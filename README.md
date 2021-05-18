@@ -19,7 +19,7 @@ script is called with arguments as below:
 
 `python3 GivTCP.py {{invertorIP}} {{wifiSN}} {{MQTTIP}} {{MQTTusername}} {{MQTTpassword}}`
 
-[Some API Documentation](/documentation/APIDocumentation)
+[Some API Documentation](/documentaion/APIDocumentation.md)
 
 
 Control is also possible, but hasn't been implemented yet.
