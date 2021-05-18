@@ -265,7 +265,6 @@ class GivTCP:
     if len(power_output)==9:		#Only publish if all values are there, otherwise values don't match up...
         GivTCP.publish_to_MQTT("Power",power_output)
 
-print('test')
 #Main Function...
 GivTCP.getPowerData()
 GivTCP.getTimeslots()
