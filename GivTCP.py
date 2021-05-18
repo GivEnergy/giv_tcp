@@ -75,14 +75,53 @@ class GivTCP:
   def str_to_hex(s):
       return ''.join([('0'+hex(ord(c)).split('x')[1])[-2:] for c in s])
 
+  def on_connect(client, userdata, flags, rc):
+    if rc==0:
+        client.connected_flag=True #set flag
+        print("connected OK Returned code=",rc)
+        #client.subscribe(topic)
+    else:
+        print("Bad connection Returned code= ",rc)
+
   def publish_to_MQTT(topic,payload):
+      mqtt.Client.connected_flag=False        #create flag in class
       client=mqtt.Client("GivEnergy_"+GivTCP.dataloggerSN)
-      if len(sys.argv)>4:
-           client.username_pw_set(GivTCP.MQTT_Username,GivTCP.MQTT_Password)
+      client.username_pw_set(GivTCP.MQTT_Username,GivTCP.MQTT_Password)
+      client.on_connect=GivTCP.on_connect     #bind call back function
+      client.loop_start()
+      print("Connecting to broker ",GivTCP.MQTT_Address)
       client.connect(GivTCP.MQTT_Address)
+      while not client.connected_flag:        #wait in loop
+        print("In wait loop")
+        time.sleep(1)
+      print("in Main Loop")
       for reg in payload:
           print('Publishing: GivEnergy/'+GivTCP.dataloggerSN+'/'+topic+'/'+reg,payload[reg])
           client.publish('GivEnergy/'+GivTCP.dataloggerSN+'/'+topic+'/'+reg,payload[reg])
+      client.loop_stop()                      #Stop loop 
+      client.disconnect()
+      return clien
+
+
+
+
+    
+    def publish_to_MQTT(topic,payload):
+      mqtt.Client.connected_flag=False        #create flag in class
+      client=mqtt.Client("GivEnergy_"+GivTCP.dataloggerSN)
+      client.username_pw_set(GivTCP.MQTT_Username,GivTCP.MQTT_Password)
+      client.on_connect=GivTCP.on_connect     #bind call back function
+      client.loop_start()
+      print("Connecting to broker ",GivTCP.MQTT_Address)
+      client.connect(GivTCP.MQTT_Address)
+      while not client.connected_flag:        #wait in loop
+        print("In wait loop")
+        time.sleep(1)
+      print("in Main Loop")
+      for reg in payload:
+          print('Publishing: GivEnergy/'+GivTCP.dataloggerSN+'/'+topic+'/'+reg,payload[reg])
+          client.publish('GivEnergy/'+GivTCP.dataloggerSN+'/'+topic+'/'+reg,payload[reg])
+      client.loop_stop()                      #Stop loop 
       client.disconnect()
       return client
 
@@ -129,10 +168,11 @@ class GivTCP:
     try:
         length = 0
         while length != responseDataSize  :
-            data = sock.recv(100)
+            data = sock.recv(164)
             length = data[5]
     except Exception as e:
         print('Error reading '+inputStep+' register(s) ' +inputRegister + ' from ' + inputFunction + ': ' +  str(e),file=sys.stderr)
+        ### Do something here if socket timesout  ###
     sock.close()
     return(data)
 
@@ -141,9 +181,8 @@ class GivTCP:
     data=''
     registerInt=int(inputRegister)
     stepInt=int(inputStep)
-
     data=GivTCP.TCP_call(inputRegister,inputFunction,inputStep)
-# Do something here if socket timesout
+
     if data != '':
       rr = data.hex()[84:-4]
       print('Success reading '+inputStep+' register(s) ' +inputRegister + ' from ' + inputFunction + '--' + rr)
@@ -278,7 +317,7 @@ class GivTCP:
     SOC={}
 
     #Grab Energy data
-    temp_output=GivTCP.read_register('0','04','60') #Get Relevant Registers
+    temp_output=GivTCP.read_register('0','04','60') #Get ALL input Registers
 
     if len(temp_output)==60:
         power_output['PV Power']= temp_output[GivTCP.input_register_LUT.get(18)[0]+"(18)"]+temp_output[GivTCP.input_register_LUT.get(20)[0]+"(20)"]
