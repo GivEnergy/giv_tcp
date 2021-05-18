@@ -149,7 +149,7 @@ class GivTCP:
             data = sock.recv(164)
             length = data[5]
     except Exception as e:
-        print('Error reading '+inputStep+' register(s) ' +inputRegister + ' from ' + inputFunction + ': ' +  str(e),file=sys.stderr)
+        print ("Error: " + str(e))
         ### Do something here if socket timesout  ###
     sock.close()
     return(data)
@@ -181,6 +181,8 @@ class GivTCP:
               final_output[key]=val
           j=j+1
           if j>=stepInt: break  #Handle cases where invertor send erroneous additional data
+    else:
+      print('Error reading '+inputStep+' register(s) ' +inputRegister + ' from ' + inputFunction,file=sys.stderr)
 
     return final_output
 
@@ -349,5 +351,5 @@ class GivTCP:
       GivTCP.publish_to_MQTT("Power",power_output)
 
 #Main Function...
-GivTCP.getTimeslots()
-GivTCP.getCombinedStats()
+#GivTCP.getTimeslots()
+#GivTCP.getCombinedStats()
