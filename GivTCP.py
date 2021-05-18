@@ -296,7 +296,6 @@ class GivTCP:
     SOC={}
 
     #Grab Energy data
-    print ("Getting all INPUT registers")
     temp_output=GivTCP.read_register('0','04','60') #Get ALL input Registers
 
     if len(temp_output)==60:
