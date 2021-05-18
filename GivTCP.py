@@ -20,7 +20,7 @@ class GivTCP:
     15:["INV Serial number 3","raw","1"],16:["INV Serial number 2","raw","1"],17:["INV Serial number 1","raw","1"],
     18:["unknown","raw","1"],19:["unknown","raw","1"],20:["Winter Mode On Off","raw","1"],21:["unknown","raw","1"],22:["Wifi or U disk ","raw","1"],
     23:["Selet dsp or ARM","raw","1"],24:["Set Variable address","raw","1"],25:["Set Variable Value","raw","1"],26:["GridPortMaxOutPutPower","raw","1"],
-    27:["BatPowerMode","raw","1"],28:["FreMode","raw","1"],29:["SOC_ForceAdjust","raw","1"],30:["Communicate  address","raw","1"],31:["Slot 2 charge time start","time","1"],
+    27:["BatPowerMode","raw","1"],28:["FreMode","raw","1"],29:["SOC_ForceAdjust","raw","1"],30:["Communicate  address","raw","1"],31:["Slot 2 charge time start","time","1"],
     32:["Slot 2 charge time stop","time","1"],33:["User code","raw","1"],34:["Modbus Version","raw","1"],35:["System time-year","raw","1"],
     36:["System time- Month","raw","1"],37:["System time- Day","raw","1"],38:["System time- Hour","raw","1"],39:["System time- Min","raw","1"],
     40:["System time- Second","raw","1"],41:["DRM enable","raw","1"],42:["CT Adjust","raw","1"],43:["Chg and dischg Soc","raw","1"],
@@ -49,16 +49,16 @@ class GivTCP:
     8:["PV1 input current","unsigned",0.1],9:["PV2 input current","unsigned",0.1],10:["single phase grid output current","raw",1],11:["PV Total generating capacity_H","raw",1],
     12:["PV Total generating capacity_L","raw",1],13:["Grid frequency of Three-single Phase","raw",1],14:["Charge Status","raw",1],15:["HighBrighBUS_Volt","raw",1],
     16:["Inverter output PF now","raw",1],17:["PV1 Energy Today","raw",1],18:["PV1 input watt","raw",1],19:["PV2 Energy Today","raw",1],20:["PV2 input watt","raw",1],
-    21:["Grid Energy Out totalH","raw",1],22:["Grid Energy Out totalL","raw",1],23:["PV mate","raw",1],24:["Three-single phase grid output watt (low)","raw",1],
-    25:["Grid Energy Out Day","raw",1],26:["Grid Energy IN Day","raw",1],27:["INV Energy IN total H","raw",1],28:["INV Energy IN total L","raw",1],
-    29:["YearDisChargeEnergyLow","raw",1],30:["Grid Output Power","signed",1],31:["PBackUp","unsigned",1],32:["Grid Energy IN totalH","unsigned",1],
-    33:["Grid Energy IN totalL","raw",1],34:["Unknown","raw",1],35:["TotalLoad energy today","raw",1],36:["Charger energy today","raw",1],
-    37:["Discharger energy today","raw",1],38:["wCountdown","raw",1],39:["fault Code High 16bits","raw",1],40:["fault Code Low 16bits","raw",1],
-    41:["Inverter temperature","raw",1],42:["LoadTotal Power ","raw",1],43:["Pgrid_Apparent","raw",1],44:["Today generate energy today (low)","unsigned",1],
-    45:["Total generate energy (high)","unsigned",1],46:["Total generate energy (low)","raw",1],47:["Work time total (high)","raw",1],48:["Work time total (low)","raw",1],
-    49:["System Mode","raw",1],50:["Battery voltage","raw",1],51:["Battery current","signed",0.1],52:["Battery power","signed",1],
+    21:["Grid Energy Out totalH","hex",0.1],22:["Grid Energy Out totalL","hex",0.11],23:["PV mate","raw",1],24:["Three-single phase grid output watt (low)","raw",1],
+    25:["Grid Energy Out Day","raw",0.1],26:["Grid Energy IN Day","raw",0.1],27:["INV Energy IN total H","hex",0.1],28:["INV Energy IN total L","hex",0.1],
+    29:["YearDisChargeEnergyLow","raw",1],30:["Grid Output Power","signed",1],31:["PBackUp","unsigned",1],32:["Grid Energy IN totalH","hex",0.1],
+    33:["Grid Energy IN totalL","hex",0.1],34:["Unknown","raw",1],35:["TotalLoad energy today","raw",0.1],36:["Charger energy today","raw",0.1],
+    37:["Discharger energy today","raw",0.1],38:["wCountdown","raw",1],39:["fault Code High 16bits","raw",1],40:["fault Code Low 16bits","raw",1],
+    41:["Inverter temperature","raw",0.1],42:["LoadTotal Power ","raw",1],43:["Pgrid_Apparent","raw",1],44:["Today generate energy today (low)","unsigned",0.1],
+    45:["Total generate energy (high)","hex",0.1],46:["Total generate energy (low)","hex",0.1],47:["Work time total (high)","hex",1],48:["Work time total (low)","hex",1],
+    49:["System Mode","raw",1],50:["Battery voltage","raw",0.01],51:["Battery current","signed",0.01],52:["Battery power","signed",1],
     53:["Output voltage","unsigned",0.1],54:["Output frequency","raw",1],55:["Charger temperature","raw",1],56:["Battery temperature","raw",1],
-    57:["Charger Warning code","raw",1],58:["wGridPortCurr","raw",1],59:["Battery percent","raw",1]
+    57:["Charger Warning code","raw",1],58:["wGridPortCurr","raw",0.01],59:["Battery percent","raw",1]
     }
 
 
@@ -180,7 +180,9 @@ class GivTCP:
     elif dataformat=="unsigned":
        value=round(int(value,16) * scaling,2)
     elif dataformat=="boolean":
-       bool(int(value,16))
+       value=bool(int(value,16))
+    elif dataformat=="hex":
+       value=value
     else:
        value=round(int(value,16) * int(scaling),2)
     return value
@@ -264,7 +266,70 @@ class GivTCP:
 
     if len(power_output)==9:		#Only publish if all values are there, otherwise values don't match up...
         GivTCP.publish_to_MQTT("Power",power_output)
+        
+  def getCombinedStats():
+    energy_output={}
+    temp_output={}
+    power_output={}
+    PV_stats={}
+    grid_power={}
+    load_power={}
+    battery_power={}
+    SOC={}
+
+    #Grab Energy data
+    temp_output=GivTCP.read_register('0','04','60') #Get Relevant Registers
+
+    if len(temp_output)==60:
+        power_output['PV Power']= temp_output[GivTCP.input_register_LUT.get(18)[0]+"(18)"]+temp_output[GivTCP.input_register_LUT.get(20)[0]+"(20)"]
+
+        temphex=str(temp_output[GivTCP.input_register_LUT.get(21)[0]+"(21)"])+str(temp_output[GivTCP.input_register_LUT.get(22)[0]+"(22)"])
+        kwh_value=round(int(temphex,16) * GivTCP.input_register_LUT.get(21)[2],2)
+        energy_output['Export Energy Total kwh']=kwh_value
+
+        temphex=str(temp_output[GivTCP.input_register_LUT.get(27)[0]+"(27)"])+str(temp_output[GivTCP.input_register_LUT.get(28)[0]+"(28)"])
+        kwh_value=round(int(temphex,16) * GivTCP.input_register_LUT.get(27)[2],2)
+        energy_output['Load Energy Total kwh']=kwh_value
+
+        temphex=str(temp_output[GivTCP.input_register_LUT.get(32)[0]+"(32)"])+str(temp_output[GivTCP.input_register_LUT.get(33)[0]+"(33)"])
+        kwh_value=round(int(temphex,16) * GivTCP.input_register_LUT.get(32)[2],2)
+        energy_output['Import Energy Total kwh']=kwh_value
+
+        value= temp_output[GivTCP.input_register_LUT.get(30)[0]+"(30)"]
+        if value<=0:
+            import_power=abs(value)
+            export_power=0
+        elif value>=0:
+            import_power=0
+            export_power=abs(value)
+        power_output['Grid Power']=value
+        power_output['Import Power']=import_power
+        power_output['Export Power']=export_power
+
+        power_output['EPS Power']= temp_output[GivTCP.input_register_LUT.get(31)[0]+"(31)"]
+
+        power_output['Load Power']= temp_output[GivTCP.input_register_LUT.get(42)[0]+"(42)"]
+        temphex=str(temp_output[GivTCP.input_register_LUT.get(45)[0]+"(45)"])+str(temp_output[GivTCP.input_register_LUT.get(46)[0]+"(46)"])
+        kwh_value=round(int(temphex,16) * GivTCP.input_register_LUT.get(45)[2],2)
+        energy_output['INV OUT Energy Total kwh']=kwh_value
+
+        value=temp_output[GivTCP.input_register_LUT.get(52)[0]+"(52)"]
+        if value>=0:
+            discharge_power=abs(value)
+            charge_power=0
+        elif value<=0:
+            discharge_power=0
+            charge_power=abs(value)
+        power_output['Battery Power']=value
+        power_output['Charge Power']=charge_power
+        power_output['Discharge Power']=discharge_power
+
+        power_output['SOC']=temp_output[GivTCP.input_register_LUT.get(59)[0]+"(59)"]
+
+    GivTCP.publish_to_MQTT("Energy",energy_output)
+    GivTCP.publish_to_MQTT("Power",power_output)
 
 #Main Function...
-GivTCP.getPowerData()
+#GivTCP.getPowerData()
 GivTCP.getTimeslots()
+GivTCP.getCombinedStats()
