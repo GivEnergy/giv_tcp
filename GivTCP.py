@@ -94,7 +94,7 @@ class GivTCP:
       client.connect(GivTCP.MQTT_Address)
       while not client.connected_flag:        #wait in loop
         print("In wait loop")
-        time.sleep(1)
+        time.sleep(0.5)
       print("in Main Loop")
       for reg in payload:
           print('Publishing: GivEnergy/'+GivTCP.dataloggerSN+'/'+topic+'/'+reg,payload[reg])
@@ -209,13 +209,18 @@ class GivTCP:
 
     #Grab Timeslots
     timeslots=GivTCP.read_register('44','03','02')
-    GivTCP.publish_to_MQTT("timeslots",timeslots)
+    if len(timeslots)==2:
+      GivTCP.publish_to_MQTT("timeslots",timeslots)
     time.sleep(0.5)
+  
     timeslots=GivTCP.read_register('56','03','02')
-    GivTCP.publish_to_MQTT("timeslots",timeslots)
+    if len(timeslots)==2:
+      GivTCP.publish_to_MQTT("timeslots",timeslots)
     time.sleep(0.5)
+
     timeslots=GivTCP.read_register('94','03','02')
-    GivTCP.publish_to_MQTT("timeslots",timeslots)
+    if len(timeslots)==2:
+      GivTCP.publish_to_MQTT("timeslots",timeslots)
 
   def getPowerData():
     power_output={}
