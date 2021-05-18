@@ -8,7 +8,7 @@ import re
 import paho.mqtt.client as mqtt
 import time
 import json
-import schedule
+# import schedule
 
 class GivTCP:
 
@@ -111,7 +111,7 @@ class GivTCP:
     if not isinstance(source, str):
         raise ValueError("string type required")
     if 0 == len(source):
-        raise valueError("string is empty")
+        raise ValueError("string is empty")
     sign_bit_mask = 1 << (len(source)*4-1)
     other_bits_mask = sign_bit_mask - 1
     value = int(source, 16)
@@ -347,6 +347,5 @@ class GivTCP:
     GivTCP.publish_to_MQTT("Power",power_output)
 
 #Main Function...
-#GivTCP.getPowerData()
 GivTCP.getTimeslots()
 GivTCP.getCombinedStats()
