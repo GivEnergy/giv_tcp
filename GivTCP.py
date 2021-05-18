@@ -303,7 +303,7 @@ class GivTCP:
     if len(SOC)!=0:
         power_output['SOC']=SOC[GivTCP.input_register_LUT.get(59)[0]+"(59)"]
 
-    if len(power_output)==9:		#Only publish if all values are there, otherwise values don't match up...
+    if len(power_output)==10:		#Only publish if all values are there, otherwise values don't match up...
         GivTCP.publish_to_MQTT("Power",power_output)
         
   def getCombinedStats():
