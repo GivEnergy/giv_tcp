@@ -86,7 +86,8 @@ class GivTCP:
   def publish_to_MQTT(topic,payload):
       mqtt.Client.connected_flag=False        #create flag in class
       client=mqtt.Client("GivEnergy_"+GivTCP.dataloggerSN)
-      client.username_pw_set(GivTCP.MQTT_Username,GivTCP.MQTT_Password)
+      if len(sys.argv)>4:
+          client.username_pw_set(GivTCP.MQTT_Username,GivTCP.MQTT_Password)
       client.on_connect=GivTCP.on_connect     #bind call back function
       client.loop_start()
       print("Connecting to broker ",GivTCP.MQTT_Address)
