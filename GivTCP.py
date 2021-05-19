@@ -94,7 +94,7 @@ class GivTCP:
       client.connect(GivTCP.MQTT_Address)
       while not client.connected_flag:        #wait in loop
         print("In wait loop")
-        time.sleep(1)
+        time.sleep(0.5)
       print("in Main Loop")
       for reg in payload:
           print('Publishing: GivEnergy/'+GivTCP.dataloggerSN+'/'+topic+'/'+reg,payload[reg])
@@ -140,7 +140,7 @@ class GivTCP:
     dataSize = GivTCP.int_to_hex_string(int(len( DEVICE_ADDRESS + DATALOGGER_FUNCTION_CODE + serial_number + FILLER + inputFunctionHex + inputRegisterHex + inputStepHex +crc)/2),16)
     command = HEAD + PROTOCOL_IDENTIFIER + dataSize + DEVICE_ADDRESS + DATALOGGER_FUNCTION_CODE + serial_number + FILLER + inputFunctionHex + inputRegisterHex + inputStepHex + crc
     sock.send(bytearray.fromhex(command))
-    sock.settimeout(1.5)
+    sock.settimeout(1)
     data=''
     # filtering  data package
     try:
@@ -159,7 +159,11 @@ class GivTCP:
     data=''
     registerInt=int(inputRegister)
     stepInt=int(inputStep)
-    data=GivTCP.TCP_call(inputRegister,inputFunction,inputStep)
+    n=0
+    while data=='' and n<3:    #Try to get register data upto 3 times before giving up
+      print ("TCP Call no: "+str(n+1))
+      data=GivTCP.TCP_call(inputRegister,inputFunction,inputStep)
+      n=n+1
 
     if data != '':
       rr = data.hex()[84:-4]
@@ -209,13 +213,10 @@ class GivTCP:
 
     #Grab Timeslots
     timeslots=GivTCP.read_register('44','03','02')
-    GivTCP.publish_to_MQTT("timeslots",timeslots)
-    time.sleep(0.5)
-    timeslots=GivTCP.read_register('56','03','02')
-    GivTCP.publish_to_MQTT("timeslots",timeslots)
-    time.sleep(0.5)
-    timeslots=GivTCP.read_register('94','03','02')
-    GivTCP.publish_to_MQTT("timeslots",timeslots)
+    timeslots.update(GivTCP.read_register('56','03','02'))
+    timeslots.update(GivTCP.read_register('94','03','02'))
+    if len(timeslots)!=0:
+      GivTCP.publish_to_MQTT("Timeslots",timeslots)
 
   def getPowerData():
     power_output={}
@@ -260,7 +261,7 @@ class GivTCP:
         power_output['EPS Power']=eps_power[GivTCP.input_register_LUT.get(31)[0]+"(31)"]
 
     time.sleep(0.5)
-    
+
     battery_power=GivTCP.read_register('52','04','1') #Get Battery Power
     #Calculate Charge/Discharge
     if len(battery_power)!=0:
@@ -283,7 +284,7 @@ class GivTCP:
 
     if len(power_output)==10:		#Only publish if all values are there, otherwise values don't match up...
         GivTCP.publish_to_MQTT("Power",power_output)
-        
+
   def getCombinedStats():
     energy_output={}
     temp_output={}
@@ -342,9 +343,10 @@ class GivTCP:
         power_output['Discharge Power']=discharge_power
 
         power_output['SOC']=temp_output[GivTCP.input_register_LUT.get(59)[0]+"(59)"]
-
-    GivTCP.publish_to_MQTT("Energy",energy_output)
-    GivTCP.publish_to_MQTT("Power",power_output)
+    if len(energy_output)!=0:
+      GivTCP.publish_to_MQTT("Energy",energy_output)
+    if len(power_output)!=0:
+      GivTCP.publish_to_MQTT("Power",power_output)
 
 #Main Function...
 GivTCP.getTimeslots()
