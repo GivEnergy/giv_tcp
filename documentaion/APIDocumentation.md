@@ -37,6 +37,6 @@ EPS Power| W | GivEnergy/`datalloggerSN`/power/batteryPower
 Charge Power| W | GivEnergy/`datalloggerSN`/power/chargePower
 Discharge Power| W | GivEnergy/`datalloggerSN`/power/dischargePower
 SOC| percent | GivEnergy/`datalloggerSN`/power/SOC
-Total Grid Export Energy| kWh | GivEnergy/`datalloggerSN`/energy/totalGridExportEnergy
-Total Load Energy| kWh | GivEnergy/`datalloggerSN`/energy/totalLoadEnergy
-Total Grid Import Energy| kWh | GivEnergy/`datalloggerSN`/energy/totalGridImportEnergy
+Total Grid Export Energy| 0.1 kWh | GivEnergy/`datalloggerSN`/energy/totalGridExportEnergy
+Total Load Energy| 0.1 kWh | GivEnergy/`datalloggerSN`/energy/totalLoadEnergy
+Total Grid Import Energy| 0.1 kWh | GivEnergy/`datalloggerSN`/energy/totalGridImportEnergy
