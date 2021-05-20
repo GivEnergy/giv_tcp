@@ -9,4 +9,9 @@ You will need set up your dongle and have your device connected to dongle.
 ## Methodology
 - VS code
 
-<img src="images/giv_tcp_tutorial_1.png"/>
+### VS code
+<img src="/images/giv_tcp_tutorial_1.png"/>
+
+1. Press the code button at the top right of the github page
+
+2. Download the zip file
