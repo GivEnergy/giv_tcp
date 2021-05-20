@@ -9,3 +9,4 @@ You will need set up your dongle and have your device connected to dongle.
 ## Methodology
 - VS code
 
+<img src="images/giv_tcp_tutorial_1.png"/>
