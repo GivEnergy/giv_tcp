@@ -76,13 +76,18 @@ class GivTCP:
     DATALOGGER_FUNCTION_CODE = '02' #hex
     FILLER = '0000000000000008' #hex
     serial_number = GivTCP.str_to_hex(GivTCP.dataloggerSN) # datalogger sn hex
-
+    socketMax=0
     # Connect the socket to the port where the server is listening
     sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     server_address = (GivTCP.invertorIP, 8899)
     sock.connect(server_address)
     stepInt=int(inputStep)
-    responseDataSize = 38 + stepInt*2
+    if inputFunction=='06':
+      responseDataSize=38
+      socketMax=44
+    else:
+      responseDataSize = 38 + stepInt*2
+      socketMax=164
     inputFunctionHex =  GivTCP.int_to_hex_string(int(inputFunction),16)
     inputRegisterHex = GivTCP.int_to_hex_string(int(inputRegister),16)
     inputStepHex = GivTCP.int_to_hex_string(int(inputStep),16)
@@ -97,13 +102,30 @@ class GivTCP:
     try:
         length = 0
         while length != responseDataSize  :
-            data = sock.recv(164)
+            data = sock.recv(socketMax)
             length = data[5]
     except Exception as e:
         print ("Error: " + str(e))
         ### Do something here if socket timesout  ###
     sock.close()
     return(data)
+
+  def write_single_register(register,value):
+    response=''
+    result="Failure"
+    n=0
+    while response=='' and n<3:    #Try to get register data upto 3 times before giving up
+      print ("TCP Call no: "+str(n+1))
+      response=GivTCP.TCP_call(register,"06",value)
+      n=n+1
+    if response!='':
+      rr = response.hex()[80:-4]
+      val=GivTCP.registerValueConvert(register, rr, "holding")
+      if int(val)==int(value):
+        result="Success"
+      else:
+        result="Failure"
+    return result
 
   def read_register(inputRegister,inputFunction,inputStep):
     final_output={}

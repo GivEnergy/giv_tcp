@@ -96,7 +96,12 @@ def getModes():
     if len(controls)!=0:
       GivTCP.publish_to_MQTT("Control Modes",controls)
 
+def setTimeslot():
+    result=GivTCP.write_single_register(95,1559)
+    print (result,": Register 95 was set")
+
 #Main Function...
-getTimeslots()
 getCombinedStats()
 getModes()
+#setTimeslot()
+getTimeslots()
