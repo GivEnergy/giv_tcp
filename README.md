@@ -19,7 +19,11 @@ script is called with arguments as below:
 
 `python3 GivTCP.py {{invertorIP}} {{wifiSN}} {{MQTTIP}} {{MQTTusername}} {{MQTTpassword}}`
 
+Not sure where to start? Check our [Quick Start Guide](/documentaion/tutorial.md)
+
 [Some API Documentation](/documentaion/APIDocumentation.md)
+
+[All the used registers are listed in here ](/documentaion/registersAndFunctions.xlsb.xlsx)
 
 
 Control is also possible, but hasn't been implemented yet.
