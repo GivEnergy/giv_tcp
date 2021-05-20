@@ -15,3 +15,5 @@ You will need set up your dongle and have your device connected to dongle.
 1. Press the code button at the top right of the github page
 
 2. Download the zip file
+
+3. Extract the zip file and open the extracted file on VS code
