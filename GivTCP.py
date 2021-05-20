@@ -166,22 +166,23 @@ class GivTCP:
       n=n+1
 
 
-    if data != '' and int(data.hex()[84:-4],16)!=0:	#do not return if data is empty or all zeros
+    if data != '':	#do not return if data is empty
       rr = data.hex()[84:-4]
-      print('Success reading '+inputStep+' register(s) ' +inputRegister + ' from ' + inputFunction + '--' + rr)
-      registers=re.findall('....',rr)
-      j=0
-      for reg in registers:
-          if inputFunction=='04':
-              val=GivTCP.registerValueConvert(registerInt+j, reg, "input")
-              key=GivTCP.input_register_LUT.get(registerInt+j)[0] + "(" + str(registerInt+j) + ")"
-              final_output[key]=val
-          elif inputFunction=='03':
-              val=GivTCP.registerValueConvert(registerInt+j, reg, "holding")
-              key=GivTCP.holding_register_LUT.get(registerInt+j)[0] + "(" + str(registerInt+j) + ")"
-              final_output[key]=val
-          j=j+1
-          if j>=stepInt: break  #Handle cases where invertor send erroneous additional data
+      if int(rr,16)!=0:   #do not return if registers return all zeros
+        print('Success reading '+inputStep+' register(s) ' +inputRegister + ' from ' + inputFunction + '--' + rr)
+        registers=re.findall('....',rr)
+        j=0
+        for reg in registers:
+            if inputFunction=='04':
+                val=GivTCP.registerValueConvert(registerInt+j, reg, "input")
+                key=GivTCP.input_register_LUT.get(registerInt+j)[0] + "(" + str(registerInt+j) + ")"
+                final_output[key]=val
+            elif inputFunction=='03':
+                val=GivTCP.registerValueConvert(registerInt+j, reg, "holding")
+                key=GivTCP.holding_register_LUT.get(registerInt+j)[0] + "(" + str(registerInt+j) + ")"
+                final_output[key]=val
+            j=j+1
+            if j>=stepInt: break  #Handle cases where invertor send erroneous additional data
     else:
       print('Error reading '+inputStep+' register(s) ' +inputRegister + ' from ' + inputFunction,file=sys.stderr)
 
