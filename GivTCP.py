@@ -91,7 +91,7 @@ class GivTCP:
     dataSize = GivTCP.int_to_hex_string(int(len( DEVICE_ADDRESS + DATALOGGER_FUNCTION_CODE + serial_number + FILLER + inputFunctionHex + inputRegisterHex + inputStepHex +crc)/2),16)
     command = HEAD + PROTOCOL_IDENTIFIER + dataSize + DEVICE_ADDRESS + DATALOGGER_FUNCTION_CODE + serial_number + FILLER + inputFunctionHex + inputRegisterHex + inputStepHex + crc
     sock.send(bytearray.fromhex(command))
-    sock.settimeout(1)
+    sock.settimeout(1.5)
     data=''
     # filtering  data package
     try:

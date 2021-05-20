@@ -22,73 +22,6 @@ def getTimeslots():
     if len(timeslots)!=0:
       GivTCP.publish_to_MQTT("Timeslots",timeslots)
 
-def getPowerData():
-    power_output={}
-    PV_stats={}
-    grid_power={}
-    load_power={}
-    battery_power={}
-    SOC={}
-
-    #Grab power data
-    PV_stats=GivTCP.read_register('18','04','3') #Get PV Power
-    if len(PV_stats)==3:
-        PVPower=PV_stats[GiV_Reg_LUT.input_register_LUT.get(18)[0]+"(18)"]+PV_stats[GiV_Reg_LUT.input_register_LUT.get(20)[0]+"(20)"]
-        power_output['PV Power']=PVPower
-
-    time.sleep(0.5)
-
-    grid_power=GivTCP.read_register('30','04','1') #Get Grid Power
-    #Calculate Import and Export
-    if len(grid_power)!=0:
-        value=grid_power[GiV_Reg_LUT.input_register_LUT.get(30)[0]+"(30)"]
-        if value<=0:
-            import_power=abs(value)
-            export_power=0
-        elif value>=0:
-            import_power=0
-            export_power=abs(value)
-        power_output['Grid Power']=value
-        power_output['Import Power']=import_power
-        power_output['Export Power']=export_power
-
-    time.sleep(0.5)
-
-    load_power=GivTCP.read_register('42','04','1') #Get Load Power
-    if len(load_power)!=0:
-        power_output['Load Power']=load_power[GiV_Reg_LUT.input_register_LUT.get(42)[0]+"(42)"]
-
-    time.sleep(0.5)
-
-    eps_power=GivTCP.read_register('31','04','1') #Get Load Power
-    if len(eps_power)!=0:
-        power_output['EPS Power']=eps_power[GiV_Reg_LUT.input_register_LUT.get(31)[0]+"(31)"]
-
-    time.sleep(0.5)
-
-    battery_power=GivTCP.read_register('52','04','1') #Get Battery Power
-    #Calculate Charge/Discharge
-    if len(battery_power)!=0:
-        value=battery_power[GiV_Reg_LUT.input_register_LUT.get(52)[0]+"(52)"]
-        if value>=0:
-            discharge_power=abs(value)
-            charge_power=0
-        elif value<=0:
-            discharge_power=0
-            charge_power=abs(value)
-        power_output['Battery Power']=value
-        power_output['Charge Power']=charge_power
-        power_output['Discharge Power']=discharge_power
-
-    time.sleep(0.5)
-
-    SOC=GivTCP.read_register('59','04','1') #Get SOC
-    if len(SOC)!=0:
-        power_output['SOC']=SOC[GiV_Reg_LUT.input_register_LUT.get(59)[0]+"(59)"]
-
-    if len(power_output)==10:		#Only publish if all values are there, otherwise values don't match up...
-        GivTCP.publish_to_MQTT("Power",power_output)
-
 def getCombinedStats():
     energy_output={}
     temp_output={}
@@ -162,7 +95,6 @@ def getModes():
     controls.update(GivTCP.read_register('116','03','01'))
     if len(controls)!=0:
       GivTCP.publish_to_MQTT("Control Modes",controls)
-
 
 #Main Function...
 getTimeslots()
