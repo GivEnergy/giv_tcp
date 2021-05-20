@@ -17,3 +17,5 @@ You will need set up your dongle and have your device connected to dongle.
 2. Download the zip file
 
 3. Extract the zip file and open the extracted file on VS code
+
+<img src="/images/giv_tcp_tutorial_2.png"/>
