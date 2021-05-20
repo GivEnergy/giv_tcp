@@ -166,7 +166,7 @@ class GivTCP:
       n=n+1
 
 
-    if data != '' and int(data)!=0:	#do not return if data is empty or all zeros
+    if data != '' and int(data.hex()[84:-4],16)!=0:	#do not return if data is empty or all zeros
       rr = data.hex()[84:-4]
       print('Success reading '+inputStep+' register(s) ' +inputRegister + ' from ' + inputFunction + '--' + rr)
       registers=re.findall('....',rr)
