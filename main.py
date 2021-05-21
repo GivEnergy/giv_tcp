@@ -93,6 +93,7 @@ def getModes():
     controls.update(GivTCP.read_register('59','03','01'))
     controls.update(GivTCP.read_register('96','03','01'))
     controls.update(GivTCP.read_register('114','03','01'))
+    controls.update(GivTCP.read_register('116','03','01'))
     controls.update(GivTCP.read_register('55','03','01'))
 
     if len(controls)!=0:
