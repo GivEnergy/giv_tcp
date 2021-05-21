@@ -89,15 +89,31 @@ def getModes():
     controls={}
 
     #Grab Modes
-    controls=GivTCP.read_register('110','03','01')
-    controls.update(GivTCP.read_register('59','03','01'))
-    controls.update(GivTCP.read_register('96','03','01'))
-    controls.update(GivTCP.read_register('114','03','01'))
-    controls.update(GivTCP.read_register('116','03','01'))
-    controls.update(GivTCP.read_register('55','03','01'))
+    shallow_charge=GivTCP.read_register('110','03','01')[GiV_Reg_LUT.holding_register_LUT.get(110)[0]+"(110)"]
+    self_consumption=GivTCP.read_register('27','03','01')[GiV_Reg_LUT.holding_register_LUT.get(27)[0]+"(27)"]
+    charge_enable=GivTCP.read_register('96','03','01')[GiV_Reg_LUT.holding_register_LUT.get(96)[0]+"(96)"]
+    battery_reserve=GivTCP.read_register('114','03','01')[GiV_Reg_LUT.holding_register_LUT.get(114)[0]+"(114)"]
+    target_soc=GivTCP.read_register('116','03','01')[GiV_Reg_LUT.holding_register_LUT.get(116)[0]+"(116)"]
+    battery_capacity=GivTCP.read_register('55','03','01')[GiV_Reg_LUT.holding_register_LUT.get(55)[0]+"(55)"]
+    discharge_enable=GivTCP.read_register('59','03','01')[GiV_Reg_LUT.holding_register_LUT.get(59)[0]+"(59)"]
+
+    if shallow_charge==4 and self_consumption==True and discharge_enable==False:
+        controlmode=1
+    elif shallow_charge==100 and self_consumption==True and discharge_enable==True:
+        controlmode=2&3
+    elif shallow_charge==4 and self_consumption==False and discharge_enable==True:
+        controlmode=4
+    else:
+        controlmode="unknown"
+
+    controls['Mode']=controlmode
+    controls['Battery Power Reserve']=battery_reserve
+    controls['Target SOC']=target_soc
+    controls['Battery Capacity']=round(((battery_capacity*51.2)/1000),2)
+    controls['Smart Charge Enable']=charge_enable
 
     if len(controls)!=0:
-      GivTCP.publish_to_MQTT("Control Modes",controls)
+      GivTCP.publish_to_MQTT("Control",controls)
 
 def setTimeslot():
     result=GivTCP.write_single_register(95,1559)

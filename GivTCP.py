@@ -134,14 +134,14 @@ class GivTCP:
     stepInt=int(inputStep)
     n=0
     while data=='' and n<3:    #Try to get register data upto 3 times before giving up
-      print ("TCP Call no: "+str(n+1))
+      print ("TCP Call no: ",str(n+1)," for register ",inputRegister)
       data=GivTCP.TCP_call(inputRegister,inputFunction,inputStep)
       n=n+1
 
 
     if data != '':	#do not return if data is empty
       rr = data.hex()[84:-4]
-      if int(rr,16)!=0:   #do not return if registers return all zeros
+      if len(rr)==4 or int(rr,16)!=0:   #do not return if registers return all zeros unless its a single register
         print('Success reading '+inputStep+' register(s) ' +inputRegister + ' from ' + inputFunction + '--' + rr)
         registers=re.findall('....',rr)
         j=0
