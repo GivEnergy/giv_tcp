@@ -67,7 +67,9 @@ def getCombinedStats():
 
 
         #Instant Power figures
-        power_output['PV Power']= temp_output[GiV_Reg_LUT.input_register_LUT.get(18)[0]+"(18)"]+temp_output[GiV_Reg_LUT.input_register_LUT.get(20)[0]+"(20)"]
+        temp_PV=temp_output[GiV_Reg_LUT.input_register_LUT.get(18)[0]+"(18)"]+temp_output[GiV_Reg_LUT.input_register_LUT.get(20)[0]+"(20)"]
+        if temp_PV<15000:
+            power_output['PV Power']= temp_PV
         value= temp_output[GiV_Reg_LUT.input_register_LUT.get(30)[0]+"(30)"]
         if value<=0:
             import_power=abs(value)
@@ -79,7 +81,9 @@ def getCombinedStats():
         power_output['Import Power']=import_power
         power_output['Export Power']=export_power
         power_output['EPS Power']= temp_output[GiV_Reg_LUT.input_register_LUT.get(31)[0]+"(31)"]
-        power_output['Load Power']= temp_output[GiV_Reg_LUT.input_register_LUT.get(42)[0]+"(42)"]
+        temp_Load=temp_output[GiV_Reg_LUT.input_register_LUT.get(42)[0]+"(42)"]
+        if temp_Load<15500:
+            power_output['Load Power']= temp_Load
 
 
         value=temp_output[GiV_Reg_LUT.input_register_LUT.get(52)[0]+"(52)"]
