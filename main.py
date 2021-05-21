@@ -92,7 +92,9 @@ def getModes():
     controls=GivTCP.read_register('110','03','01')
     controls.update(GivTCP.read_register('59','03','01'))
     controls.update(GivTCP.read_register('96','03','01'))
-    controls.update(GivTCP.read_register('116','03','01'))
+    controls.update(GivTCP.read_register('114','03','01'))
+    controls.update(GivTCP.read_register('55','03','01'))
+
     if len(controls)!=0:
       GivTCP.publish_to_MQTT("Control Modes",controls)
 
