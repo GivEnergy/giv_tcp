@@ -23,7 +23,7 @@ def getTimeslots():
       GivTCP.publish_to_MQTT("Timeslots",timeslots)
 
 def getCombinedStats():
-    energy_output={}
+    energy_total_output={}
     temp_output={}
     power_output={}
     PV_stats={}
@@ -37,25 +37,31 @@ def getCombinedStats():
     GivTCP.publish_to_MQTT("raw/input",temp_output)
 
     if len(temp_output)==60:
-        power_output['PV Power']= temp_output[GiV_Reg_LUT.input_register_LUT.get(18)[0]+"(18)"]+temp_output[GiV_Reg_LUT.input_register_LUT.get(20)[0]+"(20)"]
-
+        #Total Energy Figures
         temphex=str(temp_output[GiV_Reg_LUT.input_register_LUT.get(21)[0]+"(21)"])+str(temp_output[GiV_Reg_LUT.input_register_LUT.get(22)[0]+"(22)"])
         kwh_value=round(int(temphex,16) * GiV_Reg_LUT.input_register_LUT.get(21)[2],2)
-        energy_output['Export Energy Total kwh']=kwh_value
+        energy_total_output['Export Energy Total kwh']=kwh_value
 
         temphex=str(temp_output[GiV_Reg_LUT.input_register_LUT.get(27)[0]+"(27)"])+str(temp_output[GiV_Reg_LUT.input_register_LUT.get(28)[0]+"(28)"])
         kwh_value=round(int(temphex,16) * GiV_Reg_LUT.input_register_LUT.get(27)[2],2)
-        energy_output['Load Energy Total kwh']=kwh_value
+        energy_total_output['Load Energy Total kwh']=kwh_value
 
         temphex=str(temp_output[GiV_Reg_LUT.input_register_LUT.get(32)[0]+"(32)"])+str(temp_output[GiV_Reg_LUT.input_register_LUT.get(33)[0]+"(33)"])
         kwh_value=round(int(temphex,16) * GiV_Reg_LUT.input_register_LUT.get(32)[2],2)
-        energy_output['Import Energy Total kwh']=kwh_value
+        energy_total_output['Import Energy Total kwh']=kwh_value
 
         temphex=str(temp_output[GiV_Reg_LUT.input_register_LUT.get(11)[0]+"(11)"])+str(temp_output[GiV_Reg_LUT.input_register_LUT.get(12)[0]+"(12)"])
         pv_kwh_value=round(int(temphex,16) * GiV_Reg_LUT.input_register_LUT.get(11)[2],2)
-        energy_output['PV Energy Total kwh']=pv_kwh_value
+        energy_total_output['PV Energy Total kwh']=pv_kwh_value
+
+        temphex=str(temp_output[GiV_Reg_LUT.input_register_LUT.get(45)[0]+"(45)"])+str(temp_output[GiV_Reg_LUT.input_register_LUT.get(46)[0]+"(46)"])
+        invout_kwh_value=round(int(temphex,16) * GiV_Reg_LUT.input_register_LUT.get(45)[2],2)
+        energy_total_output['Invertor Energy OUT Total kwh']=invout_kwh_value
+        energy_total_output['Battery Charge Energy Total']=round(invout_kwh_value-pv_kwh_value,2)
 
 
+        #Instant Power figures
+        power_output['PV Power']= temp_output[GiV_Reg_LUT.input_register_LUT.get(18)[0]+"(18)"]+temp_output[GiV_Reg_LUT.input_register_LUT.get(20)[0]+"(20)"]
         value= temp_output[GiV_Reg_LUT.input_register_LUT.get(30)[0]+"(30)"]
         if value<=0:
             import_power=abs(value)
@@ -66,14 +72,9 @@ def getCombinedStats():
         power_output['Grid Power']=value
         power_output['Import Power']=import_power
         power_output['Export Power']=export_power
-
         power_output['EPS Power']= temp_output[GiV_Reg_LUT.input_register_LUT.get(31)[0]+"(31)"]
-
         power_output['Load Power']= temp_output[GiV_Reg_LUT.input_register_LUT.get(42)[0]+"(42)"]
-        temphex=str(temp_output[GiV_Reg_LUT.input_register_LUT.get(45)[0]+"(45)"])+str(temp_output[GiV_Reg_LUT.input_register_LUT.get(46)[0]+"(46)"])
-        invout_kwh_value=round(int(temphex,16) * GiV_Reg_LUT.input_register_LUT.get(45)[2],2)
-        energy_output['Invertor Energy OUT Total kwh']=invout_kwh_value
-        energy_output['Battery Charge Energy Total']=round(invout_kwh_value-pv_kwh_value,2)
+
 
         value=temp_output[GiV_Reg_LUT.input_register_LUT.get(52)[0]+"(52)"]
         if value>=0:
@@ -85,10 +86,10 @@ def getCombinedStats():
         power_output['Battery Power']=value
         power_output['Charge Power']=charge_power
         power_output['Discharge Power']=discharge_power
-
         power_output['SOC']=temp_output[GiV_Reg_LUT.input_register_LUT.get(59)[0]+"(59)"]
-    if len(energy_output)!=0:
-      GivTCP.publish_to_MQTT("Energy",energy_output)
+
+    if len(energy_total_output)!=0:
+      GivTCP.publish_to_MQTT("Energy/Total",energy_total_output)
     if len(power_output)!=0:
       GivTCP.publish_to_MQTT("Power",power_output)
 
