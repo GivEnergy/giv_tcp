@@ -137,7 +137,6 @@ class GivTCP:
       print ("TCP Call no: ",str(n+1)," for register ",inputRegister)
       data=GivTCP.TCP_call(inputRegister,inputFunction,inputStep)
       n=n+1
-
     if len(data)== (stepInt*2)+44:	#do not return if data length does not match
       rr = data.hex()[84:-4]
       if len(rr)==4 or int(rr,16)!=0:   #do not return if registers return all zeros unless its a single register

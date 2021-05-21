@@ -25,6 +25,7 @@ def getTimeslots():
 def getCombinedStats():
     energy_total_output={}
     temp_output={}
+    extrareg={}
     power_output={}
     PV_stats={}
     grid_power={}
@@ -35,6 +36,11 @@ def getCombinedStats():
     #Grab Energy data
     temp_output=GivTCP.read_register('0','04','60') #Get ALL input Registers
     GivTCP.publish_to_MQTT("raw/input",temp_output)
+
+    extrareg=GivTCP.read_register('180','04','4') #Get ALL input Registers
+    print (extrareg)
+    GivTCP.publish_to_MQTT("raw/input/extra",extrareg)
+
 
     if len(temp_output)==60:
         #Total Energy Figures
