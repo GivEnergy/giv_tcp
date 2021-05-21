@@ -41,12 +41,12 @@ class GivTCP:
           client.username_pw_set(GivTCP.MQTT_Username,GivTCP.MQTT_Password)
       client.on_connect=GivTCP.on_connect     #bind call back function
       client.loop_start()
-      print("Connecting to broker ",GivTCP.MQTT_Address)
+      print ("Connecting to broker ",GivTCP.MQTT_Address)
       client.connect(GivTCP.MQTT_Address)
       while not client.connected_flag:        #wait in loop
-        print("In wait loop")
+#        print ("In wait loop")
         time.sleep(0.5)
-      print("in Main Loop")
+#      print ("in Main Loop")
       for reg in payload:
           print('Publishing: GivEnergy/'+GivTCP.dataloggerSN+'/'+topic+'/'+reg,payload[reg])
           client.publish('GivEnergy/'+GivTCP.dataloggerSN+'/'+topic+'/'+reg,payload[reg])
@@ -133,13 +133,12 @@ class GivTCP:
     registerInt=int(inputRegister)
     stepInt=int(inputStep)
     n=0
-    while data=='' and n<3:    #Try to get register data upto 3 times before giving up
+    while data=='' and n<3 and len(data)!= (stepInt*2)+44:    #Try to get register data upto 3 times before giving up
       print ("TCP Call no: ",str(n+1)," for register ",inputRegister)
       data=GivTCP.TCP_call(inputRegister,inputFunction,inputStep)
       n=n+1
 
-
-    if data != '':	#do not return if data is empty
+    if len(data)== (stepInt*2)+44:	#do not return if data length does not match
       rr = data.hex()[84:-4]
       if len(rr)==4 or int(rr,16)!=0:   #do not return if registers return all zeros unless its a single register
         print('Success reading '+inputStep+' register(s) ' +inputRegister + ' from ' + inputFunction + '--' + rr)
