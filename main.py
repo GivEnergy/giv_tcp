@@ -24,6 +24,7 @@ def getTimeslots():
 
 def getCombinedStats():
     energy_total_output={}
+    energy_today_output={}
     temp_output={}
     extrareg={}
     power_output={}
@@ -62,9 +63,16 @@ def getCombinedStats():
 
         temphex=str(temp_output[GiV_Reg_LUT.input_register_LUT.get(45)[0]+"(45)"])+str(temp_output[GiV_Reg_LUT.input_register_LUT.get(46)[0]+"(46)"])
         invout_kwh_value=round(int(temphex,16) * GiV_Reg_LUT.input_register_LUT.get(45)[2],2)
-        energy_total_output['Invertor Energy OUT Total kwh']=invout_kwh_value
+#        energy_total_output['Invertor Energy OUT Total kwh']=invout_kwh_value
         energy_total_output['Battery Charge Energy Total']=round(invout_kwh_value-pv_kwh_value,2)
 
+        #Energy Today Fugures
+        energy_today_output['PV Energy Today kWh']=temp_output[GiV_Reg_LUT.input_register_LUT.get(17)[0]+"(17)"]+temp_output[GiV_Reg_LUT.input_register_LUT.get(19)[0]+"(19)"]
+        energy_today_output['Battery Charge Energy Today kWh']=temp_output[GiV_Reg_LUT.input_register_LUT.get(36)[0]+"(36)"]
+        energy_today_output['Battery Discharge Energy Today kWh']=temp_output[GiV_Reg_LUT.input_register_LUT.get(37)[0]+"(37)"]
+        energy_today_output['Import Energy Today kWh']=temp_output[GiV_Reg_LUT.input_register_LUT.get(26)[0]+"(26)"]
+        energy_today_output['Export Energy Today kWh']=temp_output[GiV_Reg_LUT.input_register_LUT.get(25)[0]+"(25)"]
+        energy_today_output['Load Energy Today kWh']=temp_output[GiV_Reg_LUT.input_register_LUT.get(35)[0]+"(35)"]
 
         #Instant Power figures
         temp_PV=temp_output[GiV_Reg_LUT.input_register_LUT.get(18)[0]+"(18)"]+temp_output[GiV_Reg_LUT.input_register_LUT.get(20)[0]+"(20)"]
@@ -100,6 +108,8 @@ def getCombinedStats():
 
     if len(energy_total_output)!=0:
       GivTCP.publish_to_MQTT("Energy/Total",energy_total_output)
+    if len(energy_today_output)!=0:
+      GivTCP.publish_to_MQTT("Energy/Today",energy_today_output)
     if len(power_output)!=0:
       GivTCP.publish_to_MQTT("Power",power_output)
 
