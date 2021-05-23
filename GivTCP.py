@@ -9,16 +9,17 @@ import paho.mqtt.client as mqtt
 import time
 import json
 from GivLUT import GiV_Reg_LUT
+from settings import GiV_Settings
+
 # import schedule
 
 class GivTCP:
 
-  invertorIP= sys.argv[1]
-  dataloggerSN=sys.argv[2]
-  MQTT_Address=sys.argv[3]
-  if len(sys.argv)>4:
-    MQTT_Username=sys.argv[4]
-    MQTT_Password=sys.argv[5]
+  invertorIP= GiV_Settings.invertorIP
+  dataloggerSN= GiV_Settings.dataloggerSN
+  MQTT_Address=GiV_Settings.MQTT_Address
+  MQTT_Username=GiV_Settings.MQTT_Username
+  MQTT_Password=GiV_Settings.MQTT_Password
 
   def int_to_hex_string(value, bits):
       return "{0:0{1}X}".format(value & ((1<<bits) - 1), bits//4)
