@@ -13,21 +13,21 @@ In essence the script connects to a Modbus TCP server which runs on the wifi don
   * paho-mqtt
 
 To function correctly there must be a settings.py file in the same directory which has the following data:
-*invertorIP="XXX.XXX.XXX.XXX"
-*dataloggerSN="XXXXXXXXX"
-*MQTT_Address="XXX.XXX.XXX.XXX"
-*MQTT_Username="XXXXXXX"
-*MQTT_Password="XXXXXXX"
+* invertorIP="XXX.XXX.XXX.XXX"
+* dataloggerSN="XXXXXXXXX"
+* MQTT_Address="XXX.XXX.XXX.XXX"
+* MQTT_Username="XXXXXXX"
+* MQTT_Password="XXXXXXX"
 
 read script is called with arguments as below:
 
 `python3 read.py {{functionName}}`
 
 Available functions are:
-*getTimeslots: Gets all currently stored timeslots for Charge1, Discharge1 and Discharge2
-*getCombinedStats: Gets power and Energy Stats (real-time, Today and Total)
-*getModes: Gets the 
-*runAll:- Runs all of the above
+* getTimeslots: Gets all currently stored timeslots for Charge1, Discharge1 and Discharge2
+* getCombinedStats: Gets power and Energy Stats (real-time, Today and Total)
+* getModes: Gets the 
+* runAll:- Runs all of the above
 
 
 Control is also possible, and early development functions are available here. Strong caution is recommended using these are they are not yet fully tested.
