@@ -12,15 +12,25 @@ In essence the script connects to a Modbus TCP server which runs on the wifi don
   * crccheck
   * paho-mqtt
 
-Currently the script will write timeslots and power stats to the MQTT queue, but can be made to publish any register.
+To function correctly there must be a settings.py file in the same directory which has the following data:
+*invertorIP="XXX.XXX.XXX.XXX"
+*dataloggerSN="XXXXXXXXX"
+*MQTT_Address="XXX.XXX.XXX.XXX"
+*MQTT_Username="XXXXXXX"
+*MQTT_Password="XXXXXXX"
+
+read script is called with arguments as below:
+
+`python3 read.py {{functionName}}`
+
+Available functions are:
+*getTimeslots: Gets all currently stored timeslots for Charge1, Discharge1 and Discharge2
+*getCombinedStats: Gets power and Energy Stats (real-time, Today and Total)
+*getModes: Gets the 
+*runAll:- Runs all of the above
 
 
-script is called with arguments as below:
-
-`python3 GivTCP.py {{invertorIP}} {{wifiSN}} {{MQTTIP}} {{MQTTusername}} {{MQTTpassword}}`
-
-
-Control is also possible, but hasn't been implemented yet.
+Control is also possible, and early development functions are available here. Strong caution is recommended using these are they are not yet fully tested.
 
 Health Warning:
 * I'm seeing pretty frequent timeouts on the Modbus TCP connection, so its not super reliable, but it will keep on calling and hopefully get data next time round
