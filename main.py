@@ -89,6 +89,7 @@ def getCombinedStats():
         power_output['Import Power']=import_power
         power_output['Export Power']=export_power
         power_output['EPS Power']= temp_output[GiV_Reg_LUT.input_register_LUT.get(31)[0]+"(31)"]
+        power_output['Invertor Power']= temp_output[GiV_Reg_LUT.input_register_LUT.get(24)[0]+"(24)"]
         temp_Load=temp_output[GiV_Reg_LUT.input_register_LUT.get(42)[0]+"(42)"]
         if temp_Load<15500:
             power_output['Load Power']= temp_Load
@@ -214,13 +215,10 @@ def setBatteryMode(mode):
         selfresult=GivTCP.write_single_register(27,0)
 
     #Calculate success
-    
-    if result=="Success":
+    if shallowresult=="Success" and dischargeresult=="Success" and selfresult=="Success":
         print ("Control Mode successfully set")
     else:
         print ("Error setting Control Mode")
-
-
 
 
 #Main Function...
