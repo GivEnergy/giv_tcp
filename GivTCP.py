@@ -18,8 +18,12 @@ class GivTCP:
   invertorIP= GiV_Settings.invertorIP
   dataloggerSN= GiV_Settings.dataloggerSN
   MQTT_Address=GiV_Settings.MQTT_Address
-  MQTT_Username=GiV_Settings.MQTT_Username
-  MQTT_Password=GiV_Settings.MQTT_Password
+  if GiV_Settings.MQTT_Username=='':
+     MQTTCredentials=False
+  else:
+     MQTTCredentials=True
+     MQTT_Username=GiV_Settings.MQTT_Username
+     MQTT_Password=GiV_Settings.MQTT_Password
 
   def int_to_hex_string(value, bits):
       return "{0:0{1}X}".format(value & ((1<<bits) - 1), bits//4)
@@ -38,7 +42,7 @@ class GivTCP:
   def publish_to_MQTT(topic,payload):
       mqtt.Client.connected_flag=False        #create flag in class
       client=mqtt.Client("GivEnergy_"+GivTCP.dataloggerSN)
-      if len(sys.argv)>4:
+      if GivTCP.MQTTCredentials:
           client.username_pw_set(GivTCP.MQTT_Username,GivTCP.MQTT_Password)
       client.on_connect=GivTCP.on_connect     #bind call back function
       client.loop_start()
