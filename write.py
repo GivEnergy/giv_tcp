@@ -4,16 +4,20 @@ import json
 from GivTCP import GivTCP
 from GivLUT import GiV_Reg_LUT
 
-def setChargeEnable(control):
-    if control=="off":
+def setChargeEnable(payload):
+    params=json.loads(payload)
+    control=params['enable']
+    if control=="False":
        val=0
     else:
        val=1
     result=GivTCP.write_single_register(96,val)
     return ("Setting Charge Enable was: ",result)
 
-def setDischargeEnable(control):
-    if control=="off":
+def setDischargeEnable(payload):
+    params=json.loads(payload)
+    control=params['enable']
+    if control=="False":
        val=0
     else:
        val=1
