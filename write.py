@@ -70,7 +70,7 @@ def setDischargeSlot1(payload):
     else:
         print ("Error setting Discharge Timeslot 1")
 
-def setDishargeSlot2(payload):
+def setDischargeSlot2(payload):
     params=json.loads(payload)
     start=params['start']
     end=params['finish']
