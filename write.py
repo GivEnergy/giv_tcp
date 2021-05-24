@@ -67,21 +67,23 @@ def setBatteryMode(payload):
         shallowresult=GivTCP.write_single_register(110,4)
         dischargeresult=GivTCP.write_single_register(59,0)
         selfresult=GivTCP.write_single_register(27,1)
-    if mode==2:
+    elif mode==2:
         shallowresult=GivTCP.write_single_register(110,100)
         dischargeresult=GivTCP.write_single_register(59,1)
         selfresult=GivTCP.write_single_register(27,1)
         startresult=GivTCP.write_single_register(56,1600)
         endresult=GivTCP.write_single_register(57,700)
-    if mode==3:
+    elif mode==3:
         shallowresult=GivTCP.write_single_register(110,100)
         dischargeresult=GivTCP.write_single_register(59,1)
         selfresult=GivTCP.write_single_register(27,1)
-    if mode==4:
+    elif mode==4:
         shallowresult=GivTCP.write_single_register(110,4)
         dischargeresult=GivTCP.write_single_register(59,1)
         selfresult=GivTCP.write_single_register(27,0)
-
+    else:
+        print ("Invalid Mode: ",mode)
+        return
     #Calculate success
     if shallowresult=="Success" and dischargeresult=="Success" and selfresult=="Success":
         print ("Control Mode successfully set")
