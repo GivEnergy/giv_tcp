@@ -62,7 +62,7 @@ def setDishargeSlot2(payload):
 
 def setBatteryMode(payload):
     params=json.loads(payload)
-    start=params['mode']
+    mode=params['mode']
     if mode==1:
         shallowresult=GivTCP.write_single_register(110,4)
         dischargeresult=GivTCP.write_single_register(59,0)
@@ -84,9 +84,9 @@ def setBatteryMode(payload):
 
     #Calculate success
     if shallowresult=="Success" and dischargeresult=="Success" and selfresult=="Success":
-        return ("Control Mode successfully set")
+        print ("Control Mode successfully set")
     else:
-        return ("Error setting Control Mode")
+        print ("Error setting Control Mode")
 
 
 if __name__ == '__main__':
