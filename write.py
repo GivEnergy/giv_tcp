@@ -12,7 +12,7 @@ def setChargeEnable(payload):
     else:
        val=1
     result=GivTCP.write_single_register(96,val)
-    return ("Setting Charge Enable was: ",result)
+    print ("Setting Charge Enable to ",control," was: ",result)
 
 def setDischargeEnable(payload):
     params=json.loads(payload)
@@ -22,7 +22,7 @@ def setDischargeEnable(payload):
     else:
        val=1
     result=GivTCP.write_single_register(59,val)
-    return ("Setting Discharge Enable was: ",result)
+    print ("Setting Discharge Enable was: ",result)
 
 def setChargeSlot1(payload):
     params=json.loads(payload)
