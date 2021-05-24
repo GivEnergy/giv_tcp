@@ -66,9 +66,9 @@ def setDischargeSlot1(payload):
     endresult=GivTCP.write_single_register(57,end)
     targetresult=GivTCP.write_single_register(114,target)
     if startresult=="Success" and endresult=="Success" and targetresult=="Success":
-        print ("Charge enable successfully set")
+        print ("Discharge Timeslot 1 successfully set")
     else:
-        print ("Error setting Discharge Slot 1 times")
+        print ("Error setting Discharge Timeslot 1")
 
 def setDishargeSlot2(payload):
     params=json.loads(payload)
@@ -81,7 +81,7 @@ def setDishargeSlot2(payload):
     if startresult=="Success" and endresult=="Success" and targetresult=="Success":
         print ("Disharge Timeslot 2 successfully set")
     else:
-        print ("Error setting Discharge Slot 2 times")
+        print ("Error setting Discharge Timeslot 2")
 
 def setBatteryMode(payload):
     params=json.loads(payload)
