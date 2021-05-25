@@ -131,8 +131,8 @@ class GivTCP:
             result="Success"
           else:
             result="Failure"
-     else:
-        result="Failure"
+    else:
+      result="Failure"
     return result
 
   def read_register(inputRegister,inputFunction,inputStep):
