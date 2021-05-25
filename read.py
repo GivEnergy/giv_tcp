@@ -39,19 +39,23 @@ def getCombinedStats():
         #Total Energy Figures
         temphex=str(temp_output[GiV_Reg_LUT.input_register_LUT.get(21)[0]+"(21)"])+str(temp_output[GiV_Reg_LUT.input_register_LUT.get(22)[0]+"(22)"])
         kwh_value=round(int(temphex,16) * GiV_Reg_LUT.input_register_LUT.get(21)[2],2)
-        energy_total_output['Export Energy Total kwh']=kwh_value
+        if kwh_value<100000:
+            energy_total_output['Export Energy Total kwh']=kwh_value
 
         temphex=str(temp_output[GiV_Reg_LUT.input_register_LUT.get(27)[0]+"(27)"])+str(temp_output[GiV_Reg_LUT.input_register_LUT.get(28)[0]+"(28)"])
         kwh_value=round(int(temphex,16) * GiV_Reg_LUT.input_register_LUT.get(27)[2],2)
-        energy_total_output['Load Energy Total kwh']=kwh_value
+        if kwh_value<100000:
+            energy_total_output['Load Energy Total kwh']=kwh_value
 
         temphex=str(temp_output[GiV_Reg_LUT.input_register_LUT.get(32)[0]+"(32)"])+str(temp_output[GiV_Reg_LUT.input_register_LUT.get(33)[0]+"(33)"])
         kwh_value=round(int(temphex,16) * GiV_Reg_LUT.input_register_LUT.get(32)[2],2)
-        energy_total_output['Import Energy Total kwh']=kwh_value
+        if kwh_value<100000:
+            energy_total_output['Import Energy Total kwh']=kwh_value
 
         temphex=str(temp_output[GiV_Reg_LUT.input_register_LUT.get(11)[0]+"(11)"])+str(temp_output[GiV_Reg_LUT.input_register_LUT.get(12)[0]+"(12)"])
         pv_kwh_value=round(int(temphex,16) * GiV_Reg_LUT.input_register_LUT.get(11)[2],2)
-        energy_total_output['PV Energy Total kwh']=pv_kwh_value
+        if kwh_value<100000:
+            energy_total_output['PV Energy Total kwh']=pv_kwh_value
 
         temphex=str(temp_output[GiV_Reg_LUT.input_register_LUT.get(45)[0]+"(45)"])+str(temp_output[GiV_Reg_LUT.input_register_LUT.get(46)[0]+"(46)"])
         invout_kwh_value=round(int(temphex,16) * GiV_Reg_LUT.input_register_LUT.get(45)[2],2)
