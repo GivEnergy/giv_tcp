@@ -125,10 +125,13 @@ class GivTCP:
       n=n+1
     if response!='':
       rr = response.hex()[80:-4]
-      val=GivTCP.registerValueConvert(register, rr, "holding")
-      if int(val)==int(value):
-        result="Success"
-      else:
+      if rr!='':
+          val=GivTCP.registerValueConvert(register, rr, "holding")
+          if int(val)==int(value):
+            result="Success"
+          else:
+            result="Failure"
+     else:
         result="Failure"
     return result
 
