@@ -8,6 +8,7 @@ from datetime import datetime
 now = datetime.now()
 if len(sys.argv)==3:
     if sys.argv[2]=="debug":		#if in debug mode write to log file
+        debugmode=True
         f = open('read_debug.log','a')
         sys.stdout = f
 print ("-----------------",now,"-----------------")
@@ -36,7 +37,8 @@ def getCombinedStats():
 
     #Grab Energy data
     temp_output=GivTCP.read_register('0','04','60') #Get ALL input Registers
-    GivTCP.publish_to_MQTT("raw/input",temp_output)
+    if debugmode:
+        GivTCP.publish_to_MQTT("raw/input",temp_output)
 
     extrareg=GivTCP.read_register('180','04','4') #Get ALL input Registers
     energy_today_output['Battery Charge Energy Today kWh']=extrareg[GiV_Reg_LUT.input_register_LUT.get(183)[0]+"(183)"]
@@ -44,8 +46,8 @@ def getCombinedStats():
     energy_total_output['Battery Charge Energy Total kWh']=extrareg[GiV_Reg_LUT.input_register_LUT.get(181)[0]+"(181)"]
     energy_total_output['Battery Discharge Energy Total kWh']=extrareg[GiV_Reg_LUT.input_register_LUT.get(180)[0]+"(180)"]
 
-    print (extrareg)
-    GivTCP.publish_to_MQTT("raw/input",extrareg)
+    if debugmode:
+        GivTCP.publish_to_MQTT("raw/input",extrareg)
 
 
     if len(temp_output)==60:
@@ -126,7 +128,8 @@ def getModes():
     controlmode={}
     controls=GivTCP.read_register('0','03','60')
     controls.update(GivTCP.read_register('60','03','60'))
-    GivTCP.publish_to_MQTT("raw/holding",controls)
+    if debugmode:
+        GivTCP.publish_to_MQTT("raw/holding",controls)
 
     if len(controls)==120:
       shallow_charge=controls[GiV_Reg_LUT.holding_register_LUT.get(110)[0]+"(110)"]
