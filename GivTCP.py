@@ -49,7 +49,7 @@ class GivTCP:
       print ("Connecting to broker ",GivTCP.MQTT_Address)
       client.connect(GivTCP.MQTT_Address)
       while not client.connected_flag:        #wait in loop
-#        print ("In wait loop")
+        print ("In wait loop")
         time.sleep(0.5)
 #      print ("in Main Loop")
       for reg in payload:
@@ -100,6 +100,7 @@ class GivTCP:
     crc = CrcModbus().process(bytearray.fromhex(inputFunctionHex + inputRegisterHex + inputStepHex)).finalhex()
     dataSize = GivTCP.int_to_hex_string(int(len( DEVICE_ADDRESS + DATALOGGER_FUNCTION_CODE + serial_number + FILLER + inputFunctionHex + inputRegisterHex + inputStepHex +crc)/2),16)
     command = HEAD + PROTOCOL_IDENTIFIER + dataSize + DEVICE_ADDRESS + DATALOGGER_FUNCTION_CODE + serial_number + FILLER + inputFunctionHex + inputRegisterHex + inputStepHex + crc
+    print ("Sending command: ",command)
     sock.send(bytearray.fromhex(command))
     sock.settimeout(1.5)
     data=''
@@ -120,7 +121,7 @@ class GivTCP:
     result="Failure"
     n=0
     while response=='' and n<3:    #Try to get register data upto 3 times before giving up
-      print ("TCP Call no: "+str(n+1))
+      print ("TCP Call no: ",str(n+1)," to write register",register)
       response=GivTCP.TCP_call(register,"06",value)
       n=n+1
     if response!='':
@@ -142,13 +143,13 @@ class GivTCP:
     stepInt=int(inputStep)
     n=0
     while data=='' and n<3 and len(data)!= (stepInt*2)+44:    #Try to get register data upto 3 times before giving up
-      print ("TCP Call no: ",str(n+1)," for register ",inputRegister)
+      print ("TCP Call no:",str(n+1),"to read register",inputRegister)
       data=GivTCP.TCP_call(inputRegister,inputFunction,inputStep)
       n=n+1
     if len(data)== (stepInt*2)+44:	#do not return if data length does not match
       rr = data.hex()[84:-4]
       if len(rr)==4 or int(rr,16)!=0:   #do not return if registers return all zeros unless its a single register
-        print('Success reading '+inputStep+' register(s) ' +inputRegister + ' from ' + inputFunction + '--' + rr)
+        print ('Success reading '+inputStep+' register(s) ' +inputRegister + ' from ' + inputFunction + '--' + rr)
         registers=re.findall('....',rr)
         j=0
         for reg in registers:

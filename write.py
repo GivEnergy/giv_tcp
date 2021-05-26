@@ -3,6 +3,14 @@ import sys
 import json
 from GivTCP import GivTCP
 from GivLUT import GiV_Reg_LUT
+from datetime import datetime
+
+# datetime object containing current date and time
+now = datetime.now()
+if sys.argv[3]=="debug":         #if in debug mode write to log file
+    f = open('write_debug.log','a')
+    sys.stdout = f
+print ("-----------------",now,"-----------------")
 
 def setChargeEnable(payload):
     params=json.loads(payload)

@@ -2,7 +2,15 @@
 import sys
 from GivTCP import GivTCP
 from GivLUT import GiV_Reg_LUT
-# import schedule
+from datetime import datetime
+
+# datetime object containing current date and time
+now = datetime.now()
+if len(sys.argv)==3:
+    if sys.argv[2]=="debug":		#if in debug mode write to log file
+        f = open('read_debug.log','a')
+        sys.stdout = f
+print ("-----------------",now,"-----------------")
 
 def getTimeslots():
     timeslots={}
