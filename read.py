@@ -39,6 +39,11 @@ def getCombinedStats():
     GivTCP.publish_to_MQTT("raw/input",temp_output)
 
     extrareg=GivTCP.read_register('180','04','4') #Get ALL input Registers
+    energy_today_output['Battery Charge Energy Today kWh']=extrareg[GiV_Reg_LUT.input_register_LUT.get(183)[0]+"(183)"]
+    energy_today_output['Battery Discharge Energy Today kWh']=extrareg[GiV_Reg_LUT.input_register_LUT.get(182)[0]+"(182)"]
+    energy_total_output['Battery Charge Energy Total kWh']=extrareg[GiV_Reg_LUT.input_register_LUT.get(181)[0]+"(181)"]
+    energy_total_output['Battery Discharge Energy Total kWh']=extrareg[GiV_Reg_LUT.input_register_LUT.get(180)[0]+"(180)"]
+
     print (extrareg)
     GivTCP.publish_to_MQTT("raw/input",extrareg)
 
@@ -67,13 +72,9 @@ def getCombinedStats():
 
         temphex=str(temp_output[GiV_Reg_LUT.input_register_LUT.get(45)[0]+"(45)"])+str(temp_output[GiV_Reg_LUT.input_register_LUT.get(46)[0]+"(46)"])
         invout_kwh_value=round(int(temphex,16) * GiV_Reg_LUT.input_register_LUT.get(45)[2],2)
-#        energy_total_output['Invertor Energy OUT Total kwh']=invout_kwh_value
-        energy_total_output['Battery Charge Energy Total']=round(invout_kwh_value-pv_kwh_value,2)
 
         #Energy Today Fugures
         energy_today_output['PV Energy Today kWh']=temp_output[GiV_Reg_LUT.input_register_LUT.get(17)[0]+"(17)"]+temp_output[GiV_Reg_LUT.input_register_LUT.get(19)[0]+"(19)"]
-        energy_today_output['Battery Charge Energy Today kWh']=temp_output[GiV_Reg_LUT.input_register_LUT.get(36)[0]+"(36)"]
-        energy_today_output['Battery Discharge Energy Today kWh']=temp_output[GiV_Reg_LUT.input_register_LUT.get(37)[0]+"(37)"]
         energy_today_output['Import Energy Today kWh']=temp_output[GiV_Reg_LUT.input_register_LUT.get(26)[0]+"(26)"]
         energy_today_output['Export Energy Today kWh']=temp_output[GiV_Reg_LUT.input_register_LUT.get(25)[0]+"(25)"]
         energy_today_output['Load Energy Today kWh']=temp_output[GiV_Reg_LUT.input_register_LUT.get(35)[0]+"(35)"]
