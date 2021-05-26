@@ -40,7 +40,7 @@ def getCombinedStats():
 
     extrareg=GivTCP.read_register('180','04','4') #Get ALL input Registers
     print (extrareg)
-    GivTCP.publish_to_MQTT("raw/input/extra",extrareg)
+    GivTCP.publish_to_MQTT("raw/input",extrareg)
 
 
     if len(temp_output)==60:
