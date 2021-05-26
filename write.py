@@ -6,10 +6,13 @@ from GivLUT import GiV_Reg_LUT
 from datetime import datetime
 
 # datetime object containing current date and time
+debugmode=False
 now = datetime.now()
-if sys.argv[3]=="debug":         #if in debug mode write to log file
-    f = open('write_debug.log','a')
-    sys.stdout = f
+if len(sys.argv)==3:
+    if sys.argv[2]=="debug":            #if in debug mode write to log file
+        debugmode=True
+        f = open('write_debug.log','a')
+        sys.stdout = f
 print ("-----------------",now,"-----------------")
 
 def setChargeEnable(payload):
