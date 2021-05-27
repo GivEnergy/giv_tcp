@@ -172,7 +172,7 @@ def getModes():
       if shallow_charge==4 and self_consumption==True and discharge_enable=="Paused":
           mode=1
       elif shallow_charge==100 and self_consumption==True and discharge_enable=="Active":
-          mode=2&3
+          mode=3
       elif shallow_charge==4 and self_consumption==False and discharge_enable=="Active":
           mode=4
       else:
