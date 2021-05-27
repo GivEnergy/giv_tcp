@@ -8,26 +8,25 @@ from datetime import datetime
 # datetime object containing current date and time
 debugmode=False
 now = datetime.now()
-if len(sys.argv)==3:
-    if sys.argv[2]=="debug":            #if in debug mode write to log file
-        debugmode=True
-        f = open('write_debug.log','a')
-        sys.stdout = f
+if sys.argv[len(sys.argv)-1]=="debug":            #if in debug mode write to log file
+    debugmode=True
+    f = open('write_debug.log','a')
+    sys.stdout = f
 print ("-----------------",now,"-----------------")
 
-def pauseChargeSchedule(payload):
+def pauseChargeSchedule():
     result=GivTCP.write_single_register(96,0)
     print ("Pausing Charge Schedule was a: ",result)
 
-def resumeChargeSchedule(payload):
+def resumeChargeSchedule():
     result=GivTCP.write_single_register(96,1)
     print ("Resuming Charge Schedule was a: ",result)
 
-def pauseDischargeSchedule(payload):
+def pauseDischargeSchedule():
     result=GivTCP.write_single_register(59,0)
     print ("Pausing Discharge Schedule was a: ",result)
 
-def resumeDischargeSchedule(payload):
+def resumeDischargeSchedule():
     result=GivTCP.write_single_register(59,1)
     print ("Resuming Discharge Schedule was a: ",result)
 
@@ -123,4 +122,10 @@ def setBatteryMode(payload):
 
 
 if __name__ == '__main__':
-    globals()[sys.argv[1]](sys.argv[2])
+    if len(sys.argv)==2:
+        globals()[sys.argv[1]]()
+    elif len(sys.argv)==3:
+        if sys.argv[len(sys.argv)-1]=="debug":
+            globals()[sys.argv[1]]()
+        else:
+            globals()[sys.argv[1]](sys.argv[2])
