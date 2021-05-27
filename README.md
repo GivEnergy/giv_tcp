@@ -29,6 +29,12 @@ Available functions are:
 * getModes: Gets the 
 * runAll:- Runs all of the above
 
+Not sure where to start? Check our [Quick Start Guide](/documentaion/tutorial.md)
+
+[Some API Documentation](/documentaion/APIDocumentation.md)
+
+[All the used registers are listed in here ](/documentaion/registersAndFunctions.xlsb.xlsx)
+
 
 Control is also possible, and early development functions are available here. Strong caution is recommended using these are they are not yet fully tested.
 
