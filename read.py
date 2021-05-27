@@ -36,6 +36,7 @@ def getCombinedStats():
     battery_power={}
     SOC={}
     sum=0
+    emptycount=0
 
     #Grab Energy data
     temp_output=GivTCP.read_register('0','04','60') #Get ALL input Registers
@@ -54,11 +55,13 @@ def getCombinedStats():
     for key in temp_output:		#Check that not all registers are zero
         try:
             sum= sum+ int(temp_output[key])
+            if int(temp_output[key])==0:
+                emptycount+=1
         except:
             sum=sum
-    print (sum)
+    print ("Sum of reg=",sum,"And there are",emptycount,"empty registers")
 
-    if len(temp_output)==60 and sum!=0:		#Only process and run if registers are all there and non-zero
+    if len(temp_output)==60 and emptycount<30:		#Only process and run if registers are all there and non-zero
         #Total Energy Figures
         temphex=str(temp_output[GiV_Reg_LUT.input_register_LUT.get(21)[0]+"(21)"])+str(temp_output[GiV_Reg_LUT.input_register_LUT.get(22)[0]+"(22)"])
         kwh_value=round(int(temphex,16) * GiV_Reg_LUT.input_register_LUT.get(21)[2],2)
