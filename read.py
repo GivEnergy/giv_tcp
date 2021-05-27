@@ -58,6 +58,11 @@ def getCombinedStats():
         if kwh_value<100000:
             energy_total_output['Export Energy Total kWh']=kwh_value
 
+        temphex=str(temp_output[GiV_Reg_LUT.input_register_LUT.get(6)[0]+"(6)"])+str(temp_output[GiV_Reg_LUT.input_register_LUT.get(7)[0]+"(7)"])
+        kwh_value=round(int(temphex,16) * GiV_Reg_LUT.input_register_LUT.get(21)[2],2)
+        if kwh_value<100000:
+            energy_total_output['Battery Throughput Total kWh']=kwh_value
+
         temphex=str(temp_output[GiV_Reg_LUT.input_register_LUT.get(27)[0]+"(27)"])+str(temp_output[GiV_Reg_LUT.input_register_LUT.get(28)[0]+"(28)"])
         kwh_value=round(int(temphex,16) * GiV_Reg_LUT.input_register_LUT.get(27)[2],2)
         if kwh_value<100000:
@@ -77,7 +82,8 @@ def getCombinedStats():
         invout_kwh_value=round(int(temphex,16) * GiV_Reg_LUT.input_register_LUT.get(45)[2],2)
 
         #Energy Today Fugures
-        energy_today_output['PV Energy Today kWh']=temp_output[GiV_Reg_LUT.input_register_LUT.get(17)[0]+"(17)"]+temp_output[GiV_Reg_LUT.input_register_LUT.get(19)[0]+"(19)"]
+        energy_today_output['Battery Throughput Today kWh']=temp_output[GiV_Reg_LUT.input_register_LUT.get(36)[0]+"(36)"]+temp_output[GiV_Reg_LUT.input_register_LUT.get(37)[0]+"(37)"]
+        energy_today_output['PV Energy Today kWh']=round(temp_output[GiV_Reg_LUT.input_register_LUT.get(17)[0]+"(17)"]+temp_output[GiV_Reg_LUT.input_register_LUT.get(19)[0]+"(19)"],2)
         energy_today_output['Import Energy Today kWh']=temp_output[GiV_Reg_LUT.input_register_LUT.get(26)[0]+"(26)"]
         energy_today_output['Export Energy Today kWh']=temp_output[GiV_Reg_LUT.input_register_LUT.get(25)[0]+"(25)"]
         energy_today_output['Load Energy Today kWh']=temp_output[GiV_Reg_LUT.input_register_LUT.get(35)[0]+"(35)"]
