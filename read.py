@@ -35,6 +35,7 @@ def getCombinedStats():
     load_power={}
     battery_power={}
     SOC={}
+    sum=0
 
     #Grab Energy data
     temp_output=GivTCP.read_register('0','04','60') #Get ALL input Registers
@@ -50,8 +51,14 @@ def getCombinedStats():
     if debugmode:
         GivTCP.publish_to_MQTT("raw/input",extrareg)
 
+    for key in temp_output:		#Check that not all registers are zero
+        try:
+            sum= sum+ int(temp_output[key])
+        except:
+            sum=sum
+    print (sum)
 
-    if len(temp_output)==60:
+    if len(temp_output)==60 and sum!=0:		#Only process and run if registers are all there and non-zero
         #Total Energy Figures
         temphex=str(temp_output[GiV_Reg_LUT.input_register_LUT.get(21)[0]+"(21)"])+str(temp_output[GiV_Reg_LUT.input_register_LUT.get(22)[0]+"(22)"])
         kwh_value=round(int(temphex,16) * GiV_Reg_LUT.input_register_LUT.get(21)[2],2)
@@ -123,12 +130,12 @@ def getCombinedStats():
         power_output['Discharge Power']=discharge_power
         power_output['SOC']=temp_output[GiV_Reg_LUT.input_register_LUT.get(59)[0]+"(59)"]
 
-    if len(energy_total_output)!=0:
-      GivTCP.publish_to_MQTT("Energy/Total",energy_total_output)
-    if len(energy_today_output)!=0:
-      GivTCP.publish_to_MQTT("Energy/Today",energy_today_output)
-    if len(power_output)!=0:
-      GivTCP.publish_to_MQTT("Power",power_output)
+        if len(energy_total_output)!=0:
+          GivTCP.publish_to_MQTT("Energy/Total",energy_total_output)
+        if len(energy_today_output)!=0:
+          GivTCP.publish_to_MQTT("Energy/Today",energy_today_output)
+        if len(power_output)!=0:
+          GivTCP.publish_to_MQTT("Power",power_output)
 
 def getModes():
     controls={}
