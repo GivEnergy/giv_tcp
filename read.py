@@ -153,7 +153,6 @@ def getModes():
       shallow_charge=controls[GiV_Reg_LUT.holding_register_LUT.get(110)[0]+"(110)"]
       self_consumption=controls[GiV_Reg_LUT.holding_register_LUT.get(27)[0]+"(27)"]
       charge_enable=controls[GiV_Reg_LUT.holding_register_LUT.get(96)[0]+"(96)"]
-      print ("CHarge Enable=",charge_enable)
       if charge_enable==True:
           charge_enable="Active"
       else:
@@ -170,11 +169,11 @@ def getModes():
 
       print (shallow_charge,self_consumption,discharge_enable)
 
-      if shallow_charge==4 and self_consumption==True and discharge_enable==False:
+      if shallow_charge==4 and self_consumption==True and discharge_enable=="Paused":
           mode=1
-      elif shallow_charge==100 and self_consumption==True and discharge_enable==True:
+      elif shallow_charge==100 and self_consumption==True and discharge_enable=="Active":
           mode=2&3
-      elif shallow_charge==4 and self_consumption==False and discharge_enable==True:
+      elif shallow_charge==4 and self_consumption==False and discharge_enable=="Active":
           mode=4
       else:
           mode="unknown"
