@@ -152,10 +152,19 @@ def getModes():
       shallow_charge=controls[GiV_Reg_LUT.holding_register_LUT.get(110)[0]+"(110)"]
       self_consumption=controls[GiV_Reg_LUT.holding_register_LUT.get(27)[0]+"(27)"]
       charge_enable=controls[GiV_Reg_LUT.holding_register_LUT.get(96)[0]+"(96)"]
+      if charge_enable==True:
+          charge_enable="Active"
+      else:
+          charge_enable="Paused"
+
       battery_reserve=controls[GiV_Reg_LUT.holding_register_LUT.get(114)[0]+"(114)"]
       target_soc=controls[GiV_Reg_LUT.holding_register_LUT.get(116)[0]+"(116)"]
       battery_capacity=controls[GiV_Reg_LUT.holding_register_LUT.get(55)[0]+"(55)"]
       discharge_enable=controls[GiV_Reg_LUT.holding_register_LUT.get(59)[0]+"(59)"]
+      if discharge_enable==True:
+          discharge_enable="Active"
+      else:
+          discharge_enable="Paused"
 
       print (shallow_charge,self_consumption,discharge_enable)
 
@@ -172,7 +181,8 @@ def getModes():
       controlmode['Battery Power Reserve']=battery_reserve
       controlmode['Target SOC']=target_soc
       controlmode['Battery Capacity']=round(((battery_capacity*51.2)/1000),2)
-      controlmode['Smart Charge Enable']=charge_enable
+      controlmode['Charge Schedule State']=charge_enable
+      controlmode['Discharge Schedule State']=discharge_enable
 
     if len(controlmode)!=0:
       GivTCP.publish_to_MQTT("Control",controlmode)

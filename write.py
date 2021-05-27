@@ -15,25 +15,22 @@ if len(sys.argv)==3:
         sys.stdout = f
 print ("-----------------",now,"-----------------")
 
-def setChargeEnable(payload):
-    params=json.loads(payload)
-    control=params['enable']
-    if control=="False":
-       val=0
-    else:
-       val=1
-    result=GivTCP.write_single_register(96,val)
-    print ("Setting Charge Enable to ",control," was: ",result)
+def pauseChargeSchedule():
+    result=GivTCP.write_single_register(96,0)
+    print ("Pausing Charge Schedule was a: ",result)
 
-def setDischargeEnable(payload):
-    params=json.loads(payload)
-    control=params['enable']
-    if control=="False":
-       val=0
-    else:
-       val=1
-    result=GivTCP.write_single_register(59,val)
-    print ("Setting Discharge Enable was: ",result)
+def resumeChargeSchedule():
+    result=GivTCP.write_single_register(96,1)
+    print ("Resuming Charge Schedule was a: ",result)
+
+def pauseDischargeSchedule():
+    result=GivTCP.write_single_register(59,0)
+    print ("Pausing Discharge Schedule was a: ",result)
+
+def resumeDischargeSchedule():
+    result=GivTCP.write_single_register(59,1)
+    print ("Resuming Discharge Schedule was a: ",result)
+
 
 def setChargeTarget(payload):
     params=json.loads(payload)
