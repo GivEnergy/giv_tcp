@@ -15,19 +15,19 @@ if len(sys.argv)==3:
         sys.stdout = f
 print ("-----------------",now,"-----------------")
 
-def pauseChargeSchedule():
+def pauseChargeSchedule(payload):
     result=GivTCP.write_single_register(96,0)
     print ("Pausing Charge Schedule was a: ",result)
 
-def resumeChargeSchedule():
+def resumeChargeSchedule(payload):
     result=GivTCP.write_single_register(96,1)
     print ("Resuming Charge Schedule was a: ",result)
 
-def pauseDischargeSchedule():
+def pauseDischargeSchedule(payload):
     result=GivTCP.write_single_register(59,0)
     print ("Pausing Discharge Schedule was a: ",result)
 
-def resumeDischargeSchedule():
+def resumeDischargeSchedule(payload):
     result=GivTCP.write_single_register(59,1)
     print ("Resuming Discharge Schedule was a: ",result)
 

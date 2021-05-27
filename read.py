@@ -152,7 +152,7 @@ def getModes():
       shallow_charge=controls[GiV_Reg_LUT.holding_register_LUT.get(110)[0]+"(110)"]
       self_consumption=controls[GiV_Reg_LUT.holding_register_LUT.get(27)[0]+"(27)"]
       charge_enable=controls[GiV_Reg_LUT.holding_register_LUT.get(96)[0]+"(96)"]
-      if charge_enable==True:
+      if charge_enable=="True":
           charge_enable="Active"
       else:
           charge_enable="Paused"
@@ -161,7 +161,7 @@ def getModes():
       target_soc=controls[GiV_Reg_LUT.holding_register_LUT.get(116)[0]+"(116)"]
       battery_capacity=controls[GiV_Reg_LUT.holding_register_LUT.get(55)[0]+"(55)"]
       discharge_enable=controls[GiV_Reg_LUT.holding_register_LUT.get(59)[0]+"(59)"]
-      if discharge_enable==True:
+      if discharge_enable=="True":
           discharge_enable="Active"
       else:
           discharge_enable="Paused"
