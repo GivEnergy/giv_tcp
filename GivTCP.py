@@ -45,9 +45,7 @@ class GivTCP:
       mqtt.Client.connected_flag=False        			#create flag in class
       client=mqtt.Client("GivEnergy_"+GivTCP.dataloggerSN)
 
-      try:
-          GiV_Settings.MQTT_Topic
-      except NameError:
+      if GiV_Settings.MQTT_Topic=="":
           print ("No user defined MQTT Topic")
           rootTopic='GivEnergy/'+GivTCP.dataloggerSN+'/'
       else:
