@@ -5,13 +5,13 @@ from GivTCP import GivTCP
 from GivLUT import GiV_Reg_LUT
 from datetime import datetime
 
-# datetime object containing current date and time
 debugmode=False
-now = datetime.now()
-if sys.argv[len(sys.argv)-1]=="debug":            #if in debug mode write to log file
+if GiV_Settings.debug=="True":          #if in debug mode write to log file
     debugmode=True
-    f = open('write_debug.log','a')
+    f = open('read_debug.log','a')
     sys.stdout = f
+
+now = datetime.now()
 print ("-----------------",now,"-----------------")
 
 def pauseChargeSchedule():
@@ -125,7 +125,4 @@ if __name__ == '__main__':
     if len(sys.argv)==2:
         globals()[sys.argv[1]]()
     elif len(sys.argv)==3:
-        if sys.argv[len(sys.argv)-1]=="debug":
-            globals()[sys.argv[1]]()
-        else:
-            globals()[sys.argv[1]](sys.argv[2])
+        globals()[sys.argv[1]](sys.argv[2])

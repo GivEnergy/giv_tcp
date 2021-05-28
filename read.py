@@ -3,15 +3,15 @@ import sys
 from GivTCP import GivTCP
 from GivLUT import GiV_Reg_LUT
 from datetime import datetime
+from settings import GiV_Settings
 
-# datetime object containing current date and time
 debugmode=False
+if GiV_Settings.debug=="True":		#if in debug mode write to log file
+    debugmode=True
+    f = open('read_debug.log','a')
+    sys.stdout = f
+
 now = datetime.now()
-if len(sys.argv)==3:
-    if sys.argv[2]=="debug":		#if in debug mode write to log file
-        debugmode=True
-        f = open('read_debug.log','a')
-        sys.stdout = f
 print ("-----------------",now,"-----------------")
 
 def getTimeslots():
