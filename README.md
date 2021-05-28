@@ -58,6 +58,12 @@ Available control functions are:
 | resumeChargeSchedule    | None          | Resumes the Charging schedule     |
 | resumeDischargeSchedule | None          | Resumes the Discharging schedule  |
 | setChargeTarget         | {"chargeToPercent":"50"}  | Sets the Target charge SOC |
+| setBatteryReserve|{"dischargeToPercent":"5"}| Sets the Battery Reserve discharge cut-off limit|
+| setChargeSlot1|{"start":"0100","finish":"0400","chargeToPercent":"55")| Sets the time and target SOC of the first chargeslot. Times must be expressed in hhmm format|
+| setDischargeSlot1|{"start":"0100","finish":"0400","dischargeToPercent":"55")| Sets the time and target SOC of the first dischargeslot. Times must be expressed in hhmm format|
+| setDischargeSlot2|{"start":"0100","finish":"0400","dischargeToPercent":"55")| Sets the time and target SOC of the first dischargeslot. Times must be expressed in hhmm format|
+|setBatteryMode|{"mode":"1"}| Sets battery operation mode. Mode value must be in the range 1-4|
+
 
 
 
