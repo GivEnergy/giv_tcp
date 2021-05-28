@@ -42,22 +42,31 @@ class GivTCP:
         print("Bad connection Returned code= ",rc)
 
   def publish_to_MQTT(topic,payload):
-      mqtt.Client.connected_flag=False        #create flag in class
+      mqtt.Client.connected_flag=False        			#create flag in class
       client=mqtt.Client("GivEnergy_"+GivTCP.dataloggerSN)
+
+      try:
+          GiV_Settings.MQTT_Topic
+      except NameError:
+          print ("No user defined MQTT Topic")
+          rootTopic='GivEnergy/'+GivTCP.dataloggerSN+'/'
+      else:
+          print ("User defined MQTT Topic found",GiV_Settings.MQTT_Topic)
+          rootTopic=GiV_Settings.MQTT_Topic+'/'
+
       if GivTCP.MQTTCredentials:
           client.username_pw_set(GivTCP.MQTT_Username,GivTCP.MQTT_Password)
-      client.on_connect=GivTCP.on_connect     #bind call back function
+      client.on_connect=GivTCP.on_connect     			#bind call back function
       client.loop_start()
       print ("Connecting to broker ",GivTCP.MQTT_Address)
       client.connect(GivTCP.MQTT_Address)
-      while not client.connected_flag:        #wait in loop
-        print ("In wait loop")
-        time.sleep(0.5)
-#      print ("in Main Loop")
+      while not client.connected_flag:        			#wait in loop
+          print ("In wait loop")
+          time.sleep(0.5)
       for reg in payload:
-          print('Publishing: GivEnergy/'+GivTCP.dataloggerSN+'/'+topic+'/'+reg,payload[reg])
-          client.publish('GivEnergy/'+GivTCP.dataloggerSN+'/'+topic+'/'+reg,payload[reg])
-      client.loop_stop()                      #Stop loop 
+          print('Publishing: '+rootTopic+topic+'/'+reg,payload[reg])
+          client.publish(rootTopic+topic+'/'+reg,payload[reg])
+      client.loop_stop()                      			#Stop loop
       client.disconnect()
       return client
 

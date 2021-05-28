@@ -92,7 +92,7 @@ def setDischargeSlot2(payload):
 
 def setBatteryMode(payload):
     params=json.loads(payload)
-    mode=params['mode']
+    mode=int(params['mode'])
     if mode==1:
         shallowresult=GivTCP.write_single_register(110,4)
         dischargeresult=GivTCP.write_single_register(59,0)
