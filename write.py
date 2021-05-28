@@ -5,9 +5,9 @@ from GivTCP import GivTCP
 from GivLUT import GiV_Reg_LUT
 from datetime import datetime
 
-debugmode=False
-if GiV_Settings.debug=="True":          #if in debug mode write to log file
-    debugmode=True
+Log_To_File=False
+if GiV_Settings.Log_To_File=="True":          #if in debug mode write to log file
+    Log_To_File=True
     f = open('read_debug.log','a')
     sys.stdout = f
 

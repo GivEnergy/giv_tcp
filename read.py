@@ -5,11 +5,14 @@ from GivLUT import GiV_Reg_LUT
 from datetime import datetime
 from settings import GiV_Settings
 
-debugmode=False
-if GiV_Settings.debug=="True":		#if in debug mode write to log file
-    debugmode=True
+Log_To_File=False
+if GiV_Settings.Log_To_File=="True":		#if in debug mode write to log file
+    Log_To_File=True
     f = open('read_debug.log','a')
     sys.stdout = f
+
+if GiV_Settings.Print_Raw_Registers=="True":
+    Print_Raw=True
 
 now = datetime.now()
 print ("-----------------",now,"-----------------")
@@ -40,7 +43,7 @@ def getCombinedStats():
 
     #Grab Energy data
     temp_output=GivTCP.read_register('0','04','60') #Get ALL input Registers
-    if debugmode:
+    if Print_Raw:
         GivTCP.publish_to_MQTT("raw/input",temp_output)
 
     extrareg=GivTCP.read_register('180','04','4') #Get ALL input Registers
@@ -50,7 +53,7 @@ def getCombinedStats():
         energy_total_output['Battery Charge Energy Total kWh']=extrareg[GiV_Reg_LUT.input_register_LUT.get(181)[0]+"(181)"]
         energy_total_output['Battery Discharge Energy Total kWh']=extrareg[GiV_Reg_LUT.input_register_LUT.get(180)[0]+"(180)"]
 
-    if debugmode:
+    if Print_Raw:
         GivTCP.publish_to_MQTT("raw/input",extrareg)
 
     for key in temp_output:		#Check that not all registers are zero
@@ -146,7 +149,7 @@ def getModes():
     controlmode={}
     controls=GivTCP.read_register('0','03','60')
     controls.update(GivTCP.read_register('60','03','60'))
-    if debugmode:
+    if Print_To_Raw:
         GivTCP.publish_to_MQTT("raw/holding",controls)
 
     if len(controls)==120:
