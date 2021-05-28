@@ -15,7 +15,10 @@ In essence the script connects to a Modbus TCP server which runs on the wifi don
 # Settings
 A settings.py file is required in the root directory. Use the supplied settings_template.py and populate with the relevant detailes. Only InvertorIP, dataloggerSN and MQTT_Address are required. All other settings must be there but can be left blank if not needed.
 
-The scripts function through being called from the command line with appropriate parameters ssigned. There are both Read and Write functions, providing data acquisiation and control.
+# Usage
+The scripts function through being called from the command line with appropriate parameters assigned. There are both Read and Write functions, providing data acquisiation and control.
+Node-Red flows are available which can be used to call these scripts and provide control and data visualisation.
+It is reccomended that the read.py script is called no more often than every 15s, if calling runAll.
 
 # Read
 To retrieve data and publish to the MQTT queue the read.py script is called with arguments as below:
