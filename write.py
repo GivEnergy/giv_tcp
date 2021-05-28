@@ -4,6 +4,7 @@ import json
 from GivTCP import GivTCP
 from GivLUT import GiV_Reg_LUT
 from datetime import datetime
+from settings import GiV_Settings
 
 Log_To_File=False
 if GiV_Settings.Log_To_File=="True":          #if in debug mode write to log file
