@@ -149,7 +149,7 @@ def getModes():
     controlmode={}
     controls=GivTCP.read_register('0','03','60')
     controls.update(GivTCP.read_register('60','03','60'))
-    if Print_To_Raw:
+    if Print_Raw:
         GivTCP.publish_to_MQTT("raw/holding",controls)
 
     if len(controls)==120:
