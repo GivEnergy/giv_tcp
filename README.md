@@ -26,11 +26,14 @@ To retrieve data and publish to the MQTT queue the read.py script is called with
 
 `python3 read.py {{functionName}}`
 
-Available functions are:
-* getTimeslots: Gets all currently stored timeslots for Charge1, Discharge1 and Discharge2
-* getCombinedStats: Gets power and Energy Stats (real-time, Today and Total)
-* getModes: Gets the control state info inclusing Mode, Target Charge SOC, Battery Reserve, Charge and Discharge Schedule state (Paused/Active) and Battery Capacity
-* runAll:- Runs all of the above
+Available read functions are:
+| Function          | Payload       |  Description                      |
+| ----------------- | ------------- |  -------------------------------- |
+| getTimeslots      | None          | Gets all currently stored timeslots for Charge1, Discharge1 and Discharge2      |
+| getCombinedStats  | None          | Gets power and Energy Stats (real-time, Today and Total)   |
+| getModes          | None          | Gets the control state info including: Mode, Target Charge SOC, Battery Reserve, Charge and Discharge Schedule state (Paused/Active) and Battery Capacity    |
+| runAll            | None          | Runs all of the above  |
+
 
 # Control
 Control is available through redefined functions which are called with arguments. The format of the function call matches the published GivEnegry cloud based battery.api. It requires a JSON pay load as per the below:
@@ -40,15 +43,10 @@ Control is available through redefined functions which are called with arguments
 An example payload can be found below and further details can be seen in the GivEnergy Docs to be found here: XXXXXXX
 
 {
-    "enable": true,
     "start": "0100",
     "finish": "0400",
     "chargeToPercent": "100"
 }
-
-The full call to set the chargeTimeslot would then be:
-
-`python3 write.py setChargeSlot1 '{"enable": true,"start": "0100","finish": "0400","chargeToPercent": "100"}'`
 
 Available control functions are:
 | Function                | Payload       |  Description                      |
@@ -59,21 +57,17 @@ Available control functions are:
 | resumeDischargeSchedule | None          | Resumes the Discharging schedule  |
 | setChargeTarget         | {"chargeToPercent":"50"}  | Sets the Target charge SOC |
 | setBatteryReserve|{"dischargeToPercent":"5"}| Sets the Battery Reserve discharge cut-off limit|
-| setChargeSlot1|{"start":"0100","finish":"0400","chargeToPercent":"55")| Sets the time and target SOC of the first chargeslot. Times must be expressed in hhmm format|
-| setDischargeSlot1|{"start":"0100","finish":"0400","dischargeToPercent":"55")| Sets the time and target SOC of the first dischargeslot. Times must be expressed in hhmm format|
-| setDischargeSlot2|{"start":"0100","finish":"0400","dischargeToPercent":"55")| Sets the time and target SOC of the first dischargeslot. Times must be expressed in hhmm format|
+| setChargeSlot1|{"start":"0100","finish":"0400","chargeToPercent":"55")| Sets the time and target SOC of the first chargeslot. Times must be expressed in hhmm format. Enable flag show in the battery.api documentation is not needed |
+| setDischargeSlot1|{"start":"0100","finish":"0400","dischargeToPercent":"55")| Sets the time and target SOC of the first dischargeslot. Times must be expressed in hhmm format. Enable flag show in the battery.api documentation is not needed |
+| setDischargeSlot2|{"start":"0100","finish":"0400","dischargeToPercent":"55")| Sets the time and target SOC of the first dischargeslot. Times must be expressed in hhmm format.  Enable flag show in the battery.api documentation is not needed |
 |setBatteryMode|{"mode":"1"}| Sets battery operation mode. Mode value must be in the range 1-4|
 
+The full call to set  Charge Timeslot 1 would then be:
 
-
-
+`python3 write.py setChargeSlot1 '{"enable": true,"start": "0100","finish": "0400","chargeToPercent": "100"}'`
 
 Not sure where to start? Check our [Quick Start Guide](/documentaion/tutorial.md)
 
 [Some API Documentation](/documentaion/APIDocumentation.md)
 
 [All the used registers are listed in here ](/documentaion/registersAndFunctions.xlsb.xlsx)
-
-
-
-
