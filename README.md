@@ -12,6 +12,7 @@ In essence the script connects to a Modbus TCP server which runs on the wifi don
   * crccheck
   * paho-mqtt
 
+# Settings
 A settings.py file is required in the root directory. Use the supplied settings_template.py and populate with the relevant detailes. Only InvertorIP, dataloggerSN and MQTT_Address are required. All other settings must be there but can be left blank if not needed.
 
 The scripts function through being called from the command line with appropriate parameters ssigned. There are both Read and Write functions, providing data acquisiation and control.
