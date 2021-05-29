@@ -125,7 +125,7 @@ def getCombinedStats():
         temp_PInv=temp_output[GiV_Reg_LUT.input_register_LUT.get(24)[0]+"(24)"]
         if temp_PInv<15500:
             power_output['Invertor Power']= temp_PInv
-        temp_Load=temp_output[GiV_Reg_LUT.input_register_LUT.get(42)[0]+"(42)"]
+        temp_Load=temp_PInv+power_output['PV Power']- power_output['Grid Power']
         if temp_Load<15500:
             power_output['Load Power']= temp_Load
 
