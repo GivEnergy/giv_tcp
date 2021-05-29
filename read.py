@@ -52,10 +52,8 @@ def getCombinedStats():
             energy_today_output['Battery Charge Energy Today kWh']=extrareg[GiV_Reg_LUT.input_register_LUT.get(183)[0]+"(183)"]
         if extrareg[GiV_Reg_LUT.input_register_LUT.get(182)[0]+"(182)"]<100:
             energy_today_output['Battery Discharge Energy Today kWh']=extrareg[GiV_Reg_LUT.input_register_LUT.get(182)[0]+"(182)"]
-        if extrareg[GiV_Reg_LUT.input_register_LUT.get(181)[0]+"(181)"]<100:
-            energy_total_output['Battery Charge Energy Total kWh']=extrareg[GiV_Reg_LUT.input_register_LUT.get(181)[0]+"(181)"]
-        if extrareg[GiV_Reg_LUT.input_register_LUT.get(180)[0]+"(180)"]<100:
-            energy_total_output['Battery Discharge Energy Total kWh']=extrareg[GiV_Reg_LUT.input_register_LUT.get(180)[0]+"(180)"]
+        energy_total_output['Battery Charge Energy Total kWh']=extrareg[GiV_Reg_LUT.input_register_LUT.get(181)[0]+"(181)"]
+        energy_total_output['Battery Discharge Energy Total kWh']=extrareg[GiV_Reg_LUT.input_register_LUT.get(180)[0]+"(180)"]
 
     if Print_Raw:
         GivTCP.publish_to_MQTT("raw/input",extrareg)
@@ -102,9 +100,12 @@ def getCombinedStats():
         #Energy Today Fugures
         energy_today_output['Battery Throughput Today kWh']=temp_output[GiV_Reg_LUT.input_register_LUT.get(36)[0]+"(36)"]+temp_output[GiV_Reg_LUT.input_register_LUT.get(37)[0]+"(37)"]
         energy_today_output['PV Energy Today kWh']=round(temp_output[GiV_Reg_LUT.input_register_LUT.get(17)[0]+"(17)"]+temp_output[GiV_Reg_LUT.input_register_LUT.get(19)[0]+"(19)"],2)
-        energy_today_output['Import Energy Today kWh']=temp_output[GiV_Reg_LUT.input_register_LUT.get(26)[0]+"(26)"]
-        energy_today_output['Export Energy Today kWh']=temp_output[GiV_Reg_LUT.input_register_LUT.get(25)[0]+"(25)"]
-        energy_today_output['Load Energy Today kWh']=temp_output[GiV_Reg_LUT.input_register_LUT.get(35)[0]+"(35)"]
+        if temp_output[GiV_Reg_LUT.input_register_LUT.get(26)[0]+"(26)"]<100:
+            energy_today_output['Import Energy Today kWh']=temp_output[GiV_Reg_LUT.input_register_LUT.get(26)[0]+"(26)"]
+        if temp_output[GiV_Reg_LUT.input_register_LUT.get(25)[0]+"(25)"]<100:
+            energy_today_output['Export Energy Today kWh']=temp_output[GiV_Reg_LUT.input_register_LUT.get(25)[0]+"(25)"]
+        if temp_output[GiV_Reg_LUT.input_register_LUT.get(35)[0]+"(35)"]<100:
+            energy_today_output['Load Energy Today kWh']=temp_output[GiV_Reg_LUT.input_register_LUT.get(35)[0]+"(35)"]
 
         #Instant Power figures
         temp_PV=temp_output[GiV_Reg_LUT.input_register_LUT.get(18)[0]+"(18)"]+temp_output[GiV_Reg_LUT.input_register_LUT.get(20)[0]+"(20)"]
