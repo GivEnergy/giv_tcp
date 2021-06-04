@@ -33,6 +33,7 @@ def getCombinedStats():
     temp_output={}
     extrareg={}
     power_output={}
+    power_flow_output={}
     PV_stats={}
     grid_power={}
     load_power={}
@@ -107,43 +108,92 @@ def getCombinedStats():
         if temp_output[GiV_Reg_LUT.input_register_LUT.get(35)[0]+"(35)"]<100:
             energy_today_output['Load Energy Today kWh']=temp_output[GiV_Reg_LUT.input_register_LUT.get(35)[0]+"(35)"]
 
-        #Instant Power figures
-        temp_PV=temp_output[GiV_Reg_LUT.input_register_LUT.get(18)[0]+"(18)"]+temp_output[GiV_Reg_LUT.input_register_LUT.get(20)[0]+"(20)"]
-        if temp_PV<15000:
-            power_output['PV Power']= temp_PV
-        grid_value= temp_output[GiV_Reg_LUT.input_register_LUT.get(30)[0]+"(30)"]
-        if grid_value<=0:
-            import_power=abs(grid_value)
+        #PV Power
+        PV_power=temp_output[GiV_Reg_LUT.input_register_LUT.get(18)[0]+"(18)"]+temp_output[GiV_Reg_LUT.input_register_LUT.get(20)[0]+"(20)"]
+        if PV_power<15000:
+            power_output['PV Power']= PV_power
+
+        #Grid Power
+        grid_power= temp_output[GiV_Reg_LUT.input_register_LUT.get(30)[0]+"(30)"]
+        if grid_power<=0:
+            import_power=abs(grid_power)
             export_power=0
-        elif grid_value>=0:
+        elif grid_power>=0:
             import_power=0
-            export_power=abs(grid_value)
-        power_output['Grid Power']=grid_value
+            export_power=abs(grid_power)
+        power_output['Grid Power']=grid_power
+
         power_output['Import Power']=import_power
         power_output['Export Power']=export_power
         power_output['EPS Power']= temp_output[GiV_Reg_LUT.input_register_LUT.get(31)[0]+"(31)"]
-        temp_PInv=temp_output[GiV_Reg_LUT.input_register_LUT.get(24)[0]+"(24)"]
-        if temp_PInv<15500:
-            power_output['Invertor Power']= temp_PInv
-        temp_Load=temp_PInv + temp_PV - grid_value
-        if temp_Load<15500:
-            power_output['Load Power (calc)']= temp_Load
 
-        power_output['Load Power']=temp_output[GiV_Reg_LUT.input_register_LUT.get(42)[0]+"(42)"]
+        #Invertor Power
+        Invertor_power=temp_output[GiV_Reg_LUT.input_register_LUT.get(24)[0]+"(24)"]
+        if Invertor_power<15500:
+            power_output['Invertor Power']= Invertor_power
 
+        #Calculated Load Power
+        temp_Load_Calc=Invertor_power + PV_power - grid_power
+        if temp_Load_Calc<15500:
+            power_output['Load Power (calc)']= temp_Load_Calc
 
-        value=temp_output[GiV_Reg_LUT.input_register_LUT.get(52)[0]+"(52)"]
-        if value>=0:
-            discharge_power=abs(value)
+        #Load Power
+        Load_power=temp_output[GiV_Reg_LUT.input_register_LUT.get(42)[0]+"(42)"]
+        if Load_power<15500:
+            power_output['Load Power']=Load_power
+
+        #Battery Power
+        Battery_power=temp_output[GiV_Reg_LUT.input_register_LUT.get(52)[0]+"(52)"]
+        if Battery_power>=0:
+            discharge_power=abs(Battery_power)
             charge_power=0
-        elif value<=0:
+        elif Battery_power<=0:
             discharge_power=0
-            charge_power=abs(value)
-        power_output['Battery Power']=value
+            charge_power=abs(Battery_power)
+        power_output['Battery Power']=Battery_power
         power_output['Charge Power']=charge_power
         power_output['Discharge Power']=discharge_power
+
+        #SOC
         power_output['SOC']=temp_output[GiV_Reg_LUT.input_register_LUT.get(59)[0]+"(59)"]
 
+        ############  Power Flow Stats    ############
+
+        #Solar to House
+        if PV_power>Load_power:
+            power_flow_output['Solar to House']=Load_power
+        else:
+            power_flow_output['Solar to House']=PV_power
+
+        #Solar to Battery
+        power_flow_output['Solar to Battery']=max(PV_power-Load_power-export_power,0)
+
+        #Battery to House
+        B2H=max(discharge_power-export_power,0)
+        power_flow_output['Battery to House']=B2H
+
+
+        #Grid to Battery/House Power
+        if import_power>0:
+            power_flow_output['Grid to Battery']=charge_power-max(PV_power-Load_power,0)
+            power_flow_output['Grid to House']=max(import_power-charge_power,0)
+
+        else:
+            power_flow_output['Grid to Battery']=0
+            power_flow_output['Grid to House']=0
+
+        #Battery/Solar to Grid Power
+        if export_power>0:
+            power_flow_output['Battery to Grid']=max(discharge_power-B2H,0)
+            power_flow_output['Solar to Grid']=max(PV-power-Load_power-charge_power,0)
+
+        else:
+            power_flow_output['Battery to Grid']=0
+            power_flow_output['Solar to Grid']=0
+
+        #Publish to MQTT
+        if len(power_flow_output)!=0:
+          GivTCP.publish_to_MQTT("Power/Flows",power_flow_output)
         if len(energy_total_output)!=0:
           GivTCP.publish_to_MQTT("Energy/Total",energy_total_output)
         if len(energy_today_output)!=0:
