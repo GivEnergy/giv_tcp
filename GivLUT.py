@@ -150,7 +150,7 @@ class GiV_Reg_LUT:
         21: ["Grid Energy Out totalH", "hex", 0.1],
         22: ["Grid Energy Out totalL", "hex", 0.11],
         23: ["PV mate", "unsigned", 0.1],
-        24: ["Three-single phase grid output watt (low)", "unsigned", 1],
+        24: ["Three-single phase grid output watt (low)", "signed", 1],
         25: ["Grid Energy Out Day", "unsigned", 0.1],
         26: ["Grid Energy IN Day", "unsigned", 0.1],
         27: ["INV Energy IN total H", "hex", 0.1],

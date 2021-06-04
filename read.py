@@ -111,23 +111,25 @@ def getCombinedStats():
         temp_PV=temp_output[GiV_Reg_LUT.input_register_LUT.get(18)[0]+"(18)"]+temp_output[GiV_Reg_LUT.input_register_LUT.get(20)[0]+"(20)"]
         if temp_PV<15000:
             power_output['PV Power']= temp_PV
-        value= temp_output[GiV_Reg_LUT.input_register_LUT.get(30)[0]+"(30)"]
-        if value<=0:
-            import_power=abs(value)
+        grid_value= temp_output[GiV_Reg_LUT.input_register_LUT.get(30)[0]+"(30)"]
+        if grid_value<=0:
+            import_power=abs(grid_value)
             export_power=0
-        elif value>=0:
+        elif grid_value>=0:
             import_power=0
-            export_power=abs(value)
-        power_output['Grid Power']=value
+            export_power=abs(grid_value)
+        power_output['Grid Power']=grid_value
         power_output['Import Power']=import_power
         power_output['Export Power']=export_power
         power_output['EPS Power']= temp_output[GiV_Reg_LUT.input_register_LUT.get(31)[0]+"(31)"]
         temp_PInv=temp_output[GiV_Reg_LUT.input_register_LUT.get(24)[0]+"(24)"]
         if temp_PInv<15500:
             power_output['Invertor Power']= temp_PInv
-        temp_Load=temp_PInv+power_output['PV Power']- power_output['Grid Power']
+        temp_Load=temp_PInv + temp_PV - grid_value
         if temp_Load<15500:
-            power_output['Load Power']= temp_Load
+            power_output['Load Power (calc)']= temp_Load
+
+        power_output['Load Power']=temp_output[GiV_Reg_LUT.input_register_LUT.get(42)[0]+"(42)"]
 
 
         value=temp_output[GiV_Reg_LUT.input_register_LUT.get(52)[0]+"(52)"]
