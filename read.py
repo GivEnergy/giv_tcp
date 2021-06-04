@@ -192,14 +192,14 @@ def getCombinedStats():
             power_flow_output['Solar to Grid']=0
 
         #Publish to MQTT
-        if len(power_flow_output)!=0:
-          GivTCP.publish_to_MQTT("Power/Flows",power_flow_output)
         if len(energy_total_output)!=0:
           GivTCP.publish_to_MQTT("Energy/Total",energy_total_output)
         if len(energy_today_output)!=0:
           GivTCP.publish_to_MQTT("Energy/Today",energy_today_output)
         if len(power_output)!=0:
           GivTCP.publish_to_MQTT("Power",power_output)
+        if len(power_flow_output)!=0:
+          GivTCP.publish_to_MQTT("Power/Flows",power_flow_output)
 
 def getModes():
     controls={}
