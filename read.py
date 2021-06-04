@@ -185,7 +185,7 @@ def getCombinedStats():
         #Battery/Solar to Grid Power
         if export_power>0:
             power_flow_output['Battery to Grid']=max(discharge_power-B2H,0)
-            power_flow_output['Solar to Grid']=max(PV-power-Load_power-charge_power,0)
+            power_flow_output['Solar to Grid']=max(PV_power-Load_power-charge_power,0)
 
         else:
             power_flow_output['Battery to Grid']=0
