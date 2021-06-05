@@ -10,7 +10,7 @@ if GiV_Settings.Log_To_File=="True":		#if in debug mode write to log file
     Log_To_File=True
     f = open('read_debug.log','a')
     sys.stdout = f
-
+Print_Raw=False
 if GiV_Settings.Print_Raw_Registers=="True":
     Print_Raw=True
 
