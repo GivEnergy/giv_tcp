@@ -8,3 +8,4 @@ class GiV_Settings:
   Log_To_File=""
   Debug_File_Location=""
   Print_Raw_Registers=""
+  debug=""
