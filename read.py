@@ -81,31 +81,41 @@ def getCombinedStats():
         temphex=str(temp_output[GiV_Reg_LUT.input_register_LUT.get(27)[0]+"(27)"])+str(temp_output[GiV_Reg_LUT.input_register_LUT.get(28)[0]+"(28)"])
         kwh_value=round(int(temphex,16) * GiV_Reg_LUT.input_register_LUT.get(27)[2],2)
         if kwh_value<100000:
-            energy_total_output['Load Energy Total kWh']=kwh_value
+            energy_total_output['AC Charge Energy Total kWh']=kwh_value
 
         temphex=str(temp_output[GiV_Reg_LUT.input_register_LUT.get(32)[0]+"(32)"])+str(temp_output[GiV_Reg_LUT.input_register_LUT.get(33)[0]+"(33)"])
         kwh_value=round(int(temphex,16) * GiV_Reg_LUT.input_register_LUT.get(32)[2],2)
         if kwh_value<100000:
             energy_total_output['Import Energy Total kWh']=kwh_value
 
+        temphex=str(temp_output[GiV_Reg_LUT.input_register_LUT.get(45)[0]+"(45)"])+str(temp_output[GiV_Reg_LUT.input_register_LUT.get(46)[0]+"(46)"])
+        inv_kwh_value=round(int(temphex,16) * GiV_Reg_LUT.input_register_LUT.get(45)[2],2)
+        if kwh_value<100000:
+            energy_total_output['Invertor Energy Total kWh']=inv_kwh_value
+
         temphex=str(temp_output[GiV_Reg_LUT.input_register_LUT.get(11)[0]+"(11)"])+str(temp_output[GiV_Reg_LUT.input_register_LUT.get(12)[0]+"(12)"])
         pv_kwh_value=round(int(temphex,16) * GiV_Reg_LUT.input_register_LUT.get(11)[2],2)
         if kwh_value<100000:
             energy_total_output['PV Energy Total kWh']=pv_kwh_value
 
-#        temphex=str(temp_output[GiV_Reg_LUT.input_register_LUT.get(45)[0]+"(45)"])+str(temp_output[GiV_Reg_LUT.input_register_LUT.get(46)[0]+"(46)"])
-#        invout_kwh_value=round(int(temphex,16) * GiV_Reg_LUT.input_register_LUT.get(45)[2],2)
+        energy_total_output['Load Energy Total kWh']=round(energy_total_output['Invertor Energy Total kWh']+energy_total_output['Export Energy Total kWh'],2)
+        energy_total_output['Self Consumption Energy Total kWh']=round(energy_total_output['Load Energy Total kWh']-energy_total_output['Import Energy Total kWh'],2)
 
 #Energy Today Figures
         GivTCP.debug("Getting Today Energy Data")
-        energy_today_output['Battery Throughput Today kWh']=temp_output[GiV_Reg_LUT.input_register_LUT.get(36)[0]+"(36)"]+temp_output[GiV_Reg_LUT.input_register_LUT.get(37)[0]+"(37)"]
+        energy_today_output['Battery Throughput Today kWh']=round(temp_output[GiV_Reg_LUT.input_register_LUT.get(36)[0]+"(36)"]+temp_output[GiV_Reg_LUT.input_register_LUT.get(37)[0]+"(37)"],2)
         energy_today_output['PV Energy Today kWh']=round(temp_output[GiV_Reg_LUT.input_register_LUT.get(17)[0]+"(17)"]+temp_output[GiV_Reg_LUT.input_register_LUT.get(19)[0]+"(19)"],2)
         if temp_output[GiV_Reg_LUT.input_register_LUT.get(26)[0]+"(26)"]<100:
-            energy_today_output['Import Energy Today kWh']=temp_output[GiV_Reg_LUT.input_register_LUT.get(26)[0]+"(26)"]
+            energy_today_output['Import Energy Today kWh']=round(temp_output[GiV_Reg_LUT.input_register_LUT.get(26)[0]+"(26)"],2)
         if temp_output[GiV_Reg_LUT.input_register_LUT.get(25)[0]+"(25)"]<100:
-            energy_today_output['Export Energy Today kWh']=temp_output[GiV_Reg_LUT.input_register_LUT.get(25)[0]+"(25)"]
+            energy_today_output['Export Energy Today kWh']=round(temp_output[GiV_Reg_LUT.input_register_LUT.get(25)[0]+"(25)"],2)
         if temp_output[GiV_Reg_LUT.input_register_LUT.get(35)[0]+"(35)"]<100:
-            energy_today_output['Load Energy Today kWh']=temp_output[GiV_Reg_LUT.input_register_LUT.get(35)[0]+"(35)"]
+            energy_today_output['AC Charge Energy Today kWh']=round(temp_output[GiV_Reg_LUT.input_register_LUT.get(35)[0]+"(35)"],2)
+        if temp_output[GiV_Reg_LUT.input_register_LUT.get(44)[0]+"(44)"]<100:
+            energy_today_output['Invertor Energy Today kWh']=round(temp_output[GiV_Reg_LUT.input_register_LUT.get(44)[0]+"(44)"],2)
+
+        energy_today_output['Load Energy Today kWh']=round(energy_today_output['Invertor Energy Today kWh']+energy_today_output['Export Energy Today kWh'],2)
+        energy_today_output['Self Consumption Energy Today kWh']=round(energy_today_output['Load Energy Today kWh']-energy_today_output['Import Energy Today kWh'],2)
 
 ############  Core Power Stats    ############
 
