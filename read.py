@@ -291,11 +291,11 @@ def getModesandTimes():
         timeslots['Charge end time slot 1']=controls[GiV_Reg_LUT.holding_register_LUT.get(95)[0]+"(95)"]
 
 
-    if len(timeslots)!=0:
+    if len(timeslots)==6:
         GivTCP.debug("Publishing to Timeslot MQTT")
         GivTCP.publish_to_MQTT("Timeslots",timeslots)
 
-    if len(controlmode)!=0:
+    if len(controlmode)==6:
         GivTCP.debug("Publishing to Control MQTT")
         GivTCP.publish_to_MQTT("Control",controlmode)
 

@@ -120,7 +120,7 @@ class GivTCP:
             data = sock.recv(socketMax)
             length = data[5]
     except Exception as e:
-        debug ("Error: " + str(e))
+        GivTCP.debug ("Error: " + str(e))
         ### Do something here if socket timesout  ###
     sock.close()
     return(data)
@@ -130,7 +130,7 @@ class GivTCP:
     result="Failure"
     n=0
     while response=='' and n<3:    #Try to get register data upto 3 times before giving up
-      debug ("TCP Call no: "+str(n+1)+" to write register "+register)
+      GivTCP.debug ("TCP Call no: "+str(n+1)+" to write register "+register)
       response=GivTCP.TCP_call(register,"06",value)
       n=n+1
     if response!='':
