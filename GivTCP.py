@@ -8,6 +8,7 @@ import re
 import paho.mqtt.client as mqtt
 import time
 import json
+from datetime import datetime
 from GivLUT import GiV_Reg_LUT
 from settings import GiV_Settings
 
@@ -17,15 +18,15 @@ class GivTCP:
   dataloggerSN= GiV_Settings.dataloggerSN
   MQTT_Address=GiV_Settings.MQTT_Address
   if GiV_Settings.MQTT_Username=='':
-     MQTTCredentials=False
+      MQTTCredentials=False
   else:
-     MQTTCredentials=True
-     MQTT_Username=GiV_Settings.MQTT_Username
-     MQTT_Password=GiV_Settings.MQTT_Password
+      MQTTCredentials=True
+      MQTT_Username=GiV_Settings.MQTT_Username
+      MQTT_Password=GiV_Settings.MQTT_Password
 
   def debug(input):
     if GiV_Settings.debug == "True":
-        print(input)
+      print(str(datetime.now())," - ",input)
 
   def int_to_hex_string(value, bits):
       return "{0:0{1}X}".format(value & ((1<<bits) - 1), bits//4)
@@ -60,7 +61,7 @@ class GivTCP:
       client.connect(GivTCP.MQTT_Address)
       while not client.connected_flag:        			#wait in loop
           GivTCP.debug ("In wait loop")
-          time.sleep(0.5)
+          time.sleep(0.2)
       for reg in payload:
           GivTCP.debug('Publishing: '+rootTopic+topic+'/'+str(reg)+" "+str(payload[reg]))
           client.publish(rootTopic+topic+'/'+reg,payload[reg])
@@ -152,7 +153,7 @@ class GivTCP:
     stepInt=int(inputStep)
     n=0
     while data=='' and n<3 and len(data)!= (stepInt*2)+44:    #Try to get register data upto 3 times before giving up
-      GivTCP.debug ("TCP Call no:"+str(n+1)+"to read register"+inputRegister)
+      GivTCP.debug ("TCP Call no: "+str(n+1)+" to read "+str(stepInt)+" register(s) starting from reg: "+inputRegister)
       data=GivTCP.TCP_call(inputRegister,inputFunction,inputStep)
       n=n+1
     if len(data)== (stepInt*2)+44:	#do not return if data length does not match

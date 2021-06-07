@@ -30,7 +30,7 @@ Available read functions are:
 | ----------------- | ------------- |  -------------------------------- |
 | getTimeslots      | None          | Gets all currently stored timeslots for Charge1, Discharge1 and Discharge2      |
 | getCombinedStats  | None          | Gets power and Energy Stats (real-time, Today and Total)   |
-| getModes          | None          | Gets the control state info including: Mode, Target Charge SOC, Battery Reserve, Charge and Discharge Schedule state (Paused/Active) and Battery Capacity    |
+| getModesandTimes  | None          | Gets the Timeslots and control state info including: Mode, Target Charge SOC, Battery Reserve, Charge and Discharge Schedule state (Paused/Active) and Battery Capacity    |
 | runAll            | None          | Runs all of the above  |
 
 

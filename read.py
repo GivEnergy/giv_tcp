@@ -315,14 +315,15 @@ def extraRegCheck():
         energy_total_output['Battery Discharge Energy Total kWh']=extrareg[GiV_Reg_LUT.input_register_LUT.get(180)[0]+"(180)"]
 
 def runAll():
-    now = datetime.now()
-    GivTCP.debug("------Starting-----------"+str(now)+"-----------------")
+    starttime = datetime.now()
+    GivTCP.debug("----------------------------Starting----------------------------")
     GivTCP.debug("Running getCombinedStats")
     getCombinedStats()
     GivTCP.debug("Running getModesandTimes")
     getModesandTimes()
     now = datetime.now()
-    GivTCP.debug("------Ended-----------"+str(now)+"-----------------")
+    duration=now-starttime
+    GivTCP.debug("----------------------------Ended taking "+str(duration)+" seconds------------")
 
 
 if __name__ == '__main__':
