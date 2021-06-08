@@ -131,7 +131,7 @@ class GivTCP:
     result="Failure"
     n=0
     while response=='' and n<3:    #Try to get register data upto 3 times before giving up
-      GivTCP.debug ("TCP Call no: "+str(n+1)+" to write register "+register)
+      GivTCP.debug ("TCP Call no: "+str(n+1)+" to write register "+str(register))
       response=GivTCP.TCP_call(register,"06",value)
       n=n+1
     if response!='':
@@ -156,6 +156,7 @@ class GivTCP:
       GivTCP.debug ("TCP Call no: "+str(n+1)+" to read "+str(stepInt)+" register(s) starting from reg: "+inputRegister)
       data=GivTCP.TCP_call(inputRegister,inputFunction,inputStep)
       n=n+1
+    GivTCP.debug ('Returned Data is: '+data.hex())
     if len(data)== (stepInt*2)+44:	#do not return if data length does not match
       rr = data.hex()[84:-4]
       if len(rr)==4 or int(rr,16)!=0:   #do not return if registers return all zeros unless its a single register
@@ -174,7 +175,7 @@ class GivTCP:
             j=j+1
             if j>=stepInt: break  #Handle cases where invertor send erroneous additional data
     else:
-      GivTCP.debug('Error reading '+inputStep+' register(s) ' +inputRegister + ' from ' + inputFunction,file=sys.stderr)
+      GivTCP.debug('Error reading '+inputStep+' register(s) ' +inputRegister + ' from ' + inputFunction)
 
     return final_output
 

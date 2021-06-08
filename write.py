@@ -21,15 +21,15 @@ def pauseChargeSchedule():
 
 def resumeChargeSchedule():
     result=GivTCP.write_single_register(96,1)
-    GivTCP.debug ("Resuming Charge Schedule was a: ",result)
+    GivTCP.debug ("Resuming Charge Schedule was a: "+ result)
 
 def pauseDischargeSchedule():
     result=GivTCP.write_single_register(59,0)
-    GivTCP.debug ("Pausing Discharge Schedule was a: ",result)
+    GivTCP.debug ("Pausing Discharge Schedule was a: " + result)
 
 def resumeDischargeSchedule():
     result=GivTCP.write_single_register(59,1)
-    GivTCP.debug ("Resuming Discharge Schedule was a: ",result)
+    GivTCP.debug ("Resuming Discharge Schedule was a: " + result)
 
 
 def setChargeTarget(payload):
@@ -85,7 +85,7 @@ def setDischargeSlot2(payload):
     target=params['dischargeToPercent']
     startresult=GivTCP.write_single_register(44,start)
     endresult=GivTCP.write_single_register(45,end)
-    targetresult=GivTCP.write_single_register(114,end)
+    targetresult=GivTCP.write_single_register(114,target)
     if startresult=="Success" and endresult=="Success" and targetresult=="Success":
         GivTCP.debug ("Disharge Timeslot 2 successfully set")
     else:
@@ -113,7 +113,7 @@ def setBatteryMode(payload):
         dischargeresult=GivTCP.write_single_register(59,1)
         selfresult=GivTCP.write_single_register(27,0)
     else:
-        GivTCP.debug ("Invalid Mode: ",mode)
+        GivTCP.debug ("Invalid Mode: "+ mode)
         return
     #Calculate success
     if shallowresult=="Success" and dischargeresult=="Success" and selfresult=="Success":
