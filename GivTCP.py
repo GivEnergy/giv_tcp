@@ -25,7 +25,7 @@ class GivTCP:
       MQTT_Password=GiV_Settings.MQTT_Password
 
   def debug(input):
-    if GiV_Settings.debug == "True":
+    if GiV_Settings.debug.lower() == "true":
       print(str(datetime.now())," - ",input)
 
   def int_to_hex_string(value, bits):
@@ -165,11 +165,11 @@ class GivTCP:
         j=0
         for reg in registers:
             if inputFunction=='04':
-                val=GivTCP.registerValueConvert(registerInt+j, reg, "input")
+                val=GivTCP.registerValueConvert(registerInt+j, reg, "04")
                 key=GiV_Reg_LUT.input_register_LUT.get(registerInt+j)[0] + "(" + str(registerInt+j) + ")"
                 final_output[key]=val
             elif inputFunction=='03':
-                val=GivTCP.registerValueConvert(registerInt+j, reg, "holding")
+                val=GivTCP.registerValueConvert(registerInt+j, reg, "03")
                 key=GiV_Reg_LUT.holding_register_LUT.get(registerInt+j)[0] + "(" + str(registerInt+j) + ")"
                 final_output[key]=val
             j=j+1
@@ -181,10 +181,10 @@ class GivTCP:
 
 #Function to convert the raw rgister value to real output using LUT attributes
   def registerValueConvert(register,value,regType):
-    if regType=="holding":
+    if regType=="03":
         dataformat=GiV_Reg_LUT.holding_register_LUT.get(register)[1]
         scaling=GiV_Reg_LUT.holding_register_LUT.get(register)[2]
-    if regType=="input":
+    if regType=="04":
         dataformat=GiV_Reg_LUT.input_register_LUT.get(register)[1]
         scaling=GiV_Reg_LUT.input_register_LUT.get(register)[2]
     #format value

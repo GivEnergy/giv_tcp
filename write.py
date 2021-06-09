@@ -31,7 +31,6 @@ def resumeDischargeSchedule():
     result=GivTCP.write_single_register(59,1)
     GivTCP.debug ("Resuming Discharge Schedule was a: " + result)
 
-
 def setChargeTarget(payload):
     params=json.loads(payload)
     target=params['chargeToPercent']

@@ -1,19 +1,10 @@
 # -*- coding: utf-8 -*-
 import sys
+import configparser
 from GivTCP import GivTCP
 from GivLUT import GiV_Reg_LUT
 from datetime import datetime
 from settings import GiV_Settings
-
-Log_To_File=False
-if GiV_Settings.Log_To_File=="True":		#if in debug mode write to log file
-    Log_To_File=True
-    f = open(GiV_Settings.Debug_File_Location + 'read_debug.log','a')
-    sys.stdout = f
-
-Print_Raw=False
-if GiV_Settings.Print_Raw_Registers=="True":
-    Print_Raw=True
 
 def getTimeslots():
     timeslots={}
@@ -98,13 +89,19 @@ def getCombinedStats():
         if kwh_value<100000:
             energy_total_output['PV Energy Total kWh']=pv_kwh_value
 
-        energy_total_output['Load Energy Total kWh']=round(energy_total_output['Invertor Energy Total kWh']+energy_total_output['Export Energy Total kWh'],2)
-        energy_total_output['Self Consumption Energy Total kWh']=round(energy_total_output['Load Energy Total kWh']-energy_total_output['Import Energy Total kWh'],2)
+        if GiV_Settings.Invertor_Type.lower()=="hybrid":
+            energy_total_output['Load Energy Total kWh']=round((energy_total_output['Invertor Energy Total kWh']-energy_total_output['AC Charge Energy Total kWh'])-(energy_total_output['Export Energy Total kWh']-energy_total_output['Import Energy Total kWh']),3)
+        else:
+            energy_total_output['Load Energy Total kWh']=round((energy_total_output['Invertor Energy Total kWh']-energy_total_output['AC Charge Energy Total kWh'])-(energy_total_output['Export Energy Total kWh']-energy_total_output['Import Energy Total kWh'])+energy_total_output['PV Energy Total kWh'],3)
+        
+        energy_total_output['Self Consumption Energy Total kWh']=round(energy_total_output['PV Energy Total kWh']-energy_total_output['Export Energy Total kWh'],2)
 
 #Energy Today Figures
         GivTCP.debug("Getting Today Energy Data")
-        energy_today_output['Battery Throughput Today kWh']=round(temp_output[GiV_Reg_LUT.input_register_LUT.get(36)[0]+"(36)"]+temp_output[GiV_Reg_LUT.input_register_LUT.get(37)[0]+"(37)"],2)
-        energy_today_output['PV Energy Today kWh']=round(temp_output[GiV_Reg_LUT.input_register_LUT.get(17)[0]+"(17)"]+temp_output[GiV_Reg_LUT.input_register_LUT.get(19)[0]+"(19)"],2)
+        if round(temp_output[GiV_Reg_LUT.input_register_LUT.get(36)[0]+"(36)"]+temp_output[GiV_Reg_LUT.input_register_LUT.get(37)[0]+"(37)"],2)<100:
+            energy_today_output['Battery Throughput Today kWh']=round(temp_output[GiV_Reg_LUT.input_register_LUT.get(36)[0]+"(36)"]+temp_output[GiV_Reg_LUT.input_register_LUT.get(37)[0]+"(37)"],2)
+        if round(temp_output[GiV_Reg_LUT.input_register_LUT.get(17)[0]+"(17)"]+temp_output[GiV_Reg_LUT.input_register_LUT.get(19)[0]+"(19)"],2)<100:
+            energy_today_output['PV Energy Today kWh']=round(temp_output[GiV_Reg_LUT.input_register_LUT.get(17)[0]+"(17)"]+temp_output[GiV_Reg_LUT.input_register_LUT.get(19)[0]+"(19)"],2)
         if temp_output[GiV_Reg_LUT.input_register_LUT.get(26)[0]+"(26)"]<100:
             energy_today_output['Import Energy Today kWh']=round(temp_output[GiV_Reg_LUT.input_register_LUT.get(26)[0]+"(26)"],2)
         if temp_output[GiV_Reg_LUT.input_register_LUT.get(25)[0]+"(25)"]<100:
@@ -114,8 +111,12 @@ def getCombinedStats():
         if temp_output[GiV_Reg_LUT.input_register_LUT.get(44)[0]+"(44)"]<100:
             energy_today_output['Invertor Energy Today kWh']=round(temp_output[GiV_Reg_LUT.input_register_LUT.get(44)[0]+"(44)"],2)
 
-        energy_today_output['Load Energy Today kWh']=round(energy_today_output['Invertor Energy Today kWh']+energy_today_output['Export Energy Today kWh'],2)
-        energy_today_output['Self Consumption Energy Today kWh']=round(energy_today_output['Load Energy Today kWh']-energy_today_output['Import Energy Today kWh'],2)
+
+        if GiV_Settings.Invertor_Type.lower()=="hybrid":
+            energy_today_output['Load Energy Today kWh']=round((energy_today_output['Invertor Energy Today kWh']-energy_today_output['AC Charge Energy Today kWh'])-(energy_today_output['Export Energy Today kWh']-energy_today_output['Import Energy Today kWh']),3)
+        else:
+            energy_today_output['Load Energy Today kWh']=round((energy_today_output['Invertor Energy Today kWh']-energy_today_output['AC Charge Energy Today kWh'])-(energy_today_output['Export Energy Today kWh']-energy_today_output['Import Energy Today kWh'])+energy_today_output['PV Energy Today kWh'],3)
+        energy_today_output['Self Consumption Energy Today kWh']=round(energy_today_output['PV Energy Today kWh']-energy_today_output['Export Energy Today kWh'],2)
 
 ############  Core Power Stats    ############
 
@@ -148,14 +149,16 @@ def getCombinedStats():
     #Invertor Power
         GivTCP.debug("Getting PInv Power")
         Invertor_power=temp_output[GiV_Reg_LUT.input_register_LUT.get(24)[0]+"(24)"]
-        if Invertor_power<6000:
+        if -6000 <= Invertor_power <= 6000:
             power_output['Invertor Power']= Invertor_power
+        if Invertor_power<0:
+            power_output['AC Charge Power']= abs(Invertor_power)
 
-    #Calculated Load Power
-        GivTCP.debug("Calculating Load Power")
-        temp_Load_Calc=Invertor_power + PV_power - grid_power
-        if temp_Load_Calc<15500:
-            power_output['Load Power (calc)']= temp_Load_Calc
+#    #Calculated Load Power
+#        GivTCP.debug("Calculating Load Power")
+#        temp_Load_Calc=Invertor_power + PV_power - grid_power
+#        if temp_Load_Calc<15500:
+#            power_output['Load Power (calc)']= temp_Load_Calc
 
     #Load Power
         GivTCP.debug("Getting Load Power")
@@ -200,28 +203,22 @@ def getCombinedStats():
             power_flow_output['Solar to Battery']=0
             power_flow_output['Solar to Grid']=0
 
-    #Solar to Battery - ????
-#        if import_power==0:
-#            power_flow_output['Solar to Battery']=max(charge_power,0)
-#        else:
-#            power_flow_output['Solar to Battery']=max(PV_power-Load_power-export_power,0)
-
-    #Battery to House - Happy
+    #Battery to House
         GivTCP.debug("Getting Battery to House Power Flow")
         B2H=max(discharge_power-export_power,0)
         power_flow_output['Battery to House']=B2H
 
-    #Grid to Battery/House Power - Happy
+    #Grid to Battery/House Power
         GivTCP.debug("Getting Grid to Battery/House Power Flow")
         if import_power>0:
-            power_flow_output['Grid to Battery']=charge_power-max(PV_power-Load_power,0)    # Happy
-            power_flow_output['Grid to House']=max(import_power-charge_power,0) # Happy
+            power_flow_output['Grid to Battery']=charge_power-max(PV_power-Load_power,0)
+            power_flow_output['Grid to House']=max(import_power-charge_power,0)
 
         else:
             power_flow_output['Grid to Battery']=0
             power_flow_output['Grid to House']=0
 
-    #Battery to Grid Power - Happy
+    #Battery to Grid Power
         GivTCP.debug("Getting Battery to Grid Power Flow")
         if export_power>0:
             power_flow_output['Battery to Grid']=max(discharge_power-B2H,0)
@@ -324,6 +321,14 @@ def extraRegCheck():
         energy_total_output['Battery Charge Energy Total kWh']=extrareg[GiV_Reg_LUT.input_register_LUT.get(181)[0]+"(181)"]
         energy_total_output['Battery Discharge Energy Total kWh']=extrareg[GiV_Reg_LUT.input_register_LUT.get(180)[0]+"(180)"]
 
+def getEMSData():
+    EMSData={}
+    EMSData=GivTCP.read_register('60','04','02') #Get v2.6 input Registers
+    GivTCP.debug ("EMSData is:" + str(EMSData))
+    GivTCP.debug ("EMSData is:" + str(len(EMSData))+" registers long")
+    print ("EMSData: ",EMSData)
+
+
 def runAll():
     starttime = datetime.now()
     GivTCP.debug("----------------------------Starting----------------------------")
@@ -337,4 +342,14 @@ def runAll():
 
 
 if __name__ == '__main__':
+    Log_To_File=False
+    if GiV_Settings.Log_To_File.lower()=="true":		#if in debug mode write to log file
+        Log_To_File=True
+        f = open(GiV_Settings.Debug_File_Location + 'read_debug.log','a')
+        sys.stdout = f
+
+    Print_Raw=False
+    if GiV_Settings.Print_Raw_Registers.lower()=="true":
+        Print_Raw=True
+
     globals()[sys.argv[1]]()

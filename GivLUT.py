@@ -186,6 +186,7 @@ class GiV_Reg_LUT:
         57: ["Charger Warning code", "unsigned", 1],
         58: ["wGridPortCurr", "unsigned", 0.01],
         59: ["Battery percent", "unsigned", 1],
+        60: ["Reg60", "unsigned", 1],
         180: ["Battery Discharge Energy Total", "unsigned", 0.1],
         181: ["Battery Charge Energy Total", "unsigned", 0.1],
         182: ["Battery Discharge Energy Today", "unsigned", 0.1],
