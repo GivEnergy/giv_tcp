@@ -13,9 +13,11 @@ def getTimeslots():
     timeslots=GivTCP.read_register('44','03','02')
     timeslots.update(GivTCP.read_register('56','03','02'))
     timeslots.update(GivTCP.read_register('94','03','02'))
-    if len(timeslots)!=0:
+    if len(timeslots)==6:
         GivTCP.debug("Publishing to Timeslot MQTT")
         GivTCP.publish_to_MQTT("Timeslots",timeslots)
+    else:
+        GivTCP.debug("Error retrieving Timeslot registers")
 
 def getCombinedStats():
     energy_total_output={}
@@ -48,7 +50,6 @@ def getCombinedStats():
     GivTCP.debug("Sum of reg= "+str(sum)+" And there are " + str(emptycount) +" empty registers")
 
     if len(input_registers)==64 and emptycount<30:		#Only process and run if registers are all there and non-zero
-
 #Total Energy Figures
         GivTCP.debug("Getting Total Energy Data")
         temphex=str(input_registers[GiV_Reg_LUT.input_register_LUT.get(21)[0]+"(21)"])+str(input_registers[GiV_Reg_LUT.input_register_LUT.get(22)[0]+"(22)"])
@@ -232,6 +233,9 @@ def getCombinedStats():
         GivTCP.debug("Publish all to MQTT")
         GivTCP.multi_MQTT_publish(multi_output)
 
+    else:
+        GivTCP.debug("Error retrieving Input registers, empty or missing")
+
 
 def getModesandTimes():
     controls={}
@@ -240,8 +244,6 @@ def getModesandTimes():
     GivTCP.debug("Getting All Holding Registers")
     controls=GivTCP.read_register('0','03','60')
     controls.update(GivTCP.read_register('60','03','60'))
-    if Print_Raw:
-        GivTCP.publish_to_MQTT("raw/holding",controls)
 
     if len(controls)==120:
         GivTCP.debug("All holding registers retrieved")
@@ -294,16 +296,21 @@ def getModesandTimes():
         timeslots['Discharge end time slot 2']=controls[GiV_Reg_LUT.holding_register_LUT.get(45)[0]+"(45)"]
         timeslots['Charge start time slot 1']=controls[GiV_Reg_LUT.holding_register_LUT.get(94)[0]+"(94)"]
         timeslots['Charge end time slot 1']=controls[GiV_Reg_LUT.holding_register_LUT.get(95)[0]+"(95)"]
-
-
-    if len(timeslots)==6:
-        multi_output["Timeslots"]=timeslots
-
-    if len(controlmode)==6:
-        multi_output["Control"]=controlmode
+        if Print_Raw:
+            multi_output["raw/holding"]=controls
+        if len(timeslots)==6:
+            multi_output["Timeslots"]=timeslots
+        if len(controlmode)==6:
+            multi_output["Control"]=controlmode
 
         GivTCP.debug("Publish Control and Timeslots to MQTT")
         GivTCP.multi_MQTT_publish(multi_output)
+
+    else:
+        GivTCP.debug("Error retrieving holding registers")
+
+
+    
 
 def extraRegCheck():
     extrareg={}
@@ -319,6 +326,8 @@ def extraRegCheck():
             energy_today_output['Battery Discharge Energy Today kWh']=extrareg[GiV_Reg_LUT.input_register_LUT.get(182)[0]+"(182)"]
         energy_total_output['Battery Charge Energy Total kWh']=extrareg[GiV_Reg_LUT.input_register_LUT.get(181)[0]+"(181)"]
         energy_total_output['Battery Discharge Energy Total kWh']=extrareg[GiV_Reg_LUT.input_register_LUT.get(180)[0]+"(180)"]
+    else:
+        GivTCP.debug("Error retrieving extra input register")
 
 def getEMSData():
     EMSData={}

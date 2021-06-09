@@ -65,8 +65,8 @@ class GivTCP:
       for p_load in array:
         payload=array[p_load]
         for reg in payload:
-            GivTCP.debug('Publishing: '+"Temp/"+p_load+'/'+str(reg)+" "+str(payload[reg]))
-            client.publish("Temp/"+p_load+'/'+reg,payload[reg])
+            GivTCP.debug('Publishing: '+rootTopic+p_load+'/'+str(reg)+" "+str(payload[reg]))
+            client.publish(rootTopic+p_load+'/'+reg,payload[reg])
       client.loop_stop()                      			#Stop loop
       client.disconnect()
       return client
