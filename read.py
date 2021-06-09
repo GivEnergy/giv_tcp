@@ -20,71 +20,63 @@ def getTimeslots():
 def getCombinedStats():
     energy_total_output={}
     energy_today_output={}
-    temp_output={}
-    extrareg={}
+    input_registers={}
     power_output={}
     power_flow_output={}
     sum=0
     emptycount=0
-
+    multi_output={}
+        
     GivTCP.debug("Getting All Input Registers Data")
 
     #Grab Energy data
-    temp_output=GivTCP.read_register('0','04','60') #Get ALL input Registers
-    if Print_Raw:
-        GivTCP.publish_to_MQTT("raw/input",temp_output)
+    input_registers=GivTCP.read_register('0','04','60') #Get ALL input Registers
 
-    extrareg=GivTCP.read_register('180','04','4') #Get v2.6 input Registers
     GivTCP.debug("Getting Extra Input Registers Data")
-    if len(extrareg)==4:
-        if extrareg[GiV_Reg_LUT.input_register_LUT.get(183)[0]+"(183)"]<100:	#Cap output at 100kWh in a single day
-            energy_today_output['Battery Charge Energy Today kWh']=extrareg[GiV_Reg_LUT.input_register_LUT.get(183)[0]+"(183)"]
-        if extrareg[GiV_Reg_LUT.input_register_LUT.get(182)[0]+"(182)"]<100:
-            energy_today_output['Battery Discharge Energy Today kWh']=extrareg[GiV_Reg_LUT.input_register_LUT.get(182)[0]+"(182)"]
-        energy_total_output['Battery Charge Energy Total kWh']=extrareg[GiV_Reg_LUT.input_register_LUT.get(181)[0]+"(181)"]
-        energy_total_output['Battery Discharge Energy Total kWh']=extrareg[GiV_Reg_LUT.input_register_LUT.get(180)[0]+"(180)"]
+    input_registers.update(GivTCP.read_register('180','04','4'))    #Get v2.6 input Registers
 
     if Print_Raw:
-        GivTCP.publish_to_MQTT("raw/input",extrareg)
+        multi_output['raw/input']=input_registers
 
-    for key in temp_output:		#Check that not all registers are zero
+    for key in input_registers:		#Check that not all registers are zero
         try:
-            sum= sum+ int(temp_output[key])
-            if int(temp_output[key])==0:
+            sum= sum+ int(input_registers[key])
+            if int(input_registers[key])==0:
                 emptycount+=1
         except:
             sum=sum
     GivTCP.debug("Sum of reg= "+str(sum)+" And there are " + str(emptycount) +" empty registers")
 
-    if len(temp_output)==60 and emptycount<30:		#Only process and run if registers are all there and non-zero
+    if len(input_registers)==64 and emptycount<30:		#Only process and run if registers are all there and non-zero
+
 #Total Energy Figures
         GivTCP.debug("Getting Total Energy Data")
-        temphex=str(temp_output[GiV_Reg_LUT.input_register_LUT.get(21)[0]+"(21)"])+str(temp_output[GiV_Reg_LUT.input_register_LUT.get(22)[0]+"(22)"])
+        temphex=str(input_registers[GiV_Reg_LUT.input_register_LUT.get(21)[0]+"(21)"])+str(input_registers[GiV_Reg_LUT.input_register_LUT.get(22)[0]+"(22)"])
         kwh_value=round(int(temphex,16) * GiV_Reg_LUT.input_register_LUT.get(21)[2],2)
         if kwh_value<100000:
             energy_total_output['Export Energy Total kWh']=kwh_value
 
-        temphex=str(temp_output[GiV_Reg_LUT.input_register_LUT.get(6)[0]+"(6)"])+str(temp_output[GiV_Reg_LUT.input_register_LUT.get(7)[0]+"(7)"])
+        temphex=str(input_registers[GiV_Reg_LUT.input_register_LUT.get(6)[0]+"(6)"])+str(input_registers[GiV_Reg_LUT.input_register_LUT.get(7)[0]+"(7)"])
         kwh_value=round(int(temphex,16) * GiV_Reg_LUT.input_register_LUT.get(21)[2],2)
         if kwh_value<100000:
             energy_total_output['Battery Throughput Total kWh']=kwh_value
 
-        temphex=str(temp_output[GiV_Reg_LUT.input_register_LUT.get(27)[0]+"(27)"])+str(temp_output[GiV_Reg_LUT.input_register_LUT.get(28)[0]+"(28)"])
+        temphex=str(input_registers[GiV_Reg_LUT.input_register_LUT.get(27)[0]+"(27)"])+str(input_registers[GiV_Reg_LUT.input_register_LUT.get(28)[0]+"(28)"])
         kwh_value=round(int(temphex,16) * GiV_Reg_LUT.input_register_LUT.get(27)[2],2)
         if kwh_value<100000:
             energy_total_output['AC Charge Energy Total kWh']=kwh_value
 
-        temphex=str(temp_output[GiV_Reg_LUT.input_register_LUT.get(32)[0]+"(32)"])+str(temp_output[GiV_Reg_LUT.input_register_LUT.get(33)[0]+"(33)"])
+        temphex=str(input_registers[GiV_Reg_LUT.input_register_LUT.get(32)[0]+"(32)"])+str(input_registers[GiV_Reg_LUT.input_register_LUT.get(33)[0]+"(33)"])
         kwh_value=round(int(temphex,16) * GiV_Reg_LUT.input_register_LUT.get(32)[2],2)
         if kwh_value<100000:
             energy_total_output['Import Energy Total kWh']=kwh_value
 
-        temphex=str(temp_output[GiV_Reg_LUT.input_register_LUT.get(45)[0]+"(45)"])+str(temp_output[GiV_Reg_LUT.input_register_LUT.get(46)[0]+"(46)"])
+        temphex=str(input_registers[GiV_Reg_LUT.input_register_LUT.get(45)[0]+"(45)"])+str(input_registers[GiV_Reg_LUT.input_register_LUT.get(46)[0]+"(46)"])
         inv_kwh_value=round(int(temphex,16) * GiV_Reg_LUT.input_register_LUT.get(45)[2],2)
         if kwh_value<100000:
             energy_total_output['Invertor Energy Total kWh']=inv_kwh_value
 
-        temphex=str(temp_output[GiV_Reg_LUT.input_register_LUT.get(11)[0]+"(11)"])+str(temp_output[GiV_Reg_LUT.input_register_LUT.get(12)[0]+"(12)"])
+        temphex=str(input_registers[GiV_Reg_LUT.input_register_LUT.get(11)[0]+"(11)"])+str(input_registers[GiV_Reg_LUT.input_register_LUT.get(12)[0]+"(12)"])
         pv_kwh_value=round(int(temphex,16) * GiV_Reg_LUT.input_register_LUT.get(11)[2],2)
         if kwh_value<100000:
             energy_total_output['PV Energy Total kWh']=pv_kwh_value
@@ -93,24 +85,29 @@ def getCombinedStats():
             energy_total_output['Load Energy Total kWh']=round((energy_total_output['Invertor Energy Total kWh']-energy_total_output['AC Charge Energy Total kWh'])-(energy_total_output['Export Energy Total kWh']-energy_total_output['Import Energy Total kWh']),3)
         else:
             energy_total_output['Load Energy Total kWh']=round((energy_total_output['Invertor Energy Total kWh']-energy_total_output['AC Charge Energy Total kWh'])-(energy_total_output['Export Energy Total kWh']-energy_total_output['Import Energy Total kWh'])+energy_total_output['PV Energy Total kWh'],3)
-        
+
+        energy_total_output['Battery Charge Energy Total kWh']=input_registers[GiV_Reg_LUT.input_register_LUT.get(181)[0]+"(181)"]
+        energy_total_output['Battery Discharge Energy Total kWh']=input_registers[GiV_Reg_LUT.input_register_LUT.get(180)[0]+"(180)"]
         energy_total_output['Self Consumption Energy Total kWh']=round(energy_total_output['PV Energy Total kWh']-energy_total_output['Export Energy Total kWh'],2)
 
 #Energy Today Figures
         GivTCP.debug("Getting Today Energy Data")
-        if round(temp_output[GiV_Reg_LUT.input_register_LUT.get(36)[0]+"(36)"]+temp_output[GiV_Reg_LUT.input_register_LUT.get(37)[0]+"(37)"],2)<100:
-            energy_today_output['Battery Throughput Today kWh']=round(temp_output[GiV_Reg_LUT.input_register_LUT.get(36)[0]+"(36)"]+temp_output[GiV_Reg_LUT.input_register_LUT.get(37)[0]+"(37)"],2)
-        if round(temp_output[GiV_Reg_LUT.input_register_LUT.get(17)[0]+"(17)"]+temp_output[GiV_Reg_LUT.input_register_LUT.get(19)[0]+"(19)"],2)<100:
-            energy_today_output['PV Energy Today kWh']=round(temp_output[GiV_Reg_LUT.input_register_LUT.get(17)[0]+"(17)"]+temp_output[GiV_Reg_LUT.input_register_LUT.get(19)[0]+"(19)"],2)
-        if temp_output[GiV_Reg_LUT.input_register_LUT.get(26)[0]+"(26)"]<100:
-            energy_today_output['Import Energy Today kWh']=round(temp_output[GiV_Reg_LUT.input_register_LUT.get(26)[0]+"(26)"],2)
-        if temp_output[GiV_Reg_LUT.input_register_LUT.get(25)[0]+"(25)"]<100:
-            energy_today_output['Export Energy Today kWh']=round(temp_output[GiV_Reg_LUT.input_register_LUT.get(25)[0]+"(25)"],2)
-        if temp_output[GiV_Reg_LUT.input_register_LUT.get(35)[0]+"(35)"]<100:
-            energy_today_output['AC Charge Energy Today kWh']=round(temp_output[GiV_Reg_LUT.input_register_LUT.get(35)[0]+"(35)"],2)
-        if temp_output[GiV_Reg_LUT.input_register_LUT.get(44)[0]+"(44)"]<100:
-            energy_today_output['Invertor Energy Today kWh']=round(temp_output[GiV_Reg_LUT.input_register_LUT.get(44)[0]+"(44)"],2)
-
+        if round(input_registers[GiV_Reg_LUT.input_register_LUT.get(36)[0]+"(36)"]+input_registers[GiV_Reg_LUT.input_register_LUT.get(37)[0]+"(37)"],2)<100:
+            energy_today_output['Battery Throughput Today kWh']=round(input_registers[GiV_Reg_LUT.input_register_LUT.get(36)[0]+"(36)"]+input_registers[GiV_Reg_LUT.input_register_LUT.get(37)[0]+"(37)"],2)
+        if round(input_registers[GiV_Reg_LUT.input_register_LUT.get(17)[0]+"(17)"]+input_registers[GiV_Reg_LUT.input_register_LUT.get(19)[0]+"(19)"],2)<100:
+            energy_today_output['PV Energy Today kWh']=round(input_registers[GiV_Reg_LUT.input_register_LUT.get(17)[0]+"(17)"]+input_registers[GiV_Reg_LUT.input_register_LUT.get(19)[0]+"(19)"],2)
+        if input_registers[GiV_Reg_LUT.input_register_LUT.get(26)[0]+"(26)"]<100:
+            energy_today_output['Import Energy Today kWh']=round(input_registers[GiV_Reg_LUT.input_register_LUT.get(26)[0]+"(26)"],2)
+        if input_registers[GiV_Reg_LUT.input_register_LUT.get(25)[0]+"(25)"]<100:
+            energy_today_output['Export Energy Today kWh']=round(input_registers[GiV_Reg_LUT.input_register_LUT.get(25)[0]+"(25)"],2)
+        if input_registers[GiV_Reg_LUT.input_register_LUT.get(35)[0]+"(35)"]<100:
+            energy_today_output['AC Charge Energy Today kWh']=round(input_registers[GiV_Reg_LUT.input_register_LUT.get(35)[0]+"(35)"],2)
+        if input_registers[GiV_Reg_LUT.input_register_LUT.get(44)[0]+"(44)"]<100:
+            energy_today_output['Invertor Energy Today kWh']=round(input_registers[GiV_Reg_LUT.input_register_LUT.get(44)[0]+"(44)"],2)
+        if input_registers[GiV_Reg_LUT.input_register_LUT.get(183)[0]+"(183)"]<100:	#Cap output at 100kWh in a single day
+            energy_today_output['Battery Charge Energy Today kWh']=input_registers[GiV_Reg_LUT.input_register_LUT.get(183)[0]+"(183)"]
+        if input_registers[GiV_Reg_LUT.input_register_LUT.get(182)[0]+"(182)"]<100:
+            energy_today_output['Battery Discharge Energy Today kWh']=input_registers[GiV_Reg_LUT.input_register_LUT.get(182)[0]+"(182)"]
 
         if GiV_Settings.Invertor_Type.lower()=="hybrid":
             energy_today_output['Load Energy Today kWh']=round((energy_today_output['Invertor Energy Today kWh']-energy_today_output['AC Charge Energy Today kWh'])-(energy_today_output['Export Energy Today kWh']-energy_today_output['Import Energy Today kWh']),3)
@@ -122,13 +119,13 @@ def getCombinedStats():
 
     #PV Power
         GivTCP.debug("Getting PV Power")
-        PV_power=temp_output[GiV_Reg_LUT.input_register_LUT.get(18)[0]+"(18)"]+temp_output[GiV_Reg_LUT.input_register_LUT.get(20)[0]+"(20)"]
+        PV_power=input_registers[GiV_Reg_LUT.input_register_LUT.get(18)[0]+"(18)"]+input_registers[GiV_Reg_LUT.input_register_LUT.get(20)[0]+"(20)"]
         if PV_power<15000:
             power_output['PV Power']= PV_power
 
     #Grid Power
         GivTCP.debug("Getting Grid Power")
-        grid_power= temp_output[GiV_Reg_LUT.input_register_LUT.get(30)[0]+"(30)"]
+        grid_power= input_registers[GiV_Reg_LUT.input_register_LUT.get(30)[0]+"(30)"]
         if grid_power<0:
             import_power=abs(grid_power)
             export_power=0
@@ -144,11 +141,11 @@ def getCombinedStats():
 
     #EPS Power
         GivTCP.debug("Getting EPS Power")
-        power_output['EPS Power']= temp_output[GiV_Reg_LUT.input_register_LUT.get(31)[0]+"(31)"]
+        power_output['EPS Power']= input_registers[GiV_Reg_LUT.input_register_LUT.get(31)[0]+"(31)"]
 
     #Invertor Power
         GivTCP.debug("Getting PInv Power")
-        Invertor_power=temp_output[GiV_Reg_LUT.input_register_LUT.get(24)[0]+"(24)"]
+        Invertor_power=input_registers[GiV_Reg_LUT.input_register_LUT.get(24)[0]+"(24)"]
         if -6000 <= Invertor_power <= 6000:
             power_output['Invertor Power']= Invertor_power
         if Invertor_power<0:
@@ -162,7 +159,7 @@ def getCombinedStats():
 
     #Load Power
         GivTCP.debug("Getting Load Power")
-        Load_power=temp_output[GiV_Reg_LUT.input_register_LUT.get(42)[0]+"(42)"]
+        Load_power=input_registers[GiV_Reg_LUT.input_register_LUT.get(42)[0]+"(42)"]
         if Load_power<15500:
             power_output['Load Power']=Load_power
 
@@ -171,7 +168,7 @@ def getCombinedStats():
         power_output['Self Consumption Power']=max(Load_power - import_power,0)
 
     #Battery Power
-        Battery_power=temp_output[GiV_Reg_LUT.input_register_LUT.get(52)[0]+"(52)"]
+        Battery_power=input_registers[GiV_Reg_LUT.input_register_LUT.get(52)[0]+"(52)"]
         if Battery_power>=0:
             discharge_power=abs(Battery_power)
             charge_power=0
@@ -184,8 +181,8 @@ def getCombinedStats():
 
     #SOC
         GivTCP.debug("Getting SOC")
-        if int(temp_output[GiV_Reg_LUT.input_register_LUT.get(59)[0]+"(59)"]) > 3:
-            power_output['SOC']=temp_output[GiV_Reg_LUT.input_register_LUT.get(59)[0]+"(59)"]
+        if int(input_registers[GiV_Reg_LUT.input_register_LUT.get(59)[0]+"(59)"]) > 3:
+            power_output['SOC']=input_registers[GiV_Reg_LUT.input_register_LUT.get(59)[0]+"(59)"]
 
 ############  Power Flow Stats    ############
 
@@ -226,19 +223,20 @@ def getCombinedStats():
             power_flow_output['Battery to Grid']=0
 
     #Publish to MQTT
+
+        multi_output["Energy/Total"]=energy_total_output
+        multi_output["Energy/Today"]=energy_today_output
+        multi_output["Power"]=power_output
+        multi_output["Power/Flows"]=power_flow_output
+        #print (multi_output)
         GivTCP.debug("Publish all to MQTT")
-        if len(energy_total_output)!=0:
-            GivTCP.publish_to_MQTT("Energy/Total",energy_total_output)
-        if len(energy_today_output)!=0:
-            GivTCP.publish_to_MQTT("Energy/Today",energy_today_output)
-        if len(power_output)!=0:
-            GivTCP.publish_to_MQTT("Power",power_output)
-        if len(power_flow_output)!=0:
-            GivTCP.publish_to_MQTT("Power/Flows",power_flow_output)
+        GivTCP.multi_MQTT_publish(multi_output)
+
 
 def getModesandTimes():
     controls={}
     controlmode={}
+    multi_output={}
     GivTCP.debug("Getting All Holding Registers")
     controls=GivTCP.read_register('0','03','60')
     controls.update(GivTCP.read_register('60','03','60'))
@@ -299,12 +297,13 @@ def getModesandTimes():
 
 
     if len(timeslots)==6:
-        GivTCP.debug("Publishing to Timeslot MQTT")
-        GivTCP.publish_to_MQTT("Timeslots",timeslots)
+        multi_output["Timeslots"]=timeslots
 
     if len(controlmode)==6:
-        GivTCP.debug("Publishing to Control MQTT")
-        GivTCP.publish_to_MQTT("Control",controlmode)
+        multi_output["Control"]=controlmode
+
+        GivTCP.debug("Publish Control and Timeslots to MQTT")
+        GivTCP.multi_MQTT_publish(multi_output)
 
 def extraRegCheck():
     extrareg={}
