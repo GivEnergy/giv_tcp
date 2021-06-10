@@ -92,8 +92,8 @@ def getCombinedStats():
             else:
                 energy_total_output['Load Energy Total kWh']=round((energy_total_output['Invertor Energy Total kWh']-energy_total_output['AC Charge Energy Total kWh'])-(energy_total_output['Export Energy Total kWh']-energy_total_output['Import Energy Total kWh'])+energy_total_output['PV Energy Total kWh'],3)
 
-            energy_total_output['Battery Charge Energy Total kWh']=input_registers[GiV_Reg_LUT.input_register_LUT.get(181)[0]+"(181)"]
-            energy_total_output['Battery Discharge Energy Total kWh']=input_registers[GiV_Reg_LUT.input_register_LUT.get(180)[0]+"(180)"]
+            if GivTCP.Invertor_Type!="Gen 2": energy_total_output['Battery Charge Energy Total kWh']=input_registers[GiV_Reg_LUT.input_register_LUT.get(181)[0]+"(181)"]
+            if GivTCP.Invertor_Type!="Gen 2": energy_total_output['Battery Discharge Energy Total kWh']=input_registers[GiV_Reg_LUT.input_register_LUT.get(180)[0]+"(180)"]
             energy_total_output['Self Consumption Energy Total kWh']=round(energy_total_output['PV Energy Total kWh']-energy_total_output['Export Energy Total kWh'],2)
 
     #Energy Today Figures
@@ -110,10 +110,12 @@ def getCombinedStats():
                 energy_today_output['AC Charge Energy Today kWh']=round(input_registers[GiV_Reg_LUT.input_register_LUT.get(35)[0]+"(35)"],2)
             if input_registers[GiV_Reg_LUT.input_register_LUT.get(44)[0]+"(44)"]<100:
                 energy_today_output['Invertor Energy Today kWh']=round(input_registers[GiV_Reg_LUT.input_register_LUT.get(44)[0]+"(44)"],2)
-            if input_registers[GiV_Reg_LUT.input_register_LUT.get(183)[0]+"(183)"]<100:	#Cap output at 100kWh in a single day
-                energy_today_output['Battery Charge Energy Today kWh']=input_registers[GiV_Reg_LUT.input_register_LUT.get(183)[0]+"(183)"]
-            if input_registers[GiV_Reg_LUT.input_register_LUT.get(182)[0]+"(182)"]<100:
-                energy_today_output['Battery Discharge Energy Today kWh']=input_registers[GiV_Reg_LUT.input_register_LUT.get(182)[0]+"(182)"]
+            if GivTCP.Invertor_Type!="Gen 2":
+                if input_registers[GiV_Reg_LUT.input_register_LUT.get(183)[0]+"(183)"]<100:	#Cap output at 100kWh in a single day
+                    energy_today_output['Battery Charge Energy Today kWh']=input_registers[GiV_Reg_LUT.input_register_LUT.get(183)[0]+"(183)"]
+            if GivTCP.Invertor_Type!="Gen 2":
+                if input_registers[GiV_Reg_LUT.input_register_LUT.get(182)[0]+"(182)"]<100:
+                    energy_today_output['Battery Discharge Energy Today kWh']=input_registers[GiV_Reg_LUT.input_register_LUT.get(182)[0]+"(182)"]
 
             if GivTCP.Invertor_Type.lower()=="hybrid":
                 energy_today_output['Load Energy Today kWh']=round((energy_today_output['Invertor Energy Today kWh']-energy_today_output['AC Charge Energy Today kWh'])-(energy_today_output['Export Energy Today kWh']-energy_today_output['Import Energy Today kWh']),3)
@@ -294,6 +296,7 @@ def getModesandTimes():
             controlmode['Battery Capacity']=round(((battery_capacity*51.2)/1000),2)
             controlmode['Charge Schedule State']=charge_enable
             controlmode['Discharge Schedule State']=discharge_enable
+            controlmode['Invertor Type']= GivTCP.Invertor_Type
 
     #Grab Timeslots
             timeslots={}
@@ -308,7 +311,7 @@ def getModesandTimes():
                 multi_output["raw/holding"]=controls
             if len(timeslots)==6:
                 multi_output["Timeslots"]=timeslots
-            if len(controlmode)==6:
+            if len(controlmode)==7:
                 multi_output["Control"]=controlmode
 
             GivTCP.debug("Publish Control and Timeslots to MQTT")
