@@ -186,9 +186,9 @@ class GivTCP:
       GivTCP.debug ("TCP Call no: "+str(n+1)+" to read "+str(stepInt)+" register(s) starting from reg: "+inputRegister)
       data=GivTCP.TCP_call(inputRegister,inputFunction,inputStep)
       n=n+1
-    GivTCP.debug ('Returned Data is: '+data.hex())
+    
     if len(data)== (stepInt*2)+44:	#do not return if data length does not match
-      
+      GivTCP.debug ('Returned Data is: '+data.hex())  
       #Get Invertor Type
       SN = data[28:38].decode()[0:2]
       if SN=="CE":
@@ -237,6 +237,8 @@ class GivTCP:
       value=bool(int(value,16))
     elif dataformat=="hex":
       value=value
+    elif dataformat=="ascii":
+      value=value.decode()
     else:
       value=round(int(value,16) * int(scaling),2)
     return value
