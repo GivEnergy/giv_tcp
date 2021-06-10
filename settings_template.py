@@ -9,4 +9,3 @@ class GiV_Settings:
   Debug_File_Location=""  #Optional - When used with Log_To_File this will write to specified location (Default is root directory)
   Print_Raw_Registers=""  #Optional - "True" prints all raw registers to the MQTT broker
   debug=""                #Optional - Enables verbose debug "True" or "False". Default location is stdout
-  Invertor_Type=""         #"Hybrid" or "AC Coupled"

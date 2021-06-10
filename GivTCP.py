@@ -13,7 +13,7 @@ from GivLUT import GiV_Reg_LUT
 from settings import GiV_Settings
 
 class GivTCP:
-
+  Invertor_Type=""
   invertorIP= GiV_Settings.invertorIP
   dataloggerSN= GiV_Settings.dataloggerSN
   MQTT_Address=GiV_Settings.MQTT_Address
@@ -188,6 +188,14 @@ class GivTCP:
       n=n+1
     GivTCP.debug ('Returned Data is: '+data.hex())
     if len(data)== (stepInt*2)+44:	#do not return if data length does not match
+      
+      #Get Invertor Type
+      SN = data[28:38].decode()[0:2]
+      if SN=="CE":
+        GivTCP.Invertor_Type="AC Coupled"
+      else:
+        GivTCP.Invertor_Type="Hybrid"
+
       rr = data.hex()[84:-4]
       if len(rr)==4 or int(rr,16)!=0:   #do not return if registers return all zeros unless its a single register
         GivTCP.debug ('Success reading '+inputStep+' register(s) ' +inputRegister + ' from ' + inputFunction + '--' + rr)
