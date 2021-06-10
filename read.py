@@ -28,14 +28,17 @@ def getCombinedStats():
     sum=0
     emptycount=0
     multi_output={}
-        
+    inputRegNum=60
     GivTCP.debug("Getting All Input Registers Data")
 
     #Grab Energy data
     input_registers=GivTCP.read_register('0','04','60') #Get ALL input Registers
 
-    GivTCP.debug("Getting Extra Input Registers Data")
-    input_registers.update(GivTCP.read_register('180','04','4'))    #Get v2.6 input Registers
+    #If not a Gen2 Invertor get extrareg
+    if GivTCP.Invertor_Type!="Gen 2":
+        GivTCP.debug("Getting Extra Input Registers Data")
+        input_registers.update(GivTCP.read_register('180','04','4'))    #Get v2.6 input Registers
+        inputRegNum=64
 
     if Print_Raw:
         multi_output['raw/input']=input_registers
@@ -47,9 +50,9 @@ def getCombinedStats():
                 emptycount+=1
         except:
             sum=sum
-    GivTCP.debug("Sum of reg= "+str(sum)+" And there are " + str(emptycount) +" empty registers, out of "+str(len(input_registers))+"registers collected")
+    GivTCP.debug("There are " + str(emptycount) +" empty registers and "+str(len(input_registers))+"/"+str(inputRegNum)+" registers collected")
 
-    if len(input_registers)==64 and emptycount<50:		#Only process and run if registers are all there and non-zero
+    if len(input_registers)==inputRegNum and emptycount<50:		#Only process and run if registers are all there and non-zero
 
         try:
     #Total Energy Figures

@@ -193,8 +193,11 @@ class GivTCP:
       SN = data[28:38].decode()[0:2]
       if SN=="CE":
         GivTCP.Invertor_Type="AC Coupled"
+      elif SN=="ED":
+        GivTCP.Invertor_Type="Gen 2"
       else:
         GivTCP.Invertor_Type="Hybrid"
+      GivTCP.debug("Invertor Type is: "+ GivTCP.Invertor_Type)
 
       rr = data.hex()[84:-4]
       if len(rr)==4 or int(rr,16)!=0:   #do not return if registers return all zeros unless its a single register
@@ -237,8 +240,6 @@ class GivTCP:
       value=bool(int(value,16))
     elif dataformat=="hex":
       value=value
-    elif dataformat=="ascii":
-      value=value.decode()
     else:
       value=round(int(value,16) * int(scaling),2)
     return value
