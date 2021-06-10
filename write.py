@@ -6,14 +6,8 @@ from GivLUT import GiV_Reg_LUT
 from datetime import datetime
 from settings import GiV_Settings
 
-Log_To_File=False
-if GiV_Settings.Log_To_File=="True":          #if in debug mode write to log file
-    Log_To_File=True
-    f = open(GiV_Settings.Debug_File_Location + 'read_debug.log','a')
-    sys.stdout = f
-
 now = datetime.now()
-print ("-----------------",now,"-----------------")
+GivTCP.debug ("-----------------",now,"-----------------")
 
 def pauseChargeSchedule():
     result=GivTCP.write_single_register(96,0)
@@ -112,7 +106,7 @@ def setBatteryMode(payload):
         dischargeresult=GivTCP.write_single_register(59,1)
         selfresult=GivTCP.write_single_register(27,0)
     else:
-        GivTCP.debug ("Invalid Mode: "+ mode)
+        GivTCP.debug ("Invalid Mode requested: "+ mode)
         return
     #Calculate success
     if shallowresult=="Success" and dischargeresult=="Success" and selfresult=="Success":

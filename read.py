@@ -8,14 +8,20 @@ from settings import GiV_Settings
 
 def getTimeslots():
     timeslots={}
+    jsonout={}
     GivTCP.debug("Getting TimeSlot data")
     #Grab Timeslots
     timeslots=GivTCP.read_register('44','03','02')
     timeslots.update(GivTCP.read_register('56','03','02'))
     timeslots.update(GivTCP.read_register('94','03','02'))
     if len(timeslots)==6:
-        GivTCP.debug("Publishing to Timeslot MQTT")
-        GivTCP.publish_to_MQTT("Timeslots",timeslots)
+        if GiV_Settings.output.lower()=="mqtt":
+            GivTCP.debug("Publishing to Timeslot MQTT")
+            GivTCP.publish_to_MQTT("Timeslots",timeslots)
+        elif GiV_Settings.output.lower()=="json":
+            GivTCP.debug("Pushing JSON output")
+            jsonout["Timeslots"]=timeslots
+            GivTCP.output_JSON(jsonout)
     else:
         GivTCP.debug("Error retrieving Timeslot registers")
 
@@ -237,8 +243,15 @@ def getCombinedStats():
             multi_output["Power"]=power_output
             multi_output["Power/Flows"]=power_flow_output
             #print (multi_output)
-            GivTCP.debug("Publish all to MQTT")
-            GivTCP.multi_MQTT_publish(multi_output)
+
+            if GiV_Settings.output.lower()=="mqtt":
+                GivTCP.debug("Publish all to MQTT")
+                GivTCP.multi_MQTT_publish(multi_output)
+            elif GiV_Settings.output.lower()=="json":
+                GivTCP.debug("Pushing JSON output")
+                GivTCP.output_JSON(multi_output)
+
+
         except:
             e = sys.exc_info()
             GivTCP.debug("Error processing input registers: " + str(e))
@@ -247,31 +260,31 @@ def getCombinedStats():
 
 
 def getModesandTimes():
-    controls={}
+    holding_registers={}
     controlmode={}
     multi_output={}
     GivTCP.debug("Getting All Holding Registers")
-    controls=GivTCP.read_register('0','03','60')
-    controls.update(GivTCP.read_register('60','03','60'))
+    holding_registers=GivTCP.read_register('0','03','60')
+    holding_registers.update(GivTCP.read_register('60','03','60'))
 
-    if len(controls)==120:
+    if len(holding_registers)==120:
         try:
             GivTCP.debug("All holding registers retrieved")
             GivTCP.debug("Getting mode control figures")
     # Get Control Mode registers
-            shallow_charge=controls[GiV_Reg_LUT.holding_register_LUT.get(110)[0]+"(110)"]
-            self_consumption=controls[GiV_Reg_LUT.holding_register_LUT.get(27)[0]+"(27)"]
-            charge_enable=controls[GiV_Reg_LUT.holding_register_LUT.get(96)[0]+"(96)"]
+            shallow_charge=holding_registers[GiV_Reg_LUT.holding_register_LUT.get(110)[0]+"(110)"]
+            self_consumption=holding_registers[GiV_Reg_LUT.holding_register_LUT.get(27)[0]+"(27)"]
+            charge_enable=holding_registers[GiV_Reg_LUT.holding_register_LUT.get(96)[0]+"(96)"]
             if charge_enable==True:
                 charge_enable="Active"
             else:
                 charge_enable="Paused"
 
     #Get Battery Stat registers
-            battery_reserve=controls[GiV_Reg_LUT.holding_register_LUT.get(114)[0]+"(114)"]
-            target_soc=controls[GiV_Reg_LUT.holding_register_LUT.get(116)[0]+"(116)"]
-            battery_capacity=controls[GiV_Reg_LUT.holding_register_LUT.get(55)[0]+"(55)"]
-            discharge_enable=controls[GiV_Reg_LUT.holding_register_LUT.get(59)[0]+"(59)"]
+            battery_reserve=holding_registers[GiV_Reg_LUT.holding_register_LUT.get(114)[0]+"(114)"]
+            target_soc=holding_registers[GiV_Reg_LUT.holding_register_LUT.get(116)[0]+"(116)"]
+            battery_capacity=holding_registers[GiV_Reg_LUT.holding_register_LUT.get(55)[0]+"(55)"]
+            discharge_enable=holding_registers[GiV_Reg_LUT.holding_register_LUT.get(59)[0]+"(59)"]
             if discharge_enable==True:
                 discharge_enable="Active"
             else:
@@ -301,21 +314,26 @@ def getModesandTimes():
     #Grab Timeslots
             timeslots={}
             GivTCP.debug("Getting TimeSlot data")
-            timeslots['Discharge start time slot 1']=controls[GiV_Reg_LUT.holding_register_LUT.get(56)[0]+"(56)"]
-            timeslots['Discharge end time slot 1']=controls[GiV_Reg_LUT.holding_register_LUT.get(57)[0]+"(57)"]
-            timeslots['Discharge start time slot 2']=controls[GiV_Reg_LUT.holding_register_LUT.get(44)[0]+"(44)"]
-            timeslots['Discharge end time slot 2']=controls[GiV_Reg_LUT.holding_register_LUT.get(45)[0]+"(45)"]
-            timeslots['Charge start time slot 1']=controls[GiV_Reg_LUT.holding_register_LUT.get(94)[0]+"(94)"]
-            timeslots['Charge end time slot 1']=controls[GiV_Reg_LUT.holding_register_LUT.get(95)[0]+"(95)"]
+            timeslots['Discharge start time slot 1']=holding_registers[GiV_Reg_LUT.holding_register_LUT.get(56)[0]+"(56)"]
+            timeslots['Discharge end time slot 1']=holding_registers[GiV_Reg_LUT.holding_register_LUT.get(57)[0]+"(57)"]
+            timeslots['Discharge start time slot 2']=holding_registers[GiV_Reg_LUT.holding_register_LUT.get(44)[0]+"(44)"]
+            timeslots['Discharge end time slot 2']=holding_registers[GiV_Reg_LUT.holding_register_LUT.get(45)[0]+"(45)"]
+            timeslots['Charge start time slot 1']=holding_registers[GiV_Reg_LUT.holding_register_LUT.get(94)[0]+"(94)"]
+            timeslots['Charge end time slot 1']=holding_registers[GiV_Reg_LUT.holding_register_LUT.get(95)[0]+"(95)"]
             if Print_Raw:
-                multi_output["raw/holding"]=controls
+                multi_output["raw/holding"]=holding_registers
             if len(timeslots)==6:
                 multi_output["Timeslots"]=timeslots
             if len(controlmode)==7:
                 multi_output["Control"]=controlmode
 
-            GivTCP.debug("Publish Control and Timeslots to MQTT")
-            GivTCP.multi_MQTT_publish(multi_output)
+            if GiV_Settings.output.lower()=="mqtt":
+                GivTCP.debug("Publish all to MQTT")
+                GivTCP.multi_MQTT_publish(multi_output)
+            elif GiV_Settings.output.lower()=="json":
+                GivTCP.debug("Pushing JSON output")
+                GivTCP.output_JSON(multi_output)
+
         except:
             e = sys.exc_info()
             GivTCP.debug("Error processing holding registers: " + str(e))
@@ -342,32 +360,27 @@ def extraRegCheck():
     else:
         GivTCP.debug("Error retrieving extra input register")
 
-def getEMSData():
-    EMSData={}
-    EMSData=GivTCP.read_register('60','04','02') #Get v2.6 input Registers
-    GivTCP.debug ("EMSData is:" + str(EMSData))
-    GivTCP.debug ("EMSData is:" + str(len(EMSData))+" registers long")
-    print ("EMSData: ",EMSData)
-
-
 def runAll():
     starttime = datetime.now()
     GivTCP.debug("----------------------------Starting----------------------------")
     GivTCP.debug("Running getCombinedStats")
+    if GiV_Settings.output.lower()=="json": print("[")
     getCombinedStats()
+    gCSTime = datetime.now()
+    duration=gCSTime-starttime
+    GivTCP.debug("----------------------------getCombinedStats complete taking "+str(duration)+" seconds------------")
     GivTCP.debug("Running getModesandTimes")
+    if GiV_Settings.output.lower()=="json": print(",")
     getModesandTimes()
+    if GiV_Settings.output.lower()=="json": print("]")
     now = datetime.now()
+    duration=now-gCSTime
+    GivTCP.debug("----------------------------getModesandTimes complete taking "+str(duration)+" seconds------------")
     duration=now-starttime
     GivTCP.debug("----------------------------Ended taking "+str(duration)+" seconds------------")
 
 
 if __name__ == '__main__':
-    Log_To_File=False
-    if GiV_Settings.Log_To_File.lower()=="true":		#if in debug mode write to log file
-        Log_To_File=True
-        f = open(GiV_Settings.Debug_File_Location + 'read_debug.log','a')
-        sys.stdout = f
 
     Print_Raw=False
     if GiV_Settings.Print_Raw_Registers.lower()=="true":

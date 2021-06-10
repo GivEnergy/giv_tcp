@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 import socket
+import json
 import sys
 import codecs
 from crccheck.crc import Crc16, CrcModbus
@@ -26,7 +27,9 @@ class GivTCP:
 
   def debug(input):
     if GiV_Settings.debug.lower() == "true":
-      print(str(datetime.now())," - ",input)
+      sourceFile = open(GiV_Settings.Debug_File_Location + 'read_debug.log','a')
+      print(str(datetime.now())+" - "+str(input), file = sourceFile)
+      sourceFile.close()
 
   def int_to_hex_string(value, bits):
       return "{0:0{1}X}".format(value & ((1<<bits) - 1), bits//4)
@@ -42,34 +45,39 @@ class GivTCP:
     else:
         GivTCP.debug("Bad connection Returned code= "+str(rc))
 
+  def output_JSON(array):
+    json_object = json.dumps(array, indent = 4)  
+    print(json_object)
+    GivTCP.debug("JSON output: "+ json_object)
+  
   def multi_MQTT_publish(array):   #Recieve multiple payloads with Topics and publish in a single MQTT connection
-      mqtt.Client.connected_flag=False        			#create flag in class
-      client=mqtt.Client("GivEnergy_"+GivTCP.dataloggerSN)
+    mqtt.Client.connected_flag=False        			#create flag in class
+    client=mqtt.Client("GivEnergy_"+GivTCP.dataloggerSN)
 
-      if GiV_Settings.MQTT_Topic=="":
-          GivTCP.debug ("No user defined MQTT Topic")
-          rootTopic='GivEnergy/'+GivTCP.dataloggerSN+'/'
-      else:
-          GivTCP.debug ("User defined MQTT Topic found"+ GiV_Settings.MQTT_Topic)
-          rootTopic=GiV_Settings.MQTT_Topic+'/'
+    if GiV_Settings.MQTT_Topic=="":
+        GivTCP.debug ("No user defined MQTT Topic")
+        rootTopic='GivEnergy/'+GivTCP.dataloggerSN+'/'
+    else:
+        GivTCP.debug ("User defined MQTT Topic found"+ GiV_Settings.MQTT_Topic)
+        rootTopic=GiV_Settings.MQTT_Topic+'/'
 
-      if GivTCP.MQTTCredentials:
-          client.username_pw_set(GivTCP.MQTT_Username,GivTCP.MQTT_Password)
-      client.on_connect=GivTCP.on_connect     			#bind call back function
-      client.loop_start()
-      GivTCP.debug ("Connecting to broker "+ GivTCP.MQTT_Address)
-      client.connect(GivTCP.MQTT_Address)
-      while not client.connected_flag:        			#wait in loop
-          GivTCP.debug ("In wait loop")
-          time.sleep(0.2)
-      for p_load in array:
-        payload=array[p_load]
-        for reg in payload:
-            GivTCP.debug('Publishing: '+rootTopic+p_load+'/'+str(reg)+" "+str(payload[reg]))
-            client.publish(rootTopic+p_load+'/'+reg,payload[reg])
-      client.loop_stop()                      			#Stop loop
-      client.disconnect()
-      return client
+    if GivTCP.MQTTCredentials:
+        client.username_pw_set(GivTCP.MQTT_Username,GivTCP.MQTT_Password)
+    client.on_connect=GivTCP.on_connect     			#bind call back function
+    client.loop_start()
+    GivTCP.debug ("Connecting to broker "+ GivTCP.MQTT_Address)
+    client.connect(GivTCP.MQTT_Address)
+    while not client.connected_flag:        			#wait in loop
+        GivTCP.debug ("In wait loop")
+        time.sleep(0.2)
+    for p_load in array:
+      payload=array[p_load]
+      for reg in payload:
+        GivTCP.debug('Publishing: '+rootTopic+p_load+'/'+str(reg)+" "+str(payload[reg]))
+        client.publish(rootTopic+p_load+'/'+reg,payload[reg])
+    client.loop_stop()                      			#Stop loop
+    client.disconnect()
+    return client
 
 
   def publish_to_MQTT(topic,payload):
@@ -240,6 +248,8 @@ class GivTCP:
       value=bool(int(value,16))
     elif dataformat=="hex":
       value=value
+    elif dataformat=="ascii":
+      value=bytearray.fromhex(value).decode()
     else:
       value=round(int(value,16) * int(scaling),2)
     return value
