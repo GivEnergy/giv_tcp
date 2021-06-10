@@ -49,7 +49,7 @@ def getCombinedStats():
             sum=sum
     GivTCP.debug("Sum of reg= "+str(sum)+" And there are " + str(emptycount) +" empty registers")
 
-    if len(input_registers)==64 and emptycount<30:		#Only process and run if registers are all there and non-zero
+    if len(input_registers)==64 and emptycount<50:		#Only process and run if registers are all there and non-zero
 #Total Energy Figures
         GivTCP.debug("Getting Total Energy Data")
         temphex=str(input_registers[GiV_Reg_LUT.input_register_LUT.get(21)[0]+"(21)"])+str(input_registers[GiV_Reg_LUT.input_register_LUT.get(22)[0]+"(22)"])
