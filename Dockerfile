@@ -1,16 +1,23 @@
-FROM python:3.8
-MAINTAINER Mark C
+# set base image (host OS)
+FROM python:3.9-slim-buster
 
-# Add Tini
-RUN apk add --update tini
-
-COPY . /app
+# set the working directory in the container
 WORKDIR /app
 
-RUN pip install -r requirement.txt
-RUN git clone https://github.com/britkat1980/giv_tcp.git
+# copy the dependencies file to the working directory
+COPY requirements.txt .
+
+
+# install dependencies
+RUN pip install -r requirements.txt
+
+# copy the content of the local src directory to the working directory
+COPY src/ .
+
+ENV SERIAL_NUMBER="XXXXXXXX"
+ENV INVERTOR_IP="192.168.1.1"
+ENV PRINT_RAW="False"
 
 EXPOSE 6345
 
-ENTRYPOINT ["/sbin/tini", "--"]
-CMD ["gunicorn", "-w 3", "-b :6345", "read:giv_api"]
+ENTRYPOINT ["sh", "/app/startup.sh"]
