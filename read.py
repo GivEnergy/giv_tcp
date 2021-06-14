@@ -1,11 +1,19 @@
 # -*- coding: utf-8 -*-
 import sys
-import configparser
 from GivTCP import GivTCP
 from GivLUT import GiV_Reg_LUT
 from datetime import datetime
 from settings import GiV_Settings
+from flask import Flask, json
 
+#set-up Flask details
+giv_api = Flask(__name__)
+
+@giv_api.route('/', methods=['GET'])
+def index():
+    return json.dumps(runAll())
+
+@giv_api.route('/getTimeslots', methods=['GET'])
 def getTimeslots():
     timeslots={}
     jsonout={}
@@ -24,7 +32,9 @@ def getTimeslots():
             GivTCP.output_JSON(jsonout)
     else:
         GivTCP.debug("Error retrieving Timeslot registers")
+    return(timeslots)
 
+@giv_api.route('/getCombinedStats', methods=['GET'])
 def getCombinedStats():
     energy_total_output={}
     energy_today_output={}
@@ -59,7 +69,6 @@ def getCombinedStats():
     GivTCP.debug("There are " + str(emptycount) +" empty registers and "+str(len(input_registers))+"/"+str(inputRegNum)+" registers collected")
 
     if len(input_registers)==inputRegNum and emptycount<50:		#Only process and run if registers are all there and non-zero
-
         try:
     #Total Energy Figures
             GivTCP.debug("Getting Total Energy Data")
@@ -251,14 +260,15 @@ def getCombinedStats():
                 GivTCP.debug("Pushing JSON output")
                 GivTCP.output_JSON(multi_output)
 
-
         except:
             e = sys.exc_info()
             GivTCP.debug("Error processing input registers: " + str(e))
     else:
         GivTCP.debug("Error retrieving Input registers, empty or missing")
 
+    return(multi_output)
 
+@giv_api.route('/getModesandTimes', methods=['GET'])
 def getModesandTimes():
     holding_registers={}
     controlmode={}
@@ -282,14 +292,13 @@ def getModesandTimes():
 
     #Get Battery Stat registers
             battery_reserve=holding_registers[GiV_Reg_LUT.holding_register_LUT.get(114)[0]+"(114)"]
+            if int(battery_reserve)<4: battery_reserve=4
             target_soc=holding_registers[GiV_Reg_LUT.holding_register_LUT.get(116)[0]+"(116)"]
-            battery_capacity=holding_registers[GiV_Reg_LUT.holding_register_LUT.get(55)[0]+"(55)"]
             discharge_enable=holding_registers[GiV_Reg_LUT.holding_register_LUT.get(59)[0]+"(59)"]
             if discharge_enable==True:
                 discharge_enable="Active"
             else:
                 discharge_enable="Paused"
-
             GivTCP.debug("Shallow Charge= "+str(shallow_charge)+" Self Consumption= "+str(self_consumption)+" Discharge Enable= "+str(discharge_enable))
 
     #Calculate Mode
@@ -306,7 +315,6 @@ def getModesandTimes():
             controlmode['Mode']=mode
             controlmode['Battery Power Reserve']=battery_reserve
             controlmode['Target SOC']=target_soc
-            controlmode['Battery Capacity']=round(((battery_capacity*51.2)/1000),2)
             controlmode['Charge Schedule State']=charge_enable
             controlmode['Discharge Schedule State']=discharge_enable
             controlmode['Invertor Type']= GivTCP.Invertor_Type
@@ -320,12 +328,31 @@ def getModesandTimes():
             timeslots['Discharge end time slot 2']=holding_registers[GiV_Reg_LUT.holding_register_LUT.get(45)[0]+"(45)"]
             timeslots['Charge start time slot 1']=holding_registers[GiV_Reg_LUT.holding_register_LUT.get(94)[0]+"(94)"]
             timeslots['Charge end time slot 1']=holding_registers[GiV_Reg_LUT.holding_register_LUT.get(95)[0]+"(95)"]
+
+    #Get Invertor Details
+            invertor={}
+            GivTCP.debug("Getting Invertor Details")
+            if holding_registers[GiV_Reg_LUT.holding_register_LUT.get(54)[0]+"(54)"]==1: batterytype="Lithium" 
+            if holding_registers[GiV_Reg_LUT.holding_register_LUT.get(54)[0]+"(54)"]==0: batterytype="Lead Acid" 
+            invertor['Battery Type']=batterytype
+            invertor['Battery Capacity kWh']=round(((holding_registers[GiV_Reg_LUT.holding_register_LUT.get(55)[0]+"(55)"]*51.2)/1000),2)
+            invertor['Invertor Serial Number']=holding_registers[GiV_Reg_LUT.holding_register_LUT.get(13)[0]+"(13)"]+holding_registers[GiV_Reg_LUT.holding_register_LUT.get(14)[0]+"(14)"]+holding_registers[GiV_Reg_LUT.holding_register_LUT.get(15)[0]+"(15)"]+holding_registers[GiV_Reg_LUT.holding_register_LUT.get(16)[0]+"(16)"]+holding_registers[GiV_Reg_LUT.holding_register_LUT.get(17)[0]+"(17)"]
+            invertor['Battery Serial Number']=holding_registers[GiV_Reg_LUT.holding_register_LUT.get(8)[0]+"(8)"]+holding_registers[GiV_Reg_LUT.holding_register_LUT.get(9)[0]+"(9)"]+holding_registers[GiV_Reg_LUT.holding_register_LUT.get(10)[0]+"(10)"]+holding_registers[GiV_Reg_LUT.holding_register_LUT.get(11)[0]+"(11)"]+holding_registers[GiV_Reg_LUT.holding_register_LUT.get(12)[0]+"(12)"]
+            invertor['Modbus Version']=holding_registers[GiV_Reg_LUT.holding_register_LUT.get(34)[0]+"(34)"]
+            if holding_registers[GiV_Reg_LUT.holding_register_LUT.get(47)[0]+"(47)"]==1: metertype="EM115" 
+            if holding_registers[GiV_Reg_LUT.holding_register_LUT.get(47)[0]+"(47)"]==0: metertype="EM418" 
+            invertor['Meter Type']=metertype
+
+    #Create multiouput and publish
             if Print_Raw:
                 multi_output["raw/holding"]=holding_registers
             if len(timeslots)==6:
                 multi_output["Timeslots"]=timeslots
             if len(controlmode)==7:
                 multi_output["Control"]=controlmode
+            if len(invertor)==6:
+                multi_output["Invertor Details"]=invertor
+                
 
             if GiV_Settings.output.lower()=="mqtt":
                 GivTCP.debug("Publish all to MQTT")
@@ -339,9 +366,7 @@ def getModesandTimes():
             GivTCP.debug("Error processing holding registers: " + str(e))
     else:
         GivTCP.debug("Error retrieving holding registers: missing or empty registers")
-
-
-    
+    return (multi_output)
 
 def extraRegCheck():
     extrareg={}
@@ -360,24 +385,31 @@ def extraRegCheck():
     else:
         GivTCP.debug("Error retrieving extra input register")
 
+@giv_api.route('/runAll', methods=['GET'])
 def runAll():
+    multi_output={}
     starttime = datetime.now()
     GivTCP.debug("----------------------------Starting----------------------------")
     GivTCP.debug("Running getCombinedStats")
     if GiV_Settings.output.lower()=="json": print("[")
-    getCombinedStats()
+    multi_output=getCombinedStats()
     gCSTime = datetime.now()
     duration=gCSTime-starttime
     GivTCP.debug("----------------------------getCombinedStats complete taking "+str(duration)+" seconds------------")
     GivTCP.debug("Running getModesandTimes")
     if GiV_Settings.output.lower()=="json": print(",")
-    getModesandTimes()
+    multi_output.update(getModesandTimes())
     if GiV_Settings.output.lower()=="json": print("]")
     now = datetime.now()
     duration=now-gCSTime
     GivTCP.debug("----------------------------getModesandTimes complete taking "+str(duration)+" seconds------------")
     duration=now-starttime
     GivTCP.debug("----------------------------Ended taking "+str(duration)+" seconds------------")
+    return (multi_output)
+
+def runserver():
+    giv_api.run(host='0.0.0.0', port=6384)
+    # api.run()
 
 
 if __name__ == '__main__':

@@ -6,8 +6,20 @@ from GivLUT import GiV_Reg_LUT
 from datetime import datetime
 from settings import GiV_Settings
 
-now = datetime.now()
-GivTCP.debug ("-----------------",now,"-----------------")
+def writeReg(payload):
+    params=json.loads(payload)
+    register=params['register']
+    value=params['value']
+    result=GivTCP.write_single_register(register,value)
+    GivTCP.debug ("Writing Register "+ str(register) + " was a: "+result)
+    
+def disableACCharge():
+    result=GivTCP.write_single_register(20,0)
+    GivTCP.debug ("Pausing Charge Schedule was a: "+result)
+
+def enableACCharge():
+    result=GivTCP.write_single_register(20,1)
+    GivTCP.debug ("Resuming Charge Schedule was a: "+ result)
 
 def pauseChargeSchedule():
     result=GivTCP.write_single_register(96,0)
@@ -37,6 +49,8 @@ def setChargeTarget(payload):
 def setBatteryReserve(payload):
     params=json.loads(payload)
     target=params['dischargeToPercent']
+    #Only allow minimum of 2%
+    if int(target)<4: target="4"
     targetresult=GivTCP.write_single_register(114,target)
     if targetresult=="Success":
         GivTCP.debug ("Battery Reserve successfully set")
@@ -51,6 +65,20 @@ def setChargeSlot1(payload):
     target=params['chargeToPercent']
     startresult=GivTCP.write_single_register(94,start)
     endresult=GivTCP.write_single_register(95,end)
+    targetresult=GivTCP.write_single_register(116,target)
+    enableresult=GivTCP.write_single_register(96,1)     #enable charge flag automatically
+    if startresult=="Success" and endresult=="Success" and targetresult=="Success" and enableresult=="Success":
+        GivTCP.debug ("Charge Time successfully set")
+    else:
+        GivTCP.debug ("Error setting Charge time")
+
+def setChargeSlot2(payload):
+    params=json.loads(payload)
+    start=params['start']
+    end=params['finish']
+    target=params['chargeToPercent']
+    startresult=GivTCP.write_single_register(31,start)
+    endresult=GivTCP.write_single_register(32,end)
     targetresult=GivTCP.write_single_register(116,target)
     enableresult=GivTCP.write_single_register(96,1)     #enable charge flag automatically
     if startresult=="Success" and endresult=="Success" and targetresult=="Success" and enableresult=="Success":
