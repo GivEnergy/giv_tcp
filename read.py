@@ -6,6 +6,10 @@ from datetime import datetime
 from settings import GiV_Settings
 from flask import Flask, json
 
+Print_Raw=False
+if GiV_Settings.Print_Raw_Registers.lower()=="true":
+    Print_Raw=True
+    
 #set-up Flask details
 giv_api = Flask(__name__)
 
@@ -413,9 +417,5 @@ def runserver():
 
 
 if __name__ == '__main__':
-
-    Print_Raw=False
-    if GiV_Settings.Print_Raw_Registers.lower()=="true":
-        Print_Raw=True
 
     globals()[sys.argv[1]]()
