@@ -4,54 +4,58 @@ import json
 from GivTCP import GivTCP
 from GivLUT import GiV_Reg_LUT
 from datetime import datetime
+from settings import GiV_Settings
 
-# datetime object containing current date and time
-debugmode=False
-now = datetime.now()
-if len(sys.argv)==3:
-    if sys.argv[2]=="debug":            #if in debug mode write to log file
-        debugmode=True
-        f = open('write_debug.log','a')
-        sys.stdout = f
-print ("-----------------",now,"-----------------")
-
-def setChargeEnable(payload):
+def writeReg(payload):
     params=json.loads(payload)
-    control=params['enable']
-    if control=="False":
-       val=0
-    else:
-       val=1
-    result=GivTCP.write_single_register(96,val)
-    print ("Setting Charge Enable to ",control," was: ",result)
+    register=params['register']
+    value=params['value']
+    result=GivTCP.write_single_register(register,value)
+    GivTCP.debug ("Writing Register "+ str(register) + " was a: "+result)
+    
+def disableACCharge():
+    result=GivTCP.write_single_register(20,0)
+    GivTCP.debug ("Pausing Charge Schedule was a: "+result)
 
-def setDischargeEnable(payload):
-    params=json.loads(payload)
-    control=params['enable']
-    if control=="False":
-       val=0
-    else:
-       val=1
-    result=GivTCP.write_single_register(59,val)
-    print ("Setting Discharge Enable was: ",result)
+def enableACCharge():
+    result=GivTCP.write_single_register(20,1)
+    GivTCP.debug ("Resuming Charge Schedule was a: "+ result)
+
+def pauseChargeSchedule():
+    result=GivTCP.write_single_register(96,0)
+    GivTCP.debug ("Pausing Charge Schedule was a: "+result)
+
+def resumeChargeSchedule():
+    result=GivTCP.write_single_register(96,1)
+    GivTCP.debug ("Resuming Charge Schedule was a: "+ result)
+
+def pauseDischargeSchedule():
+    result=GivTCP.write_single_register(59,0)
+    GivTCP.debug ("Pausing Discharge Schedule was a: " + result)
+
+def resumeDischargeSchedule():
+    result=GivTCP.write_single_register(59,1)
+    GivTCP.debug ("Resuming Discharge Schedule was a: " + result)
 
 def setChargeTarget(payload):
     params=json.loads(payload)
     target=params['chargeToPercent']
     targetresult=GivTCP.write_single_register(116,target)
     if targetresult=="Success":
-        print ("Charge Target successfully set")
+        GivTCP.debug ("Charge Target successfully set")
     else:
-        print ("Error setting Charge Target")
+        GivTCP.debug ("Error setting Charge Target")
 
 def setBatteryReserve(payload):
     params=json.loads(payload)
     target=params['dischargeToPercent']
+    #Only allow minimum of 2%
+    if int(target)<4: target="4"
     targetresult=GivTCP.write_single_register(114,target)
     if targetresult=="Success":
-        print ("Battery Reserve successfully set")
+        GivTCP.debug ("Battery Reserve successfully set")
     else:
-        print ("Error setting Battery Reserve")
+        GivTCP.debug ("Error setting Battery Reserve")
 
 
 def setChargeSlot1(payload):
@@ -64,9 +68,23 @@ def setChargeSlot1(payload):
     targetresult=GivTCP.write_single_register(116,target)
     enableresult=GivTCP.write_single_register(96,1)     #enable charge flag automatically
     if startresult=="Success" and endresult=="Success" and targetresult=="Success" and enableresult=="Success":
-        print ("Charge Time successfully set")
+        GivTCP.debug ("Charge Time successfully set")
     else:
-        print ("Error setting Charge time")
+        GivTCP.debug ("Error setting Charge time")
+
+def setChargeSlot2(payload):
+    params=json.loads(payload)
+    start=params['start']
+    end=params['finish']
+    target=params['chargeToPercent']
+    startresult=GivTCP.write_single_register(31,start)
+    endresult=GivTCP.write_single_register(32,end)
+    targetresult=GivTCP.write_single_register(116,target)
+    enableresult=GivTCP.write_single_register(96,1)     #enable charge flag automatically
+    if startresult=="Success" and endresult=="Success" and targetresult=="Success" and enableresult=="Success":
+        GivTCP.debug ("Charge Time successfully set")
+    else:
+        GivTCP.debug ("Error setting Charge time")
 
 def setDischargeSlot1(payload):
     params=json.loads(payload)
@@ -77,9 +95,9 @@ def setDischargeSlot1(payload):
     endresult=GivTCP.write_single_register(57,end)
     targetresult=GivTCP.write_single_register(114,target)
     if startresult=="Success" and endresult=="Success" and targetresult=="Success":
-        print ("Discharge Timeslot 1 successfully set")
+        GivTCP.debug ("Discharge Timeslot 1 successfully set")
     else:
-        print ("Error setting Discharge Timeslot 1")
+        GivTCP.debug ("Error setting Discharge Timeslot 1")
 
 def setDischargeSlot2(payload):
     params=json.loads(payload)
@@ -88,15 +106,15 @@ def setDischargeSlot2(payload):
     target=params['dischargeToPercent']
     startresult=GivTCP.write_single_register(44,start)
     endresult=GivTCP.write_single_register(45,end)
-    targetresult=GivTCP.write_single_register(114,end)
+    targetresult=GivTCP.write_single_register(114,target)
     if startresult=="Success" and endresult=="Success" and targetresult=="Success":
-        print ("Disharge Timeslot 2 successfully set")
+        GivTCP.debug ("Disharge Timeslot 2 successfully set")
     else:
-        print ("Error setting Discharge Timeslot 2")
+        GivTCP.debug ("Error setting Discharge Timeslot 2")
 
 def setBatteryMode(payload):
     params=json.loads(payload)
-    mode=params['mode']
+    mode=int(params['mode'])
     if mode==1:
         shallowresult=GivTCP.write_single_register(110,4)
         dischargeresult=GivTCP.write_single_register(59,0)
@@ -116,14 +134,17 @@ def setBatteryMode(payload):
         dischargeresult=GivTCP.write_single_register(59,1)
         selfresult=GivTCP.write_single_register(27,0)
     else:
-        print ("Invalid Mode: ",mode)
+        GivTCP.debug ("Invalid Mode requested: "+ mode)
         return
     #Calculate success
     if shallowresult=="Success" and dischargeresult=="Success" and selfresult=="Success":
-        print ("Control Mode successfully set")
+        GivTCP.debug ("Control Mode successfully set")
     else:
-        print ("Error setting Control Mode")
+        GivTCP.debug ("Error setting Control Mode")
 
 
 if __name__ == '__main__':
-    globals()[sys.argv[1]](sys.argv[2])
+    if len(sys.argv)==2:
+        globals()[sys.argv[1]]()
+    elif len(sys.argv)==3:
+        globals()[sys.argv[1]](sys.argv[2])

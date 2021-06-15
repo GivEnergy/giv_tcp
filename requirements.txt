@@ -1,0 +1,4 @@
+Flask
+gunicorn
+paho-mqtt
+crccheck

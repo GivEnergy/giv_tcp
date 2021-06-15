@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 import socket
+import json
 import sys
 import codecs
 from crccheck.crc import Crc16, CrcModbus
@@ -8,24 +9,27 @@ import re
 import paho.mqtt.client as mqtt
 import time
 import json
+from datetime import datetime
 from GivLUT import GiV_Reg_LUT
 from settings import GiV_Settings
 
-
-# import schedule
-
-
 class GivTCP:
-
+  Invertor_Type=""
   invertorIP= GiV_Settings.invertorIP
   dataloggerSN= GiV_Settings.dataloggerSN
   MQTT_Address=GiV_Settings.MQTT_Address
   if GiV_Settings.MQTT_Username=='':
-     MQTTCredentials=False
+      MQTTCredentials=False
   else:
-     MQTTCredentials=True
-     MQTT_Username=GiV_Settings.MQTT_Username
-     MQTT_Password=GiV_Settings.MQTT_Password
+      MQTTCredentials=True
+      MQTT_Username=GiV_Settings.MQTT_Username
+      MQTT_Password=GiV_Settings.MQTT_Password
+
+  def debug(input):
+    if GiV_Settings.debug.lower() == "true":
+      sourceFile = open(GiV_Settings.Debug_File_Location + 'read_debug.log','a')
+      print(str(datetime.now())+" - "+str(input), file = sourceFile)
+      sourceFile.close()
 
   def int_to_hex_string(value, bits):
       return "{0:0{1}X}".format(value & ((1<<bits) - 1), bits//4)
@@ -36,28 +40,70 @@ class GivTCP:
   def on_connect(client, userdata, flags, rc):
     if rc==0:
         client.connected_flag=True #set flag
-        print("connected OK Returned code=",rc)
+        GivTCP.debug("connected OK Returned code="+str(rc))
         #client.subscribe(topic)
     else:
-        print("Bad connection Returned code= ",rc)
+        GivTCP.debug("Bad connection Returned code= "+str(rc))
+
+  def output_JSON(array):
+    json_object = json.dumps(array, indent = 4)  
+    print(json_object)
+    GivTCP.debug("JSON output: "+ json_object)
+  
+  def multi_MQTT_publish(array):   #Recieve multiple payloads with Topics and publish in a single MQTT connection
+    mqtt.Client.connected_flag=False        			#create flag in class
+    client=mqtt.Client("GivEnergy_"+GivTCP.dataloggerSN)
+
+    if GiV_Settings.MQTT_Topic=="":
+        GivTCP.debug ("No user defined MQTT Topic")
+        rootTopic='GivEnergy/'+GivTCP.dataloggerSN+'/'
+    else:
+        GivTCP.debug ("User defined MQTT Topic found"+ GiV_Settings.MQTT_Topic)
+        rootTopic=GiV_Settings.MQTT_Topic+'/'
+
+    if GivTCP.MQTTCredentials:
+        client.username_pw_set(GivTCP.MQTT_Username,GivTCP.MQTT_Password)
+    client.on_connect=GivTCP.on_connect     			#bind call back function
+    client.loop_start()
+    GivTCP.debug ("Connecting to broker "+ GivTCP.MQTT_Address)
+    client.connect(GivTCP.MQTT_Address)
+    while not client.connected_flag:        			#wait in loop
+        GivTCP.debug ("In wait loop")
+        time.sleep(0.2)
+    for p_load in array:
+      payload=array[p_load]
+      for reg in payload:
+        GivTCP.debug('Publishing: '+rootTopic+p_load+'/'+str(reg)+" "+str(payload[reg]))
+        client.publish(rootTopic+p_load+'/'+reg,payload[reg])
+    client.loop_stop()                      			#Stop loop
+    client.disconnect()
+    return client
+
 
   def publish_to_MQTT(topic,payload):
-      mqtt.Client.connected_flag=False        #create flag in class
+      mqtt.Client.connected_flag=False        			#create flag in class
       client=mqtt.Client("GivEnergy_"+GivTCP.dataloggerSN)
+
+      if GiV_Settings.MQTT_Topic=="":
+          GivTCP.debug ("No user defined MQTT Topic")
+          rootTopic='GivEnergy/'+GivTCP.dataloggerSN+'/'
+      else:
+          GivTCP.debug ("User defined MQTT Topic found"+ GiV_Settings.MQTT_Topic)
+          rootTopic=GiV_Settings.MQTT_Topic+'/'
+
       if GivTCP.MQTTCredentials:
           client.username_pw_set(GivTCP.MQTT_Username,GivTCP.MQTT_Password)
-      client.on_connect=GivTCP.on_connect     #bind call back function
+      client.on_connect=GivTCP.on_connect     			#bind call back function
       client.loop_start()
-      print ("Connecting to broker ",GivTCP.MQTT_Address)
+      GivTCP.debug ("Connecting to broker "+ GivTCP.MQTT_Address)
       client.connect(GivTCP.MQTT_Address)
-      while not client.connected_flag:        #wait in loop
-        print ("In wait loop")
-        time.sleep(0.5)
-#      print ("in Main Loop")
+      while not client.connected_flag:        			#wait in loop
+          GivTCP.debug ("In wait loop")
+          time.sleep(0.2)
       for reg in payload:
-          print('Publishing: GivEnergy/'+GivTCP.dataloggerSN+'/'+topic+'/'+reg,payload[reg])
-          client.publish('GivEnergy/'+GivTCP.dataloggerSN+'/'+topic+'/'+reg,payload[reg])
-      client.loop_stop()                      #Stop loop 
+          GivTCP.debug('Publishing: '+rootTopic+topic+'/'+str(reg)+" "+str(payload[reg]))
+          client.publish(rootTopic+topic+'/'+reg,payload[reg])
+      client.loop_stop()                      			#Stop loop
       client.disconnect()
       return client
 
@@ -102,7 +148,7 @@ class GivTCP:
     crc = CrcModbus().process(bytearray.fromhex(inputFunctionHex + inputRegisterHex + inputStepHex)).finalhex()
     dataSize = GivTCP.int_to_hex_string(int(len( DEVICE_ADDRESS + DATALOGGER_FUNCTION_CODE + serial_number + FILLER + inputFunctionHex + inputRegisterHex + inputStepHex +crc)/2),16)
     command = HEAD + PROTOCOL_IDENTIFIER + dataSize + DEVICE_ADDRESS + DATALOGGER_FUNCTION_CODE + serial_number + FILLER + inputFunctionHex + inputRegisterHex + inputStepHex + crc
-    print ("Sending command: ",command)
+    GivTCP.debug("Sending command: "+command)
     sock.send(bytearray.fromhex(command))
     sock.settimeout(1.5)
     data=''
@@ -113,7 +159,7 @@ class GivTCP:
             data = sock.recv(socketMax)
             length = data[5]
     except Exception as e:
-        print ("Error: " + str(e))
+        GivTCP.debug ("Error: " + str(e))
         ### Do something here if socket timesout  ###
     sock.close()
     return(data)
@@ -123,7 +169,7 @@ class GivTCP:
     result="Failure"
     n=0
     while response=='' and n<3:    #Try to get register data upto 3 times before giving up
-      print ("TCP Call no: ",str(n+1)," to write register",register)
+      GivTCP.debug ("TCP Call no: "+str(n+1)+" to write register "+str(register))
       response=GivTCP.TCP_call(register,"06",value)
       n=n+1
     if response!='':
@@ -145,51 +191,65 @@ class GivTCP:
     stepInt=int(inputStep)
     n=0
     while data=='' and n<3 and len(data)!= (stepInt*2)+44:    #Try to get register data upto 3 times before giving up
-      print ("TCP Call no:",str(n+1),"to read register",inputRegister)
+      GivTCP.debug ("TCP Call no: "+str(n+1)+" to read "+str(stepInt)+" register(s) starting from reg: "+inputRegister)
       data=GivTCP.TCP_call(inputRegister,inputFunction,inputStep)
       n=n+1
+    
     if len(data)== (stepInt*2)+44:	#do not return if data length does not match
+      GivTCP.debug ('Returned Data is: '+data.hex())  
+      #Get Invertor Type
+      SN = data[28:38].decode()[0:2]
+      if SN=="CE":
+        GivTCP.Invertor_Type="AC Coupled"
+      elif SN=="ED":
+        GivTCP.Invertor_Type="Gen 2"
+      else:
+        GivTCP.Invertor_Type="Hybrid"
+      GivTCP.debug("Invertor Type is: "+ GivTCP.Invertor_Type)
+
       rr = data.hex()[84:-4]
       if len(rr)==4 or int(rr,16)!=0:   #do not return if registers return all zeros unless its a single register
-        print ('Success reading '+inputStep+' register(s) ' +inputRegister + ' from ' + inputFunction + '--' + rr)
+        GivTCP.debug ('Success reading '+inputStep+' register(s) ' +inputRegister + ' from ' + inputFunction + '--' + rr)
         registers=re.findall('....',rr)
         j=0
         for reg in registers:
             if inputFunction=='04':
-                val=GivTCP.registerValueConvert(registerInt+j, reg, "input")
+                val=GivTCP.registerValueConvert(registerInt+j, reg, "04")
                 key=GiV_Reg_LUT.input_register_LUT.get(registerInt+j)[0] + "(" + str(registerInt+j) + ")"
                 final_output[key]=val
             elif inputFunction=='03':
-                val=GivTCP.registerValueConvert(registerInt+j, reg, "holding")
+                val=GivTCP.registerValueConvert(registerInt+j, reg, "03")
                 key=GiV_Reg_LUT.holding_register_LUT.get(registerInt+j)[0] + "(" + str(registerInt+j) + ")"
                 final_output[key]=val
             j=j+1
             if j>=stepInt: break  #Handle cases where invertor send erroneous additional data
     else:
-      print('Error reading '+inputStep+' register(s) ' +inputRegister + ' from ' + inputFunction,file=sys.stderr)
+      GivTCP.debug('Error reading '+inputStep+' register(s) ' +inputRegister + ' from ' + inputFunction)
 
     return final_output
 
 #Function to convert the raw rgister value to real output using LUT attributes
   def registerValueConvert(register,value,regType):
-    if regType=="holding":
+    if regType=="03":
         dataformat=GiV_Reg_LUT.holding_register_LUT.get(register)[1]
         scaling=GiV_Reg_LUT.holding_register_LUT.get(register)[2]
-    if regType=="input":
+    if regType=="04":
         dataformat=GiV_Reg_LUT.input_register_LUT.get(register)[1]
         scaling=GiV_Reg_LUT.input_register_LUT.get(register)[2]
     #format value
     if dataformat=="time":
-       value=int(value,16)
-       value=str(value).rjust(4,"0")
+      value=int(value,16)
+      value=str(value).rjust(4,"0")
     elif dataformat=="signed":
-       value=round(GivTCP.hex_to_signed(value) * scaling,2)
+      value=round(GivTCP.hex_to_signed(value) * scaling,2)
     elif dataformat=="unsigned":
-       value=round(int(value,16) * scaling,2)
+      value=round(int(value,16) * scaling,2)
     elif dataformat=="boolean":
-       value=bool(int(value,16))
+      value=bool(int(value,16))
     elif dataformat=="hex":
-       value=value
+      value=value
+    elif dataformat=="ascii":
+      value=bytearray.fromhex(value).decode()
     else:
-       value=round(int(value,16) * int(scaling),2)
+      value=round(int(value,16) * int(scaling),2)
     return value
