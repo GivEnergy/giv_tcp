@@ -6,7 +6,7 @@ from GivLUT import GiV_Reg_LUT
 from datetime import datetime
 from settings import GiV_Settings
 from read import giv_api
-
+from flask import request
 
 def writeReg(payload):
     params=json.loads(payload)
@@ -15,7 +15,7 @@ def writeReg(payload):
     result=GivTCP.write_single_register(register,value)
     GivTCP.debug ("Writing Register "+ str(register) + " was a: "+result)
 
-@giv_api.route('/disableACCharge', methods=['GET'])
+@giv_api.route('/disableACCharge', methods=['POST'])
 def disableACCharge():
     temp={}
     result=GivTCP.write_single_register(20,0)
@@ -23,7 +23,7 @@ def disableACCharge():
     temp['result']="Pausing Charge Schedule was a: "+result
     return json.dumps(temp)
 
-@giv_api.route('/enableACCharge', methods=['GET'])
+@giv_api.route('/enableACCharge', methods=['POST'])
 def enableACCharge():
     temp={}
     result=GivTCP.write_single_register(20,1)
@@ -31,7 +31,7 @@ def enableACCharge():
     temp['result']="Resuming Charge Schedule was a: "+ result
     return json.dumps(temp)
 
-@giv_api.route('/pauseChargeSchedule', methods=['GET'])
+@giv_api.route('/pauseChargeSchedule', methods=['POST'])
 def pauseChargeSchedule():
     temp={}
     result=GivTCP.write_single_register(96,0)
@@ -39,7 +39,7 @@ def pauseChargeSchedule():
     temp['result']="Pausing Charge Schedule was a: "+result
     return json.dumps(temp)
 
-@giv_api.route('/resumeChargeSchedule', methods=['GET'])
+@giv_api.route('/resumeChargeSchedule', methods=['POST'])
 def resumeChargeSchedule():
     temp={}
     result=GivTCP.write_single_register(96,1)
@@ -47,7 +47,7 @@ def resumeChargeSchedule():
     temp['result']="Resuming Charge Schedule was a: "+ result
     return json.dumps(temp)
 
-@giv_api.route('/pauseDischargeSchedule', methods=['GET'])
+@giv_api.route('/pauseDischargeSchedule', methods=['POST'])
 def pauseDischargeSchedule():
     temp={}
     result=GivTCP.write_single_register(59,0)
@@ -55,7 +55,7 @@ def pauseDischargeSchedule():
     temp['result']="Pausing Discharge Schedule was a: " + result
     return json.dumps(temp)
 
-@giv_api.route('/resumeDischargeSchedule', methods=['GET'])
+@giv_api.route('/resumeDischargeSchedule', methods=['POST'])
 def resumeDischargeSchedule():
     temp={}
     result=GivTCP.write_single_register(59,1)
@@ -64,7 +64,7 @@ def resumeDischargeSchedule():
     return json.dumps(temp)
 
 @giv_api.route('/setChargeTarget', methods=['POST'])
-def setChargeTarget():
+def setChargeTarget(payload=""):
     temp={}
     if payload=="":      #If no payload, assume its called via flask
         params = request.get_json(silent=True, force=True)
@@ -76,11 +76,13 @@ def setChargeTarget():
     temp['result']="Setting charge target was a: " + targetresult
     return json.dumps(temp)
 
-@giv_api.route('/setBatteryReserve/<payload>', methods=['GET'])
-def setBatteryReserve(payload):
+@giv_api.route('/setBatteryReserve', methods=['POST'])
+def setBatteryReserve(payload=""):
     temp={}
-    params=request.get_json(force=True) 
-    params=json.loads(payload)
+    if payload=="":      #If no payload, assume its called via flask
+        params = request.get_json(silent=True, force=True)
+    else:
+        params=json.loads(payload)
     target=params['dischargeToPercent']
     #Only allow minimum of 2%
     if int(target)<4: target="4"
@@ -89,10 +91,13 @@ def setBatteryReserve(payload):
     temp['result']="Battery Reserve setting was a: " + targetresult
     return json.dumps(temp)
 
-@giv_api.route('/setChargeSlot1/<payload>', methods=['GET'])
-def setChargeSlot1(payload):
+@giv_api.route('/setChargeSlot1', methods=['POST'])
+def setChargeSlot1(payload=""):
     temp={}
-    params=json.loads(payload)
+    if payload=="":      #If no payload, assume its called via flask
+        params = request.get_json(silent=True, force=True)
+    else:
+        params=json.loads(payload)
     start=params['start']
     end=params['finish']
     target=params['chargeToPercent']
@@ -108,10 +113,13 @@ def setChargeSlot1(payload):
         temp['result']="Error setting Charge time"
     return json.dumps(temp)
 
-@giv_api.route('/setChargeSlot2/<payload>', methods=['GET'])
-def setChargeSlot2(payload):
+@giv_api.route('/setChargeSlot2', methods=['POST'])
+def setChargeSlot2(payload=""):
     temp={}
-    params=json.loads(payload)
+    if payload=="":      #If no payload, assume its called via flask
+        params = request.get_json(silent=True, force=True)
+    else:
+        params=json.loads(payload)
     start=params['start']
     end=params['finish']
     target=params['chargeToPercent']
@@ -127,10 +135,13 @@ def setChargeSlot2(payload):
         temp['result']="Error setting Charge time"
     return json.dumps(temp)
 
-@giv_api.route('/setDischargeSlot1/<payload>', methods=['GET'])
-def setDischargeSlot1(payload):
+@giv_api.route('/setDischargeSlot1', methods=['POST'])
+def setDischargeSlot1(payload=""):
     temp={}
-    params=json.loads(payload)
+    if payload=="":      #If no payload, assume its called via flask
+        params = request.get_json(silent=True, force=True)
+    else:
+        params=json.loads(payload)
     start=params['start']
     end=params['finish']
     target=params['dischargeToPercent']
@@ -145,10 +156,13 @@ def setDischargeSlot1(payload):
         temp['result']="Error setting Discharge time"
     return json.dumps(temp)
 
-@giv_api.route('/setDischargeSlot2/<payload>', methods=['GET'])
-def setDischargeSlot2(payload):
+@giv_api.route('/setDischargeSlot2', methods=['POST'])
+def setDischargeSlot2(payload=""):
     temp={}
-    params=json.loads(payload)
+    if payload=="":      #If no payload, assume its called via flask
+        params = request.get_json(silent=True, force=True)
+    else:
+        params=json.loads(payload)
     start=params['start']
     end=params['finish']
     target=params['dischargeToPercent']
@@ -163,10 +177,13 @@ def setDischargeSlot2(payload):
         temp['result']="Error setting Discharge time"
     return json.dumps(temp)
 
-@giv_api.route('/setBatteryMode/<payload>', methods=['GET'])
-def setBatteryMode(payload):
+@giv_api.route('/setBatteryMode', methods=['POST'])
+def setBatteryMode(payload=""):
     temp={}
-    params=json.loads(payload)
+    if payload=="":      #If no payload, assume its called via flask
+        params = request.get_json(silent=True, force=True)
+    else:
+        params=json.loads(payload)
     mode=int(params['mode'])
     if mode==1:
         shallowresult=GivTCP.write_single_register(110,4)
