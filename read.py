@@ -4,7 +4,7 @@ from GivTCP import GivTCP
 from GivLUT import GiV_Reg_LUT
 from datetime import datetime
 from settings import GiV_Settings
-from flask import Flask, json
+from flask import Flask, json, request
 
 Print_Raw=False
 if GiV_Settings.Print_Raw_Registers.lower()=="true":
@@ -12,6 +12,8 @@ if GiV_Settings.Print_Raw_Registers.lower()=="true":
     
 #set-up Flask details
 giv_api = Flask(__name__)
+
+import write
 
 @giv_api.route('/', methods=['GET'])
 def index():
