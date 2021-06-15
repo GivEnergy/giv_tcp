@@ -319,8 +319,7 @@ def getModesandTimes():
             controlmode['Target SOC']=target_soc
             controlmode['Charge Schedule State']=charge_enable
             controlmode['Discharge Schedule State']=discharge_enable
-            controlmode['Invertor Type']= GivTCP.Invertor_Type
-
+            
     #Grab Timeslots
             timeslots={}
             GivTCP.debug("Getting TimeSlot data")
@@ -344,15 +343,16 @@ def getModesandTimes():
             if holding_registers[GiV_Reg_LUT.holding_register_LUT.get(47)[0]+"(47)"]==1: metertype="EM115" 
             if holding_registers[GiV_Reg_LUT.holding_register_LUT.get(47)[0]+"(47)"]==0: metertype="EM418" 
             invertor['Meter Type']=metertype
+            invertor['Invertor Type']= GivTCP.Invertor_Type
 
     #Create multiouput and publish
             if Print_Raw:
                 multi_output["raw/holding"]=holding_registers
             if len(timeslots)==6:
                 multi_output["Timeslots"]=timeslots
-            if len(controlmode)==6:
+            if len(controlmode)==5:
                 multi_output["Control"]=controlmode
-            if len(invertor)==6:
+            if len(invertor)==7:
                 multi_output["Invertor Details"]=invertor
                 
 
