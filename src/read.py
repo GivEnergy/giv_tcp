@@ -13,11 +13,7 @@ if GiV_Settings.Print_Raw_Registers.lower()=="true":
 #set-up Flask details
 giv_api = Flask(__name__)
 
-import write
-
-@giv_api.route('/', methods=['GET'])
-def index():
-    return json.dumps(runAll())
+import write_flask
 
 @giv_api.route('/getTimeslots', methods=['GET'])
 def getTimeslots():
