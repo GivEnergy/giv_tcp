@@ -66,7 +66,7 @@ def resumeDischargeSchedule():
 @giv_api.route('/setChargeTarget', methods=['POST'])
 def setChargeTarget():
     temp={}
-    if payload="":      #If no payload, assume its called via flask
+    if payload=="":      #If no payload, assume its called via flask
         params = request.get_json(silent=True, force=True)
     else:
         params=json.loads(payload)
