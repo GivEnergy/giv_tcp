@@ -86,11 +86,15 @@ The full call to set  Charge Timeslot 1 would then be:
 GivTCP provides a wrapper function REST.py which uses Flask to expose the read and control functions as RESTful http calls. To utilise this service you will need to either use a WSGI serivce such as gunicorn or use the pre-built Docker container
 
 ### Gunicorn
-ensure Gunicorn is installed by running:
+Ensure Gunicorn is installed by running:
+
 `pip install gunicorn`
-then call the service by initiating the following command from the same directory as the downloaded src files:
+
+Then call the service by initiating the following command from the same directory as the downloaded src files:
+
 `gunicorn -w 4 -b 127.0.0.1:6345 REST:giv_api`
-where the 127.0.0.1:6345 is the IP address and port you want to bind the service to.
+
+(where the 127.0.0.1:6345 is the IP address and port you want to bind the service to)
 
 ### Docker
 The docker container can be downloaded at the Docker hub here: 
