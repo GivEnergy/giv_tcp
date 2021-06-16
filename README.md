@@ -124,8 +124,29 @@ ARM: https://hub.docker.com/repository/docker/britkat/giv_tcp-arm
 The following table outlines the http methods needed to call the various read and control functions. For each control function the payload is an identical JSON string as above (minus the single quotes).  
 The RESTful Service will return a JSON object which you can then parse as you so desire   
 
+URL's below are based off the root http address of http://IP:6345
+(Port may change if you are running yourself using gunicorn, in which case use the details specified in the gunicorn command)
+
 | URL                | Method       |  payload              |  Description             |
 | ------------------ | ------------ |  -------------------- | -------------------------|
+| READ Functions|
+| /runALL| GET | None |  |
+| /getTimeslots| GET | None | | 
+| /getCombinedStats| GET | None | | 
+| /getModesandTimes| GET | None | | 
+| Control Functions|
+| | | | | 
+| | | | |
+| | | | | 
+| | | | | 
+| | | | |
+| | | | | 
+| | | | | 
+| | | | | 
+| | | | | 
+| | | | | 
+| | | | | 
+  
 
 Not sure where to start? Check our [Quick Start Guide](/documentaion/tutorial.md)  
 
