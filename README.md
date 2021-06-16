@@ -16,11 +16,26 @@ In essence the script connects to a Modbus TCP server which runs on the wifi don
 A settings.py file is required in the root directory. Use the supplied settings_template.py and populate with the relevant details. Only InvertorIP, dataloggerSN and MQTT_Address are required. All other settings must be there but can be left blank if not needed.
 
 # Usage
-The scripts function through being called from the command line with appropriate parameters assigned. There are both Read and Write functions, providing data acquisiation and control.
-Node-Red flows are available which can be used to call these scripts and provide control and data visualisation.
-It is reccomended that the read.py script is called no more often than every 15s, if calling runAll.
+GivTCP can be executed in a number of ways and can be set to output data in multiple formats. Exact usage is dependent on your use-case and needs:
 
-# Read
+# Execution
+CLI - Execute the script at the command line and pass the relevant function and parameters as per the details below
+CLI Through Node-Red - Using the Exec node in Node-Red to call the script in the same way as above. This allows automation of script calling within a wider automated system
+REST Service (docker container) - Deployed inside a Docker container a RESTful service calls the relevant functions using the details below
+
+# Outputs (Read mode):
+MQTT- The script will publish directly to the nominated MQTT broker all the requested read data.
+JSON-  The functions return a JSON formated object which can then be consumed by other systems or functions
+
+## Docker
+
+## RESTful
+
+## CLI
+
+## CLI Through Node-Red
+
+# Read functions
 To retrieve data and publish to the MQTT queue the read.py script is called with arguments as below:
 
 `python3 read.py {{functionName}}`
@@ -34,12 +49,8 @@ Available read functions are:
 | runAll            | None          | Runs all of the above  |
 
 
-# Control
+# Control functions
 Control is available through redefined functions which are called with arguments. The format of the function call matches the published GivEnegry cloud based battery.api. It requires a JSON pay load as per the below:
-
-`python3 write.py {{functionName}} {{controlPayload}}`
-
-An example payload can be found below and further details can be seen in the GivEnergy Docs to be found here: XXXXXXX
 
 {
     "start": "0100",
@@ -60,6 +71,12 @@ Available control functions are:
 | setDischargeSlot1|{"start":"0100","finish":"0400","dischargeToPercent":"55")| Sets the time and target SOC of the first dischargeslot. Times must be expressed in hhmm format. Enable flag show in the battery.api documentation is not needed |
 | setDischargeSlot2|{"start":"0100","finish":"0400","dischargeToPercent":"55")| Sets the time and target SOC of the first dischargeslot. Times must be expressed in hhmm format.  Enable flag show in the battery.api documentation is not needed |
 |setBatteryMode|{"mode":"1"}| Sets battery operation mode. Mode value must be in the range 1-4|
+
+## CLI
+
+`python3 write.py {{functionName}} {{controlPayload}}`
+
+An example payload can be found below and further details can be seen in the GivEnergy Docs to be found here: XXXXXXX
 
 The full call to set  Charge Timeslot 1 would then be:
 
