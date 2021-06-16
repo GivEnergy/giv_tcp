@@ -12,9 +12,9 @@ In essence the script connects to a Modbus TCP server which runs on the wifi don
   * paho-mqtt
 
 # Settings
-A settings.py file is required in the root directory. Use the supplied settings_template.py and populate with the relevant details. Only InvertorIP, dataloggerSN and MQTT_Address are required. All other settings must be there but can be left blank if not needed.
+A settings.py file is required in the root directory. Use the supplied settings_template.py and populate with the relevant details. Only InvertorIP and dataloggerSN are required as a minimum, but output should be selected to ensure the data is passed out as either JSON or MQTT. All other settings must be there but can be left blank if not needed.
 
-# Usage
+# Execution of GivTCP
 GivTCP can be executed in a number of ways and can be set to output data in multiple formats. Exact usage is dependent on your use-case and needs:
 
 ## CLI
@@ -66,10 +66,15 @@ Control is available through predefined functions. The format of the function ca
 For each execution method there is a defined way of interacting and calling the relevat functions
 
 ## CLI
+GivTCP can be called from any machine running Python3. The relevant script must be called and a function name passed to it as an argument. Exmaples of how to call read and write functions are shown here: 
 
 ### Read
 `python3 read.py {{functionName}}`
 
+The full call to get all information by running the runAll function would then be:  
+  
+`python3 read.py runAll`  
+  
 ### Control
 `python3 write.py {{functionName}} '{{controlPayload}}'`
 
