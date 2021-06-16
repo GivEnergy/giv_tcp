@@ -1,4 +1,3 @@
-# GivTCP
 TCP Modbus connection to MQTT for Givenergy Battery/PV Invertors
 
 This project allows connection to the GivEnergy invertors via TCP Modbus. Access is through the native Wifi/Ethernet dongle can be connected to through either the local LAN network or directly through the inbuilt SSID AP.
@@ -18,24 +17,30 @@ A settings.py file is required in the root directory. Use the supplied settings_
 # Usage
 GivTCP can be executed in a number of ways and can be set to output data in multiple formats. Exact usage is dependent on your use-case and needs:
 
-# Execution
-CLI - Execute the script at the command line and pass the relevant function and parameters as per the details below
-CLI Through Node-Red - Using the Exec node in Node-Red to call the script in the same way as above. This allows automation of script calling within a wider automated system
-REST Service (docker container) - Deployed inside a Docker container a RESTful service calls the relevant functions using the details below
+## Execution
+### CLI
+Execute the script at the command line and pass the relevant function and parameters as per the details below
+### CLI Through Node-Red
+Using the Exec node in Node-Red to call the script in the same way as above. This allows automation of script calling within a wider automated system
+### REST Service
+Deployed inside a Docker container a RESTful service calls the relevant functions using the details below through GET and POST http methods
 
-# Outputs (Read mode):
-MQTT- The script will publish directly to the nominated MQTT broker all the requested read data.
-JSON-  The functions return a JSON formated object which can then be consumed by other systems or functions
+## Outputs (Read mode):
+### MQTT
+The script will publish directly to the nominated MQTT broker all the requested read data.
+### JSON
+The functions return a JSON formated object which can then be consumed by other systems or functions
 
-## Docker
+### Docker
 
-## RESTful
+### RESTful
 
-## CLI
+### CLI
 
-## CLI Through Node-Red
+### CLI Through Node-Red
 
-# Read functions
+## GivTCP functions
+### Read Data
 To retrieve data and publish to the MQTT queue the read.py script is called with arguments as below:
 
 `python3 read.py {{functionName}}`
@@ -49,7 +54,7 @@ Available read functions are:
 | runAll            | None          | Runs all of the above  |
 
 
-# Control functions
+### Control functions
 Control is available through redefined functions which are called with arguments. The format of the function call matches the published GivEnegry cloud based battery.api. It requires a JSON pay load as per the below:
 
 {
