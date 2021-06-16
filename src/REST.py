@@ -1,67 +1,88 @@
 # -*- coding: utf-8 -*-
 import sys
 import json
-from read import giv_api
 from flask import Flask, json, request
+#from write import *     #grab passthrough functions from main write file
+#from read import *     #grab passthrough functions from main read file
+import read as rd
+import write as wr
 
-from write import *     #grab passthrough functions from main write file
+#set-up Flask details
+giv_api = Flask(__name__)
 
+#Proxy Read Functions
+@giv_api.route('/getTimeslots', methods=['GET'])
+def getTimes():
+    return rd.getTimeslots()
+
+@giv_api.route('/getCombinedStats', methods=['GET'])
+def getStats():
+    return rd.getCombinedStats()
+
+@giv_api.route('/getModesandTimes', methods=['GET'])
+def getcontrols():
+    return rd.getModesandTimes()
+
+@giv_api.route('/runAll', methods=['GET'])
+def getAll():
+    return rd.runAll()
+
+#Proxy Write Functions
 @giv_api.route('/disableACCharge', methods=['POST'])
 def disACCharge():
-    return disableACCharge
+    return wr.disableACCharge
 
 @giv_api.route('/enableACCharge', methods=['POST'])
 def enACCharge():
-    return enableACCharge    
+    return wr.enableACCharge    
 
 @giv_api.route('/pauseChargeSchedule', methods=['POST'])
 def pauseChrgSchedule():
-    return pauseChargeSchedule
+    return wr.pauseChargeSchedule
 
 @giv_api.route('/resumeChargeSchedule', methods=['POST'])
 def resumeChrgSchedule():
-    return resumeChargeSchedule
+    return wr.resumeChargeSchedule
 
 @giv_api.route('/pauseDischargeSchedule', methods=['POST'])
 def pauseDischrgSchedule():
-    return pauseDischargeSchedule
+    return wr.pauseDischargeSchedule
 
 @giv_api.route('/resumeDischargeSchedule', methods=['POST'])
 def resumeDischrgSchedule():
-    return resumeDischargeSchedule
+    return wr.resumeDischargeSchedule
 
 @giv_api.route('/setChargeTarget', methods=['POST'])
 def setChrgTarget():
     payload = request.get_json(silent=True, force=True)
-    print (payload)
-    return setChargeTarget(payload)
+    return wr.setChargeTarget(payload)
 
 @giv_api.route('/setBatteryReserve', methods=['POST'])
 def setBattReserve():
     payload = request.get_json(silent=True, force=True)
-    return setBatteryReserve(payload)
+    return wr.setBatteryReserve(payload)
 
 @giv_api.route('/setChargeSlot1', methods=['POST'])
 def setChrgSlot1():
     payload = request.get_json(silent=True, force=True)
-    return setChargeSlot1(payload)
+    return wr.setChargeSlot1(payload)
 
 @giv_api.route('/setChargeSlot2', methods=['POST'])
 def setChrgSlot2():
     payload = request.get_json(silent=True, force=True)
-    return setChargeSlot2(payload)
+    return wr.setChargeSlot2(payload)
 
 @giv_api.route('/setDischargeSlot1', methods=['POST'])
 def setDischrgSlot1():
     payload = request.get_json(silent=True, force=True)
-    return setDischargeSlot1(payload)
+    return wr.setDischargeSlot1(payload)
 
 @giv_api.route('/setDischargeSlot2', methods=['POST'])
 def setDischrgSlot2():
     payload = request.get_json(silent=True, force=True)
-    return setDischargeSlot2(payload)
+    return wr.setDischargeSlot2(payload)
 
 @giv_api.route('/setBatteryMode', methods=['POST'])
 def setBattMode():
     payload = request.get_json(silent=True, force=True)
-    return setBatteryMode(payload)
+    return wr.setBatteryMode(payload)

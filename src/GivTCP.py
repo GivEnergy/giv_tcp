@@ -200,7 +200,7 @@ class GivTCP:
       #Get Invertor Type
       SN = data[28:38].decode()[0:2]
       if SN=="CE":
-        GivTCP.Invertor_Type="AC Coupled"
+        GivTCP.Invertor_Type="AC"
       elif SN=="ED":
         GivTCP.Invertor_Type="Gen 2"
       else:

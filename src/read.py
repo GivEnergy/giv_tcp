@@ -4,18 +4,12 @@ from GivTCP import GivTCP
 from GivLUT import GiV_Reg_LUT
 from datetime import datetime
 from settings import GiV_Settings
-from flask import Flask, json, request
+
 
 Print_Raw=False
 if GiV_Settings.Print_Raw_Registers.lower()=="true":
     Print_Raw=True
     
-#set-up Flask details
-giv_api = Flask(__name__)
-
-import write_flask
-
-@giv_api.route('/getTimeslots', methods=['GET'])
 def getTimeslots():
     timeslots={}
     jsonout={}
@@ -36,7 +30,6 @@ def getTimeslots():
         GivTCP.debug("Error retrieving Timeslot registers")
     return(timeslots)
 
-@giv_api.route('/getCombinedStats', methods=['GET'])
 def getCombinedStats():
     energy_total_output={}
     energy_today_output={}
@@ -109,8 +102,8 @@ def getCombinedStats():
             else:
                 energy_total_output['Load Energy Total kWh']=round((energy_total_output['Invertor Energy Total kWh']-energy_total_output['AC Charge Energy Total kWh'])-(energy_total_output['Export Energy Total kWh']-energy_total_output['Import Energy Total kWh'])+energy_total_output['PV Energy Total kWh'],3)
 
-            if GivTCP.Invertor_Type!="Gen 2": energy_total_output['Battery Charge Energy Total kWh']=input_registers[GiV_Reg_LUT.input_register_LUT.get(181)[0]+"(181)"]
-            if GivTCP.Invertor_Type!="Gen 2": energy_total_output['Battery Discharge Energy Total kWh']=input_registers[GiV_Reg_LUT.input_register_LUT.get(180)[0]+"(180)"]
+            if GivTCP.Invertor_Type!="Gen 2" and GivTCP.Invertor_Type!="AC": energy_total_output['Battery Charge Energy Total kWh']=input_registers[GiV_Reg_LUT.input_register_LUT.get(181)[0]+"(181)"]
+            if GivTCP.Invertor_Type!="Gen 2" and GivTCP.Invertor_Type!="AC": energy_total_output['Battery Discharge Energy Total kWh']=input_registers[GiV_Reg_LUT.input_register_LUT.get(180)[0]+"(180)"]
             energy_total_output['Self Consumption Energy Total kWh']=round(energy_total_output['PV Energy Total kWh']-energy_total_output['Export Energy Total kWh'],2)
 
     #Energy Today Figures
@@ -127,10 +120,10 @@ def getCombinedStats():
                 energy_today_output['AC Charge Energy Today kWh']=round(input_registers[GiV_Reg_LUT.input_register_LUT.get(35)[0]+"(35)"],2)
             if input_registers[GiV_Reg_LUT.input_register_LUT.get(44)[0]+"(44)"]<100:
                 energy_today_output['Invertor Energy Today kWh']=round(input_registers[GiV_Reg_LUT.input_register_LUT.get(44)[0]+"(44)"],2)
-            if GivTCP.Invertor_Type!="Gen 2":
+            if GivTCP.Invertor_Type!="Gen 2" and GivTCP.Invertor_Type!="AC":
                 if input_registers[GiV_Reg_LUT.input_register_LUT.get(183)[0]+"(183)"]<100:	#Cap output at 100kWh in a single day
                     energy_today_output['Battery Charge Energy Today kWh']=input_registers[GiV_Reg_LUT.input_register_LUT.get(183)[0]+"(183)"]
-            if GivTCP.Invertor_Type!="Gen 2":
+            if GivTCP.Invertor_Type!="Gen 2" and GivTCP.Invertor_Type!="AC":
                 if input_registers[GiV_Reg_LUT.input_register_LUT.get(182)[0]+"(182)"]<100:
                     energy_today_output['Battery Discharge Energy Today kWh']=input_registers[GiV_Reg_LUT.input_register_LUT.get(182)[0]+"(182)"]
 
@@ -270,7 +263,6 @@ def getCombinedStats():
 
     return(multi_output)
 
-@giv_api.route('/getModesandTimes', methods=['GET'])
 def getModesandTimes():
     holding_registers={}
     controlmode={}
@@ -387,7 +379,15 @@ def extraRegCheck():
     else:
         GivTCP.debug("Error retrieving extra input register")
 
-@giv_api.route('/runAll', methods=['GET'])
+    if GiV_Settings.output.lower()=="mqtt":
+        GivTCP.debug("Publish all to MQTT")
+        GivTCP.multi_MQTT_publish(energy_today_output)
+        GivTCP.multi_MQTT_publish(energy_total_output)
+    elif GiV_Settings.output.lower()=="json":
+        GivTCP.debug("Pushing JSON output")
+        GivTCP.output_JSON(energy_today_output)
+        GivTCP.output_JSON(energy_total_output)
+
 def runAll():
     multi_output={}
     starttime = datetime.now()
@@ -409,11 +409,6 @@ def runAll():
     GivTCP.debug("----------------------------Ended taking "+str(duration)+" seconds------------")
     return (multi_output)
 
-def runserver():
-    giv_api.run(host='0.0.0.0', port=6384)
-    # api.run()
-
 
 if __name__ == '__main__':
-
     globals()[sys.argv[1]]()

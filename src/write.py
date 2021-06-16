@@ -5,8 +5,6 @@ from GivTCP import GivTCP
 from GivLUT import GiV_Reg_LUT
 from datetime import datetime
 from settings import GiV_Settings
-from read import giv_api
-from flask import Flask, json, request
 
 def writeReg(payload):
     params=json.loads(payload)

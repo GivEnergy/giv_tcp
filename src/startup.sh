@@ -1,6 +1,8 @@
 #!/bin/sh
 #Only used for Docker Version
 
+rm settings.py	# remove settings.py in case it exists
+
 printf "class GiV_Settings:\n" >> settings.py
 printf "    invertorIP=\"$INVERTOR_IP\"\n" >> settings.py
 printf "    dataloggerSN=\"$SERIAL_NUMBER\"\n" >> settings.py
@@ -13,4 +15,4 @@ printf "    output=\"$OUTPUT\"\n" >> settings.py
 printf "    debug=\"$DEBUG\"\n" >> settings.py
 printf "    Debug_File_Location=\"$DEBUG_FILE_LOCATION\"\n" >> settings.py
 
-gunicorn -w 3 -b :6345 read:giv_api
+gunicorn -w 3 -b :6345 REST:giv_api
