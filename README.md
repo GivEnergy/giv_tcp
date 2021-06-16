@@ -17,16 +17,18 @@ A settings.py file is required in the root directory. Use the supplied settings_
 # Execution of GivTCP
 GivTCP can be executed in a number of ways and can be set to output data in multiple formats. Exact usage is dependent on your use-case and needs:
 
-## CLI
-Execute the script at the command line and pass the relevant function and parameters as per the details below
-## CLI Through Node-Red
-Using the Exec node in Node-Red to call the script in the same way as above. This allows automation of script calling within a wider automated system
-## REST Service
-Deployed inside a Docker container a RESTful service calls the relevant functions using the details below through GET and POST http methods
+| Method         |  Description                    |
+| ---------------| ------------------------------- |
+| CLI | Execute the script at the command line and pass the relevant function and parameters as per the details below |
+| CLI through Node-Read | Using the Exec node in Node-Red to call the script in the same way as above. This allows automation of script calling within a wider automated system |
+| REST Service | Deployed inside a Docker container a RESTful service calls the relevant functions using the details below through GET and POST http methods |
 
 # Output formats:
 ## MQTT
 The script will publish directly to the nominated MQTT broker all the requested read data.
+
+![image](https://user-images.githubusercontent.com/69121158/122302074-847e9980-cef9-11eb-87eb-f4010b0874ed.png)
+  
 ## JSON
 The functions return a JSON formated object which can then be consumed by other systems or functions, default output is to stdout
 
