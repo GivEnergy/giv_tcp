@@ -71,12 +71,12 @@ For each execution method there is a defined way of interacting and calling the 
 ### Control
 `python3 write.py {{functionName}} '{{controlPayload}}'`
 
-An example payload can be found below and further details can be seen in the GivEnergy Docs to be found here: XXXXXXX
-Note: In order to send json payloads via CLI you will need to place the JSON string inside single quotes
+An example payload can be found below and further details can be seen in the GivEnergy Docs to be found here: XXXXXXX  
+Note: In order to send json payloads via CLI you will need to place the JSON string inside single quotes  
 
-The full call to set  Charge Timeslot 1 would then be:
+The full call to set  Charge Timeslot 1 would then be:  
 
-`python3 write.py setChargeSlot1 '{"enable": true,"start": "0100","finish": "0400","chargeToPercent": "100"}'`
+`python3 write.py setChargeSlot1 '{"enable": true,"start": "0100","finish": "0400","chargeToPercent": "100"}'`  
 
 ## CLI through Node-Red
 
@@ -86,30 +86,30 @@ The full call to set  Charge Timeslot 1 would then be:
 GivTCP provides a wrapper function REST.py which uses Flask to expose the read and control functions as RESTful http calls. To utilise this service you will need to either use a WSGI serivce such as gunicorn or use the pre-built Docker container
 
 ### Gunicorn
-Ensure Gunicorn is installed by running:
+Ensure Gunicorn is installed by running:  
 
-`pip install gunicorn`
+`pip install gunicorn`  
 
-Then call the service by initiating the following command from the same directory as the downloaded src files:
+Then call the service by initiating the following command from the same directory as the downloaded src files:  
 
-`gunicorn -w 4 -b 127.0.0.1:6345 REST:giv_api`
+`gunicorn -w 4 -b 127.0.0.1:6345 REST:giv_api`  
 
-(where the 127.0.0.1:6345 is the IP address and port you want to bind the service to)
+(where the 127.0.0.1:6345 is the IP address and port you want to bind the service to)  
 
 ### Docker
-The docker container can be downloaded at the Docker hub here: 
-x86:https://hub.docker.com/repository/docker/britkat/giv_tcp
-ARM: https://hub.docker.com/repository/docker/britkat/giv_tcp-arm
+The docker container can be downloaded at the Docker hub here:   
+x86:https://hub.docker.com/repository/docker/britkat/giv_tcp  
+ARM: https://hub.docker.com/repository/docker/britkat/giv_tcp-arm  
 
 ### Calling RESTFul Functions
 
-The following table outlines the http methods needed to call the various read and control functions. For each control function the payload is an identical JSON string as above (minus the single quotes).
-The RESTful Service will return a JSON object which you can then parse as you so desire 
+The following table outlines the http methods needed to call the various read and control functions. For each control function the payload is an identical JSON string as above (minus the single quotes).  
+The RESTful Service will return a JSON object which you can then parse as you so desire   
 
 
 
-Not sure where to start? Check our [Quick Start Guide](/documentaion/tutorial.md)
+Not sure where to start? Check our [Quick Start Guide](/documentaion/tutorial.md)  
 
-[Some API Documentation](/documentaion/APIDocumentation.md)
+[Some API Documentation](/documentaion/APIDocumentation.md)  
 
 [All the used registers are listed in here ](/documentaion/registersAndFunctions.xlsb.xlsx)
