@@ -1,4 +1,5 @@
-TCP Modbus connection to MQTT for Givenergy Battery/PV Invertors
+# GivTCP
+## TCP Modbus connection to MQTT for Givenergy Battery/PV Invertors
 
 This project allows connection to the GivEnergy invertors via TCP Modbus. Access is through the native Wifi/Ethernet dongle can be connected to through either the local LAN network or directly through the inbuilt SSID AP.
 
