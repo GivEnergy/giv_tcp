@@ -1,16 +1,17 @@
 # GivTCP
 ## TCP Modbus connection to MQTT/JSON for Givenergy Battery/PV Invertors
 
-This project allows connection to the GivEnergy invertors via TCP Modbus. Access is through the native Wifi/Ethernet dongle can be connected to through either the local LAN network or directly through the inbuilt SSID AP.
+This project allows connection to the GivEnergy invertors via TCP Modbus. Access is through the native Wifi/Ethernet dongle and can be connected to through either the local LAN network or directly through the inbuilt SSID AP.
 
-In essence the script connects to a Modbus TCP server which runs on the wifi dongle, so all you need is somewhere to run the script on the same network. You will need the following to make it work:
-* MQTT server running on the network and know its IP address
-* MQTT login credentials (optional)
+In basis of this project is a connection to a Modbus TCP server which runs on the wifi dongle, so all you need is somewhere to run the script on the same network. You will need the following to make it work:
+* GivEnergy Invertor properly commissioned and working
 * IP address of the invertor
 * Serial Number of the wifi/gps dongle (not the invertor) - which can be found on the portal: https://www.givenergy.cloud/GivManage/setting/deviceMenu/inverterList
-* Machine/Pi/VM running Python which has following modules installed:
+* Machine/Pi/VM running Python which has following pip modules installed:
   * crccheck
   * paho-mqtt
+  * Flask (optional is using the RESTful Service
+(To install these run `pip install crccheck` , `pip install paho-mqtt` , `pip install Flask`)
 
 # Settings
 A settings.py file is required in the root directory. Use the supplied settings_template.py and populate with the relevant details. Only InvertorIP and dataloggerSN are required as a minimum, but output should be selected to ensure the data is passed out as either JSON or MQTT. All other settings must be there but can be left blank if not needed.
@@ -65,20 +66,17 @@ Control is available through predefined functions. The format of the function ca
 | setDischargeSlot2|{"start":"0100","finish":"0400","dischargeToPercent":"55")| Sets the time and target SOC of the first dischargeslot. Times must be expressed in hhmm format.  Enable flag show in the battery.api documentation is not needed |
 |setBatteryMode|{"mode":"1"}| Sets battery operation mode. Mode value must be in the range 1-4|
 
-# Example deployments
-For each execution method there is a defined way of interacting and calling the relevat functions
-
-## CLI
+# CLI Usage
 GivTCP can be called from any machine running Python3. The relevant script must be called and a function name passed to it as an argument. Exmaples of how to call read and write functions are shown here: 
 
-### Read
+## Read
 `python3 read.py {{functionName}}`
 
 The full call to get all information by running the runAll function would then be:  
   
 `python3 read.py runAll`  
   
-### Control
+## Control
 `python3 write.py {{functionName}} '{{controlPayload}}'`
 
 An example payload can be found below and further details can be seen in the GivEnergy Docs to be found here: XXXXXXX  
@@ -88,9 +86,15 @@ The full call to set  Charge Timeslot 1 would then be:
 
 `python3 write.py setChargeSlot1 '{"enable": true,"start": "0100","finish": "0400","chargeToPercent": "100"}'`  
 
-## CLI through Node-Red
+# CLI through Node-Red
 
-
+Node-Red provides the ability to call the python scripts through an "Exec" node. This essentially makes a command line call to the host OS, and mimics the CLI process above. The advantage of this execution method is that it allows integration into wider automation systems and provides a stable, self-healing ability to run the script on demand. wrapping this core code in a logic flow.  
+  
+![image](https://user-images.githubusercontent.com/69121158/122303286-3bc7e000-cefb-11eb-93c5-bf48907bd189.png)
+  
+To execute this you must download the src files for this project, place them in an accessible folder on your machine running Node-Red then set the paramters of the Exec functon to call it.  
+  
+Example Node-Red flows are vailable here: XXXX
 
 ## RESTful Service
 GivTCP provides a wrapper function REST.py which uses Flask to expose the read and control functions as RESTful http calls. To utilise this service you will need to either use a WSGI serivce such as gunicorn or use the pre-built Docker container
