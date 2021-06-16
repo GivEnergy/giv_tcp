@@ -100,13 +100,32 @@ Then call the service by initiating the following command from the same director
 The docker container can be downloaded at the Docker hub here:   
 x86:https://hub.docker.com/repository/docker/britkat/giv_tcp  
 ARM: https://hub.docker.com/repository/docker/britkat/giv_tcp-arm  
+  
+* Download the correct docker image for your achitecture (tested on x86 and rpi3)
+* Create a container with the relevant ENV variables below (mimicing the settings.py file)
+* Set the container to auto-restart to ensure reliability
+
+| ENV Name                | Example       |  Description                      |
+| ----------------------- | ------------- |  -------------------------------- |
+| INVERTOR_IP |192.168.10.1 | Required |
+| SERIAL_NUMBER | AB12345678 | Required |
+| OUTPUT | MQTT | Optional (Include MQTT to publish to MQTT as well as JSON return) |
+| MQTT_ADDRESS | 192.168.10.2 | Optional (but required if OUTPUT is set to MQTT) |
+| MQTT_USERNAME | bob | Optional |
+| MQTT_PASSWORD | cat | Optional |
+| MQTT_TOPIC | GivEnergy/Data | Optional |
+| DEBUG | True | Optional - if True then will write debug info to sepcified file location (default is same directory as the py files) |
+| DEBUG_FILE_LOCATION | /usr/pi/data | Optional  |
+| PRINT_RAW | True | Optional - If set to True the raw register values will be returned alongside the normal data |
+
 
 ### Calling RESTFul Functions
 
 The following table outlines the http methods needed to call the various read and control functions. For each control function the payload is an identical JSON string as above (minus the single quotes).  
 The RESTful Service will return a JSON object which you can then parse as you so desire   
 
-
+| URL                | Method       |  payload              |  Description             |
+| ------------------ | ------------ |  -------------------- | -------------------------|
 
 Not sure where to start? Check our [Quick Start Guide](/documentaion/tutorial.md)  
 
