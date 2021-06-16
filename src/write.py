@@ -13,14 +13,14 @@ def writeReg(payload):
     result=GivTCP.write_single_register(register,value)
     GivTCP.debug ("Writing Register "+ str(register) + " was a: "+result)
 
-def disableACCharge():
+def disableChargeTarget():
     temp={}
     result=GivTCP.write_single_register(20,0)
     GivTCP.debug ("Pausing Charge Schedule was a: "+result)
     temp['result']="Pausing Charge Schedule was a: "+result
     return json.dumps(temp)
 
-def enableACCharge():
+def enableChargeTarget():
     temp={}
     result=GivTCP.write_single_register(20,1)
     GivTCP.debug ("Resuming Charge Schedule was a: "+ result)

@@ -28,13 +28,13 @@ def getAll():
     return rd.runAll()
 
 #Proxy Write Functions
-@giv_api.route('/disableACCharge', methods=['POST'])
-def disACCharge():
-    return wr.disableACCharge
+@giv_api.route('/disableChargeTarget', methods=['POST'])
+def disChargeTrgt():
+    return wr.disableChargeTarget
 
-@giv_api.route('/enableACCharge', methods=['POST'])
-def enACCharge():
-    return wr.enableACCharge    
+@giv_api.route('/enableChargeTarget', methods=['POST'])
+def enChargeTrgt():
+    return wr.enableChargeTarget    
 
 @giv_api.route('/pauseChargeSchedule', methods=['POST'])
 def pauseChrgSchedule():

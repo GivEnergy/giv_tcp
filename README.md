@@ -49,6 +49,8 @@ Control is available through predefined functions. The format of the function ca
 ### Available control functions are:
 | Function                | Payload       |  Description                      |
 | ----------------------- | ------------- |  -------------------------------- |
+| enableChargeTarget     | None          | Sets invertor to follow setChargeTarget value when charging from grid (will stop charging when battery SOC= ChargeTarget)     |
+| disableChargeTarget     | None          | Sets invertor to ignore setChargeTarget value when charging from grid (will continue to charge to 100% during ChargeSlot)     |
 | pauseChargeSchedule     | None          | Pauses the Charging schedule      |
 | pauseDischargeSchedule  | None          | Pauses the Discharging schedule   |
 | resumeChargeSchedule    | None          | Resumes the Charging schedule     |
@@ -126,27 +128,32 @@ The RESTful Service will return a JSON object which you can then parse as you so
 
 URL's below are based off the root http address of http://IP:6345
 (Port may change if you are running yourself using gunicorn, in which case use the details specified in the gunicorn command)
-
-| URL                | Method       |  payload              |  Description             |
-| ------------------ | ------------ |  -------------------- | -------------------------|
-| READ Functions|
+  
+#### Read Functions
+| URL                | Method       |  payload              |
+| ------------------ | ------------ |  -------------------- |
 | /runALL| GET | None |  |
 | /getTimeslots| GET | None | | 
 | /getCombinedStats| GET | None | | 
 | /getModesandTimes| GET | None | | 
-| Control Functions|
-| | | | | 
-| | | | |
-| | | | | 
-| | | | | 
-| | | | |
-| | | | | 
-| | | | | 
-| | | | | 
-| | | | | 
-| | | | | 
-| | | | | 
   
+#### Control Functions
+| URL                | Method       |  payload              |
+| ------------------ | ------------ |  -------------------- |
+| /disableChargeTarget| POST | None | 
+| /enableChargeTarget| POST | None |
+| /pauseChargeSchedule| POST | None |
+| /resumeChargeSchedule| POST | None |
+| /pauseDischargeSchedule| POST | None |
+| /resumeDischargeSchedule| POST | None | 
+| /setChargeTarget| POST | |
+| /setBatteryReserve| POST | |
+| /setChargeSlot1| POST | |
+| /setChargeSlot2| POST | |
+| /setDischargeSlot1| POST | |
+| /setDischargeSlot2| POST | |
+| /setBatteryMode| POST | |
+
 
 Not sure where to start? Check our [Quick Start Guide](/documentaion/tutorial.md)  
 
