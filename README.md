@@ -146,13 +146,13 @@ URL's below are based off the root http address of http://IP:6345
 | /resumeChargeSchedule| POST | None |
 | /pauseDischargeSchedule| POST | None |
 | /resumeDischargeSchedule| POST | None | 
-| /setChargeTarget| POST | |
-| /setBatteryReserve| POST | |
-| /setChargeSlot1| POST | |
-| /setChargeSlot2| POST | |
-| /setDischargeSlot1| POST | |
-| /setDischargeSlot2| POST | |
-| /setBatteryMode| POST | |
+| /setChargeTarget| POST | {"chargeToPercent":"50"} |
+| /setBatteryReserve| POST | {"dischargeToPercent":"5"} |
+| /setChargeSlot1| POST | {"start":"0100","finish":"0400","chargeToPercent":"55") |
+| /setChargeSlot2| POST | {"start":"0100","finish":"0400","chargeToPercent":"55") |
+| /setDischargeSlot1| POST | {"start":"0100","finish":"0400","dischargeToPercent":"55") |
+| /setDischargeSlot2| POST | {"start":"0100","finish":"0400","dischargeToPercent":"55") |
+| /setBatteryMode| POST | {"mode":"1"} |
 
 
 Not sure where to start? Check our [Quick Start Guide](/documentaion/tutorial.md)  
