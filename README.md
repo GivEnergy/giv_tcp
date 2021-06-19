@@ -10,7 +10,8 @@ In basis of this project is a connection to a Modbus TCP server which runs on th
 * Machine/Pi/VM running Python which has following pip modules installed:
   * crccheck
   * paho-mqtt
-  * Flask (optional is using the RESTful Service
+  * Flask (optional is using the RESTful Service  
+   
 (To install these run `pip install crccheck` , `pip install paho-mqtt` , `pip install Flask`)
 
 # Settings
