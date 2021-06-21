@@ -45,8 +45,8 @@ def getCombinedStats():
     #Grab Energy data
     input_registers=GivTCP.read_register('0','04','60') #Get ALL input Registers
 
-    #If not a Gen2 Invertor get extrareg
-    if GivTCP.Invertor_Type!="Gen 2":
+    #If its a Hybrid Invertor then get extrareg
+    if GivTCP.Invertor_Type=="Hybrid":
         GivTCP.debug("Getting Extra Input Registers Data")
         input_registers.update(GivTCP.read_register('180','04','4'))    #Get v2.6 input Registers
         inputRegNum=64
@@ -387,6 +387,7 @@ def extraRegCheck():
         GivTCP.debug("Pushing JSON output")
         GivTCP.output_JSON(energy_today_output)
         GivTCP.output_JSON(energy_total_output)
+    return (energy_today_output)
 
 def runAll():
     multi_output={}
