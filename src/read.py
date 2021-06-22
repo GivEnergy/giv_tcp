@@ -34,6 +34,7 @@ def getCombinedStats():
     energy_total_output={}
     energy_today_output={}
     input_registers={}
+    batt_fw={}
     power_output={}
     power_flow_output={}
     sum=0
@@ -44,9 +45,23 @@ def getCombinedStats():
 
     #Grab Energy data
     input_registers=GivTCP.read_register('0','04','60') #Get ALL input Registers
+    
+    #If its not Gen 2 and on right f/w then get extrareg
+    if GivTCP.Invertor_Type!="Gen 2":
+        GivTCP.debug("Checking fw version number")
+        batt_fw=GivTCP.read_register('19','03','3')
+        fw=batt_fw[GiV_Reg_LUT.holding_register_LUT.get(21)[0]+"(21)"]
+        if GivTCP.Invertor_Type=="Hybrid" and fw>=449:
+            GivTCP.debug("FW does have extra registers: ("+str(GivTCP.Invertor_Type)+": " + str(fw)+")")
+            hasExtraReg=True
+        elif GivTCP.Invertor_Type=="AC" and fw>=533:
+            GivTCP.debug("FW does have extra registers: ("+str(GivTCP.Invertor_Type)+": " + str(fw)+")")
+            hasExtraReg=True
+    else:
+        hasExtraReg=False
+        GivTCP.debug("FW does NOT have extra registers: ("+str(GivTCP.Invertor_Type)+": " + str(fw)+")")
 
-    #If its a Hybrid Invertor then get extrareg
-    if GivTCP.Invertor_Type=="Hybrid":
+    if hasExtraReg:
         GivTCP.debug("Getting Extra Input Registers Data")
         input_registers.update(GivTCP.read_register('180','04','4'))    #Get v2.6 input Registers
         inputRegNum=64
@@ -102,8 +117,8 @@ def getCombinedStats():
             else:
                 energy_total_output['Load Energy Total kWh']=round((energy_total_output['Invertor Energy Total kWh']-energy_total_output['AC Charge Energy Total kWh'])-(energy_total_output['Export Energy Total kWh']-energy_total_output['Import Energy Total kWh'])+energy_total_output['PV Energy Total kWh'],3)
 
-            if GivTCP.Invertor_Type!="Gen 2" and GivTCP.Invertor_Type!="AC": energy_total_output['Battery Charge Energy Total kWh']=input_registers[GiV_Reg_LUT.input_register_LUT.get(181)[0]+"(181)"]
-            if GivTCP.Invertor_Type!="Gen 2" and GivTCP.Invertor_Type!="AC": energy_total_output['Battery Discharge Energy Total kWh']=input_registers[GiV_Reg_LUT.input_register_LUT.get(180)[0]+"(180)"]
+            if GivTCP.Invertor_Type=="Hybrid": energy_total_output['Battery Charge Energy Total kWh']=input_registers[GiV_Reg_LUT.input_register_LUT.get(181)[0]+"(181)"]
+            if GivTCP.Invertor_Type=="Hybrid": energy_total_output['Battery Discharge Energy Total kWh']=input_registers[GiV_Reg_LUT.input_register_LUT.get(180)[0]+"(180)"]
             energy_total_output['Self Consumption Energy Total kWh']=round(energy_total_output['PV Energy Total kWh']-energy_total_output['Export Energy Total kWh'],2)
 
     #Energy Today Figures
@@ -120,10 +135,10 @@ def getCombinedStats():
                 energy_today_output['AC Charge Energy Today kWh']=round(input_registers[GiV_Reg_LUT.input_register_LUT.get(35)[0]+"(35)"],2)
             if input_registers[GiV_Reg_LUT.input_register_LUT.get(44)[0]+"(44)"]<100:
                 energy_today_output['Invertor Energy Today kWh']=round(input_registers[GiV_Reg_LUT.input_register_LUT.get(44)[0]+"(44)"],2)
-            if GivTCP.Invertor_Type!="Gen 2" and GivTCP.Invertor_Type!="AC":
+            if GivTCP.Invertor_Type=="Hybrid":
                 if input_registers[GiV_Reg_LUT.input_register_LUT.get(183)[0]+"(183)"]<100:	#Cap output at 100kWh in a single day
                     energy_today_output['Battery Charge Energy Today kWh']=input_registers[GiV_Reg_LUT.input_register_LUT.get(183)[0]+"(183)"]
-            if GivTCP.Invertor_Type!="Gen 2" and GivTCP.Invertor_Type!="AC":
+            if GivTCP.Invertor_Type=="Hybrid":
                 if input_registers[GiV_Reg_LUT.input_register_LUT.get(182)[0]+"(182)"]<100:
                     energy_today_output['Battery Discharge Energy Today kWh']=input_registers[GiV_Reg_LUT.input_register_LUT.get(182)[0]+"(182)"]
 

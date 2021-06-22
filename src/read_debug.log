@@ -1,0 +1,104 @@
+2021-06-22 08:59:59.585851 - ----------------------------Starting----------------------------
+2021-06-22 08:59:59.586339 - Running getCombinedStats
+2021-06-22 08:59:59.586728 - Getting All Input Registers Data
+2021-06-22 08:59:59.587116 - TCP Call no: 1 to read 60 register(s) starting from reg: 0
+2021-06-22 08:59:59.594438 - Sending command: 59590001001C010241423132333435363738000000000000000800040000003Ccaf1
+2021-06-22 08:59:59.835836 - Returned Data is: 59590001009e010257463230333647383738000000000000008a0004534132303437473039380000003c0001070a07520ec6000008de0000448e00060007006500002e87138500050a55247c0002007b000300900000040b000009cb00000031000013a100000011000000004bb40000002400220013000000000000015709b001c7001700003a0b000007fe0001145013460a0609a61383015700e6000000ca0014c362
+2021-06-22 08:59:59.842924 - Invertor Type is: Hybrid
+2021-06-22 08:59:59.843303 - Success reading 60 register(s) 0 from 04--0001070a07520ec6000008de0000448e00060007006500002e87138500050a55247c0002007b000300900000040b000009cb00000031000013a100000011000000004bb40000002400220013000000000000015709b001c7001700003a0b000007fe0001145013460a0609a61383015700e6000000ca0014
+2021-06-22 08:59:59.844718 - Checking fw version number
+2021-06-22 08:59:59.844982 - TCP Call no: 1 to read 3 register(s) starting from reg: 19
+2021-06-22 08:59:59.849623 - Sending command: 59590001001C0102414231323334353637380000000000000008000300130003dff5
+2021-06-22 09:00:00.031367 - Returned Data is: 59590001002c01025746323033364738373800000000000000180003534132303437473039380013000301c1000101c1db66
+2021-06-22 09:00:00.031911 - Invertor Type is: Hybrid
+2021-06-22 09:00:00.032317 - Success reading 3 register(s) 19 from 03--01c1000101c1
+2021-06-22 09:00:00.034189 - FW does have extra registers: (Hybrid: 449)
+2021-06-22 09:00:00.035132 - Getting Extra Input Registers Data
+2021-06-22 09:00:00.035972 - TCP Call no: 1 to read 4 register(s) starting from reg: 180
+2021-06-22 09:00:00.040824 - Sending command: 59590001001C0102414231323334353637380000000000000008000400B400043eb0
+2021-06-22 09:00:00.205818 - Returned Data is: 59590001002e010257463230333647383738000000000000001a00045341323034374730393800b4000421582336001300225ad0
+2021-06-22 09:00:00.208636 - Invertor Type is: Hybrid
+2021-06-22 09:00:00.209003 - Success reading 4 register(s) 180 from 04--2158233600130022
+2021-06-22 09:00:00.212807 - There are 21 empty registers and 64/64 registers collected
+2021-06-22 09:00:00.220984 - Getting Total Energy Data
+2021-06-22 09:00:00.223930 - Getting Today Energy Data
+2021-06-22 09:00:00.228687 - Getting PV Power
+2021-06-22 09:00:00.229241 - Getting Grid Power
+2021-06-22 09:00:00.229666 - Getting EPS Power
+2021-06-22 09:00:00.229958 - Getting PInv Power
+2021-06-22 09:00:00.230292 - Getting Load Power
+2021-06-22 09:00:00.230578 - Getting Self Consumption Power
+2021-06-22 09:00:00.230873 - Getting SOC
+2021-06-22 09:00:00.231219 - Getting Solar to H/B/G Power Flows
+2021-06-22 09:00:00.234260 - Getting Battery to House Power Flow
+2021-06-22 09:00:00.234726 - Getting Grid to Battery/House Power Flow
+2021-06-22 09:00:00.234975 - Getting Battery to Grid Power Flow
+2021-06-22 09:00:00.235411 - Publish all to MQTT
+2021-06-22 09:00:00.252517 - No user defined MQTT Topic
+2021-06-22 09:00:00.261802 - Connecting to broker 192.168.2.83
+2021-06-22 09:00:00.308642 - In wait loop
+2021-06-22 09:00:00.509393 - In wait loop
+2021-06-22 09:00:00.710267 - In wait loop
+2021-06-22 09:00:00.911248 - In wait loop
+2021-06-22 09:00:01.113287 - In wait loop
+2021-06-22 09:00:01.276277 - connected OK Returned code=0
+2021-06-22 09:00:01.314371 - Publishing: GivEnergy/SA2047G098/Energy/Total/Export Energy Total kWh 103.5
+2021-06-22 09:00:01.315678 - Publishing: GivEnergy/SA2047G098/Energy/Total/Battery Throughput Total kWh 1755.0
+2021-06-22 09:00:01.316829 - Publishing: GivEnergy/SA2047G098/Energy/Total/AC Charge Energy Total kWh 502.5
+2021-06-22 09:00:01.317648 - Publishing: GivEnergy/SA2047G098/Energy/Total/Import Energy Total kWh 1938.0
+2021-06-22 09:00:01.318367 - Publishing: GivEnergy/SA2047G098/Energy/Total/Invertor Energy Total kWh 1485.9
+2021-06-22 09:00:01.363902 - Publishing: GivEnergy/SA2047G098/Energy/Total/PV Energy Total kWh 1191.1
+2021-06-22 09:00:01.368399 - Publishing: GivEnergy/SA2047G098/Energy/Total/Load Energy Total kWh 2817.9
+2021-06-22 09:00:01.371913 - Publishing: GivEnergy/SA2047G098/Energy/Total/Battery Charge Energy Total kWh 901.4
+2021-06-22 09:00:01.373162 - Publishing: GivEnergy/SA2047G098/Energy/Total/Battery Discharge Energy Total kWh 853.6
+2021-06-22 09:00:01.376162 - Publishing: GivEnergy/SA2047G098/Energy/Total/Self Consumption Energy Total kWh 1087.6
+2021-06-22 09:00:01.377374 - Publishing: GivEnergy/SA2047G098/Energy/Today/Battery Throughput Today kWh 5.3
+2021-06-22 09:00:01.378678 - Publishing: GivEnergy/SA2047G098/Energy/Today/PV Energy Today kWh 0.5
+2021-06-22 09:00:01.400643 - Publishing: GivEnergy/SA2047G098/Energy/Today/Import Energy Today kWh 4.9
+2021-06-22 09:00:01.401440 - Publishing: GivEnergy/SA2047G098/Energy/Today/Export Energy Today kWh 0.0
+2021-06-22 09:00:01.402219 - Publishing: GivEnergy/SA2047G098/Energy/Today/AC Charge Energy Today kWh 3.6
+2021-06-22 09:00:01.402971 - Publishing: GivEnergy/SA2047G098/Energy/Today/Invertor Energy Today kWh 2.3
+2021-06-22 09:00:01.403691 - Publishing: GivEnergy/SA2047G098/Energy/Today/Battery Charge Energy Today kWh 3.4
+2021-06-22 09:00:01.404307 - Publishing: GivEnergy/SA2047G098/Energy/Today/Battery Discharge Energy Today kWh 1.9
+2021-06-22 09:00:01.404839 - Publishing: GivEnergy/SA2047G098/Energy/Today/Load Energy Today kWh 3.6
+2021-06-22 09:00:01.405449 - Publishing: GivEnergy/SA2047G098/Energy/Today/Self Consumption Energy Today kWh 0.5
+2021-06-22 09:00:01.406090 - Publishing: GivEnergy/SA2047G098/Power/PV Power 267
+2021-06-22 09:00:01.406624 - Publishing: GivEnergy/SA2047G098/Power/Grid Power 17
+2021-06-22 09:00:01.407172 - Publishing: GivEnergy/SA2047G098/Power/Import Power 0
+2021-06-22 09:00:01.407705 - Publishing: GivEnergy/SA2047G098/Power/Export Power 17
+2021-06-22 09:00:01.417836 - Publishing: GivEnergy/SA2047G098/Power/EPS Power 0
+2021-06-22 09:00:01.418444 - Publishing: GivEnergy/SA2047G098/Power/Invertor Power 2507
+2021-06-22 09:00:01.418972 - Publishing: GivEnergy/SA2047G098/Power/Load Power 2480
+2021-06-22 09:00:01.419964 - Publishing: GivEnergy/SA2047G098/Power/Self Consumption Power 2480
+2021-06-22 09:00:01.428383 - Publishing: GivEnergy/SA2047G098/Power/Battery Power 2566
+2021-06-22 09:00:01.429600 - Publishing: GivEnergy/SA2047G098/Power/Charge Power 0
+2021-06-22 09:00:01.431893 - Publishing: GivEnergy/SA2047G098/Power/Discharge Power 2566
+2021-06-22 09:00:01.440744 - Publishing: GivEnergy/SA2047G098/Power/SOC 20
+2021-06-22 09:00:01.447307 - Publishing: GivEnergy/SA2047G098/Power/Flows/Solar to House 267
+2021-06-22 09:00:01.448491 - Publishing: GivEnergy/SA2047G098/Power/Flows/Solar to Battery 0
+2021-06-22 09:00:01.449841 - Publishing: GivEnergy/SA2047G098/Power/Flows/Solar to Grid 0
+2021-06-22 09:00:01.450965 - Publishing: GivEnergy/SA2047G098/Power/Flows/Battery to House 2549
+2021-06-22 09:00:01.456981 - Publishing: GivEnergy/SA2047G098/Power/Flows/Grid to Battery 0
+2021-06-22 09:00:01.459172 - Publishing: GivEnergy/SA2047G098/Power/Flows/Grid to House 0
+2021-06-22 09:00:01.461262 - Publishing: GivEnergy/SA2047G098/Power/Flows/Battery to Grid 17
+2021-06-22 09:00:01.463876 - ----------------------------getCombinedStats complete taking 0:00:01.878278 seconds------------
+2021-06-22 09:00:01.466742 - Running getModesandTimes
+2021-06-22 09:00:01.466961 - Getting All Holding Registers
+2021-06-22 09:00:01.469773 - TCP Call no: 1 to read 60 register(s) starting from reg: 0
+2021-06-22 09:00:01.910163 - Sending command: 59590001001C010241423132333435363738000000000000000800030000003C0a44
+2021-06-22 09:00:03.412651 - Error: timed out
+2021-06-22 09:00:03.418382 - TCP Call no: 2 to read 60 register(s) starting from reg: 0
+2021-06-22 09:00:03.425762 - Sending command: 59590001001C010241423132333435363738000000000000000800030000003C0a44
+2021-06-22 09:00:04.933499 - Error: timed out
+2021-06-22 09:00:04.934359 - TCP Call no: 3 to read 60 register(s) starting from reg: 0
+2021-06-22 09:00:04.940411 - Sending command: 59590001001C010241423132333435363738000000000000000800030000003C0a44
+2021-06-22 09:00:06.446931 - Error: timed out
+2021-06-22 09:00:06.447855 - Error reading 60 register(s) 0 from 03
+2021-06-22 09:00:06.452352 - TCP Call no: 1 to read 60 register(s) starting from reg: 60
+2021-06-22 09:00:06.843513 - Sending command: 59590001001C01024142313233343536373800000000000000080003003C003C0684
+2021-06-22 09:00:08.140382 - Returned Data is: 59590001009e010257463230333647383738000000000000008a000353413230343747303938003c003c05dc001e001e07300ab4125c144e007e001b0018001c07300a3c12891450007e00340002001c06db0b15125c14500ab40000000000000000000000000000000000000000006401f4000110e016da00000000000000000000000000000000000000060001000400320032000000040000002d0000000000000fd5
+2021-06-22 09:00:08.140883 - Invertor Type is: Hybrid
+2021-06-22 09:00:08.141474 - Success reading 60 register(s) 60 from 03--05dc001e001e07300ab4125c144e007e001b0018001c07300a3c12891450007e00340002001c06db0b15125c14500ab40000000000000000000000000000000000000000006401f4000110e016da00000000000000000000000000000000000000060001000400320032000000040000002d000000000000
+2021-06-22 09:00:08.142958 - Error retrieving holding registers: missing or empty registers
+2021-06-22 09:00:08.143666 - ----------------------------getModesandTimes complete taking 0:00:06.679583 seconds------------
+2021-06-22 09:00:08.144108 - ----------------------------Ended taking 0:00:08.557861 seconds------------

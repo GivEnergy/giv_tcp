@@ -13,10 +13,17 @@ from datetime import datetime
 from GivLUT import GiV_Reg_LUT
 from settings import GiV_Settings
 
+class HA_Sensor:
+  name=""
+  statetopic=""
+  device_class=""
+
+
 class GivTCP:
   Invertor_Type=""
   invertorIP= GiV_Settings.invertorIP
-  dataloggerSN= GiV_Settings.dataloggerSN
+  dataloggerSN= "AB12345678"  #GiV_Settings.dataloggerSN
+  SN=''
   MQTT_Address=GiV_Settings.MQTT_Address
   if GiV_Settings.MQTT_Username=='':
       MQTTCredentials=False
@@ -25,6 +32,10 @@ class GivTCP:
       MQTT_Username=GiV_Settings.MQTT_Username
       MQTT_Password=GiV_Settings.MQTT_Password
 
+  def HADiscovery():
+    disco_prefix='homeassistant/'
+    rootTopic='GivEnergy/'+GivTCP.dataloggerSN+'/'
+      
   def debug(input):
     if GiV_Settings.debug.lower() == "true":
       sourceFile = open(GiV_Settings.Debug_File_Location + 'read_debug.log','a')
@@ -52,11 +63,11 @@ class GivTCP:
   
   def multi_MQTT_publish(array):   #Recieve multiple payloads with Topics and publish in a single MQTT connection
     mqtt.Client.connected_flag=False        			#create flag in class
-    client=mqtt.Client("GivEnergy_"+GivTCP.dataloggerSN)
+    client=mqtt.Client("GivEnergy_"+GivTCP.SN)
 
     if GiV_Settings.MQTT_Topic=="":
         GivTCP.debug ("No user defined MQTT Topic")
-        rootTopic='GivEnergy/'+GivTCP.dataloggerSN+'/'
+        rootTopic='GivEnergy/'+GivTCP.SN+'/'
     else:
         GivTCP.debug ("User defined MQTT Topic found"+ GiV_Settings.MQTT_Topic)
         rootTopic=GiV_Settings.MQTT_Topic+'/'
@@ -82,11 +93,11 @@ class GivTCP:
 
   def publish_to_MQTT(topic,payload):
       mqtt.Client.connected_flag=False        			#create flag in class
-      client=mqtt.Client("GivEnergy_"+GivTCP.dataloggerSN)
+      client=mqtt.Client("GivEnergy_"+GivTCP.SN)
 
       if GiV_Settings.MQTT_Topic=="":
           GivTCP.debug ("No user defined MQTT Topic")
-          rootTopic='GivEnergy/'+GivTCP.dataloggerSN+'/'
+          rootTopic='GivEnergy/'+GivTCP.SN+'/'
       else:
           GivTCP.debug ("User defined MQTT Topic found"+ GiV_Settings.MQTT_Topic)
           rootTopic=GiV_Settings.MQTT_Topic+'/'
@@ -198,10 +209,11 @@ class GivTCP:
     if len(data)== (stepInt*2)+44:	#do not return if data length does not match
       GivTCP.debug ('Returned Data is: '+data.hex())  
       #Get Invertor Type
-      SN = data[28:38].decode()[0:2]
-      if SN=="CE":
+      GivTCP.SN = data[28:38].decode()
+      iType=GivTCP.SN[0:2]
+      if iType=="CE":
         GivTCP.Invertor_Type="AC"
-      elif SN=="ED":
+      elif iType=="ED":
         GivTCP.Invertor_Type="Gen 2"
       else:
         GivTCP.Invertor_Type="Hybrid"
