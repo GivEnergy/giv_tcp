@@ -15,8 +15,8 @@ def find_Invertor(target_ip):
     result = srp(packet, timeout=3, verbose=0)[0]
     # a list of clients, we will fill this in the upcoming loop
     for sent, received in result:
+        #print("IP=",received.psrc,"and MAC= ",received.hwsrc)
         if received.hwsrc[0:8]=="34:ea:e7" or received.hwsrc[0:8]=="98:d8:63":
-            #print("IP=",received.psrc,"and MAC= ",received.hwsrc)
             return received.psrc
 
 def long2net(arg):
@@ -48,7 +48,6 @@ for network, netmask, _, interface, address, _ in scapy.config.conf.route.routes
         continue
     net = to_CIDR_notation(network, netmask)
     if net:
-        print("Scanning:",net)
         invIP=find_Invertor(net)
         if invIP!= None and invIP!=" ":
             print (invIP)
