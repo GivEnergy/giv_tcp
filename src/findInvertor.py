@@ -48,6 +48,7 @@ for network, netmask, _, interface, address, _ in scapy.config.conf.route.routes
         continue
     net = to_CIDR_notation(network, netmask)
     if net:
+        print("Scanning:",net)
         invIP=find_Invertor(net)
         if invIP!= None and invIP!=" ":
             print (invIP)

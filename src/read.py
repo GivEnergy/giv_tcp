@@ -52,6 +52,7 @@ def getCombinedStats():
     emptycount=0
     multi_output={}
     inputRegNum=60
+    hasExtraReg=False
     GivTCP.debug("Getting All Input Registers Data")
 
     #Grab Energy data
@@ -69,7 +70,6 @@ def getCombinedStats():
             GivTCP.debug("FW does have extra registers: ("+str(GivTCP.Invertor_Type)+": " + str(fw)+")")
             hasExtraReg=True
     else:
-        hasExtraReg=False
         GivTCP.debug("FW does NOT have extra registers: "+str(GivTCP.Invertor_Type))
 
     if hasExtraReg:
