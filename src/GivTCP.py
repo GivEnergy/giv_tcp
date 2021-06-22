@@ -13,17 +13,11 @@ from datetime import datetime
 from GivLUT import GiV_Reg_LUT
 from settings import GiV_Settings
 
-class HA_Sensor:
-  name=""
-  statetopic=""
-  device_class=""
-
-
 class GivTCP:
   Invertor_Type=""
   invertorIP= GiV_Settings.invertorIP
   dataloggerSN= "AB12345678"  #GiV_Settings.dataloggerSN
-  SN=''
+  SN=""
   MQTT_Address=GiV_Settings.MQTT_Address
   if GiV_Settings.MQTT_Username=='':
       MQTTCredentials=False
