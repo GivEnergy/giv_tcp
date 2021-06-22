@@ -21,4 +21,4 @@ printf "    output=\"$OUTPUT\"\n" >> settings.py
 printf "    debug=\"$DEBUG\"\n" >> settings.py
 printf "    Debug_File_Location=\"$DEBUG_FILE_LOCATION\"\n" >> settings.py
 
-#gunicorn -w 3 -b :6345 REST:giv_api
+gunicorn -w 3 -b :6345 REST:giv_api
