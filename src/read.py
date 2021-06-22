@@ -11,13 +11,24 @@ if GiV_Settings.Print_Raw_Registers.lower()=="true":
     Print_Raw=True
     
 def getTimeslots():
-    timeslots={}
+    holding_registers={}
     jsonout={}
     GivTCP.debug("Getting TimeSlot data")
     #Grab Timeslots
-    timeslots=GivTCP.read_register('44','03','02')
-    timeslots.update(GivTCP.read_register('56','03','02'))
-    timeslots.update(GivTCP.read_register('94','03','02'))
+    holding_registers=GivTCP.read_register('44','03','02')
+    holding_registers.update(GivTCP.read_register('56','03','02'))
+    holding_registers.update(GivTCP.read_register('94','03','02'))
+
+    timeslots={}
+    GivTCP.debug("Getting TimeSlot data")
+    timeslots['Discharge start time slot 1']=holding_registers[GiV_Reg_LUT.holding_register_LUT.get(56)[0]+"(56)"]
+    timeslots['Discharge end time slot 1']=holding_registers[GiV_Reg_LUT.holding_register_LUT.get(57)[0]+"(57)"]
+    timeslots['Discharge start time slot 2']=holding_registers[GiV_Reg_LUT.holding_register_LUT.get(44)[0]+"(44)"]
+    timeslots['Discharge end time slot 2']=holding_registers[GiV_Reg_LUT.holding_register_LUT.get(45)[0]+"(45)"]
+    timeslots['Charge start time slot 1']=holding_registers[GiV_Reg_LUT.holding_register_LUT.get(94)[0]+"(94)"]
+    timeslots['Charge end time slot 1']=holding_registers[GiV_Reg_LUT.holding_register_LUT.get(95)[0]+"(95)"]
+
+
     if len(timeslots)==6:
         if GiV_Settings.output.lower()=="mqtt":
             GivTCP.debug("Publishing to Timeslot MQTT")
