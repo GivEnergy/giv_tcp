@@ -2,3 +2,4 @@ Flask
 gunicorn
 paho-mqtt
 crccheck
+scapy
