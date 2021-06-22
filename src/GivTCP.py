@@ -69,14 +69,14 @@ class GivTCP:
         GivTCP.debug ("No user defined MQTT Topic")
         rootTopic='GivEnergy/'+GivTCP.SN+'/'
     else:
-        GivTCP.debug ("User defined MQTT Topic found"+ GiV_Settings.MQTT_Topic)
+        GivTCP.debug ("User defined MQTT Topic found: "+ GiV_Settings.MQTT_Topic)
         rootTopic=GiV_Settings.MQTT_Topic+'/'
 
     if GivTCP.MQTTCredentials:
         client.username_pw_set(GivTCP.MQTT_Username,GivTCP.MQTT_Password)
     client.on_connect=GivTCP.on_connect     			#bind call back function
     client.loop_start()
-    GivTCP.debug ("Connecting to broker "+ GivTCP.MQTT_Address)
+    GivTCP.debug ("Connecting to broker: "+ GivTCP.MQTT_Address)
     client.connect(GivTCP.MQTT_Address)
     while not client.connected_flag:        			#wait in loop
         GivTCP.debug ("In wait loop")
