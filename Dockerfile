@@ -14,8 +14,7 @@ RUN pip install -r requirements.txt
 # copy the content of the local src directory to the working directory
 COPY src/ .
 
-ENV SERIAL_NUMBER="XXXXXXXX"
-ENV INVERTOR_IP="192.168.1.1"
+ENV INVERTOR_IP=""
 ENV PRINT_RAW="False"
 ENV MQTT_ADDRESS=""
 ENV MQTT_USERNAME=""
