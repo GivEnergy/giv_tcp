@@ -6,7 +6,7 @@ rm settings.py	# remove settings.py in case it exists
 printf "class GiV_Settings:\n" >> settings.py
 if [$INVERTOR_IP=""]
 then
-    outputString=$(python3 /config/giv_tcp/src/test.py)
+    outputString=$(python3 findInvertor.py)
     printf "    invertorIP=\"$outputString\"\n" >> settings.py
 else
     printf "    invertorIP=\"$INVERTOR_IP\"\n" >> settings.py
