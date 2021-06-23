@@ -29,7 +29,13 @@ printf "    output=\"$OUTPUT\"\n" >> settings.py
 printf "    debug=\"$DEBUG\"\n" >> settings.py
 printf "    Debug_File_Location=\"$DEBUG_FILE_LOCATION\"\n" >> settings.py
 
-echo 'Starting Gunicorn on port 6345'
-gunicorn -w 3 -b :6345 REST:giv_api     #Use for on-demand read and control
+echo Starting Gunicorn on port 6345
+gunicorn -w 3 -b :6345 REST:giv_api &     #Use for on-demand read and control
+
+if [ "$MQTT_PORT" = "127.0.0.1"]        #Only run Mosquitto if its using local broker
+then
+    echo Starting Mosquitto on port "$MQTT_PORT"
+    /usr/sbin/mosquitto -p "$MQTT_PORT"         #Run local MQTT brker as default
+fi
 
 #python3 sched.py       #Use to run periodically and push to MQTT
