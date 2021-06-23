@@ -6,8 +6,15 @@ rm settings.py	# remove settings.py in case it exists
 printf "class GiV_Settings:\n" >> settings.py
 if [ -z "$INVERTOR_IP" ]
 then
-    echo 'IP not set in ENV, scanning network...'
-    outputString=`python3 findInvertor.py`
+    for i in 1 2 3
+    do
+        echo 'IP not set in ENV, scanning network...'
+        outputString=`python3 findInvertor.py`
+        if [ ! -z "$outputString" ]
+        then
+            break
+    done
+
     if [ -z "$outputString" ]
     then
         echo 'No invertor found... Please add into ENV manually'
@@ -35,7 +42,8 @@ gunicorn -w 3 -b :6345 REST:giv_api &     #Use for on-demand read and control
 if [ "$MQTT_ADDRESS" = "127.0.0.1" ]        #Only run Mosquitto if its using local broker
 then
     echo Starting Mosquitto on port "$MQTT_PORT"
-    /usr/sbin/mosquitto -p "$MQTT_PORT"         #Run local MQTT brker as default
+    /usr/sbin/mosquitto -p "$MQTT_PORT" &        #Run local MQTT brker as default
 fi
 
-#python3 sched.py       #Use to run periodically and push to MQTT
+echo 'Running Invertor read loop every 10s...'
+python3 sched.py       #Use to run periodically and push to MQTT
