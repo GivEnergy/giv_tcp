@@ -1,9 +1,12 @@
 #Script to periodically execute the runALL function every 10s, to be used with MQTT for unattended publishing
 import schedule
 import time
+import sys
 from read import runAll
 
-schedule.every(10).seconds.do(runAll)
+loop_timer=int(sys.argv[1])
+print (loop_timer)
+schedule.every(loop_timer).seconds.do(runAll)
 
 while True:
     schedule.run_pending()
