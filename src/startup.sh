@@ -8,11 +8,12 @@ if [ -z "$INVERTOR_IP" ]
 then
     for i in 1 2 3
     do
-        echo 'IP not set in ENV, scanning network...'
+        echo 'IP not set in ENV, scanning network attempt ' "$i"
         outputString=`python3 findInvertor.py`
         if [ ! -z "$outputString" ]
         then
             break
+        fi
     done
 
     if [ -z "$outputString" ]
