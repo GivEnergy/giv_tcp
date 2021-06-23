@@ -18,6 +18,10 @@ class GivTCP:
   invertorIP= GiV_Settings.invertorIP
   dataloggerSN= "AB12345678"  #GiV_Settings.dataloggerSN
   SN=""
+  if GiV_Settings.MQTT_Port=='':
+      MQTT_Port=1883
+  else:
+      MQTT_Port=int(GiV_Settings.MQTT_Port)
   MQTT_Address=GiV_Settings.MQTT_Address
   if GiV_Settings.MQTT_Username=='':
       MQTTCredentials=False
@@ -71,7 +75,7 @@ class GivTCP:
     client.on_connect=GivTCP.on_connect     			#bind call back function
     client.loop_start()
     GivTCP.debug ("Connecting to broker: "+ GivTCP.MQTT_Address)
-    client.connect(GivTCP.MQTT_Address)
+    client.connect(GivTCP.MQTT_Address,port=GivTCP.MQTT_Port)
     while not client.connected_flag:        			#wait in loop
         GivTCP.debug ("In wait loop")
         time.sleep(0.2)
@@ -101,7 +105,7 @@ class GivTCP:
       client.on_connect=GivTCP.on_connect     			#bind call back function
       client.loop_start()
       GivTCP.debug ("Connecting to broker "+ GivTCP.MQTT_Address)
-      client.connect(GivTCP.MQTT_Address)
+      client.connect(GivTCP.MQTT_Address, port=GivTCP.MQTT_Address)
       while not client.connected_flag:        			#wait in loop
           GivTCP.debug ("In wait loop")
           time.sleep(0.2)
