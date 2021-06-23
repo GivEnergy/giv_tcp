@@ -47,7 +47,7 @@ for network, netmask, _, interface, address, _ in scapy.config.conf.route.routes
     if interface != interface_to_scan and interface.startswith('docker') or interface.startswith('br-'):
         continue
     net = to_CIDR_notation(network, netmask)
-    if net:
+    if net[0:7]!="169.254":
         invIP=find_Invertor(net)
         if invIP!= None and invIP!=" ":
             print (invIP)
