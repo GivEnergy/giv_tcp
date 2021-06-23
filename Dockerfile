@@ -1,7 +1,7 @@
 # set base image (host OS)
 FROM python:rc-alpine
 
-RUN apk --no-cache add mosquitto mosquitto-clients
+RUN apk --no-cache add mosquitto
 
 # set the working directory in the container
 WORKDIR /app
