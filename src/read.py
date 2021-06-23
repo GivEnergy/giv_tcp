@@ -65,19 +65,18 @@ def getCombinedStats():
         fw=batt_fw[GiV_Reg_LUT.holding_register_LUT.get(21)[0]+"(21)"]
         if GivTCP.Invertor_Type=="Hybrid" and fw>=449:
             GivTCP.debug("FW does have extra registers: ("+str(GivTCP.Invertor_Type)+": " + str(fw)+")")
+            input_registers.update(GivTCP.read_register('180','04','2'))    #Get v2.6 input Registers
             hasExtraReg=True
-        elif GivTCP.Invertor_Type=="AC" and fw>=533:
+            inputRegNum=62
+        elif GivTCP.Invertor_Type=="AC":
             GivTCP.debug("FW does have extra registers: ("+str(GivTCP.Invertor_Type)+": " + str(fw)+")")
+            input_registers.update(GivTCP.read_register('105','04','2'))    #Get v2.6 input Registers
             hasExtraReg=True
+            inputRegNum=62
         else:
-            GivTCP.debug("FW does NOT have extra registers: "+str(GivTCP.Invertor_Type))
+            GivTCP.debug("FW does NOT have extra registers: ("+str(GivTCP.Invertor_Type)+": "+ str(fw)+")")
     else:
         GivTCP.debug("FW does NOT have extra registers: "+str(GivTCP.Invertor_Type))
-
-    if hasExtraReg:
-        GivTCP.debug("Getting Extra Input Registers Data")
-        input_registers.update(GivTCP.read_register('180','04','4'))    #Get v2.6 input Registers
-        inputRegNum=64
 
     if Print_Raw:
         multi_output['raw/input']=input_registers
@@ -149,11 +148,11 @@ def getCombinedStats():
             if input_registers[GiV_Reg_LUT.input_register_LUT.get(44)[0]+"(44)"]<100:
                 energy_today_output['Invertor Energy Today kWh']=round(input_registers[GiV_Reg_LUT.input_register_LUT.get(44)[0]+"(44)"],2)
             if hasExtraReg:
-                if input_registers[GiV_Reg_LUT.input_register_LUT.get(183)[0]+"(183)"]<100:	#Cap output at 100kWh in a single day
-                    energy_today_output['Battery Charge Energy Today kWh']=input_registers[GiV_Reg_LUT.input_register_LUT.get(183)[0]+"(183)"]
+                if input_registers[GiV_Reg_LUT.input_register_LUT.get(36)[0]+"(36)"]<100:	#Cap output at 100kWh in a single day
+                    energy_today_output['Battery Charge Energy Today kWh']=input_registers[GiV_Reg_LUT.input_register_LUT.get(36)[0]+"(36)"]
             if hasExtraReg:
-                if input_registers[GiV_Reg_LUT.input_register_LUT.get(182)[0]+"(182)"]<100:
-                    energy_today_output['Battery Discharge Energy Today kWh']=input_registers[GiV_Reg_LUT.input_register_LUT.get(182)[0]+"(182)"]
+                if input_registers[GiV_Reg_LUT.input_register_LUT.get(37)[0]+"(37)"]<100:
+                    energy_today_output['Battery Discharge Energy Today kWh']=input_registers[GiV_Reg_LUT.input_register_LUT.get(37)[0]+"(37)"]
 
             if GivTCP.Invertor_Type.lower()=="hybrid":
                 energy_today_output['Load Energy Today kWh']=round((energy_today_output['Invertor Energy Today kWh']-energy_today_output['AC Charge Energy Today kWh'])-(energy_today_output['Export Energy Today kWh']-energy_today_output['Import Energy Today kWh']),3)
@@ -394,16 +393,12 @@ def extraRegCheck():
     extrareg={}
     energy_today_output={}
     energy_total_output={}
-    extrareg=GivTCP.read_register('180','04','4') #Get v2.6 input Registers
+    extrareg=GivTCP.read_register('105','04','2') #Get v2.6 input Registers
     GivTCP.debug ("Extrareg is:" + str(extrareg))
     GivTCP.debug ("Extrareg is:" + str(len(extrareg))+" registers long")
     if len(extrareg)==4:
-        if extrareg[GiV_Reg_LUT.input_register_LUT.get(183)[0]+"(183)"]<100:	#Cap output at 100kWh in a single day
-            energy_today_output['Battery Charge Energy Today kWh']=extrareg[GiV_Reg_LUT.input_register_LUT.get(183)[0]+"(183)"]
-        if extrareg[GiV_Reg_LUT.input_register_LUT.get(182)[0]+"(182)"]<100:
-            energy_today_output['Battery Discharge Energy Today kWh']=extrareg[GiV_Reg_LUT.input_register_LUT.get(182)[0]+"(182)"]
-        energy_total_output['Battery Charge Energy Total kWh']=extrareg[GiV_Reg_LUT.input_register_LUT.get(181)[0]+"(181)"]
-        energy_total_output['Battery Discharge Energy Total kWh']=extrareg[GiV_Reg_LUT.input_register_LUT.get(180)[0]+"(180)"]
+        energy_total_output['Battery Charge Energy Total kWh']=extrareg[GiV_Reg_LUT.input_register_LUT.get(105)[0]+"(105)"]
+        energy_total_output['Battery Discharge Energy Total kWh']=extrareg[GiV_Reg_LUT.input_register_LUT.get(106)[0]+"(106)"]
     else:
         GivTCP.debug("Error retrieving extra input register")
 
