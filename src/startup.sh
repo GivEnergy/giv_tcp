@@ -4,7 +4,7 @@
 rm settings.py	# remove settings.py in case it exists
 
 printf "class GiV_Settings:\n" >> settings.py
-if [ $INVERTOR_IP='' ]
+if [ -z "$INVERTOR_IP" ]
 then
     echo 'IP not set in ENV, scanning network...'
     outputString=`python3 findInvertor.py`
