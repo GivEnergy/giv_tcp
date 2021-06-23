@@ -24,9 +24,12 @@ printf "    MQTT_Address=\"$MQTT_ADDRESS\"\n" >> settings.py
 printf "    MQTT_Username=\"$MQTT_USERNAME\"\n" >> settings.py
 printf "    MQTT_Password=\"$MQTT_PASSWORD\"\n" >> settings.py
 printf "    MQTT_Topic=\"$MQTT_TOPIC\"\n" >> settings.py
+printf "    MQTT_Port=\"$MQTT_PORT\"\n" >> settings.py
 printf "    output=\"$OUTPUT\"\n" >> settings.py
 printf "    debug=\"$DEBUG\"\n" >> settings.py
 printf "    Debug_File_Location=\"$DEBUG_FILE_LOCATION\"\n" >> settings.py
 
 echo 'Starting Gunicorn on port 6345'
-gunicorn -w 3 -b :6345 REST:giv_api
+gunicorn -w 3 -b :6345 REST:giv_api     #Use for on-demand read and control
+
+#python3 sched.py       #Use to run periodically and push to MQTT

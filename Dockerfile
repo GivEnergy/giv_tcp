@@ -1,5 +1,5 @@
 # set base image (host OS)
-FROM python:3.9-slim-buster
+FROM python:rc-alpine
 
 # set the working directory in the container
 WORKDIR /app
@@ -20,6 +20,7 @@ ENV MQTT_ADDRESS=""
 ENV MQTT_USERNAME=""
 ENV MQTT_PASSWORD=""
 ENV MQTT_TOPIC=""
+ENV MQTT_PORT=""
 ENV OUTPUT=""
 ENV DEBUG="False"
 ENV DEBUG_FILE_LOCATION=""
