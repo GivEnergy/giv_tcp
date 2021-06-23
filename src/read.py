@@ -62,19 +62,20 @@ def getCombinedStats():
     if GivTCP.Invertor_Type!="Gen 2":
         GivTCP.debug("Checking fw version number")
         batt_fw=GivTCP.read_register('19','03','3')
-        fw=batt_fw[GiV_Reg_LUT.holding_register_LUT.get(21)[0]+"(21)"]
-        if GivTCP.Invertor_Type=="Hybrid" and fw>=449:
-            GivTCP.debug("FW does have extra registers: ("+str(GivTCP.Invertor_Type)+": " + str(fw)+")")
-            input_registers.update(GivTCP.read_register('180','04','2'))    #Get v2.6 input Registers
-            hasExtraReg=True
-            inputRegNum=62
-        elif GivTCP.Invertor_Type=="AC":
-            GivTCP.debug("FW does have extra registers: ("+str(GivTCP.Invertor_Type)+": " + str(fw)+")")
-            input_registers.update(GivTCP.read_register('105','04','2'))    #Get v2.6 input Registers
-            hasExtraReg=True
-            inputRegNum=62
-        else:
-            GivTCP.debug("FW does NOT have extra registers: ("+str(GivTCP.Invertor_Type)+": "+ str(fw)+")")
+        if len(batt_fw)==3:
+            fw=batt_fw[GiV_Reg_LUT.holding_register_LUT.get(21)[0]+"(21)"]
+            if GivTCP.Invertor_Type=="Hybrid" and fw>=449:
+                GivTCP.debug("FW does have extra registers: ("+str(GivTCP.Invertor_Type)+": " + str(fw)+")")
+                input_registers.update(GivTCP.read_register('180','04','2'))    #Get v2.6 input Registers
+                hasExtraReg=True
+                inputRegNum=62
+            elif GivTCP.Invertor_Type=="AC":
+                GivTCP.debug("FW does have extra registers: ("+str(GivTCP.Invertor_Type)+": " + str(fw)+")")
+                input_registers.update(GivTCP.read_register('105','04','2'))    #Get v2.6 input Registers
+                hasExtraReg=True
+                inputRegNum=62
+            else:
+                GivTCP.debug("FW does NOT have extra registers: ("+str(GivTCP.Invertor_Type)+": "+ str(fw)+")")
     else:
         GivTCP.debug("FW does NOT have extra registers: "+str(GivTCP.Invertor_Type))
 
