@@ -175,7 +175,10 @@ class GivTCP:
     elif dataformat=="hex":
       value=value
     elif dataformat=="ascii":
-      value=bytearray.fromhex(value).decode()
+      try:
+        value=bytearray.fromhex(value).decode()
+      except:
+        value=value
     else:
       value=round(int(value,16) * int(scaling),2)
     return value
