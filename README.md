@@ -122,9 +122,8 @@ ARM: https://hub.docker.com/repository/docker/britkat/giv_tcp-arm
 
 | ENV Name                | Example       |  Description                      |
 | ----------------------- | ------------- |  -------------------------------- |
-| INVERTOR_IP |192.168.10.1 | Required |
-| SERIAL_NUMBER | AB12345678 | Required |
-| OUTPUT | MQTT | Optional (Include MQTT to publish to MQTT as well as JSON return) |
+| INVERTOR_IP |192.168.10.1 | Docker container can auto detect Invertors if running on your host network. If this fails then add the IP manually to this ENV |
+| MQTT_OUTPUT | True | Optional (Include MQTT to publish to MQTT as well as JSON return) |
 | MQTT_ADDRESS | 192.168.10.2 | Optional (but required if OUTPUT is set to MQTT) |
 | MQTT_USERNAME | bob | Optional |
 | MQTT_PASSWORD | cat | Optional |
