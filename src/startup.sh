@@ -28,12 +28,13 @@ else
     printf "    invertorIP=\"$INVERTOR_IP\"\n" >> settings.py
 fi
 printf "    Print_Raw_Registers=\"$PRINT_RAW\"\n" >> settings.py
+printf "    MQTT_Output=\"$MQTT_OUTPUT\"\n" >> settings.py
 printf "    MQTT_Address=\"$MQTT_ADDRESS\"\n" >> settings.py
 printf "    MQTT_Username=\"$MQTT_USERNAME\"\n" >> settings.py
 printf "    MQTT_Password=\"$MQTT_PASSWORD\"\n" >> settings.py
 printf "    MQTT_Topic=\"$MQTT_TOPIC\"\n" >> settings.py
 printf "    MQTT_Port=\"$MQTT_PORT\"\n" >> settings.py
-printf "    output=\"$OUTPUT\"\n" >> settings.py
+printf "    JSON_Output=\"$JSON_OUTPUT\"\n" >> settings.py
 printf "    debug=\"$DEBUG\"\n" >> settings.py
 printf "    Debug_File_Location=\"$DEBUG_FILE_LOCATION\"\n" >> settings.py
 
