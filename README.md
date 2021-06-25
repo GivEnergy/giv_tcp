@@ -22,10 +22,10 @@ GivTCP can be executed in a number of ways and can be set to output data in mult
 
 | Method         |  Description                    |
 | ---------------| ------------------------------- |
-| [CLI](#cli) | Execute the script at the command line and pass the relevant function and parameters as per the details below |
+| [CLI](#cli-usage) | Execute the script at the command line and pass the relevant function and parameters as per the details below |
 | [CLI through Node-Read](#cli-through-node-red) | Using the Exec node in Node-Red to call the script in the same way as above. This allows automation of script calling within a wider automated system |
 | [REST Service](#restful-service) | Deployed inside a Docker container a RESTful service calls the relevant functions using the details below through GET and POST http methods |
-| [Docker container](#docker) | A docker container is availble which has all code and pre-requisites installed and out of the box is set to auto-discover the invertor and publish to an internal MQTT broker. This can be changed to publish to an external broker by modifying the container ENV variables |
+| [Docker container](#docker) | A docker container is available which has all code and pre-requisites installed and out of the box is set to auto-discover the invertor and publish to an internal MQTT broker. This can be changed to publish to an external broker by modifying the container ENV variables |
 
 # Output formats:
 ## MQTT
@@ -98,10 +98,10 @@ To execute this you must download the src files for this project, place them in 
   
 Example Node-Red flows are vailable here: XXXX
 
-## RESTful Service
+# RESTful Service
 GivTCP provides a wrapper function REST.py which uses Flask to expose the read and control functions as RESTful http calls. To utilise this service you will need to either use a WSGI serivce such as gunicorn or use the pre-built Docker container
 
-### Gunicorn
+## Gunicorn
 Ensure Gunicorn is installed by running:  
 
 `pip install gunicorn`  
@@ -112,7 +112,7 @@ Then call the service by initiating the following command from the same director
 
 (where the 127.0.0.1:6345 is the IP address and port you want to bind the service to)  
 
-### Docker
+## Docker
 The docker container can be downloaded at the Docker hub here:   
 x86:https://hub.docker.com/repository/docker/britkat/giv_tcp  
 ARM: https://hub.docker.com/repository/docker/britkat/giv_tcp-arm  
@@ -120,6 +120,8 @@ ARM: https://hub.docker.com/repository/docker/britkat/giv_tcp-arm
 * Download the correct docker image for your achitecture (tested on x86 and rpi3)
 * Create a container with the relevant ENV variables below (mimicing the settings.py file)
 * Set the container to auto-restart to ensure reliability
+* Out of the box the default setup enables local MQTT broker and REST service
+* For Invertor autodiscovery to function your container must run on the "Host" network within docker (not Bridge). If it fails then you will need to manually add in INVERTOR_IP to the env variables
 
 | ENV Name                | Example       |  Description                      |
 | ----------------------- | ------------- |  -------------------------------- |
