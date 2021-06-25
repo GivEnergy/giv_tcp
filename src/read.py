@@ -6,7 +6,7 @@ from GivJson import GivJSON
 from GivLUT import GiV_Reg_LUT
 from datetime import datetime
 from settings import GiV_Settings
-from influx import GivInflux
+#from influx import GivInflux
 
 
 Print_Raw=False
@@ -389,9 +389,9 @@ def publishOutput(output):
     if GiV_Settings.JSON_Output.lower()=="true":
         GivTCP.debug("Pushing JSON output")
         GivJSON.output_JSON(output)
-    if GiV_Settings.Influx_Output.lower()=="true":
-        GivTCP.debug("Pushing JSON output")
-        GivInflux.publish(output)
+#    if GiV_Settings.Influx_Output.lower()=="true":
+#        GivTCP.debug("Pushing output to Influx")
+#        GivInflux.publish(output)
 
 def extraRegCheck():
     extrareg={}
