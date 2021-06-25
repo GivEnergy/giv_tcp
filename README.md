@@ -25,6 +25,7 @@ GivTCP can be executed in a number of ways and can be set to output data in mult
 | CLI | Execute the script at the command line and pass the relevant function and parameters as per the details below |
 | CLI through Node-Read | Using the Exec node in Node-Red to call the script in the same way as above. This allows automation of script calling within a wider automated system |
 | REST Service | Deployed inside a Docker container a RESTful service calls the relevant functions using the details below through GET and POST http methods |
+| Docker container | A docker container is availble which has all code and pre-requisites installed and out of the box is set to auto-discover the invertor and publish to an internal MQTT broker. This can be changed to publish to an external broker by modifying the container ENV variables |
 
 # Output formats:
 ## MQTT
@@ -123,14 +124,14 @@ ARM: https://hub.docker.com/repository/docker/britkat/giv_tcp-arm
 | ENV Name                | Example       |  Description                      |
 | ----------------------- | ------------- |  -------------------------------- |
 | INVERTOR_IP |192.168.10.1 | Docker container can auto detect Invertors if running on your host network. If this fails then add the IP manually to this ENV |
-| MQTT_OUTPUT | True | Optional (Include MQTT to publish to MQTT as well as JSON return) |
-| MQTT_ADDRESS | 192.168.10.2 | Optional (but required if OUTPUT is set to MQTT) |
+| MQTT_OUTPUT | True | Optional if set to True then MQTT_ADDRESS is required |
+| MQTT_ADDRESS | 127.0.0.1 | Optional (but required if OUTPUT is set to MQTT) |
 | MQTT_USERNAME | bob | Optional |
 | MQTT_PASSWORD | cat | Optional |
-| MQTT_TOPIC | GivEnergy/Data | Optional |
-| DEBUG | True | Optional - if True then will write debug info to sepcified file location (default is same directory as the py files) |
+| MQTT_TOPIC | GivEnergy/Data | Optional - default is Givenergy.<serial number>|
+| DEBUG | False | Optional - if True then will write debug info to sepcified file location (default is same directory as the py files) |
 | DEBUG_FILE_LOCATION | /usr/pi/data | Optional  |
-| PRINT_RAW | True | Optional - If set to True the raw register values will be returned alongside the normal data |
+| PRINT_RAW | False | Optional - If set to True the raw register values will be returned alongside the normal data |
 
 
 ### Calling RESTFul Functions
