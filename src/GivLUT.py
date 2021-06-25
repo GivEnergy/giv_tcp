@@ -162,8 +162,8 @@ class GiV_Reg_LUT:
         33: ["Grid Energy IN totalL", "hex", 0.1],
         34: ["Unknown", "unsigned", 1],
         35: ["TotalLoad energy today", "unsigned", 0.1],
-        36: ["Charger energy today", "unsigned", 0.1],
-        37: ["Discharger energy today", "unsigned", 0.1],
+        36: ["Battery Charge Energy Today", "unsigned", 0.1],
+        37: ["Battery Discharge Energy Today", "unsigned", 0.1],
         38: ["wCountdown", "unsigned", 1],
         39: ["fault Code High 16bits", "hex", 1],
         40: ["fault Code Low 16bits", "hex", 1],
@@ -187,8 +187,8 @@ class GiV_Reg_LUT:
         58: ["wGridPortCurr", "unsigned", 0.01],
         59: ["Battery percent", "unsigned", 1],
         60: ["Reg60", "unsigned", 1],
+        105: ["Battery Discharge Energy Total AC", "unsigned", 0.1],
+        106: ["Battery Charge Energy Total AC", "unsigned", 0.1],
         180: ["Battery Discharge Energy Total", "unsigned", 0.1],
-        181: ["Battery Charge Energy Total", "unsigned", 0.1],
-        182: ["Battery Discharge Energy Today", "unsigned", 0.1],
-        183: ["Battery Charge Energy Today", "unsigned", 0.1]
+        181: ["Battery Charge Energy Total", "unsigned", 0.1]
     }

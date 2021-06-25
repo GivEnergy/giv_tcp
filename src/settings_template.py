@@ -1,11 +1,21 @@
 class GiV_Settings:
     invertorIP=""           #Required - IP address of Invertor on local network
-#    dataloggerSN=""        # NO LONGER REQUIRED - Wifi/GPS S/N found here: https://www.givenergy.cloud/GivManage/setting/deviceMenu/inverterList
-    output=""               #Required - "MQTT" or "JSON"
-    MQTT_Address=""         #Required (if output=MQTT) -  IP address of MQTT broker (local or remote)
-    MQTT_Username=""        #Optional - Username for MQTT broker
+#MQTT Output Settings
+    MQTT_Output=""               #True or False
+    MQTT_Address=""         #IP address of MQTT broker (local or remote)
+    MQTT_Username=""            #Optional - Username for MQTT broker
     MQTT_Password=""        #Optional - Password for MQTT broker
     MQTT_Topic=""           #Optional - Root topic for all MQTT messages. Defaults to "GivEnergy/<SerialNumber> 
-    debug=""                #Optional - Enables verbose debug "True" or "False".
+    MQTT_Port=""
+#Debug Settings
+    debug="True"                #Optional - Enables verbose debug "True" or "False".
     Debug_File_Location=""  #Optional - Location of debug file (Default is root directory)
-    Print_Raw_Registers=""  #Optional - "True" prints all raw registers to the MQTT broker
+    Print_Raw_Registers="False"  #Optional - "True" prints all raw registers to the MQTT broker
+#Influx Settings
+    Influx_Output="False"       #True or False
+    influxURL="http://localhost:8086"
+    influxToken=""
+    influxBucket="GivEnergy"
+    influxOrg="GivTCP"
+#JSON Settings
+    JSON_Output="False"     #True or False

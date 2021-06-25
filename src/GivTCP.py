@@ -1,14 +1,11 @@
 # -*- coding: utf-8 -*-
 import socket
-import json
 import sys
 import codecs
 from crccheck.crc import Crc16, CrcModbus
 import subprocess
 import re
-import paho.mqtt.client as mqtt
 import time
-import json
 from datetime import datetime
 from GivLUT import GiV_Reg_LUT
 from settings import GiV_Settings
@@ -18,17 +15,6 @@ class GivTCP:
   invertorIP= GiV_Settings.invertorIP
   dataloggerSN= "AB12345678"  #GiV_Settings.dataloggerSN
   SN=""
-  if GiV_Settings.MQTT_Port=='':
-      MQTT_Port=1883
-  else:
-      MQTT_Port=int(GiV_Settings.MQTT_Port)
-  MQTT_Address=GiV_Settings.MQTT_Address
-  if GiV_Settings.MQTT_Username=='':
-      MQTTCredentials=False
-  else:
-      MQTTCredentials=True
-      MQTT_Username=GiV_Settings.MQTT_Username
-      MQTT_Password=GiV_Settings.MQTT_Password
 
   def HADiscovery():
     disco_prefix='homeassistant/'
@@ -45,76 +31,6 @@ class GivTCP:
 
   def str_to_hex(s):
       return ''.join([('0'+hex(ord(c)).split('x')[1])[-2:] for c in s])
-
-  def on_connect(client, userdata, flags, rc):
-    if rc==0:
-        client.connected_flag=True #set flag
-        GivTCP.debug("connected OK Returned code="+str(rc))
-        #client.subscribe(topic)
-    else:
-        GivTCP.debug("Bad connection Returned code= "+str(rc))
-
-  def output_JSON(array):
-    json_object = json.dumps(array, indent = 4)  
-    print(json_object)
-    GivTCP.debug("JSON output: "+ json_object)
-  
-  def multi_MQTT_publish(array):   #Recieve multiple payloads with Topics and publish in a single MQTT connection
-    mqtt.Client.connected_flag=False        			#create flag in class
-    client=mqtt.Client("GivEnergy_"+GivTCP.SN)
-
-    if GiV_Settings.MQTT_Topic=="":
-        GivTCP.debug ("No user defined MQTT Topic")
-        rootTopic='GivEnergy/'+GivTCP.SN+'/'
-    else:
-        GivTCP.debug ("User defined MQTT Topic found: "+ GiV_Settings.MQTT_Topic)
-        rootTopic=GiV_Settings.MQTT_Topic+'/'
-
-    if GivTCP.MQTTCredentials:
-        client.username_pw_set(GivTCP.MQTT_Username,GivTCP.MQTT_Password)
-    client.on_connect=GivTCP.on_connect     			#bind call back function
-    client.loop_start()
-    GivTCP.debug ("Connecting to broker: "+ GivTCP.MQTT_Address)
-    client.connect(GivTCP.MQTT_Address,port=GivTCP.MQTT_Port)
-    while not client.connected_flag:        			#wait in loop
-        GivTCP.debug ("In wait loop")
-        time.sleep(0.2)
-    for p_load in array:
-      payload=array[p_load]
-      for reg in payload:
-        GivTCP.debug('Publishing: '+rootTopic+p_load+'/'+str(reg)+" "+str(payload[reg]))
-        client.publish(rootTopic+p_load+'/'+reg,payload[reg])
-    client.loop_stop()                      			#Stop loop
-    client.disconnect()
-    return client
-
-
-  def publish_to_MQTT(topic,payload):
-      mqtt.Client.connected_flag=False        			#create flag in class
-      client=mqtt.Client("GivEnergy_"+GivTCP.SN)
-
-      if GiV_Settings.MQTT_Topic=="":
-          GivTCP.debug ("No user defined MQTT Topic")
-          rootTopic='GivEnergy/'+GivTCP.SN+'/'
-      else:
-          GivTCP.debug ("User defined MQTT Topic found"+ GiV_Settings.MQTT_Topic)
-          rootTopic=GiV_Settings.MQTT_Topic+'/'
-
-      if GivTCP.MQTTCredentials:
-          client.username_pw_set(GivTCP.MQTT_Username,GivTCP.MQTT_Password)
-      client.on_connect=GivTCP.on_connect     			#bind call back function
-      client.loop_start()
-      GivTCP.debug ("Connecting to broker "+ GivTCP.MQTT_Address)
-      client.connect(GivTCP.MQTT_Address, port=GivTCP.MQTT_Address)
-      while not client.connected_flag:        			#wait in loop
-          GivTCP.debug ("In wait loop")
-          time.sleep(0.2)
-      for reg in payload:
-          GivTCP.debug('Publishing: '+rootTopic+topic+'/'+str(reg)+" "+str(payload[reg]))
-          client.publish(rootTopic+topic+'/'+reg,payload[reg])
-      client.loop_stop()                      			#Stop loop
-      client.disconnect()
-      return client
 
   def hex_to_signed(source):
     """Convert a string hex value to a signed hexidecimal value.

@@ -4,3 +4,5 @@ paho-mqtt
 crccheck
 scapy
 schedule
+rx
+influxdb_client

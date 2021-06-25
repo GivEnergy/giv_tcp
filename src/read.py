@@ -1,9 +1,12 @@
 # -*- coding: utf-8 -*-
 import sys
 from GivTCP import GivTCP
+from mqtt import GivMQTT
+from GivJson import GivJSON
 from GivLUT import GiV_Reg_LUT
 from datetime import datetime
 from settings import GiV_Settings
+from influx import GivInflux
 
 
 Print_Raw=False
@@ -30,13 +33,7 @@ def getTimeslots():
 
 
     if len(timeslots)==6:
-        if GiV_Settings.output.lower()=="mqtt":
-            GivTCP.debug("Publishing to Timeslot MQTT")
-            GivTCP.publish_to_MQTT("Timeslots",timeslots)
-        elif GiV_Settings.output.lower()=="json":
-            GivTCP.debug("Pushing JSON output")
-            jsonout["Timeslots"]=timeslots
-            GivTCP.output_JSON(jsonout)
+        publishOutput(multi_output)
     else:
         GivTCP.debug("Error retrieving Timeslot registers")
     return(timeslots)
@@ -76,6 +73,8 @@ def getCombinedStats():
                 inputRegNum=62
             else:
                 GivTCP.debug("FW does NOT have extra registers: ("+str(GivTCP.Invertor_Type)+": "+ str(fw)+")")
+        else:
+            GivTCP.debug("Could not check firmware version so skipping extraReg")
     else:
         GivTCP.debug("FW does NOT have extra registers: "+str(GivTCP.Invertor_Type))
 
@@ -130,8 +129,13 @@ def getCombinedStats():
             else:
                 energy_total_output['Load Energy Total kWh']=round((energy_total_output['Invertor Energy Total kWh']-energy_total_output['AC Charge Energy Total kWh'])-(energy_total_output['Export Energy Total kWh']-energy_total_output['Import Energy Total kWh'])+energy_total_output['PV Energy Total kWh'],3)
 
-            if hasExtraReg: energy_total_output['Battery Charge Energy Total kWh']=input_registers[GiV_Reg_LUT.input_register_LUT.get(181)[0]+"(181)"]
-            if hasExtraReg: energy_total_output['Battery Discharge Energy Total kWh']=input_registers[GiV_Reg_LUT.input_register_LUT.get(180)[0]+"(180)"]
+            if hasExtraReg and GivTCP.Invertor_Type=="Hybrid": 
+                energy_total_output['Battery Charge Energy Total kWh']=input_registers[GiV_Reg_LUT.input_register_LUT.get(181)[0]+"(181)"]
+                energy_total_output['Battery Discharge Energy Total kWh']=input_registers[GiV_Reg_LUT.input_register_LUT.get(180)[0]+"(180)"]
+            if hasExtraReg and GivTCP.Invertor_Type=="AC": 
+                energy_total_output['Battery Charge Energy Total kWh']=input_registers[GiV_Reg_LUT.input_register_LUT.get(106)[0]+"(106)"]
+                energy_total_output['Battery Discharge Energy Total kWh']=input_registers[GiV_Reg_LUT.input_register_LUT.get(105)[0]+"(105)"]
+
             energy_total_output['Self Consumption Energy Total kWh']=round(energy_total_output['PV Energy Total kWh']-energy_total_output['Export Energy Total kWh'],2)
 
     #Energy Today Figures
@@ -148,12 +152,10 @@ def getCombinedStats():
                 energy_today_output['AC Charge Energy Today kWh']=round(input_registers[GiV_Reg_LUT.input_register_LUT.get(35)[0]+"(35)"],2)
             if input_registers[GiV_Reg_LUT.input_register_LUT.get(44)[0]+"(44)"]<100:
                 energy_today_output['Invertor Energy Today kWh']=round(input_registers[GiV_Reg_LUT.input_register_LUT.get(44)[0]+"(44)"],2)
-            if hasExtraReg:
-                if input_registers[GiV_Reg_LUT.input_register_LUT.get(36)[0]+"(36)"]<100:	#Cap output at 100kWh in a single day
-                    energy_today_output['Battery Charge Energy Today kWh']=input_registers[GiV_Reg_LUT.input_register_LUT.get(36)[0]+"(36)"]
-            if hasExtraReg:
-                if input_registers[GiV_Reg_LUT.input_register_LUT.get(37)[0]+"(37)"]<100:
-                    energy_today_output['Battery Discharge Energy Today kWh']=input_registers[GiV_Reg_LUT.input_register_LUT.get(37)[0]+"(37)"]
+            if input_registers[GiV_Reg_LUT.input_register_LUT.get(36)[0]+"(36)"]<100:	#Cap output at 100kWh in a single day
+                energy_today_output['Battery Charge Energy Today kWh']=input_registers[GiV_Reg_LUT.input_register_LUT.get(36)[0]+"(36)"]
+            if input_registers[GiV_Reg_LUT.input_register_LUT.get(37)[0]+"(37)"]<100:
+                energy_today_output['Battery Discharge Energy Today kWh']=input_registers[GiV_Reg_LUT.input_register_LUT.get(37)[0]+"(37)"]
 
             if GivTCP.Invertor_Type.lower()=="hybrid":
                 energy_today_output['Load Energy Today kWh']=round((energy_today_output['Invertor Energy Today kWh']-energy_today_output['AC Charge Energy Today kWh'])-(energy_today_output['Export Energy Today kWh']-energy_today_output['Import Energy Today kWh']),3)
@@ -276,12 +278,7 @@ def getCombinedStats():
             multi_output["Power/Flows"]=power_flow_output
             #print (multi_output)
 
-            if GiV_Settings.output.lower()=="mqtt":
-                GivTCP.debug("Publish all to MQTT")
-                GivTCP.multi_MQTT_publish(multi_output)
-            elif GiV_Settings.output.lower()=="json":
-                GivTCP.debug("Pushing JSON output")
-                GivTCP.output_JSON(multi_output)
+            publishOutput(multi_output)
 
         except:
             e = sys.exc_info()
@@ -376,12 +373,7 @@ def getModesandTimes():
                 multi_output["Invertor Details"]=invertor
                 
 
-            if GiV_Settings.output.lower()=="mqtt":
-                GivTCP.debug("Publish all to MQTT")
-                GivTCP.multi_MQTT_publish(multi_output)
-            elif GiV_Settings.output.lower()=="json":
-                GivTCP.debug("Pushing JSON output")
-                GivTCP.output_JSON(multi_output)
+            publishOutput(multi_output)
 
         except:
             e = sys.exc_info()
@@ -389,6 +381,17 @@ def getModesandTimes():
     else:
         GivTCP.debug("Error retrieving holding registers: missing or empty registers")
     return (multi_output)
+
+def publishOutput(output):
+    if GiV_Settings.MQTT_Output.lower()=="true":
+        GivTCP.debug("Publish all to MQTT")
+        GivMQTT.multi_MQTT_publish(output)
+    if GiV_Settings.JSON_Output.lower()=="true":
+        GivTCP.debug("Pushing JSON output")
+        GivJSON.output_JSON(output)
+    if GiV_Settings.Influx_Output.lower()=="true":
+        GivTCP.debug("Pushing JSON output")
+        GivInflux.publish(output)
 
 def extraRegCheck():
     extrareg={}
@@ -403,14 +406,7 @@ def extraRegCheck():
     else:
         GivTCP.debug("Error retrieving extra input register")
 
-    if GiV_Settings.output.lower()=="mqtt":
-        GivTCP.debug("Publish all to MQTT")
-        GivTCP.multi_MQTT_publish(energy_today_output)
-        GivTCP.multi_MQTT_publish(energy_total_output)
-    elif GiV_Settings.output.lower()=="json":
-        GivTCP.debug("Pushing JSON output")
-        GivTCP.output_JSON(energy_today_output)
-        GivTCP.output_JSON(energy_total_output)
+    publishOutput(energy_total_output)
     return (energy_today_output)
 
 def runAll():
@@ -418,15 +414,15 @@ def runAll():
     starttime = datetime.now()
     GivTCP.debug("----------------------------Starting----------------------------")
     GivTCP.debug("Running getCombinedStats")
-    if GiV_Settings.output.lower()=="json": print("[")
+    if GiV_Settings.JSON_Output.lower()=="true": print("[")
     multi_output=getCombinedStats()
     gCSTime = datetime.now()
     duration=gCSTime-starttime
     GivTCP.debug("----------------------------getCombinedStats complete taking "+str(duration)+" seconds------------")
     GivTCP.debug("Running getModesandTimes")
-    if GiV_Settings.output.lower()=="json": print(",")
+    if GiV_Settings.JSON_Output.lower()=="true": print(",")
     multi_output.update(getModesandTimes())
-    if GiV_Settings.output.lower()=="json": print("]")
+    if GiV_Settings.JSON_Output.lower()=="true": print("]")
     now = datetime.now()
     duration=now-gCSTime
     GivTCP.debug("----------------------------getModesandTimes complete taking "+str(duration)+" seconds------------")

@@ -1,4 +1,5 @@
-#Ignore seetings file
+#Ignore settings file
 settings.py
+settings.old
 __pycache__
 test.py
