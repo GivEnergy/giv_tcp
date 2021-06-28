@@ -13,12 +13,8 @@ from settings import GiV_Settings
 class GivTCP:
   Invertor_Type=""
   invertorIP= GiV_Settings.invertorIP
-  dataloggerSN= "AB12345678"  #GiV_Settings.dataloggerSN
+  dataloggerSN= "AB12345678"  #Dummy Serial number
   SN=""
-
-  def HADiscovery():
-    disco_prefix='homeassistant/'
-    rootTopic='GivEnergy/'+GivTCP.dataloggerSN+'/'
       
   def debug(input):
     if GiV_Settings.debug.lower() == "true":
@@ -79,15 +75,17 @@ class GivTCP:
       GivTCP.debug("Connected to Invertor on: "+str(server_address))
       GivTCP.debug("Sending command: "+command)
       sock.send(bytearray.fromhex(command))
-    except socket.gaierror:
-        GivTCP.debug ("Address-related error connecting to server")
+    except socket.gaierror as e:
+        GivTCP.debug ("Address-related error connecting to server:" + str(e))
         return()
-    except socket.error:
-        GivTCP.debug ("Connection error")
+    except socket.error as e:
+        GivTCP.debug ("Connection error:" + str(e))
         return()
-    except socket.timeout:
-        GivTCP.debug ("Timeout error")
+    except socket.timeout as e:
+        GivTCP.debug ("Timeout error: " + str(e))
         return()
+    except as e:
+        GivTCP.debug ("Unknown error: " + str(e))
     sock.settimeout(1.5)
     data=''
     # filtering  data package
@@ -115,8 +113,10 @@ class GivTCP:
       if rr!='':
           val=GivTCP.registerValueConvert(register, rr, "03")
           if int(val)==int(value):
+            GivTCP.debug('Register'+str(register) +'successfully set to '+str(val))
             result="Success"
           else:
+            GivTCP.debug('Register'+str(register) +'failed to set to '+str(val))
             result="Failure"
     else:
       result="Failure"
@@ -162,6 +162,8 @@ class GivTCP:
                 final_output[key]=val
             j=j+1
             if j>=stepInt: break  #Handle cases where invertor send erroneous additional data
+      else:
+        GivTCP.debug('Error reading data. Invertor returned empty data')
     else:
       GivTCP.debug('Error reading '+inputStep+' register(s) ' +inputRegister + ' from ' + inputFunction)
 
