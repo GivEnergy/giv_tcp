@@ -77,6 +77,8 @@ class GivTCP:
       GivTCP.debug("Connecting to Invertor on: "+str(server_address))
       sock.connect(server_address)
       GivTCP.debug("Connected to Invertor on: "+str(server_address))
+      GivTCP.debug("Sending command: "+command)
+      sock.send(bytearray.fromhex(command))
     except socket.gaierror:
         GivTCP.debug ("Address-related error connecting to server")
         return()
@@ -86,8 +88,6 @@ class GivTCP:
     except socket.timeout:
         GivTCP.debug ("Timeout error")
         return()
-    GivTCP.debug("Sending command: "+command)
-    sock.send(bytearray.fromhex(command))
     sock.settimeout(1.5)
     data=''
     # filtering  data package
