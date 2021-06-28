@@ -37,6 +37,8 @@ printf "    MQTT_Port=\"$MQTT_PORT\"\n" >> settings.py
 printf "    JSON_Output=\"$JSON_OUTPUT\"\n" >> settings.py
 printf "    debug=\"$DEBUG\"\n" >> settings.py
 printf "    Debug_File_Location=\"$DEBUG_FILE_LOCATION\"\n" >> settings.py
+printf "    Influx_Output=\"$INFLUX_OUTPUT\"\n" >> settings.py
+printf "    HA_Output=\"$HA_OUTPUT\"\n" >> settings.py
 
 if [ "$MQTT_ADDRESS" = "127.0.0.1" ]        #Only run Mosquitto if its using local broker
 then

@@ -19,3 +19,7 @@ class GiV_Settings:
     influxOrg="GivTCP"
 #JSON Settings
     JSON_Output="False"     #True or False
+#Home Assistant Settings
+    HA_Output="False"
+    HA_url="http://IPADDRESS:PORT/api"
+    HA_token = ""
