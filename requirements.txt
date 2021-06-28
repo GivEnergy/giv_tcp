@@ -6,3 +6,5 @@ scapy
 schedule
 rx
 influxdb_client
+homeassistant_api
+simplejson
