@@ -7,6 +7,7 @@ from GivLUT import GiV_Reg_LUT
 from datetime import datetime
 from settings import GiV_Settings
 from influx import GivInflux
+from HomeAssist import GivHA
 
 
 Print_Raw=False
@@ -328,6 +329,8 @@ def getModesandTimes():
                 mode=3
             elif shallow_charge==4 and self_consumption==False and discharge_enable=="Active":
                 mode=4
+            if shallow_charge==4 and self_consumption==True and discharge_enable=="Active":
+                mode=5
             else:
                 mode="unknown"
             GivTCP.debug("Mode is: " + str(mode))
@@ -392,6 +395,10 @@ def publishOutput(output):
     if GiV_Settings.Influx_Output.lower()=="true":
         GivTCP.debug("Pushing output to Influx")
         GivInflux.publish(output)
+    if GiV_Settings.HA_Output.lower()=="true":
+        GivTCP.debug("Pushing output to HA")
+        GivHA.push(output)
+        
 
 def extraRegCheck():
     extrareg={}

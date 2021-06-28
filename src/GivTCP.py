@@ -55,10 +55,7 @@ class GivTCP:
     FILLER = '0000000000000008' #hex
     serial_number = GivTCP.str_to_hex(GivTCP.dataloggerSN) # datalogger sn hex
     socketMax=0
-    # Connect the socket to the port where the server is listening
-    sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-    server_address = (GivTCP.invertorIP, 8899)
-    sock.connect(server_address)
+
     stepInt=int(inputStep)
     if inputFunction=='06':
       responseDataSize=38
@@ -73,6 +70,22 @@ class GivTCP:
     crc = CrcModbus().process(bytearray.fromhex(inputFunctionHex + inputRegisterHex + inputStepHex)).finalhex()
     dataSize = GivTCP.int_to_hex_string(int(len( DEVICE_ADDRESS + DATALOGGER_FUNCTION_CODE + serial_number + FILLER + inputFunctionHex + inputRegisterHex + inputStepHex +crc)/2),16)
     command = HEAD + PROTOCOL_IDENTIFIER + dataSize + DEVICE_ADDRESS + DATALOGGER_FUNCTION_CODE + serial_number + FILLER + inputFunctionHex + inputRegisterHex + inputStepHex + crc
+    try:
+      # Connect the socket to the port where the server is listening
+      sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+      server_address = (GivTCP.invertorIP, 8899)
+      GivTCP.debug("Connecting to Invertor on: "+str(server_address))
+      sock.connect(server_address)
+      GivTCP.debug("Connected to Invertor on: "+str(server_address))
+    except socket.gaierror:
+        GivTCP.debug ("Address-related error connecting to server")
+        return()
+    except socket.error:
+        GivTCP.debug ("Connection error")
+        return()
+    except socket.timeout:
+        GivTCP.debug ("Timeout error")
+        return()
     GivTCP.debug("Sending command: "+command)
     sock.send(bytearray.fromhex(command))
     sock.settimeout(1.5)
