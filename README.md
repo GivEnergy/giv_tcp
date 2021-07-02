@@ -6,7 +6,6 @@ This project allows connection to the GivEnergy invertors via TCP Modbus. Access
 In basis of this project is a connection to a Modbus TCP server which runs on the wifi dongle, so all you need is somewhere to run the script on the same network. You will need the following to make it work:
 * GivEnergy Invertor properly commissioned and working
 * IP address of the invertor
-* Serial Number of the wifi/gps dongle (not the invertor) - which can be found on the portal: https://www.givenergy.cloud/GivManage/setting/deviceMenu/inverterList
 * Machine/Pi/VM running Python which has  pip modules installed as per the requirements.txt file:
    
 (To install these run `pip install -r requirements.txt`)
