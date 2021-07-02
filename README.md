@@ -7,15 +7,12 @@ In basis of this project is a connection to a Modbus TCP server which runs on th
 * GivEnergy Invertor properly commissioned and working
 * IP address of the invertor
 * Serial Number of the wifi/gps dongle (not the invertor) - which can be found on the portal: https://www.givenergy.cloud/GivManage/setting/deviceMenu/inverterList
-* Machine/Pi/VM running Python which has following pip modules installed:
-  * crccheck
-  * paho-mqtt
-  * Flask (optional is using the RESTful Service  
+* Machine/Pi/VM running Python which has  pip modules installed as per the requirements.txt file:
    
-(To install these run `pip install crccheck` , `pip install paho-mqtt` , `pip install Flask`)
+(To install these run `pip install -r requirements.txt`)
 
 # Settings
-A settings.py file is required in the root directory. Use the supplied settings_template.py and populate with the relevant details. Only InvertorIP and dataloggerSN are required as a minimum, but output should be selected to ensure the data is passed out as either JSON or MQTT. All other settings must be there but can be left blank if not needed.
+A settings.py file is required in the root directory. Use the supplied settings_template.py and populate with the relevant details. Only InvertorIP is required as a minimum, but output should be selected to ensure the data is passed out as either JSON or MQTT. All other settings must be there but can be left blank if not needed.
 
 # Execution of GivTCP
 GivTCP can be executed in a number of ways and can be set to output data in multiple formats. Exact usage is dependent on your use-case and needs:
