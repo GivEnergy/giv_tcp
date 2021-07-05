@@ -5,9 +5,6 @@ from GivLUT import GiV_Reg_LUT
 from datetime import datetime
 from settings import GiV_Settings
 
-
-
-
 Print_Raw=False
 if GiV_Settings.Print_Raw_Registers.lower()=="true":
     Print_Raw=True
