@@ -5,7 +5,6 @@ import sys
 from read import runAll
 
 loop_timer=int(sys.argv[1])
-print (loop_timer)
 schedule.every(loop_timer).seconds.do(runAll)
 
 while True:

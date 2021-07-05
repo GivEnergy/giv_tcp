@@ -16,7 +16,7 @@ def find_Invertor(target_ip):
     # a list of clients, we will fill this in the upcoming loop
     for sent, received in result:
         #print("IP=",received.psrc,"and MAC= ",received.hwsrc)
-        if received.hwsrc[0:8]=="34:ea:e7" or received.hwsrc[0:8]=="98:d8:63":
+        if received.hwsrc[0:8]=="34:ea:e7" or received.hwsrc[0:8]=="98:d8:63" or received.hwsrc[0:8]=="0e:93:9f":
             return received.psrc
 
 def long2net(arg):

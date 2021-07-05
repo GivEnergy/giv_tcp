@@ -49,6 +49,7 @@ class GivTCP:
     DEVICE_ADDRESS = '01' #hex
     DATALOGGER_FUNCTION_CODE = '02' #hex
     FILLER = '0000000000000008' #hex
+    SLAVE_ADDRESS = '32' #hex
     serial_number = GivTCP.str_to_hex(GivTCP.dataloggerSN) # datalogger sn hex
     socketMax=0
 
@@ -59,13 +60,14 @@ class GivTCP:
     else:
       responseDataSize = 38 + stepInt*2
       socketMax=164
-    inputFunctionHex =  GivTCP.int_to_hex_string(int(inputFunction),16)
+    inputFunctionHex =  GivTCP.int_to_hex_string(int(inputFunction),16)[-2:]
+    GivTCP.debug("InputFunction hex=: "+ inputFunctionHex)
     inputRegisterHex = GivTCP.int_to_hex_string(int(inputRegister),16)
     inputStepHex = GivTCP.int_to_hex_string(int(inputStep),16)
 
     crc = CrcModbus().process(bytearray.fromhex(inputFunctionHex + inputRegisterHex + inputStepHex)).finalhex()
     dataSize = GivTCP.int_to_hex_string(int(len( DEVICE_ADDRESS + DATALOGGER_FUNCTION_CODE + serial_number + FILLER + inputFunctionHex + inputRegisterHex + inputStepHex +crc)/2),16)
-    command = HEAD + PROTOCOL_IDENTIFIER + dataSize + DEVICE_ADDRESS + DATALOGGER_FUNCTION_CODE + serial_number + FILLER + inputFunctionHex + inputRegisterHex + inputStepHex + crc
+    command = HEAD + PROTOCOL_IDENTIFIER + dataSize + DEVICE_ADDRESS + DATALOGGER_FUNCTION_CODE + serial_number + FILLER + SLAVE_ADDRESS + inputFunctionHex + inputRegisterHex + inputStepHex + crc
     try:
       # Connect the socket to the port where the server is listening
       sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)

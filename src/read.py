@@ -1,13 +1,11 @@
 # -*- coding: utf-8 -*-
 import sys
 from GivTCP import GivTCP
-from mqtt import GivMQTT
-from GivJson import GivJSON
 from GivLUT import GiV_Reg_LUT
 from datetime import datetime
 from settings import GiV_Settings
-from influx import GivInflux
-from HomeAssist import GivHA
+
+
 
 
 Print_Raw=False
@@ -158,6 +156,8 @@ def getCombinedStats():
             if input_registers[GiV_Reg_LUT.input_register_LUT.get(37)[0]+"(37)"]<100:
                 energy_today_output['Battery Discharge Energy Today kWh']=input_registers[GiV_Reg_LUT.input_register_LUT.get(37)[0]+"(37)"]
 
+            energy_today_output['Import for Load Energy Today kWh']=input_registers[GiV_Reg_LUT.input_register_LUT.get(26)[0]+"(26)"] - input_registers[GiV_Reg_LUT.input_register_LUT.get(35)[0]+"(35)"]
+
             if GivTCP.Invertor_Type.lower()=="hybrid":
                 energy_today_output['Load Energy Today kWh']=round((energy_today_output['Invertor Energy Today kWh']-energy_today_output['AC Charge Energy Today kWh'])-(energy_today_output['Export Energy Today kWh']-energy_today_output['Import Energy Today kWh']),3)
             else:
@@ -271,14 +271,13 @@ def getCombinedStats():
             else:
                 power_flow_output['Battery to Grid']=0
 
-        #Publish to MQTT
-
+        #Combine all outputs
             multi_output["Energy/Total"]=energy_total_output
             multi_output["Energy/Today"]=energy_today_output
             multi_output["Power"]=power_output
             multi_output["Power/Flows"]=power_flow_output
-            #print (multi_output)
 
+        #Publish combined output according to settings
             publishOutput(multi_output)
 
         except:
@@ -387,15 +386,19 @@ def getModesandTimes():
 
 def publishOutput(output):
     if GiV_Settings.MQTT_Output.lower()=="true":
+        from mqtt import GivMQTT
         GivTCP.debug("Publish all to MQTT")
         GivMQTT.multi_MQTT_publish(output)
     if GiV_Settings.JSON_Output.lower()=="true":
+        from GivJson import GivJSON
         GivTCP.debug("Pushing JSON output")
         GivJSON.output_JSON(output)
     if GiV_Settings.Influx_Output.lower()=="true":
+        from influx import GivInflux
         GivTCP.debug("Pushing output to Influx")
         GivInflux.publish(output)
     if GiV_Settings.HA_Output.lower()=="true":
+        from HomeAssist import GivHA
         GivTCP.debug("Pushing output to HA")
         GivHA.push(output)
         
