@@ -67,10 +67,10 @@ def setChargeTarget(payload):
 def setBatteryReserve(payload):
     temp={}
     if type(payload) is not dict: payload=json.loads(payload)
-    params=json.loads(payload)
     target=payload['dischargeToPercent']
     #Only allow minimum of 2%
     if int(target)<4: target="4"
+    GivTCP.debug ("Setting battery reserve target to: " + target)
     targetresult=GivTCP.write_single_register(114,target)
     GivTCP.debug ("Battery Reserve setting was a: " + targetresult)
     temp['result']="Battery Reserve setting was a: " + targetresult
