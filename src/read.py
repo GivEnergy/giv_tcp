@@ -325,7 +325,7 @@ def getModesandTimes():
                 mode=3
             elif shallow_charge==4 and self_consumption==False and discharge_enable=="Active":
                 mode=4
-            if shallow_charge==4 and self_consumption==True and discharge_enable=="Active":
+            elif shallow_charge==4 and self_consumption==True and discharge_enable=="Active":
                 mode=5
             else:
                 mode="unknown"
