@@ -23,3 +23,4 @@ class GiV_Settings:
     HA_Output="False"
     HA_url="http://IPADDRESS:PORT/api"
     HA_token = ""
+    test

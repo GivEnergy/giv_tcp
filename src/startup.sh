@@ -38,7 +38,13 @@ printf "    JSON_Output=\"$JSON_OUTPUT\"\n" >> settings.py
 printf "    debug=\"$DEBUG\"\n" >> settings.py
 printf "    Debug_File_Location=\"$DEBUG_FILE_LOCATION\"\n" >> settings.py
 printf "    Influx_Output=\"$INFLUX_OUTPUT\"\n" >> settings.py
+printf "    influxURL=\"$INFLUX_URL\"\n" >> settings.py
+printf "    influxToken=\"$INFLUX_TOKEN\"\n" >> settings.py
+printf "    influxBucket=\"$INFLUX_BUCKET\"\n" >> settings.py
+printf "    influxOrg=\"$INFLUX_ORG\"\n" >> settings.py
 printf "    HA_Output=\"$HA_OUTPUT\"\n" >> settings.py
+printf "    HA_url=\"$HA_URL\"\n" >> settings.py
+printf "    HA_token=\"$HA_TOKEN\"\n" >> settings.py
 
 if [ "$MQTT_ADDRESS" = "127.0.0.1" ]        #Only run Mosquitto if its using local broker
 then
