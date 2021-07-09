@@ -78,6 +78,7 @@ def setBatteryReserve(payload):
 
 def setChargeSlot1(payload):
     temp={}
+    targetresult="Success"
     if type(payload) is not dict: payload=json.loads(payload)
     start=payload['start']
     end=payload['finish']
@@ -97,6 +98,7 @@ def setChargeSlot1(payload):
 
 def setChargeSlot2(payload):
     temp={}
+    targetresult="Success"
     if type(payload) is not dict: payload=json.loads(payload)
     start=payload['start']
     end=payload['finish']
@@ -116,6 +118,7 @@ def setChargeSlot2(payload):
 
 def setDischargeSlot1(payload):
     temp={}
+    targetresult="Success"
     if type(payload) is not dict: payload=json.loads(payload)
     start=payload['start']
     end=payload['finish']
@@ -135,6 +138,7 @@ def setDischargeSlot1(payload):
 
 def setDischargeSlot2(payload):
     temp={}
+    targetresult="Success"
     if type(payload) is not dict: payload=json.loads(payload)
     start=payload['start']
     end=payload['finish']
