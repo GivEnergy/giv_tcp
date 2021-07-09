@@ -86,7 +86,7 @@ def setChargeSlot1(payload):
         targetresult=GivTCP.write_single_register(116,target)
     startresult=GivTCP.write_single_register(94,start)
     endresult=GivTCP.write_single_register(95,end)
-        enableresult=GivTCP.write_single_register(96,1)     #enable charge flag automatically
+    enableresult=GivTCP.write_single_register(96,1)     #enable charge flag automatically
     if startresult=="Success" and endresult=="Success" and targetresult=="Success" and enableresult=="Success":
         GivTCP.debug ("Charge Time successfully set")
         temp['result']="Charge Time successfully set"
