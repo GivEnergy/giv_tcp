@@ -81,11 +81,12 @@ def setChargeSlot1(payload):
     if type(payload) is not dict: payload=json.loads(payload)
     start=payload['start']
     end=payload['finish']
-    target=payload['chargeToPercent']
+    if 'chargeToPercent' in payload.keys():
+        target=payload['chargeToPercent']
+        targetresult=GivTCP.write_single_register(116,target)
     startresult=GivTCP.write_single_register(94,start)
     endresult=GivTCP.write_single_register(95,end)
-    targetresult=GivTCP.write_single_register(116,target)
-    enableresult=GivTCP.write_single_register(96,1)     #enable charge flag automatically
+        enableresult=GivTCP.write_single_register(96,1)     #enable charge flag automatically
     if startresult=="Success" and endresult=="Success" and targetresult=="Success" and enableresult=="Success":
         GivTCP.debug ("Charge Time successfully set")
         temp['result']="Charge Time successfully set"
@@ -99,10 +100,11 @@ def setChargeSlot2(payload):
     if type(payload) is not dict: payload=json.loads(payload)
     start=payload['start']
     end=payload['finish']
-    target=payload['chargeToPercent']
+    if 'chargeToPercent' in payload.keys():
+        target=payload['chargeToPercent']
+        targetresult=GivTCP.write_single_register(116,target)
     startresult=GivTCP.write_single_register(31,start)
     endresult=GivTCP.write_single_register(32,end)
-    targetresult=GivTCP.write_single_register(116,target)
     enableresult=GivTCP.write_single_register(96,1)     #enable charge flag automatically
     if startresult=="Success" and endresult=="Success" and targetresult=="Success" and enableresult=="Success":
         GivTCP.debug ("Charge Time successfully set")
@@ -117,7 +119,9 @@ def setDischargeSlot1(payload):
     if type(payload) is not dict: payload=json.loads(payload)
     start=payload['start']
     end=payload['finish']
-    target=payload['dischargeToPercent']
+    if 'dischargeToPercent' in payload.keys():
+        target=payload['dischargeToPercent']
+        targetresult=GivTCP.write_single_register(116,target)
     startresult=GivTCP.write_single_register(56,start)
     endresult=GivTCP.write_single_register(57,end)
     targetresult=GivTCP.write_single_register(114,target)
@@ -134,7 +138,9 @@ def setDischargeSlot2(payload):
     if type(payload) is not dict: payload=json.loads(payload)
     start=payload['start']
     end=payload['finish']
-    target=payload['dischargeToPercent']
+    if 'dischargeToPercent' in payload.keys():
+        target=payload['dischargeToPercent']
+        targetresult=GivTCP.write_single_register(116,target)
     startresult=GivTCP.write_single_register(44,start)
     endresult=GivTCP.write_single_register(45,end)
     targetresult=GivTCP.write_single_register(114,target)
