@@ -59,9 +59,9 @@ Control is available through predefined functions. The format of the function ca
 | resumeDischargeSchedule | None          | Resumes the Discharging schedule  |
 | setChargeTarget         | {"chargeToPercent":"50"}  | Sets the Target charge SOC |
 | setBatteryReserve|{"dischargeToPercent":"5"}| Sets the Battery Reserve discharge cut-off limit|
-| setChargeSlot1|{"start":"0100","finish":"0400","chargeToPercent":"55")| Sets the time and target SOC of the first chargeslot. Times must be expressed in hhmm format. Enable flag show in the battery.api documentation is not needed |
-| setDischargeSlot1|{"start":"0100","finish":"0400","dischargeToPercent":"55")| Sets the time and target SOC of the first dischargeslot. Times must be expressed in hhmm format. Enable flag show in the battery.api documentation is not needed |
-| setDischargeSlot2|{"start":"0100","finish":"0400","dischargeToPercent":"55")| Sets the time and target SOC of the first dischargeslot. Times must be expressed in hhmm format.  Enable flag show in the battery.api documentation is not needed |
+| setChargeSlot1|{"start":"0100","finish":"0400","chargeToPercent":"55")| Sets the time and target SOC of the first chargeslot. Times must be expressed in hhmm format. Enable flag show in the battery.api documentation is not needed and chargeToPercent is optional|
+| setDischargeSlot1|{"start":"0100","finish":"0400","dischargeToPercent":"55")| Sets the time and target SOC of the first dischargeslot. Times must be expressed in hhmm format. Enable flag show in the battery.api documentation is not needed and dischargeToPercent is optional |
+| setDischargeSlot2|{"start":"0100","finish":"0400","dischargeToPercent":"55")| Sets the time and target SOC of the first dischargeslot. Times must be expressed in hhmm format.  Enable flag show in the battery.api documentation is not needed and dischargeToPercent is optional |
 |setBatteryMode|{"mode":"1"}| Sets battery operation mode. Mode value must be in the range 1-4|
 
 # CLI Usage
@@ -110,10 +110,9 @@ Then call the service by initiating the following command from the same director
 
 ## Docker
 The docker container can be downloaded at the Docker hub here:   
-x86:https://hub.docker.com/repository/docker/britkat/giv_tcp  
-ARM: https://hub.docker.com/repository/docker/britkat/giv_tcp-arm  
+https://hub.docker.com/repository/docker/britkat/giv_tcp-ma
   
-* Download the correct docker image for your achitecture (tested on x86 and rpi3)
+* Docker image is multi-architecture so docker should grab the correct version for your system (tested on x86 and rpi3)
 * Create a container with the relevant ENV variables below (mimicing the settings.py file)
 * Set the container to auto-restart to ensure reliability
 * Out of the box the default setup enables local MQTT broker and REST service
@@ -130,6 +129,13 @@ ARM: https://hub.docker.com/repository/docker/britkat/giv_tcp-arm
 | DEBUG | False | Optional - if True then will write debug info to sepcified file location (default is same directory as the py files) |
 | DEBUG_FILE_LOCATION | /usr/pi/data | Optional  |
 | PRINT_RAW | False | Optional - If set to True the raw register values will be returned alongside the normal data |
+| INFLUX_OUTPUT | False | Optional - Used to enable publishing of energy and power data to influx |
+| INFLUX_TOKEN |abcdefg123456789| Optional - If using influx this is the token generated from within influxdb itself |
+| INFLUX_BUCKET |giv_bucket| Optional - If using influx this is data bucket to use|
+| INFLUX_ORG |giv_tcp| Optional - If using influx this is the org that the token is assigned to |
+| HA_OUTPUT | False |Optional - Used to enable publishing of energy and power data to Home Assistant |
+| HA_URL |https://homeassistant.local:8123| URL of Home Assistant instance (noting correct use of IP or domain name, whichever works in your browser)|
+| HA_TOKEN |abcdefg123456789| Optional - If using Home Assistant this is the Long Lasting Token generated from within Home Assistant itself |
 
 
 ### Calling RESTFul Functions
