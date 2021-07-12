@@ -2,3 +2,9 @@ Flask
 gunicorn
 paho-mqtt
 crccheck
+scapy
+schedule
+rx
+influxdb_client
+homeassistant_api
+simplejson
