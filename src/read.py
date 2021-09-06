@@ -38,6 +38,7 @@ def getCombinedStats():
     energy_total_output={}
     energy_today_output={}
     input_registers={}
+    invertor={}
     batt_fw={}
     power_output={}
     power_flow_output={}
@@ -165,8 +166,12 @@ def getCombinedStats():
 
         #PV Power
             GivTCP.debug("Getting PV Power")
-            PV_power=input_registers[GiV_Reg_LUT.input_register_LUT.get(18)[0]+"(18)"]+input_registers[GiV_Reg_LUT.input_register_LUT.get(20)[0]+"(20)"]
+            PV_power_1=input_registers[GiV_Reg_LUT.input_register_LUT.get(18)[0]+"(18)"]
+            PV_power_2=input_registers[GiV_Reg_LUT.input_register_LUT.get(20)[0]+"(20)"]
+            PV_power=PV_power_1+PV_power_2
             if PV_power<15000:
+                power_output['PV Power String 1']= PV_power_1
+                power_output['PV Power String 2']= PV_power_2
                 power_output['PV Power']= PV_power
 
         #Grid Power
@@ -268,11 +273,15 @@ def getCombinedStats():
             else:
                 power_flow_output['Battery to Grid']=0
 
+        #Get Invertor Temperature
+            invertor['Invertor Temperature']=input_registers[GiV_Reg_LUT.input_register_LUT.get(41)[0]+"(41)"]
+
         #Combine all outputs
             multi_output["Energy/Total"]=energy_total_output
             multi_output["Energy/Today"]=energy_today_output
             multi_output["Power"]=power_output
             multi_output["Power/Flows"]=power_flow_output
+            multi_output["Invertor Details"]=invertor
 
         #Publish combined output according to settings
             publishOutput(multi_output)

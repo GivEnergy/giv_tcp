@@ -11,7 +11,7 @@ class GiV_Settings:
     debug="True"                #Optional - Enables verbose debug "True" or "False".
     Debug_File_Location=""  #Optional - Location of debug file (Default is root directory)
     Print_Raw_Registers="False"  #Optional - "True" prints all raw registers to the MQTT broker
-#Influx Settings
+#Influx Settings - Only works with Influx v2
     Influx_Output="False"       #True or False
     influxURL="http://localhost:8086"
     influxToken=""
@@ -20,6 +20,6 @@ class GiV_Settings:
 #JSON Settings
     JSON_Output="False"     #True or False
 #Home Assistant Settings
-    HA_Output="False"
-    HA_url="http://IPADDRESS:PORT/api"
-    HA_token = ""
+    HA_Output="False"       #True or False
+    HA_url="http://IPADDRESS"
+    HA_token = ""   #Create a long lasting Token in Homeassistant and paste here
