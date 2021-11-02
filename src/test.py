@@ -1,3 +1,4 @@
+# version 1.0
 import json
 import sys
 from homeassistant_api import Client

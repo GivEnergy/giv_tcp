@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+# version 1.0
 import sys
 import json
 from flask import Flask, json, request

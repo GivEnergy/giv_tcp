@@ -1,5 +1,6 @@
 #!/bin/sh
 #Only used for Docker Deployment
+# version 1.0
 
 FILE=/app/settings.py
 if [ -f "$FILE" ]

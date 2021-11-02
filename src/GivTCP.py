@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+# version 1.0
 import socket
 import sys
 import codecs

@@ -1,3 +1,4 @@
+# version 1.0
 from scapy.all import ARP, Ether, srp
 import scapy.config
 import scapy.layers.l2

@@ -1,3 +1,4 @@
+# version 1.0
 class GiV_Settings:
     invertorIP=""           #Required - IP address of Invertor on local network
 #MQTT Output Settings
