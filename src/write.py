@@ -56,6 +56,34 @@ def resumeDischargeSchedule():
     temp['result']="Resuming Discharge Schedule was a: " + result
     return json.dumps(temp)
 
+def pauseBatteryCharge():
+    temp={}
+    result=GivTCP.write_single_register(111,0)
+    GivTCP.debug ("Pausing Charge Schedule was a: "+result)
+    temp['result']="Pausing Charge Schedule was a: "+result
+    return json.dumps(temp)
+
+def resumeBatteryCharge():
+    temp={}
+    result=GivTCP.write_single_register(111,50)
+    GivTCP.debug ("Resuming Charge Schedule was a: "+ result)
+    temp['result']="Resuming Charge Schedule was a: "+ result
+    return json.dumps(temp)
+
+def pauseBatteryDischarge():
+    temp={}
+    result=GivTCP.write_single_register(112,0)
+    GivTCP.debug ("Pausing Charge Schedule was a: "+result)
+    temp['result']="Pausing Charge Schedule was a: "+result
+    return json.dumps(temp)
+
+def resumeBatteryDischarge():
+    temp={}
+    result=GivTCP.write_single_register(112,50)
+    GivTCP.debug ("Resuming Charge Schedule was a: "+ result)
+    temp['result']="Resuming Charge Schedule was a: "+ result
+    return json.dumps(temp)
+
 def setChargeTarget(payload):
     temp={}
     if type(payload) is not dict: payload=json.loads(payload)
