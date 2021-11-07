@@ -51,6 +51,22 @@ def pauseDischrgSchedule():
 def resumeDischrgSchedule():
     return wr.resumeDischargeSchedule()
 
+@giv_api.route('/pauseBatteryCharge', methods=['POST'])
+def pauseChrgSchedule():
+    return wr.pauseBatteryCharge()
+
+@giv_api.route('/resumeBatteryCharge', methods=['POST'])
+def resumeChrgSchedule():
+    return wr.resumeBatteryCharge()
+
+@giv_api.route('/pauseBatteryDischarge', methods=['POST'])
+def pauseChrgSchedule():
+    return wr.pauseBatteryDischarge()
+
+@giv_api.route('/resumeBatteryDischarge', methods=['POST'])
+def resumeChrgSchedule():
+    return wr.resumeBatteryDischarge()
+
 @giv_api.route('/setChargeTarget', methods=['POST'])
 def setChrgTarget():
     payload = request.get_json(silent=True, force=True)
