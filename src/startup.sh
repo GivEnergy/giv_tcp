@@ -10,6 +10,7 @@ else
     echo "$FILE does not exist"
     printf "class GiV_Settings:\n" >> settings.py
     if [ -z "$INVERTOR_IP" ]
+    echo 'IP not set in ENV'
     then
         for i in 1 2 3
         do
