@@ -105,6 +105,32 @@ def setBatteryReserve(payload):
     temp['result']="Battery Reserve setting was a: " + targetresult
     return json.dumps(temp)
 
+def setChargeRate(payload):
+    temp={}
+    if type(payload) is not dict: payload=json.loads(payload)
+    target=payload['chargeRate']
+    #Only allow max of 100%
+    target=int(target)*2
+    if target>100: target="100"
+    GivTCP.debug ("Setting battery charge rate to: " + target)
+    targetresult=GivTCP.write_single_register(111,target)
+    GivTCP.debug ("Battery charge rate setting was a: " + targetresult)
+    temp['result']="Battery charge rate setting was a: " + targetresult
+    return json.dumps(temp)
+
+def setDishargeRate(payload):
+    temp={}
+    if type(payload) is not dict: payload=json.loads(payload)
+    target=payload['dischargeRate']
+    #Only allow max of 100%
+    target=int(target)*2
+    if target>100: target="100"
+    GivTCP.debug ("Setting battery discharge rate to: " + target)
+    targetresult=GivTCP.write_single_register(112,target)
+    GivTCP.debug ("Battery discharge rate setting was a: " + targetresult)
+    temp['result']="Battery discharge rate setting was a: " + targetresult
+    return json.dumps(temp)
+
 def setChargeSlot1(payload):
     temp={}
     targetresult="Success"

@@ -77,6 +77,16 @@ def setBattReserve():
     payload = request.get_json(silent=True, force=True)
     return wr.setBatteryReserve(payload)
 
+@giv_api.route('/setChargeRate', methods=['POST'])
+def setChrgeRate():
+    payload = request.get_json(silent=True, force=True)
+    return wr.setChargeRate(payload)
+
+@giv_api.route('/setDishargeRate', methods=['POST'])
+def setDischrgeRate():
+    payload = request.get_json(silent=True, force=True)
+    return wr.setDishargeRate(payload)
+
 @giv_api.route('/setChargeSlot1', methods=['POST'])
 def setChrgSlot1():
     payload = request.get_json(silent=True, force=True)
