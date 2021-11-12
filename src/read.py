@@ -326,6 +326,19 @@ def getModesandTimes():
             else:
                 discharge_enable="Paused"
             GivTCP.debug("Shallow Charge= "+str(shallow_charge)+" Self Consumption= "+str(self_consumption)+" Discharge Enable= "+str(discharge_enable))
+    
+    #Get Charge/Discharge Active status
+            discharge_state=holding_registers[GiV_Reg_LUT.holding_register_LUT.get(112)[0]+"(112)"]
+            if discharge_state==True:
+                discharge_state="Active"
+            else:
+                discharge_state="Paused"
+            charge_state=holding_registers[GiV_Reg_LUT.holding_register_LUT.get(111)[0]+"(111)"]
+            if charge_state==True:
+                charge_state="Active"
+            else:
+                charge_state="Paused"
+
 
     #Calculate Mode
             GivTCP.debug("Calculating Mode...")
@@ -345,7 +358,9 @@ def getModesandTimes():
             controlmode['Target SOC']=target_soc
             controlmode['Charge Schedule State']=charge_enable
             controlmode['Discharge Schedule State']=discharge_enable
-            
+            controlmode['Battery Charge State']=charge_state
+            controlmode['Battery Discharge State']=discharge_state
+         
     #Grab Timeslots
             timeslots={}
             GivTCP.debug("Getting TimeSlot data")
