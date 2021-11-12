@@ -329,15 +329,15 @@ def getModesandTimes():
     
     #Get Charge/Discharge Active status
             discharge_state=holding_registers[GiV_Reg_LUT.holding_register_LUT.get(112)[0]+"(112)"]
-            if discharge_state==True:
-                discharge_state="Active"
-            else:
+            if discharge_state==0:
                 discharge_state="Paused"
-            charge_state=holding_registers[GiV_Reg_LUT.holding_register_LUT.get(111)[0]+"(111)"]
-            if charge_state==True:
-                charge_state="Active"
             else:
+                discharge_state="Active"
+            charge_state=holding_registers[GiV_Reg_LUT.holding_register_LUT.get(111)[0]+"(111)"]
+            if charge_state==0:
                 charge_state="Paused"
+            else:
+                charge_state="Active"
 
 
     #Calculate Mode
