@@ -99,8 +99,8 @@ def setBatteryReserve(payload):
     target=payload['dischargeToPercent']
     #Only allow minimum of 2%
     if int(target)<4: target="4"
-    GivTCP.debug ("Setting battery reserve target to: " + str(target))
-    targetresult=GivTCP.write_single_register(114,str(target))
+    GivTCP.debug ("Setting battery reserve target to: " + target)
+    targetresult=GivTCP.write_single_register(114,target)
     GivTCP.debug ("Battery Reserve setting was a: " + targetresult)
     temp['result']="Battery Reserve setting was a: " + targetresult
     return json.dumps(temp)
@@ -113,7 +113,7 @@ def setChargeRate(payload):
     target=int(target)/2
     if target>100: target="100"
     GivTCP.debug ("Setting battery charge rate to: " + str(target))
-    targetresult=GivTCP.write_single_register(111,str(target))
+    targetresult=GivTCP.write_single_register(111,target)
     GivTCP.debug ("Battery charge rate setting was a: " + targetresult)
     temp['result']="Battery charge rate setting was a: " + targetresult
     return json.dumps(temp)
@@ -125,7 +125,7 @@ def setDishargeRate(payload):
     #Only allow max of 100%
     target=int(target)/2
     if target>100: target="100"
-    GivTCP.debug ("Setting battery discharge rate to: " + target)
+    GivTCP.debug ("Setting battery discharge rate to: " + str(target))
     targetresult=GivTCP.write_single_register(112,target)
     GivTCP.debug ("Battery discharge rate setting was a: " + targetresult)
     temp['result']="Battery discharge rate setting was a: " + targetresult
