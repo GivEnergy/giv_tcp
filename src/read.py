@@ -329,11 +329,13 @@ def getModesandTimes():
     
     #Get Charge/Discharge Active status
             discharge_state=holding_registers[GiV_Reg_LUT.holding_register_LUT.get(112)[0]+"(112)"]
+            discharge_rate=discharge_state*2
             if discharge_state==0:
                 discharge_state="Paused"
             else:
                 discharge_state="Active"
             charge_state=holding_registers[GiV_Reg_LUT.holding_register_LUT.get(111)[0]+"(111)"]
+            charge_rate=charge_state*2
             if charge_state==0:
                 charge_state="Paused"
             else:
@@ -360,7 +362,9 @@ def getModesandTimes():
             controlmode['Discharge Schedule State']=discharge_enable
             controlmode['Battery Charge State']=charge_state
             controlmode['Battery Discharge State']=discharge_state
-         
+            controlmode['Battery Charge Rate']=charge_rate
+            controlmode['Battery Discharge Rate']=discharge_rate
+
     #Grab Timeslots
             timeslots={}
             GivTCP.debug("Getting TimeSlot data")
@@ -393,7 +397,7 @@ def getModesandTimes():
                 multi_output["Timeslots"]=timeslots
             if len(controlmode)==7:
                 multi_output["Control"]=controlmode
-            if len(invertor)==7:
+            if len(invertor)==9:
                 multi_output["Invertor Details"]=invertor
                 
 

@@ -110,7 +110,7 @@ def setChargeRate(payload):
     if type(payload) is not dict: payload=json.loads(payload)
     target=payload['chargeRate']
     #Only allow max of 100%
-    target=int(target)*2
+    target=int(target)/2
     if target>100: target="100"
     GivTCP.debug ("Setting battery charge rate to: " + target)
     targetresult=GivTCP.write_single_register(111,target)
@@ -123,7 +123,7 @@ def setDishargeRate(payload):
     if type(payload) is not dict: payload=json.loads(payload)
     target=payload['dischargeRate']
     #Only allow max of 100%
-    target=int(target)*2
+    target=int(target)/2
     if target>100: target="100"
     GivTCP.debug ("Setting battery discharge rate to: " + target)
     targetresult=GivTCP.write_single_register(112,target)
