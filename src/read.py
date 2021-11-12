@@ -391,7 +391,7 @@ def getModesandTimes():
                 multi_output["raw/holding"]=holding_registers
             if len(timeslots)==6:
                 multi_output["Timeslots"]=timeslots
-            if len(controlmode)==5:
+            if len(controlmode)==7:
                 multi_output["Control"]=controlmode
             if len(invertor)==7:
                 multi_output["Invertor Details"]=invertor
