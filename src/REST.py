@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-# version 1.0
+# version 2021.11.12
 import sys
 import json
 from flask import Flask, json, request
@@ -52,19 +52,19 @@ def resumeDischrgSchedule():
     return wr.resumeDischargeSchedule()
 
 @giv_api.route('/pauseBatteryCharge', methods=['POST'])
-def pauseChrgSchedule():
+def pauseBatCharge():
     return wr.pauseBatteryCharge()
 
 @giv_api.route('/resumeBatteryCharge', methods=['POST'])
-def resumeChrgSchedule():
+def resumeBatCharge():
     return wr.resumeBatteryCharge()
 
 @giv_api.route('/pauseBatteryDischarge', methods=['POST'])
-def pauseChrgSchedule():
+def pauseBatDisharge():
     return wr.pauseBatteryDischarge()
 
 @giv_api.route('/resumeBatteryDischarge', methods=['POST'])
-def resumeChrgSchedule():
+def resumeBatDisharge():
     return wr.resumeBatteryDischarge()
 
 @giv_api.route('/setChargeTarget', methods=['POST'])
