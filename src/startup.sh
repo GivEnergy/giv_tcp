@@ -8,7 +8,6 @@ then
     echo "$FILE exists."
 else
     echo "$FILE does not exist"
-    printf "class GiV_Settings:\n" >> settings.py
     if [ -z "$INVERTOR_IP" ]
     echo 'IP not set in ENV'
     then
@@ -28,10 +27,12 @@ else
             exit 1
         else
             echo Invertor found at "$outputString"
+            printf "class GiV_Settings:\n" >> settings.py
             printf "    invertorIP=\"$outputString\"\n" >> settings.py
         fi
     else
-        printf "    invertorIP=\"$INVERTOR_IP\"\n" >> settings.py
+            printf "class GiV_Settings:\n" >> settings.py
+            printf "    invertorIP=\"$INVERTOR_IP\"\n" >> settings.py
     fi
     printf "    Print_Raw_Registers=\"$PRINT_RAW\"\n" >> settings.py
     printf "    MQTT_Output=\"$MQTT_OUTPUT\"\n" >> settings.py
