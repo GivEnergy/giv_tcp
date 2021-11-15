@@ -400,7 +400,6 @@ def getModesandTimes():
             if len(invertor)==7:
                 multi_output["Invertor Details"]=invertor
                 
-
             publishOutput(multi_output)
 
         except:
