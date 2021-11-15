@@ -118,7 +118,7 @@ def setChargeRate(payload):
     temp['result']="Battery charge rate setting was a: " + targetresult
     return json.dumps(temp)
 
-def setDishargeRate(payload):
+def setDischargeRate(payload):
     temp={}
     if type(payload) is not dict: payload=json.loads(payload)
     target=payload['dischargeRate']
