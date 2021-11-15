@@ -82,7 +82,7 @@ def setChrgeRate():
     payload = request.get_json(silent=True, force=True)
     return wr.setChargeRate(payload)
 
-@giv_api.route('/setDishargeRate', methods=['POST'])
+@giv_api.route('/setDischargeRate', methods=['POST'])
 def setDischrgeRate():
     payload = request.get_json(silent=True, force=True)
     return wr.setDischargeRate(payload)
