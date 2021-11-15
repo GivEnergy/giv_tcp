@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-# version 1.0
+# version 2021.11.15
 import sys
 from GivTCP import GivTCP
 from GivLUT import GiV_Reg_LUT
