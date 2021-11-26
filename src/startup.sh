@@ -8,7 +8,6 @@ then
     echo "$FILE exists."
 else
     echo "$FILE does not exist"
-    echo "Invertor IP is set as $INVERTOR_IP"
     if [ -z "$INVERTOR_IP" ]; then
         echo 'IP not set in ENV'
         for i in 1 2 3
