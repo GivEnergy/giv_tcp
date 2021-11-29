@@ -149,7 +149,7 @@ URL's below are based off the root http address of http://IP:6345
 #### Read Functions
 | URL                | Method       |  payload              |
 | ------------------ | ------------ |  -------------------- |
-| /runALL| GET | None |  |
+| /runAll| GET | None |  |
 | /getTimeslots| GET | None | | 
 | /getCombinedStats| GET | None | | 
 | /getModesandTimes| GET | None | | 
