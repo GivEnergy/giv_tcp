@@ -170,10 +170,3 @@ URL's below are based off the root http address of http://IP:6345
 | /setDischargeSlot1| POST | {"start":"0100","finish":"0400","dischargeToPercent":"55") |
 | /setDischargeSlot2| POST | {"start":"0100","finish":"0400","dischargeToPercent":"55") |
 | /setBatteryMode| POST | {"mode":"1"} |
-
-
-Not sure where to start? Check our [Quick Start Guide](/documentaion/tutorial.md)  
-
-[Some API Documentation](/documentaion/APIDocumentation.md)  
-
-[All the used registers are listed in here ](/documentaion/registersAndFunctions.xlsb.xlsx)
