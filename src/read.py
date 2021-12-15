@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+# version 2021.11.15
 import sys
 from GivTCP import GivTCP
 from GivLUT import GiV_Reg_LUT
@@ -325,6 +326,21 @@ def getModesandTimes():
             else:
                 discharge_enable="Paused"
             GivTCP.debug("Shallow Charge= "+str(shallow_charge)+" Self Consumption= "+str(self_consumption)+" Discharge Enable= "+str(discharge_enable))
+    
+    #Get Charge/Discharge Active status
+            discharge_state=holding_registers[GiV_Reg_LUT.holding_register_LUT.get(112)[0]+"(112)"]
+            discharge_rate=discharge_state*2
+            if discharge_state==0:
+                discharge_state="Paused"
+            else:
+                discharge_state="Active"
+            charge_state=holding_registers[GiV_Reg_LUT.holding_register_LUT.get(111)[0]+"(111)"]
+            charge_rate=charge_state*2
+            if charge_state==0:
+                charge_state="Paused"
+            else:
+                charge_state="Active"
+
 
     #Calculate Mode
             GivTCP.debug("Calculating Mode...")
@@ -344,7 +360,11 @@ def getModesandTimes():
             controlmode['Target SOC']=target_soc
             controlmode['Charge Schedule State']=charge_enable
             controlmode['Discharge Schedule State']=discharge_enable
-            
+            controlmode['Battery Charge State']=charge_state
+            controlmode['Battery Discharge State']=discharge_state
+            controlmode['Battery Charge Rate']=charge_rate
+            controlmode['Battery Discharge Rate']=discharge_rate
+
     #Grab Timeslots
             timeslots={}
             GivTCP.debug("Getting TimeSlot data")
@@ -375,12 +395,11 @@ def getModesandTimes():
                 multi_output["raw/holding"]=holding_registers
             if len(timeslots)==6:
                 multi_output["Timeslots"]=timeslots
-            if len(controlmode)==5:
+            if len(controlmode)==9:
                 multi_output["Control"]=controlmode
             if len(invertor)==7:
                 multi_output["Invertor Details"]=invertor
                 
-
             publishOutput(multi_output)
 
         except:

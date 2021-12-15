@@ -1,4 +1,4 @@
-
+# version 1.0
 class GiV_Reg_LUT:
 
     holding_register_LUT = {

@@ -1,4 +1,5 @@
 #Script to periodically execute the runALL function every 10s, to be used with MQTT for unattended publishing
+# version 1.0
 import schedule
 import time
 import sys

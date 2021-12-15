@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+# version 2021.11.15
 import sys
 import json
 from GivTCP import GivTCP
@@ -55,6 +56,34 @@ def resumeDischargeSchedule():
     temp['result']="Resuming Discharge Schedule was a: " + result
     return json.dumps(temp)
 
+def pauseBatteryCharge():
+    temp={}
+    result=GivTCP.write_single_register(111,0)
+    GivTCP.debug ("Pausing Charge Schedule was a: "+result)
+    temp['result']="Pausing Charge Schedule was a: "+result
+    return json.dumps(temp)
+
+def resumeBatteryCharge():
+    temp={}
+    result=GivTCP.write_single_register(111,50)
+    GivTCP.debug ("Resuming Charge Schedule was a: "+ result)
+    temp['result']="Resuming Charge Schedule was a: "+ result
+    return json.dumps(temp)
+
+def pauseBatteryDischarge():
+    temp={}
+    result=GivTCP.write_single_register(112,0)
+    GivTCP.debug ("Pausing Charge Schedule was a: "+result)
+    temp['result']="Pausing Charge Schedule was a: "+result
+    return json.dumps(temp)
+
+def resumeBatteryDischarge():
+    temp={}
+    result=GivTCP.write_single_register(112,50)
+    GivTCP.debug ("Resuming Charge Schedule was a: "+ result)
+    temp['result']="Resuming Charge Schedule was a: "+ result
+    return json.dumps(temp)
+
 def setChargeTarget(payload):
     temp={}
     if type(payload) is not dict: payload=json.loads(payload)
@@ -74,6 +103,32 @@ def setBatteryReserve(payload):
     targetresult=GivTCP.write_single_register(114,target)
     GivTCP.debug ("Battery Reserve setting was a: " + targetresult)
     temp['result']="Battery Reserve setting was a: " + targetresult
+    return json.dumps(temp)
+
+def setChargeRate(payload):
+    temp={}
+    if type(payload) is not dict: payload=json.loads(payload)
+    target=payload['chargeRate']
+    #Only allow max of 100%
+    target=int(target)/2
+    if target>100: target="100"
+    GivTCP.debug ("Setting battery charge rate to: " + str(target))
+    targetresult=GivTCP.write_single_register(111,target)
+    GivTCP.debug ("Battery charge rate setting was a: " + targetresult)
+    temp['result']="Battery charge rate setting was a: " + targetresult
+    return json.dumps(temp)
+
+def setDischargeRate(payload):
+    temp={}
+    if type(payload) is not dict: payload=json.loads(payload)
+    target=payload['dischargeRate']
+    #Only allow max of 100%
+    target=int(target)/2
+    if target>100: target="100"
+    GivTCP.debug ("Setting battery discharge rate to: " + str(target))
+    targetresult=GivTCP.write_single_register(112,target)
+    GivTCP.debug ("Battery discharge rate setting was a: " + targetresult)
+    temp['result']="Battery discharge rate setting was a: " + targetresult
     return json.dumps(temp)
 
 def setChargeSlot1(payload):
