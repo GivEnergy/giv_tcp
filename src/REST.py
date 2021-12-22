@@ -111,3 +111,8 @@ def setDischrgSlot2():
 def setBattMode():
     payload = request.get_json(silent=True, force=True)
     return wr.setBatteryMode(payload)
+
+@giv_api.route('/setDateTime', methods=['POST'])
+def setDate():
+    payload = request.get_json(silent=True, force=True)
+    return wr.setDateTime(payload)

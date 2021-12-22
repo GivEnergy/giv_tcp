@@ -1,11 +1,12 @@
 # -*- coding: utf-8 -*-
-# version 2021.11.15
+# version 2021.12.22
 import sys
 import json
 from GivTCP import GivTCP
 from GivLUT import GiV_Reg_LUT
 from datetime import datetime
 from settings import GiV_Settings
+from datetime import date
 
 def writeReg(payload):
     params=json.loads(payload)
@@ -263,6 +264,26 @@ def setBatteryMode(payload):
     else:
         GivTCP.debug ("Error setting Control Mode")
         temp['result']="Error setting Control Mode"
+    return json.dumps(temp)
+
+def setDateTime(payload):
+    temp={}
+    targetresult="Success"
+    if type(payload) is not dict: payload=json.loads(payload)
+    #convert payload to dateTime components
+    iDateTime=datetime.strptime(payload['dateTime'],"%d/%m/%Y %H:%M:%S")   #format '12/11/2021 09:15:32'
+    
+    #Set Date and Time on Invertor
+    yearResult=GivTCP.write_single_register(35,iDateTime.year)
+    monthResult=GivTCP.write_single_register(36,iDateTime.month)
+    dayResult=GivTCP.write_single_register(37,iDateTime.day)
+    hourResult=GivTCP.write_single_register(38,iDateTime.hour)
+    minResult=GivTCP.write_single_register(39,iDateTime.minute)
+    secResult=GivTCP.write_single_register(40,iDateTime.second)
+    if yearResult=="Success" and monthResult=="Success" and dayResult=="Success" and hourResult=="Success" and minResult=="Success" and secResult=="Success":
+        targetResult="Success"
+    GivTCP.debug ("Invertor time setting was a: " + targetresult)
+    temp['result']="Invertor time setting was a: " + targetresult
     return json.dumps(temp)
 
 if __name__ == '__main__':
