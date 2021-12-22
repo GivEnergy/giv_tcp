@@ -63,6 +63,7 @@ Control is available through predefined functions. The format of the function ca
 | setDischargeSlot1|{"start":"0100","finish":"0400","dischargeToPercent":"55")| Sets the time and target SOC of the first dischargeslot. Times must be expressed in hhmm format. Enable flag show in the battery.api documentation is not needed and dischargeToPercent is optional |
 | setDischargeSlot2|{"start":"0100","finish":"0400","dischargeToPercent":"55")| Sets the time and target SOC of the first dischargeslot. Times must be expressed in hhmm format.  Enable flag show in the battery.api documentation is not needed and dischargeToPercent is optional |
 |setBatteryMode|{"mode":"1"}| Sets battery operation mode. Mode value must be in the range 1-4|
+|setDateTime|{"dateTime":"dd/mm/yyyy hh:mm:ss"}| Sets invertor time, format must be as shown here|
 
 # CLI Usage
 GivTCP can be called from any machine running Python3. The relevant script must be called and a function name passed to it as an argument. Exmaples of how to call read and write functions are shown here: 
@@ -165,8 +166,9 @@ URL's below are based off the root http address of http://IP:6345
 | /resumeDischargeSchedule| POST | None | 
 | /setChargeTarget| POST | {"chargeToPercent":"50"} |
 | /setBatteryReserve| POST | {"dischargeToPercent":"5"} |
-| /setChargeSlot1| POST | {"start":"0100","finish":"0400","chargeToPercent":"55") |
-| /setChargeSlot2| POST | {"start":"0100","finish":"0400","chargeToPercent":"55") |
-| /setDischargeSlot1| POST | {"start":"0100","finish":"0400","dischargeToPercent":"55") |
-| /setDischargeSlot2| POST | {"start":"0100","finish":"0400","dischargeToPercent":"55") |
+| /setChargeSlot1| POST | {"start":"0100","finish":"0400","chargeToPercent":"55"} |
+| /setChargeSlot2| POST | {"start":"0100","finish":"0400","chargeToPercent":"55"} |
+| /setDischargeSlot1| POST | {"start":"0100","finish":"0400","dischargeToPercent":"55"} |
+| /setDischargeSlot2| POST | {"start":"0100","finish":"0400","dischargeToPercent":"55"} |
 | /setBatteryMode| POST | {"mode":"1"} |
+| /setDateTime|POST | {"dateTime":"dd/mm/yyyy hh:mm:ss"}|
