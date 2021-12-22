@@ -89,8 +89,17 @@ def setChargeTarget(payload):
     if type(payload) is not dict: payload=json.loads(payload)
     target=payload['chargeToPercent']
     targetresult=GivTCP.write_single_register(116,target)
-    GivTCP.debug ("Setting charge target was a: " + targetresult)
-    temp['result']="Setting charge target was a: " + targetresult
+    wintermoderesult=""
+    if target == 100:
+        wintermoderesult = GivTCP.write_single_register(20, 1)
+    else:
+        wintermoderesult = GivTCP.write_single_register(20, 0)
+    if targetresult=="Success" and wintermoderesult=="Success":
+        GivTCP.debug ("Setting charge target was a: Success")
+        temp['result']="Setting charge target was a: Success"
+    else:
+        GivTCP.debug ("Error Setting charge target")
+        temp['result']="Setting charge target"
     return json.dumps(temp)
 
 def setBatteryReserve(payload):
@@ -134,16 +143,21 @@ def setDischargeRate(payload):
 def setChargeSlot1(payload):
     temp={}
     targetresult="Success"
+    wintermoderesult="Success"
     if type(payload) is not dict: payload=json.loads(payload)
     start=payload['start']
     end=payload['finish']
     if 'chargeToPercent' in payload.keys():
         target=payload['chargeToPercent']
         targetresult=GivTCP.write_single_register(116,target)
+        if target==100:
+            wintermoderesult=GivTCP.write_single_register(20, 1)
+        else:
+            wintermoderesult=GivTCP.write_single_register(20, 0)
     startresult=GivTCP.write_single_register(94,start)
     endresult=GivTCP.write_single_register(95,end)
     enableresult=GivTCP.write_single_register(96,1)     #enable charge flag automatically
-    if startresult=="Success" and endresult=="Success" and targetresult=="Success" and enableresult=="Success":
+    if startresult=="Success" and endresult=="Success" and targetresult=="Success" and enableresult=="Success" and wintermoderesult=="Success":
         GivTCP.debug ("Charge Time successfully set")
         temp['result']="Charge Time successfully set"
     else:
@@ -154,16 +168,21 @@ def setChargeSlot1(payload):
 def setChargeSlot2(payload):
     temp={}
     targetresult="Success"
+    wintermoderesult="Success"
     if type(payload) is not dict: payload=json.loads(payload)
     start=payload['start']
     end=payload['finish']
     if 'chargeToPercent' in payload.keys():
         target=payload['chargeToPercent']
         targetresult=GivTCP.write_single_register(116,target)
+        if target==100:
+            wintermoderesult=GivTCP.write_single_register(20, 1)
+        else:
+            wintermoderesult=GivTCP.write_single_register(20, 0)
     startresult=GivTCP.write_single_register(31,start)
     endresult=GivTCP.write_single_register(32,end)
     enableresult=GivTCP.write_single_register(96,1)     #enable charge flag automatically
-    if startresult=="Success" and endresult=="Success" and targetresult=="Success" and enableresult=="Success":
+    if startresult=="Success" and endresult=="Success" and targetresult=="Success" and enableresult=="Success" and wintermoderesult=="Success":
         GivTCP.debug ("Charge Time successfully set")
         temp['result']="Charge Time successfully set"
     else:
