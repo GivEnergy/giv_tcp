@@ -1,11 +1,12 @@
 # -*- coding: utf-8 -*-
-# version 2021.11.15
+# version 2021.12.22
 import sys
 import json
 from GivTCP import GivTCP
 from GivLUT import GiV_Reg_LUT
 from datetime import datetime
 from settings import GiV_Settings
+from datetime import date
 
 def writeReg(payload):
     params=json.loads(payload)
@@ -89,8 +90,17 @@ def setChargeTarget(payload):
     if type(payload) is not dict: payload=json.loads(payload)
     target=payload['chargeToPercent']
     targetresult=GivTCP.write_single_register(116,target)
-    GivTCP.debug ("Setting charge target was a: " + targetresult)
-    temp['result']="Setting charge target was a: " + targetresult
+    wintermoderesult=""
+    if target == 100:
+        wintermoderesult = GivTCP.write_single_register(20, 1)
+    else:
+        wintermoderesult = GivTCP.write_single_register(20, 0)
+    if targetresult=="Success" and wintermoderesult=="Success":
+        GivTCP.debug ("Setting charge target was a: Success")
+        temp['result']="Setting charge target was a: Success"
+    else:
+        GivTCP.debug ("Error Setting charge target")
+        temp['result']="Setting charge target"
     return json.dumps(temp)
 
 def setBatteryReserve(payload):
@@ -134,16 +144,21 @@ def setDischargeRate(payload):
 def setChargeSlot1(payload):
     temp={}
     targetresult="Success"
+    wintermoderesult="Success"
     if type(payload) is not dict: payload=json.loads(payload)
     start=payload['start']
     end=payload['finish']
     if 'chargeToPercent' in payload.keys():
         target=payload['chargeToPercent']
         targetresult=GivTCP.write_single_register(116,target)
+        if target==100:
+            wintermoderesult=GivTCP.write_single_register(20, 1)
+        else:
+            wintermoderesult=GivTCP.write_single_register(20, 0)
     startresult=GivTCP.write_single_register(94,start)
     endresult=GivTCP.write_single_register(95,end)
     enableresult=GivTCP.write_single_register(96,1)     #enable charge flag automatically
-    if startresult=="Success" and endresult=="Success" and targetresult=="Success" and enableresult=="Success":
+    if startresult=="Success" and endresult=="Success" and targetresult=="Success" and enableresult=="Success" and wintermoderesult=="Success":
         GivTCP.debug ("Charge Time successfully set")
         temp['result']="Charge Time successfully set"
     else:
@@ -154,16 +169,21 @@ def setChargeSlot1(payload):
 def setChargeSlot2(payload):
     temp={}
     targetresult="Success"
+    wintermoderesult="Success"
     if type(payload) is not dict: payload=json.loads(payload)
     start=payload['start']
     end=payload['finish']
     if 'chargeToPercent' in payload.keys():
         target=payload['chargeToPercent']
         targetresult=GivTCP.write_single_register(116,target)
+        if target==100:
+            wintermoderesult=GivTCP.write_single_register(20, 1)
+        else:
+            wintermoderesult=GivTCP.write_single_register(20, 0)
     startresult=GivTCP.write_single_register(31,start)
     endresult=GivTCP.write_single_register(32,end)
     enableresult=GivTCP.write_single_register(96,1)     #enable charge flag automatically
-    if startresult=="Success" and endresult=="Success" and targetresult=="Success" and enableresult=="Success":
+    if startresult=="Success" and endresult=="Success" and targetresult=="Success" and enableresult=="Success" and wintermoderesult=="Success":
         GivTCP.debug ("Charge Time successfully set")
         temp['result']="Charge Time successfully set"
     else:
@@ -244,6 +264,26 @@ def setBatteryMode(payload):
     else:
         GivTCP.debug ("Error setting Control Mode")
         temp['result']="Error setting Control Mode"
+    return json.dumps(temp)
+
+def setDateTime(payload):
+    temp={}
+    targetresult="Success"
+    if type(payload) is not dict: payload=json.loads(payload)
+    #convert payload to dateTime components
+    iDateTime=datetime.strptime(payload['dateTime'],"%d/%m/%Y %H:%M:%S")   #format '12/11/2021 09:15:32'
+    
+    #Set Date and Time on Invertor
+    yearResult=GivTCP.write_single_register(35,iDateTime.year)
+    monthResult=GivTCP.write_single_register(36,iDateTime.month)
+    dayResult=GivTCP.write_single_register(37,iDateTime.day)
+    hourResult=GivTCP.write_single_register(38,iDateTime.hour)
+    minResult=GivTCP.write_single_register(39,iDateTime.minute)
+    secResult=GivTCP.write_single_register(40,iDateTime.second)
+    if yearResult=="Success" and monthResult=="Success" and dayResult=="Success" and hourResult=="Success" and minResult=="Success" and secResult=="Success":
+        targetResult="Success"
+    GivTCP.debug ("Invertor time setting was a: " + targetresult)
+    temp['result']="Invertor time setting was a: " + targetresult
     return json.dumps(temp)
 
 if __name__ == '__main__':
