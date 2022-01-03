@@ -61,14 +61,24 @@ def getCombinedStats():
             fw=batt_fw[GiV_Reg_LUT.holding_register_LUT.get(21)[0]+"(21)"]
             if GivTCP.Invertor_Type=="Hybrid" and fw>=449:
                 GivTCP.debug("FW does have extra registers: ("+str(GivTCP.Invertor_Type)+": " + str(fw)+")")
-                input_registers.update(GivTCP.read_register('180','04','2'))    #Get v2.6 input Registers
-                hasExtraReg=True
-                inputRegNum=62
+                extraReg=GivTCP.read_register('180','04','2')
+                if len(extraReg)==2:
+                    GivTCP.debug("Extra registers successfully retrieved")
+                    input_registers.update(extraReg)    #Get v2.6 input Registers
+                    hasExtraReg=True
+                    inputRegNum=62
+                else:
+                    GivTCP.debug("Extra registers NOT successfully retrieved, ignoring them from now on")
             elif GivTCP.Invertor_Type=="AC":
                 GivTCP.debug("FW does have extra registers: ("+str(GivTCP.Invertor_Type)+": " + str(fw)+")")
-                input_registers.update(GivTCP.read_register('105','04','2'))    #Get v2.6 input Registers
-                hasExtraReg=True
-                inputRegNum=62
+                extraReg=GivTCP.read_register('105','04','2')
+                if len(extraReg)==2:
+                    GivTCP.debug("Extra registers successfully retrieved")
+                    input_registers.update(extraReg)    #Get v2.6 input Registers
+                    hasExtraReg=True
+                    inputRegNum=62
+                else:
+                    GivTCP.debug("Extra registers NOT successfully retrieved, ignoring them from now on")
             else:
                 GivTCP.debug("FW does NOT have extra registers: ("+str(GivTCP.Invertor_Type)+": "+ str(fw)+")")
         else:
@@ -88,7 +98,7 @@ def getCombinedStats():
             sum=sum
     GivTCP.debug("There are " + str(emptycount) +" empty registers and "+str(len(input_registers))+"/"+str(inputRegNum)+" registers collected")
 
-    if len(input_registers)>inputRegNum-3 and emptycount<50:		#Only process and run if registers are all there and non-zero (ignore if extrareg is missing)
+    if len(input_registers)==inputRegNum and emptycount<50:		#Only process and run if registers are all there and non-zero (ignore if extrareg is missing)
         try:
     #Total Energy Figures
             GivTCP.debug("Getting Total Energy Data")
