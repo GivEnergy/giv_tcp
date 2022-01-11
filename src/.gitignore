@@ -3,3 +3,5 @@ settings.py
 settings.old
 __pycache__
 read_debug.log
+.venv
+.vscode

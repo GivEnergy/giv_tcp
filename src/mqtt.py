@@ -1,9 +1,11 @@
 # version 1.0
 import paho.mqtt.client as mqtt
 import time
-from datetime import datetime
+import datetime
+
 from GivTCP import GivTCP
 from settings import GiV_Settings
+from givenergy_modbus.model.inverter import Model
 
 class GivMQTT():
     
@@ -50,8 +52,30 @@ class GivMQTT():
         for p_load in array:
             payload=array[p_load]
             for reg in payload:
-                GivTCP.debug('Publishing: '+rootTopic+p_load+'/'+str(reg)+" "+str(payload[reg]))
-                client.publish(rootTopic+p_load+'/'+reg,payload[reg])
+                # Check payload[reg] is print safe (not dateTime)
+                if isinstance(payload[reg], tuple):
+                    if "slot" in str(reg):
+                        GivTCP.debug('Publishing: '+rootTopic+p_load+'/'+str(reg)+"_start "+str(payload[reg][0].strftime("%H%M")))
+                        client.publish(rootTopic+p_load+'/'+reg+"_start",payload[reg][0].strftime("%H%M"))
+                        GivTCP.debug('Publishing: '+rootTopic+p_load+'/'+str(reg)+"_end "+str(payload[reg][1].strftime("%H%M")))
+                        client.publish(rootTopic+p_load+'/'+reg+"_end",payload[reg][1].strftime("%H%M"))
+                    else:
+                        #Deal with other tuples _ Print each value
+                        for x in payload[reg]:
+                            GivTCP.debug('Publishing: '+rootTopic+p_load+'/'+str(reg)+"_"+str(x)+" "+str(payload[reg][x]))
+                            client.publish(rootTopic+p_load+'/'+reg+"_"+str(x),str(x))
+                elif isinstance(payload[reg], datetime.datetime):
+                    GivTCP.debug('Publishing: '+rootTopic+p_load+'/'+str(reg)+" "+str(payload[reg].strftime("%d-%m-%Y %H:%M:%S")))
+                    client.publish(rootTopic+p_load+'/'+reg,payload[reg].strftime("%d-%m-%Y %H:%M:%S"))
+                elif isinstance(payload[reg], datetime.time):
+                    GivTCP.debug('Publishing: '+rootTopic+p_load+'/'+str(reg)+" "+str(payload[reg].strftime("%H:%M")))
+                    client.publish(rootTopic+p_load+'/'+reg,payload[reg].strftime("%H:%M"))
+                elif isinstance(payload[reg], Model):
+                    GivTCP.debug('Publishing: '+rootTopic+p_load+'/'+str(reg)+" "+str(payload[reg].name))
+                    client.publish(rootTopic+p_load+'/'+str(payload[reg].name))
+                else:
+                    GivTCP.debug('Publishing: '+rootTopic+p_load+'/'+str(reg)+" "+str(payload[reg]))
+                    client.publish(rootTopic+p_load+'/'+reg,payload[reg])
         client.loop_stop()                      			#Stop loop
         client.disconnect()
         return client

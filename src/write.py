@@ -2,105 +2,141 @@
 # version 2021.12.22
 import sys
 import json
+
+from paho.mqtt.client import Client
 from GivTCP import GivTCP
-from GivLUT import GiV_Reg_LUT
 from datetime import datetime
 from settings import GiV_Settings
 from datetime import date
-
-def writeReg(payload):
-    params=json.loads(payload)
-    register=params['register']
-    value=params['value']
-    result=GivTCP.write_single_register(register,value)
-    GivTCP.debug ("Writing Register "+ str(register) + " was a: "+result)
+from givenergy_modbus.client import GivEnergyClient
+from givenergy_modbus.model.register import HoldingRegister, InputRegister
 
 def disableChargeTarget():
     temp={}
-    result=GivTCP.write_single_register(20,0)
-    GivTCP.debug ("Pausing Charge Schedule was a: "+result)
-    temp['result']="Pausing Charge Schedule was a: "+result
+    try:
+        GivEnergyClient(host=GiV_Settings.invertorIP).disable_charge_target
+        temp['result']="Pausing Charge Schedule was a success"
+    except:
+        e = sys.exc_info()
+        temp['result']="Pausing Charge Schedule failed: " + str(e)
+    GivTCP.debug (temp['result'])
     return json.dumps(temp)
 
 def enableChargeTarget():
     temp={}
-    result=GivTCP.write_single_register(20,1)
-    GivTCP.debug ("Resuming Charge Schedule was a: "+ result)
-    temp['result']="Resuming Charge Schedule was a: "+ result
+    try:
+        GivEnergyClient(host=GiV_Settings.invertorIP).enable_charge_target
+        temp['result']="Resuming Charge Schedule was a success"
+    except:
+        e = sys.exc_info()
+        temp['result']="Pausing Charge Schedule failed: " + str(e)
+    GivTCP.debug (temp['result'])
     return json.dumps(temp)
 
 def pauseChargeSchedule():
     temp={}
-    result=GivTCP.write_single_register(96,0)
-    GivTCP.debug ("Pausing Charge Schedule was a: "+result)
-    temp['result']="Pausing Charge Schedule was a: "+result
+    try:
+        GivEnergyClient(host=GiV_Settings.invertorIP).disable_charge
+        temp['result']="Pausing Charge Schedule was a success"
+    except:
+        e = sys.exc_info()
+        temp['result']="Pausing Charge Schedule failed: " + str(e)
+    GivTCP.debug (temp['result'])
     return json.dumps(temp)
 
 def resumeChargeSchedule():
     temp={}
-    result=GivTCP.write_single_register(96,1)
-    GivTCP.debug ("Resuming Charge Schedule was a: "+ result)
-    temp['result']="Resuming Charge Schedule was a: "+ result
+    try:
+        GivEnergyClient(host=GiV_Settings.invertorIP).enable_charge
+        temp['result']="Resuming Charge Schedule was a success"
+    except:
+        e = sys.exc_info()
+        temp['result']="Resuming Charge Schedule failed: " + str(e)
+    GivTCP.debug (temp['result'])
     return json.dumps(temp)
 
 def pauseDischargeSchedule():
     temp={}
-    result=GivTCP.write_single_register(59,0)
-    GivTCP.debug ("Pausing Discharge Schedule was a: " + result)
-    temp['result']="Pausing Discharge Schedule was a: " + result
+    try:
+        GivEnergyClient(host=GiV_Settings.invertorIP).enable_discharge
+        temp['result']="Pausing Discharge Schedule was a success"
+    except:
+        e = sys.exc_info()
+        temp['result']="Pausing Discharge Schedule failed: " + str(e)
+    GivTCP.debug (temp['result'])
     return json.dumps(temp)
 
 def resumeDischargeSchedule():
     temp={}
-    result=GivTCP.write_single_register(59,1)
-    GivTCP.debug ("Resuming Discharge Schedule was a: " + result)
-    temp['result']="Resuming Discharge Schedule was a: " + result
+    try:
+        GivEnergyClient(host=GiV_Settings.invertorIP).disable_discharge
+        temp['result']="Resuming Discharge Schedule was a success"
+    except:
+        e = sys.exc_info()
+        temp['result']="Resuming Discharge Schedule failed: " + str(e)
+    GivTCP.debug (temp['result'])
     return json.dumps(temp)
 
 def pauseBatteryCharge():
     temp={}
-    result=GivTCP.write_single_register(111,0)
-    GivTCP.debug ("Pausing Charge Schedule was a: "+result)
-    temp['result']="Pausing Charge Schedule was a: "+result
+    try:
+        GivEnergyClient(host=GiV_Settings.invertorIP).set_battery_charge_limit(0)
+        temp['result']="Pausing Charge was a success"
+    except:
+        e = sys.exc_info()
+        temp['result']="Pausing Charge failed: " + str(e)
+    GivTCP.debug (temp['result'])
     return json.dumps(temp)
 
 def resumeBatteryCharge():
     temp={}
-    result=GivTCP.write_single_register(111,50)
-    GivTCP.debug ("Resuming Charge Schedule was a: "+ result)
-    temp['result']="Resuming Charge Schedule was a: "+ result
+    try:
+        GivEnergyClient(host=GiV_Settings.invertorIP).set_battery_charge_limit(50)
+        temp['result']="Resuming Charge was a success"
+    except:
+        e = sys.exc_info()
+        temp['result']="Resuming Charge failed: " + str(e)
+    GivTCP.debug (temp['result'])
     return json.dumps(temp)
 
 def pauseBatteryDischarge():
     temp={}
-    result=GivTCP.write_single_register(112,0)
-    GivTCP.debug ("Pausing Charge Schedule was a: "+result)
-    temp['result']="Pausing Charge Schedule was a: "+result
+    try:
+        GivEnergyClient(host=GiV_Settings.invertorIP).set_battery_discharge_limit(0)
+        temp['result']="Pausing Discharge was a success"
+    except:
+        e = sys.exc_info()
+        temp['result']="Pausing Discharge failed: " + str(e)
+    GivTCP.debug (temp['result'])
     return json.dumps(temp)
 
 def resumeBatteryDischarge():
     temp={}
-    result=GivTCP.write_single_register(112,50)
-    GivTCP.debug ("Resuming Charge Schedule was a: "+ result)
-    temp['result']="Resuming Charge Schedule was a: "+ result
+    try:
+        GivEnergyClient(host=GiV_Settings.invertorIP).set_battery_discharge_limit(50)
+        temp['result']="Resuming Discharge was a success"
+    except:
+        e = sys.exc_info()
+        temp['result']="Resuming Discharge failed: " + str(e)
+    GivTCP.debug (temp['result'])
     return json.dumps(temp)
 
 def setChargeTarget(payload):
     temp={}
     if type(payload) is not dict: payload=json.loads(payload)
     target=payload['chargeToPercent']
-    targetresult=GivTCP.write_single_register(116,target)
-    wintermoderesult=""
-    if target == 100:
-        wintermoderesult = GivTCP.write_single_register(20, 1)
-    else:
-        wintermoderesult = GivTCP.write_single_register(20, 0)
-    if targetresult=="Success" and wintermoderesult=="Success":
-        GivTCP.debug ("Setting charge target was a: Success")
-        temp['result']="Setting charge target was a: Success"
-    else:
-        GivTCP.debug ("Error Setting charge target")
-        temp['result']="Setting charge target"
+    try:
+        client=GivEnergyClient(host=GiV_Settings.invertorIP)
+        client.set_battery_target_soc(target)
+        if target == 100:
+            client.enable_charge_target
+        else:
+            client.disable_charge_target
+        temp['result']="Setting Charge Target was a success"
+    except:
+        e = sys.exc_info()
+        temp['result']="Setting Charge Target failed: " + str(e)
+    GivTCP.debug (temp['result'])
     return json.dumps(temp)
 
 def setBatteryReserve(payload):
@@ -110,9 +146,13 @@ def setBatteryReserve(payload):
     #Only allow minimum of 2%
     if int(target)<4: target="4"
     GivTCP.debug ("Setting battery reserve target to: " + target)
-    targetresult=GivTCP.write_single_register(114,target)
-    GivTCP.debug ("Battery Reserve setting was a: " + targetresult)
-    temp['result']="Battery Reserve setting was a: " + targetresult
+    try:
+        GivEnergyClient(host=GiV_Settings.invertorIP).set_battery_power_reserve(target)
+        temp['result']="Setting Battery Reserve was a success"
+    except:
+        e = sys.exc_info()
+        temp['result']="Setting Battery Reserve failed: " + str(e)
+    GivTCP.debug (temp['result'])
     return json.dumps(temp)
 
 def setChargeRate(payload):
@@ -123,10 +163,15 @@ def setChargeRate(payload):
     target=int(target)/2
     if target>100: target="100"
     GivTCP.debug ("Setting battery charge rate to: " + str(target))
-    targetresult=GivTCP.write_single_register(111,target)
-    GivTCP.debug ("Battery charge rate setting was a: " + targetresult)
-    temp['result']="Battery charge rate setting was a: " + targetresult
+    try:
+        GivEnergyClient(host=GiV_Settings.invertorIP).set_battery_charge_limit(target)
+        temp['result']="Setting Charge Rate was a success"
+    except:
+        e = sys.exc_info()
+        temp['result']="Setting Charge Rate failed: " + str(e)
+    GivTCP.debug (temp['result'])
     return json.dumps(temp)
+
 
 def setDischargeRate(payload):
     temp={}
@@ -136,10 +181,15 @@ def setDischargeRate(payload):
     target=int(target)/2
     if target>100: target="100"
     GivTCP.debug ("Setting battery discharge rate to: " + str(target))
-    targetresult=GivTCP.write_single_register(112,target)
-    GivTCP.debug ("Battery discharge rate setting was a: " + targetresult)
-    temp['result']="Battery discharge rate setting was a: " + targetresult
+    try:
+        GivEnergyClient(host=GiV_Settings.invertorIP).set_battery_discharge_limit(target)
+        temp['result']="Setting Discharge Rate was a success"
+    except:
+        e = sys.exc_info()
+        temp['result']="Setting Discharge Rate failed: " + str(e)
+    GivTCP.debug (temp['result'])
     return json.dumps(temp)
+
 
 def setChargeSlot1(payload):
     temp={}
@@ -149,21 +199,16 @@ def setChargeSlot1(payload):
     start=payload['start']
     end=payload['finish']
     if 'chargeToPercent' in payload.keys():
-        target=payload['chargeToPercent']
-        targetresult=GivTCP.write_single_register(116,target)
-        if target==100:
-            wintermoderesult=GivTCP.write_single_register(20, 1)
-        else:
-            wintermoderesult=GivTCP.write_single_register(20, 0)
-    startresult=GivTCP.write_single_register(94,start)
-    endresult=GivTCP.write_single_register(95,end)
-    enableresult=GivTCP.write_single_register(96,1)     #enable charge flag automatically
-    if startresult=="Success" and endresult=="Success" and targetresult=="Success" and enableresult=="Success" and wintermoderesult=="Success":
-        GivTCP.debug ("Charge Time successfully set")
-        temp['result']="Charge Time successfully set"
-    else:
-        GivTCP.debug ("Error setting Charge time")
-        temp['result']="Error setting Charge time"
+        targetresult=setChargeTarget(payload)
+    client=GivEnergyClient(host=GiV_Settings.invertorIP)
+    try:
+        client.enable_charge
+        client.set_charge_slot_1(datetime.strptime(start,"%H:%M"),datetime.strptime(end,"%H:%M"))
+        temp['result']="Setting Charge Slot 1 was a success"
+    except:
+        e = sys.exc_info()
+        temp['result']="Setting Charge Slot 1 failed: " + str(e)
+    GivTCP.debug (temp['result'])
     return json.dumps(temp)
 
 def setChargeSlot2(payload):
@@ -174,96 +219,81 @@ def setChargeSlot2(payload):
     start=payload['start']
     end=payload['finish']
     if 'chargeToPercent' in payload.keys():
-        target=payload['chargeToPercent']
-        targetresult=GivTCP.write_single_register(116,target)
-        if target==100:
-            wintermoderesult=GivTCP.write_single_register(20, 1)
-        else:
-            wintermoderesult=GivTCP.write_single_register(20, 0)
-    startresult=GivTCP.write_single_register(31,start)
-    endresult=GivTCP.write_single_register(32,end)
-    enableresult=GivTCP.write_single_register(96,1)     #enable charge flag automatically
-    if startresult=="Success" and endresult=="Success" and targetresult=="Success" and enableresult=="Success" and wintermoderesult=="Success":
-        GivTCP.debug ("Charge Time successfully set")
-        temp['result']="Charge Time successfully set"
-    else:
-        GivTCP.debug ("Error setting Charge time")
-        temp['result']="Error setting Charge time"
+        targetresult=setChargeTarget(payload)
+    client=GivEnergyClient(host=GiV_Settings.invertorIP)
+    try:
+        client.enable_charge
+        client.set_charge_slot_2(datetime.strptime(start,"%H:%M"),datetime.strptime(end,"%H:%M"))
+        temp['result']="Setting Charge Slot 2 was a success"
+    except:
+        e = sys.exc_info()
+        temp['result']="Setting Charge Slot 2 failed: " + str(e)
+    GivTCP.debug (temp['result'])
     return json.dumps(temp)
 
 def setDischargeSlot1(payload):
     temp={}
     targetresult="Success"
+    wintermoderesult="Success"
     if type(payload) is not dict: payload=json.loads(payload)
     start=payload['start']
     end=payload['finish']
     if 'dischargeToPercent' in payload.keys():
-        target=payload['dischargeToPercent']
-        targetresult=GivTCP.write_single_register(116,target)
-    startresult=GivTCP.write_single_register(56,start)
-    endresult=GivTCP.write_single_register(57,end)
-    targetresult=GivTCP.write_single_register(114,target)
-    if startresult=="Success" and endresult=="Success" and targetresult=="Success":
-        GivTCP.debug ("Disharge Time successfully set")
-        temp['result']="Discharge Time successfully set"
-    else:
-        GivTCP.debug ("Error setting Discharge time")
-        temp['result']="Error setting Discharge time"
+        targetresult=setBatteryReserve(payload)
+    client=GivEnergyClient(host=GiV_Settings.invertorIP)
+    try:
+        client.set_discharge_slot_1(datetime.strptime(start,"%H:%M"),datetime.strptime(end,"%H:%M"))
+        client.enable_discharge
+        temp['result']="Setting Discharge Slot 1 was a success"
+    except:
+        e = sys.exc_info()
+        temp['result']="Setting Discharge Slot 1 failed: " + str(e)
+    GivTCP.debug (temp['result'])
     return json.dumps(temp)
 
 def setDischargeSlot2(payload):
     temp={}
     targetresult="Success"
+    wintermoderesult="Success"
     if type(payload) is not dict: payload=json.loads(payload)
     start=payload['start']
     end=payload['finish']
     if 'dischargeToPercent' in payload.keys():
-        target=payload['dischargeToPercent']
-        targetresult=GivTCP.write_single_register(116,target)
-    startresult=GivTCP.write_single_register(44,start)
-    endresult=GivTCP.write_single_register(45,end)
-    targetresult=GivTCP.write_single_register(114,target)
-    if startresult=="Success" and endresult=="Success" and targetresult=="Success":
-        GivTCP.debug ("Disharge Time successfully set")
-        temp['result']="Discharge Time successfully set"
-    else:
-        GivTCP.debug ("Error setting Discharge time")
-        temp['result']="Error setting Discharge time"
+        targetresult=setBatteryReserve(payload)
+    client=GivEnergyClient(host=GiV_Settings.invertorIP)
+    try:
+        client.set_discharge_slot_2(datetime.strptime(start,"%H:%M"),datetime.strptime(end,"%H:%M"))
+        client.enable_discharge
+        temp['result']="Setting Discharge Slot 2 was a success"
+    except:
+        e = sys.exc_info()
+        temp['result']="Setting Discharge Slot 2 failed: " + str(e)
+    GivTCP.debug (temp['result'])
     return json.dumps(temp)
+
 
 def setBatteryMode(payload):
     temp={}
     if type(payload) is not dict: payload=json.loads(payload)
     mode=int(payload['mode'])
-    if mode==1:
-        shallowresult=GivTCP.write_single_register(110,4)
-        dischargeresult=GivTCP.write_single_register(59,0)
-        selfresult=GivTCP.write_single_register(27,1)
-    elif mode==2:
-        shallowresult=GivTCP.write_single_register(110,100)
-        dischargeresult=GivTCP.write_single_register(59,1)
-        selfresult=GivTCP.write_single_register(27,1)
-        startresult=GivTCP.write_single_register(56,1600)
-        endresult=GivTCP.write_single_register(57,700)
-    elif mode==3:
-        shallowresult=GivTCP.write_single_register(110,100)
-        dischargeresult=GivTCP.write_single_register(59,1)
-        selfresult=GivTCP.write_single_register(27,1)
-    elif mode==4:
-        shallowresult=GivTCP.write_single_register(110,4)
-        dischargeresult=GivTCP.write_single_register(59,1)
-        selfresult=GivTCP.write_single_register(27,0)
-    else:
-        GivTCP.debug ("Invalid Mode requested: "+ mode)
-        temp['result']="Error setting Discharge time"
-        return json.dumps(temp)
-    #Calculate success
-    if shallowresult=="Success" and dischargeresult=="Success" and selfresult=="Success":
-        GivTCP.debug ("Control Mode successfully set")
-        temp['result']="Control Mode successfully set"
-    else:
-        GivTCP.debug ("Error setting Control Mode")
-        temp['result']="Error setting Control Mode"
+    try:
+        if mode==1:
+            client=GivEnergyClient(host=GiV_Settings.invertorIP).set_mode_dynamic
+        elif mode==2:
+            client=GivEnergyClient(host=GiV_Settings.invertorIP).set_mode_storage
+        elif mode==3:
+            client=GivEnergyClient(host=GiV_Settings.invertorIP).set_mode_storage(export=True)
+        elif mode==4:
+            client=GivEnergyClient(host=GiV_Settings.invertorIP).set_mode_storage(export=True)
+        else:
+            GivTCP.debug ("Invalid Mode requested: "+ mode)
+            temp['result']="Invalid Mode requested"
+            return json.dumps(temp)
+        temp['result']="Setting Battery Mode was a success"
+    except:
+        e = sys.exc_info()
+        temp['result']="Setting Battery Mode failed: " + str(e)
+    GivTCP.debug (temp['result'])
     return json.dumps(temp)
 
 def setDateTime(payload):
@@ -273,21 +303,13 @@ def setDateTime(payload):
     #convert payload to dateTime components
     try:
         iDateTime=datetime.strptime(payload['dateTime'],"%d/%m/%Y %H:%M:%S")   #format '12/11/2021 09:15:32'
-
         #Set Date and Time on Invertor
-        yearResult=GivTCP.write_single_register(35,iDateTime.year)
-        monthResult=GivTCP.write_single_register(36,iDateTime.month)
-        dayResult=GivTCP.write_single_register(37,iDateTime.day)
-        hourResult=GivTCP.write_single_register(38,iDateTime.hour)
-        minResult=GivTCP.write_single_register(39,iDateTime.minute)
-        secResult=GivTCP.write_single_register(40,iDateTime.second)
-        if yearResult=="Success" and monthResult=="Success" and dayResult=="Success" and hourResult=="Success" and minResult=="Success" and secResult=="Success":
-            targetResult="Success"
-        GivTCP.debug ("Invertor time setting was a: " + targetresult)
-        temp['result']="Invertor time setting was a: " + targetresult
-    except ValueError as e:
-        GivTCP.debug ("Error setting Invertor time: Incorrect dateTime format")
-        temp['result']="Error setting Invertor time: Incorrect dateTime format"
+        GivEnergyClient(host=GiV_Settings.invertorIP).set_datetime(iDateTime)
+        temp['result']="Invertor time setting was a success"
+    except:
+        e = sys.exc_info()
+        temp['result']="Setting Battery Mode failed: " + str(e) 
+    GivTCP.debug (temp['result'])
     return json.dumps(temp)
 
 if __name__ == '__main__':
