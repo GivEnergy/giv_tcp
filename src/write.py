@@ -7,9 +7,7 @@ from paho.mqtt.client import Client
 from GivTCP import GivTCP
 from datetime import datetime
 from settings import GiV_Settings
-from datetime import date
 from givenergy_modbus.client import GivEnergyClient
-from givenergy_modbus.model.register import HoldingRegister, InputRegister
 
 def disableChargeTarget():
     temp={}

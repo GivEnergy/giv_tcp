@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 # version 2021.11.15
 import sys
+import json
 from GivTCP import GivTCP
 from settings import GiV_Settings
 from givenergy_modbus.client import GivEnergyClient
@@ -25,6 +26,7 @@ def runAll():
     multi_output={}
     allRegNum=300
     hasExtraReg=False
+    temp={}
     GivTCP.debug("----------------------------Starting----------------------------")
     GivTCP.debug("Getting All Registers")
     
@@ -279,11 +281,12 @@ def runAll():
             multi_output["Invertor Details"]=invertor
             
         publishOutput(multi_output)
-
     except:
         e = sys.exc_info()
         GivTCP.debug("Error processing registers: " + str(e))
-    return(multi_output)
+        temp['result']="Error processing registers: " + str(e)
+        return json.dumps(temp)
+    return json.dumps(multi_output)
 
 def publishOutput(output):
     if GiV_Settings.MQTT_Output.lower()=="true":

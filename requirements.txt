@@ -1,7 +1,7 @@
 Flask
 gunicorn
 paho-mqtt
-crccheck
+givenergy-modbus
 scapy
 schedule
 rx
