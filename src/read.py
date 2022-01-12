@@ -1,11 +1,13 @@
 # -*- coding: utf-8 -*-
-# version 2021.11.15
+# version 2021.01.12
 import sys
 import json
+import datetime
 from GivTCP import GivTCP
 from settings import GiV_Settings
 from givenergy_modbus.client import GivEnergyClient
-from givenergy_modbus.model.inverter import Model
+from givenergy_modbus.model.inverter import Inverter, Model
+from givenergy_modbus.model.register_cache import RegisterCache
 
 Print_Raw=False
 if GiV_Settings.Print_Raw_Registers.lower()=="true":
@@ -15,8 +17,6 @@ def runAll():
     energy_total_output={}
     energy_today_output={}
     batt_fw={}
-    iReg={}
-    hReg={}
     power_output={}
     controlmode={}
     power_flow_output={}
@@ -31,10 +31,20 @@ def runAll():
     GivTCP.debug("Getting All Registers")
     
     #Connect to Invertor and load data
-    client=GivEnergyClient(host=GiV_Settings.invertorIP)
-
-    #Create Inverter instance
-    GEInv = client.fetch_inverter()
+    try:
+        client=GivEnergyClient(host=GiV_Settings.invertorIP)
+        InvRegCache = RegisterCache()
+        client.update_inverter_registers(InvRegCache)
+        GEInv=Inverter.from_orm(InvRegCache)
+        #BatRegCache = RegisterCache()
+        #client.update_battery_registers(BatRegCache)
+        #GEBat=Battery.from_orm(BatRegCache)
+        GivTCP.debug("Invertor connection successful, registers retrieved")
+    except:
+        e = sys.exc_info()
+        GivTCP.debug("Error collecting registers: " + str(e))
+        temp['result']="Error collecting registers: " + str(e)
+        return json.dumps(temp)
 
     if Print_Raw:
         multi_output['raw/invertor']=GEInv.dict()
@@ -48,18 +58,18 @@ def runAll():
         energy_total_output['Import Energy Total kWh']=round(GEInv.e_grid_in_total,2)
         energy_total_output['Invertor Energy Total kWh']=round(GEInv.e_inverter_out_total,2)
         energy_total_output['PV Energy Total kWh']=round(GEInv.p_inverter_out,2)    #CHECK-CHECK
-        '''
-        if  GEInv.Model==Model.Hybrid:
+        
+        if  GEInv.inverter_model==Model.Hybrid:
             energy_total_output['Load Energy Total kWh']=round((energy_total_output['Invertor Energy Total kWh']-energy_total_output['AC Charge Energy Total kWh'])-(energy_total_output['Export Energy Total kWh']-energy_total_output['Import Energy Total kWh']),3)
             energy_total_output['Battery Charge Energy Total kWh']=GEInv.e_battery_charge_total
             energy_total_output['Battery Discharge Energy Total kWh']=round(GEInv.e_battery_discharge_total,2)
         else:
             energy_total_output['Load Energy Total kWh']=round((energy_total_output['Invertor Energy Total kWh']-energy_total_output['AC Charge Energy Total kWh'])-(energy_total_output['Export Energy Total kWh']-energy_total_output['Import Energy Total kWh'])+energy_total_output['PV Energy Total kWh'],3)
 
-        if GEInv.model.lower()=="ac": 
-            energy_total_output['Battery Charge Energy Total kWh']=GEInv.e_battery_charge_ac_total
-            energy_total_output['Battery Discharge Energy Total kWh']=GEInv.e_battery_discharge_ac_total
-        '''
+        if GEInv.inverter_model==Model.Hybrid: 
+            energy_total_output['Battery Charge Energy Total kWh']=GEInv.e_battery_discharge_total_2
+            energy_total_output['Battery Discharge Energy Total kWh']=GEInv.e_battery_discharge_total_2
+        
         energy_total_output['Self Consumption Energy Total kWh']=round(energy_total_output['PV Energy Total kWh']-energy_total_output['Export Energy Total kWh'],2)
 
 #Energy Today Figures
@@ -73,13 +83,14 @@ def runAll():
         energy_today_output['Battery Charge Energy Today kWh']=round(GEInv.e_battery_charge_day,2)
         energy_today_output['Battery Discharge Energy Today kWh']=round(GEInv.e_battery_discharge_day,2)
         energy_today_output['Import for Load Energy Today kWh']=round(GEInv.e_grid_in_day - GEInv.e_inverter_in_day,2)
-        '''
-        if GEInv.model.lower()=="hybrid":
+        energy_today_output['Self Consumption Energy Today kWh']=round(energy_today_output['PV Energy Today kWh']-energy_today_output['Export Energy Today kWh'],2)
+                
+        if GEInv.inverter_model==Model.Hybrid: 
             energy_today_output['Load Energy Today kWh']=round((energy_today_output['Invertor Energy Today kWh']-energy_today_output['AC Charge Energy Today kWh'])-(energy_today_output['Export Energy Today kWh']-energy_today_output['Import Energy Today kWh']),3)
         else:
             energy_today_output['Load Energy Today kWh']=round((energy_today_output['Invertor Energy Today kWh']-energy_today_output['AC Charge Energy Today kWh'])-(energy_today_output['Export Energy Today kWh']-energy_today_output['Import Energy Today kWh'])+energy_today_output['PV Energy Today kWh'],3)
-        energy_today_output['Self Consumption Energy Today kWh']=round(energy_today_output['PV Energy Today kWh']-energy_today_output['Export Energy Today kWh'],2)
-        '''
+
+        
 ############  Core Power Stats    ############
 
     #PV Power
@@ -286,7 +297,7 @@ def runAll():
         GivTCP.debug("Error processing registers: " + str(e))
         temp['result']="Error processing registers: " + str(e)
         return json.dumps(temp)
-    return json.dumps(multi_output)
+    return json.dumps(multi_output, indent=4, sort_keys=True, default=str)
 
 def publishOutput(output):
     if GiV_Settings.MQTT_Output.lower()=="true":
@@ -301,10 +312,6 @@ def publishOutput(output):
         from influx import GivInflux
         GivTCP.debug("Pushing output to Influx")
         GivInflux.publish(output)
-    if GiV_Settings.HA_Output.lower()=="true":
-        from HomeAssist import GivHA
-        GivTCP.debug("Pushing output to HA")
-        GivHA.push(output)
 
 if __name__ == '__main__':
     globals()[sys.argv[1]]()
