@@ -228,13 +228,15 @@ def runAll():
 
         #Get Charge/Discharge Active status
         discharge_state=GEInv.battery_discharge_limit
-        discharge_rate=discharge_state*2
+        discharge_rate=discharge_state*3
+        if discharge_rate>100: discharge_rate=100
         if discharge_state==0:
             discharge_state="Paused"
         else:
             discharge_state="Active"
         charge_state=GEInv.battery_charge_limit
-        charge_rate=charge_state*2
+        charge_rate=charge_state*3
+        if charge_rate>100: charge_rate=100
         if charge_state==0:
             charge_state="Paused"
         else:
@@ -281,7 +283,7 @@ def runAll():
         if GEInv.meter_type==1: metertype="EM115" 
         if GEInv.meter_type==0: metertype="EM418" 
         invertor['Meter Type']=metertype
-        #invertor['Invertor Type']= GEInv.Model
+        invertor['Invertor Type']= GEInv.inverter_model.name
 
         #Create multioutput and publish
         if len(timeslots)==8:

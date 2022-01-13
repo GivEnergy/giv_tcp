@@ -116,3 +116,6 @@ def setBattMode():
 def setDate():
     payload = request.get_json(silent=True, force=True)
     return wr.setDateTime(payload)
+
+if __name__ == "__main__":
+    giv_api.run()

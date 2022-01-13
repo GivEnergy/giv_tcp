@@ -122,14 +122,14 @@ def resumeBatteryDischarge():
 def setChargeTarget(payload):
     temp={}
     if type(payload) is not dict: payload=json.loads(payload)
-    target=payload['chargeToPercent']
+    target=int(payload['chargeToPercent'])
     try:
         client=GivEnergyClient(host=GiV_Settings.invertorIP)
         client.set_battery_target_soc(target)
         if target == 100:
             client.enable_charge_target
         else:
-            client.disable_charge_target
+            client.disable_charge_target    #Is this right???
         temp['result']="Setting Charge Target was a success"
     except:
         e = sys.exc_info()
@@ -140,10 +140,10 @@ def setChargeTarget(payload):
 def setBatteryReserve(payload):
     temp={}
     if type(payload) is not dict: payload=json.loads(payload)
-    target=payload['dischargeToPercent']
+    target=int(payload['dischargeToPercent'])
     #Only allow minimum of 2%
-    if int(target)<4: target="4"
-    GivTCP.debug ("Setting battery reserve target to: " + target)
+    if target<4: target=4
+    GivTCP.debug ("Setting battery reserve target to: " + str(target))
     try:
         GivEnergyClient(host=GiV_Settings.invertorIP).set_battery_power_reserve(target)
         temp['result']="Setting Battery Reserve was a success"
@@ -156,10 +156,12 @@ def setBatteryReserve(payload):
 def setChargeRate(payload):
     temp={}
     if type(payload) is not dict: payload=json.loads(payload)
-    target=payload['chargeRate']
-    #Only allow max of 100%
-    target=int(target)/2
-    if target>100: target="100"
+    target=int(payload['chargeRate'])
+    #Only allow max of 100% and if not 100% the scale to a third to get register value
+    if target>=100:
+        target=50
+    else:
+        target=int(target/3)
     GivTCP.debug ("Setting battery charge rate to: " + str(target))
     try:
         GivEnergyClient(host=GiV_Settings.invertorIP).set_battery_charge_limit(target)
@@ -175,9 +177,11 @@ def setDischargeRate(payload):
     temp={}
     if type(payload) is not dict: payload=json.loads(payload)
     target=payload['dischargeRate']
-    #Only allow max of 100%
-    target=int(target)/2
-    if target>100: target="100"
+    #Only allow max of 100% and if not 100% the scale to a third to get register value
+    if int(target)>=100:
+        target=50
+    else:
+        target=int(target/3)
     GivTCP.debug ("Setting battery discharge rate to: " + str(target))
     try:
         GivEnergyClient(host=GiV_Settings.invertorIP).set_battery_discharge_limit(target)
