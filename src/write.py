@@ -5,7 +5,7 @@ import json
 
 from paho.mqtt.client import Client
 from GivTCP import GivTCP
-from datetime import datetime
+from datetime import datetime, time
 from settings import GiV_Settings
 from givenergy_modbus.client import GivEnergyClient
 
@@ -156,12 +156,11 @@ def setBatteryReserve(payload):
 def setChargeRate(payload):
     temp={}
     if type(payload) is not dict: payload=json.loads(payload)
-    target=int(payload['chargeRate'])
     #Only allow max of 100% and if not 100% the scale to a third to get register value
-    if target>=100:
+    if int(payload['chargeRate'])>=100:
         target=50
     else:
-        target=int(target/3)
+        target=int(int(payload['chargeRate'])/3)
     GivTCP.debug ("Setting battery charge rate to: " + str(target))
     try:
         GivEnergyClient(host=GiV_Settings.invertorIP).set_battery_charge_limit(target)
@@ -176,12 +175,11 @@ def setChargeRate(payload):
 def setDischargeRate(payload):
     temp={}
     if type(payload) is not dict: payload=json.loads(payload)
-    target=payload['dischargeRate']
     #Only allow max of 100% and if not 100% the scale to a third to get register value
-    if int(target)>=100:
+    if int(payload['dischargeRate'])>=100:
         target=50
     else:
-        target=int(target/3)
+        target=int(int(payload['dischargeRate'])/3)
     GivTCP.debug ("Setting battery discharge rate to: " + str(target))
     try:
         GivEnergyClient(host=GiV_Settings.invertorIP).set_battery_discharge_limit(target)
@@ -198,14 +196,12 @@ def setChargeSlot1(payload):
     targetresult="Success"
     wintermoderesult="Success"
     if type(payload) is not dict: payload=json.loads(payload)
-    start=payload['start']
-    end=payload['finish']
     if 'chargeToPercent' in payload.keys():
         targetresult=setChargeTarget(payload)
     client=GivEnergyClient(host=GiV_Settings.invertorIP)
     try:
         client.enable_charge
-        client.set_charge_slot_1(datetime.strptime(start,"%H:%M"),datetime.strptime(end,"%H:%M"))
+        client.set_charge_slot_1((datetime.strptime(payload['start'],"%H:%M"),datetime.strptime(payload['finish'],"%H:%M")))
         temp['result']="Setting Charge Slot 1 was a success"
     except:
         e = sys.exc_info()
@@ -218,14 +214,12 @@ def setChargeSlot2(payload):
     targetresult="Success"
     wintermoderesult="Success"
     if type(payload) is not dict: payload=json.loads(payload)
-    start=payload['start']
-    end=payload['finish']
     if 'chargeToPercent' in payload.keys():
         targetresult=setChargeTarget(payload)
     client=GivEnergyClient(host=GiV_Settings.invertorIP)
     try:
         client.enable_charge
-        client.set_charge_slot_2(datetime.strptime(start,"%H:%M"),datetime.strptime(end,"%H:%M"))
+        client.set_charge_slot_2((datetime.strptime(payload['start'],"%H:%M"),datetime.strptime(payload['finish'],"%H:%M")))
         temp['result']="Setting Charge Slot 2 was a success"
     except:
         e = sys.exc_info()
@@ -238,13 +232,11 @@ def setDischargeSlot1(payload):
     targetresult="Success"
     wintermoderesult="Success"
     if type(payload) is not dict: payload=json.loads(payload)
-    start=payload['start']
-    end=payload['finish']
     if 'dischargeToPercent' in payload.keys():
         targetresult=setBatteryReserve(payload)
     client=GivEnergyClient(host=GiV_Settings.invertorIP)
     try:
-        client.set_discharge_slot_1(datetime.strptime(start,"%H:%M"),datetime.strptime(end,"%H:%M"))
+        client.set_discharge_slot_1((datetime.strptime(payload['start'],"%H:%M"),datetime.strptime(payload['finish'],"%H:%M")))
         client.enable_discharge
         temp['result']="Setting Discharge Slot 1 was a success"
     except:
@@ -258,13 +250,11 @@ def setDischargeSlot2(payload):
     targetresult="Success"
     wintermoderesult="Success"
     if type(payload) is not dict: payload=json.loads(payload)
-    start=payload['start']
-    end=payload['finish']
     if 'dischargeToPercent' in payload.keys():
         targetresult=setBatteryReserve(payload)
     client=GivEnergyClient(host=GiV_Settings.invertorIP)
     try:
-        client.set_discharge_slot_2(datetime.strptime(start,"%H:%M"),datetime.strptime(end,"%H:%M"))
+        client.set_discharge_slot_2((datetime.strptime(payload['start'],"%H:%M"),datetime.strptime(payload['finish'],"%H:%M")))
         client.enable_discharge
         temp['result']="Setting Discharge Slot 2 was a success"
     except:
