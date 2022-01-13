@@ -3,6 +3,7 @@
 import sys
 import json
 import logging
+import datetime
 from settings import GiV_Settings
 from givenergy_modbus.client import GivEnergyClient
 from givenergy_modbus.model.inverter import Inverter, Model
@@ -311,19 +312,50 @@ def runAll():
         return json.dumps(temp)
     return json.dumps(multi_output, indent=4, sort_keys=True, default=str)
 
-def publishOutput(output,SN):
+def publishOutput(array,SN):
+    safeoutput={}
+    tempoutput={}
+    # Create a publish safe version of the output
+    for p_load in array:
+        output=array[p_load]
+        for reg in output:
+        # Check output[reg] is print safe (not dateTime)
+            if isinstance(output[reg], tuple):
+                if "slot" in str(reg):
+                    logging.info('Converting Timeslots to publish safe string')
+                    safeoutput[reg+"_start"]=output[reg][0].strftime("%H%M")
+                    safeoutput[reg+"_end"]=output[reg][1].strftime("%H%M")
+                else:
+                    #Deal with other tuples _ Print each value
+                    for index, key in enumerate(output[reg]):
+                        logging.info('Converting Tuple to multiple publish safe strings')
+                        safeoutput[reg+"_"+str(index)]=str(key)
+            elif isinstance(output[reg], datetime.datetime):
+                logging.info('Converting datetime to publish safe string')
+                safeoutput[reg]=output[reg].strftime("%d-%m-%Y %H:%M:%S")
+            elif isinstance(output[reg], datetime.time):
+                logging.info('Converting time to publish safe string')
+                safeoutput[reg]=output[reg].strftime("%H:%M")
+            elif isinstance(output[reg], Model):
+                logging.info('Converting time to publish safe string')
+                safeoutput[reg]=output[reg].name
+            else:
+                safeoutput[reg]=output[reg]
+        tempoutput[p_load]=safeoutput
+
+
     if GiV_Settings.MQTT_Output.lower()=="true":
         from mqtt import GivMQTT
         logging.info("Publish all to MQTT")
-        GivMQTT.multi_MQTT_publish(str(GiV_Settings.MQTT_Topic+"/"+SN), output)
+        GivMQTT.multi_MQTT_publish(str(GiV_Settings.MQTT_Topic+"/"+SN), tempoutput)
     if GiV_Settings.JSON_Output.lower()=="true":
         from GivJson import GivJSON
         logging.info("Pushing JSON output")
-        GivJSON.output_JSON(output)
+        GivJSON.output_JSON(tempoutput)
     if GiV_Settings.Influx_Output.lower()=="true":
         from influx import GivInflux
         logging.info("Pushing output to Influx")
-        GivInflux.publish(SN,output)
+        GivInflux.publish(SN,tempoutput)
 
 if __name__ == '__main__':
     globals()[sys.argv[1]]()

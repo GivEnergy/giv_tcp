@@ -50,31 +50,9 @@ class GivMQTT():
             time.sleep(0.2)
         for p_load in array:
             payload=array[p_load]
+            logging.info('Publishing: '+rootTopic+p_load)
             for reg in payload:
-                # Check payload[reg] is print safe (not dateTime)
-                if isinstance(payload[reg], tuple):
-                    if "slot" in str(reg):
-                        logging.info('Publishing: '+rootTopic+p_load+'/'+str(reg)+"_start "+str(payload[reg][0].strftime("%H%M")))
-                        client.publish(rootTopic+p_load+'/'+reg+"_start",payload[reg][0].strftime("%H%M"))
-                        logging.info('Publishing: '+rootTopic+p_load+'/'+str(reg)+"_end "+str(payload[reg][1].strftime("%H%M")))
-                        client.publish(rootTopic+p_load+'/'+reg+"_end",payload[reg][1].strftime("%H%M"))
-                    else:
-                        #Deal with other tuples _ Print each value
-                        for index, key in enumerate(payload[reg]):
-                            logging.info('Publishing: '+rootTopic+p_load+'/'+str(reg)+"_"+str(index)+" "+str(key))
-                            client.publish(rootTopic+p_load+'/'+reg+"_"+str(index),str(key))
-                elif isinstance(payload[reg], datetime.datetime):
-                    logging.info('Publishing: '+rootTopic+p_load+'/'+str(reg)+" "+str(payload[reg].strftime("%d-%m-%Y %H:%M:%S")))
-                    client.publish(rootTopic+p_load+'/'+reg,payload[reg].strftime("%d-%m-%Y %H:%M:%S"))
-                elif isinstance(payload[reg], datetime.time):
-                    logging.info('Publishing: '+rootTopic+p_load+'/'+str(reg)+" "+str(payload[reg].strftime("%H:%M")))
-                    client.publish(rootTopic+p_load+'/'+reg,payload[reg].strftime("%H:%M"))
-                elif isinstance(payload[reg], Model):
-                    logging.info('Publishing: '+rootTopic+p_load+'/'+str(reg)+" "+str(payload[reg].name))
-                    client.publish(rootTopic+p_load+'/'+str(payload[reg].name))
-                else:
-                    logging.info('Publishing: '+rootTopic+p_load+'/'+str(reg)+" "+str(payload[reg]))
-                    client.publish(rootTopic+p_load+'/'+reg,payload[reg])
+                client.publish(rootTopic+p_load+'/'+reg,payload[reg])
         client.loop_stop()                      			#Stop loop
         client.disconnect()
         return client
