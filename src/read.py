@@ -1,34 +1,35 @@
 # -*- coding: utf-8 -*-
-# version 2021.01.12
+# version 2021.01.13
 import sys
 import json
-import datetime
-from GivTCP import GivTCP
+import logging
 from settings import GiV_Settings
 from givenergy_modbus.client import GivEnergyClient
 from givenergy_modbus.model.inverter import Inverter, Model
+from givenergy_modbus.model.battery import Battery
 from givenergy_modbus.model.register_cache import RegisterCache
 
 Print_Raw=False
 if GiV_Settings.Print_Raw_Registers.lower()=="true":
     Print_Raw=True
+
+if GiV_Settings.debug.lower()=="true":
+    logging.basicConfig(filename='givtcp_debug.log', encoding='utf-8', level=logging.DEBUG)
+else:
+    logging.basicConfig(filename='givtcp_debug.log', encoding='utf-8', level=logging.INFO)
     
 def runAll():
     energy_total_output={}
     energy_today_output={}
-    batt_fw={}
     power_output={}
     controlmode={}
     power_flow_output={}
-    sum=0
     invertor={}
-    emptycount=0
+    battery={}
     multi_output={}
-    allRegNum=300
-    hasExtraReg=False
     temp={}
-    GivTCP.debug("----------------------------Starting----------------------------")
-    GivTCP.debug("Getting All Registers")
+    logging.info("----------------------------Starting----------------------------")
+    logging.info("Getting All Registers")
     
     #Connect to Invertor and load data
     try:
@@ -36,22 +37,23 @@ def runAll():
         InvRegCache = RegisterCache()
         client.update_inverter_registers(InvRegCache)
         GEInv=Inverter.from_orm(InvRegCache)
-        #BatRegCache = RegisterCache()
-        #client.update_battery_registers(BatRegCache)
-        #GEBat=Battery.from_orm(BatRegCache)
-        GivTCP.debug("Invertor connection successful, registers retrieved")
+        BatRegCache = RegisterCache()
+        client.update_battery_registers(BatRegCache)
+        GEBat=Battery.from_orm(BatRegCache)
+        logging.info("Invertor connection successful, registers retrieved")
     except:
         e = sys.exc_info()
-        GivTCP.debug("Error collecting registers: " + str(e))
+        logging.error("Error collecting registers: " + str(e))
         temp['result']="Error collecting registers: " + str(e)
         return json.dumps(temp)
 
     if Print_Raw:
         multi_output['raw/invertor']=GEInv.dict()
+        multi_output['raw/battery']=GEBat.dict()
         
     try:
     #Total Energy Figures
-        GivTCP.debug("Getting Total Energy Data")
+        logging.info("Getting Total Energy Data")
         energy_total_output['Export Energy Total kWh']=round(GEInv.e_grid_out_total,2)
         energy_total_output['Battery Throughput Total kWh']=round(GEInv.e_battery_discharge_total_2,2)
         energy_total_output['AC Charge Energy Total kWh']=round(GEInv.e_inverter_in_total,2)
@@ -73,7 +75,7 @@ def runAll():
         energy_total_output['Self Consumption Energy Total kWh']=round(energy_total_output['PV Energy Total kWh']-energy_total_output['Export Energy Total kWh'],2)
 
 #Energy Today Figures
-        GivTCP.debug("Getting Today Energy Data")
+        logging.info("Getting Today Energy Data")
         energy_today_output['Battery Throughput Today kWh']=round(GEInv.e_battery_charge_day+GEInv.e_battery_discharge_day,2)
         energy_today_output['PV Energy Today kWh']=round(GEInv.e_pv1_day+GEInv.e_pv2_day,2)
         energy_today_output['Import Energy Today kWh']=round(GEInv.e_grid_in_day,2)
@@ -94,7 +96,7 @@ def runAll():
 ############  Core Power Stats    ############
 
     #PV Power
-        GivTCP.debug("Getting PV Power")
+        logging.info("Getting PV Power")
         PV_power_1=GEInv.p_pv1
         PV_power_2=GEInv.p_pv2
         PV_power=PV_power_1+PV_power_2
@@ -104,7 +106,7 @@ def runAll():
             power_output['PV Power']= PV_power
 
     #Grid Power
-        GivTCP.debug("Getting Grid Power")
+        logging.info("Getting Grid Power")
         grid_power= GEInv.p_grid_out
         if grid_power<0:
             import_power=abs(grid_power)
@@ -120,11 +122,11 @@ def runAll():
         power_output['Export Power']=export_power
 
     #EPS Power
-        GivTCP.debug("Getting EPS Power")
+        logging.info("Getting EPS Power")
         power_output['EPS Power']= GEInv.p_eps_backup
 
     #Invertor Power
-        GivTCP.debug("Getting PInv Power")
+        logging.info("Getting PInv Power")
         Invertor_power=GEInv.p_inverter_out
         if -6000 <= Invertor_power <= 6000:
             power_output['Invertor Power']= Invertor_power
@@ -132,13 +134,13 @@ def runAll():
             power_output['AC Charge Power']= abs(Invertor_power)
 
     #Load Power
-        GivTCP.debug("Getting Load Power")
+        logging.info("Getting Load Power")
         Load_power=GEInv.p_load_demand 
         if Load_power<15500:
             power_output['Load Power']=Load_power
 
     #Self Consumption
-        GivTCP.debug("Getting Self Consumption Power")
+        logging.info("Getting Self Consumption Power")
         power_output['Self Consumption Power']=max(Load_power - import_power,0)
 
     #Battery Power
@@ -154,13 +156,13 @@ def runAll():
         power_output['Discharge Power']=discharge_power
 
     #SOC
-        GivTCP.debug("Getting SOC")
+        logging.info("Getting SOC")
         power_output['SOC']=GEInv.battery_percent
 
 ############  Power Flow Stats    ############
 
     #Solar to H/B/G
-        GivTCP.debug("Getting Solar to H/B/G Power Flows")
+        logging.info("Getting Solar to H/B/G Power Flows")
         if PV_power>0:
             S2H=min(PV_power,Load_power)
             power_flow_output['Solar to House']=S2H
@@ -174,12 +176,12 @@ def runAll():
             power_flow_output['Solar to Grid']=0
 
     #Battery to House
-        GivTCP.debug("Getting Battery to House Power Flow")
+        logging.info("Getting Battery to House Power Flow")
         B2H=max(discharge_power-export_power,0)
         power_flow_output['Battery to House']=B2H
 
     #Grid to Battery/House Power
-        GivTCP.debug("Getting Grid to Battery/House Power Flow")
+        logging.info("Getting Grid to Battery/House Power Flow")
         if import_power>0:
             power_flow_output['Grid to Battery']=charge_power-max(PV_power-Load_power,0)
             power_flow_output['Grid to House']=max(import_power-charge_power,0)
@@ -189,14 +191,14 @@ def runAll():
             power_flow_output['Grid to House']=0
 
     #Battery to Grid Power
-        GivTCP.debug("Getting Battery to Grid Power Flow")
+        logging.info("Getting Battery to Grid Power Flow")
         if export_power>0:
             power_flow_output['Battery to Grid']=max(discharge_power-B2H,0)
         else:
             power_flow_output['Battery to Grid']=0
 
     #Get Invertor Temperature
-        invertor['Invertor Temperature']=round(GEInv.temp_inverter_heatsink,2)
+
 
     #Combine all outputs
         multi_output["Energy/Total"]=energy_total_output
@@ -206,7 +208,7 @@ def runAll():
         multi_output["Invertor Details"]=invertor
 
     ################ Run Holding Reg now ###################
-        GivTCP.debug("Getting mode control figures")
+        logging.info("Getting mode control figures")
         # Get Control Mode registers
         shallow_charge=GEInv.battery_soc_reserve
         self_consumption=GEInv.battery_power_mode 
@@ -224,7 +226,7 @@ def runAll():
             discharge_enable="Active"
         else:
             discharge_enable="Paused"
-        GivTCP.debug("Shallow Charge= "+str(shallow_charge)+" Self Consumption= "+str(self_consumption)+" Discharge Enable= "+str(discharge_enable))
+        logging.info("Shallow Charge= "+str(shallow_charge)+" Self Consumption= "+str(self_consumption)+" Discharge Enable= "+str(discharge_enable))
 
         #Get Charge/Discharge Active status
         discharge_state=GEInv.battery_discharge_limit
@@ -244,9 +246,9 @@ def runAll():
 
 
         #Calculate Mode
-        GivTCP.debug("Calculating Mode...")
+        logging.info("Calculating Mode...")
         mode=GEInv.system_mode
-        GivTCP.debug("Mode is: " + str(mode))
+        logging.info("Mode is: " + str(mode))
 
         controlmode['Mode']=mode
         controlmode['Battery Power Reserve']=battery_reserve
@@ -260,7 +262,7 @@ def runAll():
 
         #Grab Timeslots
         timeslots={}
-        GivTCP.debug("Getting TimeSlot data")
+        logging.info("Getting TimeSlot data")
         timeslots['Discharge start time slot 1']=GEInv.discharge_slot_1[0]
         timeslots['Discharge end time slot 1']=GEInv.discharge_slot_1[1]
         timeslots['Discharge start time slot 2']=GEInv.discharge_slot_2[0]
@@ -272,7 +274,7 @@ def runAll():
 
         #Get Invertor Details
         invertor={}
-        GivTCP.debug("Getting Invertor Details")
+        logging.info("Getting Invertor Details")
         if GEInv.battery_type==1: batterytype="Lithium" 
         if GEInv.battery_type==0: batterytype="Lead Acid" 
         invertor['Battery Type']=batterytype
@@ -284,36 +286,44 @@ def runAll():
         if GEInv.meter_type==0: metertype="EM418" 
         invertor['Meter Type']=metertype
         invertor['Invertor Type']= GEInv.inverter_model.name
+        invertor['Invertor Temperature']=round(GEInv.temp_inverter_heatsink,2)
+
+        #Get Battery Details
+        battery={}
+        logging.info("Getting Invertor Details")
+        battery['Battery Serial Number']=GEBat.battery_serial_number
+        battery['Battery SOC']=GEBat.battery_soc
+        battery['Battery Capacity']=GEBat.battery_full_capacity
+        battery['Battery Firmware Version']=GEBat.bms_firmware_version
+
 
         #Create multioutput and publish
-        if len(timeslots)==8:
-            multi_output["Timeslots"]=timeslots
-        if len(controlmode)==9:
-            multi_output["Control"]=controlmode
-        if len(invertor)==7:
-            multi_output["Invertor Details"]=invertor
-            
-        publishOutput(multi_output)
+        multi_output["Timeslots"]=timeslots
+        multi_output["Control"]=controlmode
+        multi_output["Invertor Details"]=invertor
+        multi_output["Battery Details"]=battery
+        publishOutput(multi_output,GEInv.inverter_serial_number)
+
     except:
         e = sys.exc_info()
-        GivTCP.debug("Error processing registers: " + str(e))
+        logging.error("Error processing registers: " + str(e))
         temp['result']="Error processing registers: " + str(e)
         return json.dumps(temp)
     return json.dumps(multi_output, indent=4, sort_keys=True, default=str)
 
-def publishOutput(output):
+def publishOutput(output,SN):
     if GiV_Settings.MQTT_Output.lower()=="true":
         from mqtt import GivMQTT
-        GivTCP.debug("Publish all to MQTT")
-        GivMQTT.multi_MQTT_publish(output)
+        logging.info("Publish all to MQTT")
+        GivMQTT.multi_MQTT_publish(str(GiV_Settings.MQTT_Topic+"/"+SN), output)
     if GiV_Settings.JSON_Output.lower()=="true":
         from GivJson import GivJSON
-        GivTCP.debug("Pushing JSON output")
+        logging.info("Pushing JSON output")
         GivJSON.output_JSON(output)
     if GiV_Settings.Influx_Output.lower()=="true":
         from influx import GivInflux
-        GivTCP.debug("Pushing output to Influx")
-        GivInflux.publish(output)
+        logging.info("Pushing output to Influx")
+        GivInflux.publish(SN,output)
 
 if __name__ == '__main__':
     globals()[sys.argv[1]]()

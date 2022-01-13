@@ -2,6 +2,6 @@
 settings.py
 settings.old
 __pycache__
-read_debug.log
+givtcp_debug.log
 .venv
 .vscode
