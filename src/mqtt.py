@@ -33,12 +33,6 @@ class GivMQTT():
         mqtt.Client.connected_flag=False        			#create flag in class
         client=mqtt.Client("GivEnergy_GivTCP")
 
-        if GiV_Settings.MQTT_Topic=="":
-            logging.info ("No user defined MQTT Topic")
-        else:
-            logging.info ("User defined MQTT Topic found: "+ GiV_Settings.MQTT_Topic)
-            rootTopic=GiV_Settings.MQTT_Topic+'/'
-
         if GivMQTT.MQTTCredentials:
             client.username_pw_set(GivMQTT.MQTT_Username,GivMQTT.MQTT_Password)
         client.on_connect=GivMQTT.on_connect     			#bind call back function

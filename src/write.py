@@ -16,29 +16,29 @@ else:
 def disableChargeTarget():
     temp={}
     try:
-        GivEnergyClient(host=GiV_Settings.invertorIP).disable_charge_target
-        temp['result']="Pausing Charge Schedule was a success"
+        GivEnergyClient(host=GiV_Settings.invertorIP).disable_charge_target()
+        temp['result']="Disabling Charge Target was a success"
     except:
         e = sys.exc_info()
-        temp['result']="Pausing Charge Schedule failed: " + str(e)
+        temp['result']="Disabling Charge Target failed: " + str(e)
     logging.info (temp['result'])
     return json.dumps(temp)
 
 def enableChargeTarget():
     temp={}
     try:
-        GivEnergyClient(host=GiV_Settings.invertorIP).enable_charge_target
-        temp['result']="Resuming Charge Schedule was a success"
+        GivEnergyClient(host=GiV_Settings.invertorIP).enable_charge_target()
+        temp['result']="Enabling Charge Target was a success"
     except:
         e = sys.exc_info()
-        temp['result']="Pausing Charge Schedule failed: " + str(e)
+        temp['result']="Enabling Charge Target failed: " + str(e)
     logging.info (temp['result'])
     return json.dumps(temp)
 
 def pauseChargeSchedule():
     temp={}
     try:
-        GivEnergyClient(host=GiV_Settings.invertorIP).disable_charge
+        GivEnergyClient(host=GiV_Settings.invertorIP).disable_charge()
         temp['result']="Pausing Charge Schedule was a success"
     except:
         e = sys.exc_info()
@@ -49,7 +49,7 @@ def pauseChargeSchedule():
 def resumeChargeSchedule():
     temp={}
     try:
-        GivEnergyClient(host=GiV_Settings.invertorIP).enable_charge
+        GivEnergyClient(host=GiV_Settings.invertorIP).enable_charge()
         temp['result']="Resuming Charge Schedule was a success"
     except:
         e = sys.exc_info()
@@ -60,7 +60,7 @@ def resumeChargeSchedule():
 def pauseDischargeSchedule():
     temp={}
     try:
-        GivEnergyClient(host=GiV_Settings.invertorIP).enable_discharge
+        GivEnergyClient(host=GiV_Settings.invertorIP).enable_discharge()
         temp['result']="Pausing Discharge Schedule was a success"
     except:
         e = sys.exc_info()
@@ -71,7 +71,7 @@ def pauseDischargeSchedule():
 def resumeDischargeSchedule():
     temp={}
     try:
-        GivEnergyClient(host=GiV_Settings.invertorIP).disable_discharge
+        GivEnergyClient(host=GiV_Settings.invertorIP).disable_discharge()
         temp['result']="Resuming Discharge Schedule was a success"
     except:
         e = sys.exc_info()
@@ -130,10 +130,6 @@ def setChargeTarget(payload):
     try:
         client=GivEnergyClient(host=GiV_Settings.invertorIP)
         client.set_battery_target_soc(target)
-        if target == 100:
-            client.enable_charge_target
-        else:
-            client.disable_charge_target    #Is this right???
         temp['result']="Setting Charge Target was a success"
     except:
         e = sys.exc_info()
@@ -145,7 +141,7 @@ def setBatteryReserve(payload):
     temp={}
     if type(payload) is not dict: payload=json.loads(payload)
     target=int(payload['dischargeToPercent'])
-    #Only allow minimum of 2%
+    #Only allow minimum of 4%
     if target<4: target=4
     logging.info ("Setting battery reserve target to: " + str(target))
     try:
@@ -204,7 +200,6 @@ def setChargeSlot1(payload):
         targetresult=setChargeTarget(payload)
     client=GivEnergyClient(host=GiV_Settings.invertorIP)
     try:
-        client.enable_charge
         client.set_charge_slot_1((datetime.strptime(payload['start'],"%H:%M"),datetime.strptime(payload['finish'],"%H:%M")))
         temp['result']="Setting Charge Slot 1 was a success"
     except:
@@ -222,7 +217,6 @@ def setChargeSlot2(payload):
         targetresult=setChargeTarget(payload)
     client=GivEnergyClient(host=GiV_Settings.invertorIP)
     try:
-        client.enable_charge
         client.set_charge_slot_2((datetime.strptime(payload['start'],"%H:%M"),datetime.strptime(payload['finish'],"%H:%M")))
         temp['result']="Setting Charge Slot 2 was a success"
     except:
@@ -241,7 +235,6 @@ def setDischargeSlot1(payload):
     client=GivEnergyClient(host=GiV_Settings.invertorIP)
     try:
         client.set_discharge_slot_1((datetime.strptime(payload['start'],"%H:%M"),datetime.strptime(payload['finish'],"%H:%M")))
-        client.enable_discharge
         temp['result']="Setting Discharge Slot 1 was a success"
     except:
         e = sys.exc_info()
@@ -259,7 +252,6 @@ def setDischargeSlot2(payload):
     client=GivEnergyClient(host=GiV_Settings.invertorIP)
     try:
         client.set_discharge_slot_2((datetime.strptime(payload['start'],"%H:%M"),datetime.strptime(payload['finish'],"%H:%M")))
-        client.enable_discharge
         temp['result']="Setting Discharge Slot 2 was a success"
     except:
         e = sys.exc_info()

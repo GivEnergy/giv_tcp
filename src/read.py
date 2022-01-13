@@ -304,7 +304,7 @@ def runAll():
         multi_output["Invertor Details"]=invertor
         multi_output["Battery Details"]=battery
         publishOutput(multi_output,GEInv.inverter_serial_number)
-
+        
     except:
         e = sys.exc_info()
         logging.error("Error processing registers: " + str(e))
@@ -318,6 +318,7 @@ def publishOutput(array,SN):
     # Create a publish safe version of the output
     for p_load in array:
         output=array[p_load]
+        safeoutput={}
         for reg in output:
         # Check output[reg] is print safe (not dateTime)
             if isinstance(output[reg], tuple):
@@ -347,7 +348,9 @@ def publishOutput(array,SN):
     if GiV_Settings.MQTT_Output.lower()=="true":
         from mqtt import GivMQTT
         logging.info("Publish all to MQTT")
-        GivMQTT.multi_MQTT_publish(str(GiV_Settings.MQTT_Topic+"/"+SN), tempoutput)
+        if GiV_Settings.MQTT_Topic=="":
+            GiV_Settings.MQTT_Topic="GivEnergy"
+        GivMQTT.multi_MQTT_publish(str(GiV_Settings.MQTT_Topic+"/"+SN+"/"), tempoutput)
     if GiV_Settings.JSON_Output.lower()=="true":
         from GivJson import GivJSON
         logging.info("Pushing JSON output")
