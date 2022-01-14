@@ -1,3 +1,4 @@
+# version 1.0
 from GivTCP import GivTCP
 from settings import GiV_Settings
 from requests import post

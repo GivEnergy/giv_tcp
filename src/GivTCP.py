@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+# version 1.0
 import socket
 import sys
 import codecs
@@ -21,6 +22,7 @@ class GivTCP:
       sourceFile = open(GiV_Settings.Debug_File_Location + 'read_debug.log','a')
       print(str(datetime.now())+" - "+str(input), file = sourceFile)
       sourceFile.close()
+      print(str(datetime.now())+" - "+str(input), file=sys.stderr)
 
   def int_to_hex_string(value, bits):
       return "{0:0{1}X}".format(value & ((1<<bits) - 1), bits//4)

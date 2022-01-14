@@ -1,5 +1,6 @@
 #!/bin/sh
 #Only used for Docker Deployment
+# version 1.0
 
 FILE=/app/settings.py
 if [ -f "$FILE" ]
@@ -7,9 +8,8 @@ then
     echo "$FILE exists."
 else
     echo "$FILE does not exist"
-    printf "class GiV_Settings:\n" >> settings.py
-    if [ -z "$INVERTOR_IP" ]
-    then
+    if [ -z "$INVERTOR_IP" ]; then
+        echo 'IP not set in ENV'
         for i in 1 2 3
         do
             echo 'IP not set in ENV, scanning network attempt ' "$i"
@@ -26,10 +26,12 @@ else
             exit 1
         else
             echo Invertor found at "$outputString"
+            printf "class GiV_Settings:\n" >> settings.py
             printf "    invertorIP=\"$outputString\"\n" >> settings.py
         fi
     else
-        printf "    invertorIP=\"$INVERTOR_IP\"\n" >> settings.py
+            printf "class GiV_Settings:\n" >> settings.py
+            printf "    invertorIP=\"$INVERTOR_IP\"\n" >> settings.py
     fi
     printf "    Print_Raw_Registers=\"$PRINT_RAW\"\n" >> settings.py
     printf "    MQTT_Output=\"$MQTT_OUTPUT\"\n" >> settings.py

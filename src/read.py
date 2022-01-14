@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+# version 2021.11.15
 import sys
 from GivTCP import GivTCP
 from GivLUT import GiV_Reg_LUT
@@ -60,14 +61,24 @@ def getCombinedStats():
             fw=batt_fw[GiV_Reg_LUT.holding_register_LUT.get(21)[0]+"(21)"]
             if GivTCP.Invertor_Type=="Hybrid" and fw>=449:
                 GivTCP.debug("FW does have extra registers: ("+str(GivTCP.Invertor_Type)+": " + str(fw)+")")
-                input_registers.update(GivTCP.read_register('180','04','2'))    #Get v2.6 input Registers
-                hasExtraReg=True
-                inputRegNum=62
+                extraReg=GivTCP.read_register('180','04','2')
+                if len(extraReg)==2:
+                    GivTCP.debug("Extra registers successfully retrieved")
+                    input_registers.update(extraReg)    #Get v2.6 input Registers
+                    hasExtraReg=True
+                    inputRegNum=62
+                else:
+                    GivTCP.debug("Extra registers NOT successfully retrieved, ignoring them from now on")
             elif GivTCP.Invertor_Type=="AC":
                 GivTCP.debug("FW does have extra registers: ("+str(GivTCP.Invertor_Type)+": " + str(fw)+")")
-                input_registers.update(GivTCP.read_register('105','04','2'))    #Get v2.6 input Registers
-                hasExtraReg=True
-                inputRegNum=62
+                extraReg=GivTCP.read_register('105','04','2')
+                if len(extraReg)==2:
+                    GivTCP.debug("Extra registers successfully retrieved")
+                    input_registers.update(extraReg)    #Get v2.6 input Registers
+                    hasExtraReg=True
+                    inputRegNum=62
+                else:
+                    GivTCP.debug("Extra registers NOT successfully retrieved, ignoring them from now on")
             else:
                 GivTCP.debug("FW does NOT have extra registers: ("+str(GivTCP.Invertor_Type)+": "+ str(fw)+")")
         else:
@@ -87,7 +98,7 @@ def getCombinedStats():
             sum=sum
     GivTCP.debug("There are " + str(emptycount) +" empty registers and "+str(len(input_registers))+"/"+str(inputRegNum)+" registers collected")
 
-    if len(input_registers)==inputRegNum and emptycount<50:		#Only process and run if registers are all there and non-zero
+    if len(input_registers)==inputRegNum and emptycount<50:		#Only process and run if registers are all there and non-zero (ignore if extrareg is missing)
         try:
     #Total Energy Figures
             GivTCP.debug("Getting Total Energy Data")
@@ -325,6 +336,21 @@ def getModesandTimes():
             else:
                 discharge_enable="Paused"
             GivTCP.debug("Shallow Charge= "+str(shallow_charge)+" Self Consumption= "+str(self_consumption)+" Discharge Enable= "+str(discharge_enable))
+    
+    #Get Charge/Discharge Active status
+            discharge_state=holding_registers[GiV_Reg_LUT.holding_register_LUT.get(112)[0]+"(112)"]
+            discharge_rate=discharge_state*2
+            if discharge_state==0:
+                discharge_state="Paused"
+            else:
+                discharge_state="Active"
+            charge_state=holding_registers[GiV_Reg_LUT.holding_register_LUT.get(111)[0]+"(111)"]
+            charge_rate=charge_state*2
+            if charge_state==0:
+                charge_state="Paused"
+            else:
+                charge_state="Active"
+
 
     #Calculate Mode
             GivTCP.debug("Calculating Mode...")
@@ -344,7 +370,11 @@ def getModesandTimes():
             controlmode['Target SOC']=target_soc
             controlmode['Charge Schedule State']=charge_enable
             controlmode['Discharge Schedule State']=discharge_enable
-            
+            controlmode['Battery Charge State']=charge_state
+            controlmode['Battery Discharge State']=discharge_state
+            controlmode['Battery Charge Rate']=charge_rate
+            controlmode['Battery Discharge Rate']=discharge_rate
+
     #Grab Timeslots
             timeslots={}
             GivTCP.debug("Getting TimeSlot data")
@@ -375,12 +405,11 @@ def getModesandTimes():
                 multi_output["raw/holding"]=holding_registers
             if len(timeslots)==6:
                 multi_output["Timeslots"]=timeslots
-            if len(controlmode)==5:
+            if len(controlmode)==9:
                 multi_output["Control"]=controlmode
             if len(invertor)==7:
                 multi_output["Invertor Details"]=invertor
                 
-
             publishOutput(multi_output)
 
         except:

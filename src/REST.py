@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+# version 2021.12.22
 import sys
 import json
 from flask import Flask, json, request
@@ -50,6 +51,22 @@ def pauseDischrgSchedule():
 def resumeDischrgSchedule():
     return wr.resumeDischargeSchedule()
 
+@giv_api.route('/pauseBatteryCharge', methods=['POST'])
+def pauseBatCharge():
+    return wr.pauseBatteryCharge()
+
+@giv_api.route('/resumeBatteryCharge', methods=['POST'])
+def resumeBatCharge():
+    return wr.resumeBatteryCharge()
+
+@giv_api.route('/pauseBatteryDischarge', methods=['POST'])
+def pauseBatDisharge():
+    return wr.pauseBatteryDischarge()
+
+@giv_api.route('/resumeBatteryDischarge', methods=['POST'])
+def resumeBatDisharge():
+    return wr.resumeBatteryDischarge()
+
 @giv_api.route('/setChargeTarget', methods=['POST'])
 def setChrgTarget():
     payload = request.get_json(silent=True, force=True)
@@ -59,6 +76,16 @@ def setChrgTarget():
 def setBattReserve():
     payload = request.get_json(silent=True, force=True)
     return wr.setBatteryReserve(payload)
+
+@giv_api.route('/setChargeRate', methods=['POST'])
+def setChrgeRate():
+    payload = request.get_json(silent=True, force=True)
+    return wr.setChargeRate(payload)
+
+@giv_api.route('/setDischargeRate', methods=['POST'])
+def setDischrgeRate():
+    payload = request.get_json(silent=True, force=True)
+    return wr.setDischargeRate(payload)
 
 @giv_api.route('/setChargeSlot1', methods=['POST'])
 def setChrgSlot1():
@@ -84,3 +111,8 @@ def setDischrgSlot2():
 def setBattMode():
     payload = request.get_json(silent=True, force=True)
     return wr.setBatteryMode(payload)
+
+@giv_api.route('/setDateTime', methods=['POST'])
+def setDate():
+    payload = request.get_json(silent=True, force=True)
+    return wr.setDateTime(payload)

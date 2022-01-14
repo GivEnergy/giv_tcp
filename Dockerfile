@@ -2,6 +2,7 @@
 FROM python:rc-alpine
 
 RUN apk --no-cache add mosquitto
+RUN apk add --no-cache bash
 
 # set the working directory in the container
 WORKDIR /app
