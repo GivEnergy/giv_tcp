@@ -10,7 +10,7 @@ class GiV_Settings:
     MQTT_Port=""
 #Debug Settings
     debug="True"                #Optional - Enables verbose debug "True" or "False".
-    Debug_File_Location=""  #Optional - Location of debug file (Default is root directory)
+    Debug_File_Location=""  #Optional - Location of logs (Default is console)
     Print_Raw_Registers="False"  #Optional - "True" prints all raw registers to the MQTT broker
 #Influx Settings - Only works with Influx v2
     Influx_Output="False"       #True or False
