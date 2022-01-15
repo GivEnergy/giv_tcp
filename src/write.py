@@ -129,7 +129,7 @@ def setChargeTarget(payload):
     target=int(payload['chargeToPercent'])
     try:
         client=GivEnergyClient(host=GiV_Settings.invertorIP)
-        client.set_battery_target_soc(target)
+        client.enable_charge_target(target)
         temp['result']="Setting Charge Target was a success"
     except:
         e = sys.exc_info()
