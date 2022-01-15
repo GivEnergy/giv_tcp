@@ -8,10 +8,15 @@ from settings import GiV_Settings
 from givenergy_modbus.client import GivEnergyClient
 
 if GiV_Settings.debug.lower()=="true":
-    logging.basicConfig(filename='givtcp_debug.log', encoding='utf-8', level=logging.DEBUG)
+    if GiV_Settings.Debug_File_Location=="":
+        logging.basicConfig(level=logging.DEBUG)
+    else:
+        logging.basicConfig(filename=GiV_Settings.Debug_File_Location, encoding='utf-8', level=logging.DEBUG)
 else:
-    logging.basicConfig(filename='givtcp_debug.log', encoding='utf-8', level=logging.INFO)
-
+    if GiV_Settings.Debug_File_Location=="":
+        logging.basicConfig(level=logging.INFO)
+    else:
+        logging.basicConfig(filename=GiV_Settings.Debug_File_Location, encoding='utf-8', level=logging.INFO)
 
 def disableChargeTarget():
     temp={}
