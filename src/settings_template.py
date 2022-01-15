@@ -1,7 +1,7 @@
 # version 1.0
 class GiV_Settings:
     invertorIP=""           #Required - IP address of Invertor on local network
-    numBatteries=1
+    numBatteries=""
 #MQTT Output Settings
     MQTT_Output=""               #True or False
     MQTT_Address=""         #IP address of MQTT broker (local or remote)
