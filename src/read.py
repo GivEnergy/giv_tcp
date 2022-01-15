@@ -301,12 +301,39 @@ def runAll():
         for b in batteries:
             sn=b.battery_serial_number
             battery[sn]={}
-            battery[sn]['Battery Serial Number']="sn"
+            battery[sn]['Battery Serial Number']=sn
             battery[sn]['Battery SOC']=b.battery_soc
             battery[sn]['Battery Capacity']=b.battery_full_capacity
+            battery[sn]['Battery Design Capacity']=b.battery_design_capacity
+            battery[sn]['Battery Remaining Capcity']=b.battery_remaining_capacity
             battery[sn]['Battery Firmware Version']=b.bms_firmware_version
-            b.
+            battery[sn]['Battery Cells']=b.battery_num_cells
+            battery[sn]['Battery Cycles']=b.battery_num_cycles
+            battery[sn]['Battery USB present']=b.usb_inserted
+            battery[sn]['Battery Temperature']=b.temp_bms_mos
+            battery[sn]['Battery Voltage']=b.v_battery_cells_sum
 
+            battery[sn]['Battery Cell 1 Voltage'] = b.v_battery_cell_01
+            battery[sn]['Battery Cell 2 Voltage'] = b.v_battery_cell_02
+            battery[sn]['Battery Cell 3 Voltage'] = b.v_battery_cell_03
+            battery[sn]['Battery Cell 4 Voltage'] = b.v_battery_cell_04
+            battery[sn]['Battery Cell 5 Voltage'] = b.v_battery_cell_05
+            battery[sn]['Battery Cell 6 Voltage'] = b.v_battery_cell_06
+            battery[sn]['Battery Cell 7 Voltage'] = b.v_battery_cell_07
+            battery[sn]['Battery Cell 8 Voltage'] = b.v_battery_cell_08
+            battery[sn]['Battery Cell 9 Voltage'] = b.v_battery_cell_09
+            battery[sn]['Battery Cell 10 Voltage'] = b.v_battery_cell_10
+            battery[sn]['Battery Cell 11 Voltage'] = b.v_battery_cell_11
+            battery[sn]['Battery Cell 12 Voltage'] = b.v_battery_cell_12
+            battery[sn]['Battery Cell 13 Voltage'] = b.v_battery_cell_13
+            battery[sn]['Battery Cell 14 Voltage'] = b.v_battery_cell_14
+            battery[sn]['Battery Cell 15 Voltage'] = b.v_battery_cell_15
+            battery[sn]['Battery Cell 16 Voltage'] = b.v_battery_cell_16
+
+            battery[sn]['Battery Cell 1 Temperature'] = b.temp_battery_cells_1
+            battery[sn]['Battery Cell 2 Temperature'] = b.temp_battery_cells_2
+            battery[sn]['Battery Cell 3 Temperature'] = b.temp_battery_cells_3
+            battery[sn]['Battery Cell 4 Temperature'] = b.temp_battery_cells_4
 
         #Create multioutput and publish
         multi_output["Timeslots"]=timeslots
