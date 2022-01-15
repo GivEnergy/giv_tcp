@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 # version 2021.01.13
+import array
 import sys
 import json
 import logging
@@ -26,7 +27,7 @@ def runAll():
     controlmode={}
     power_flow_output={}
     invertor={}
-    battery={}
+    batteries = []
     multi_output={}
     temp={}
     logging.info("----------------------------Starting----------------------------")
@@ -38,9 +39,13 @@ def runAll():
         InvRegCache = RegisterCache()
         client.update_inverter_registers(InvRegCache)
         GEInv=Inverter.from_orm(InvRegCache)
-        BatRegCache = RegisterCache()
-        client.update_battery_registers(BatRegCache)
-        GEBat=Battery.from_orm(BatRegCache)
+
+        for x in range(0, GiV_Settings.numBatteries):
+            BatRegCache = RegisterCache()
+            client.update_battery_registers(BatRegCache, battery_number=x)
+            GEBat=Battery.from_orm(BatRegCache)
+            batteries.insert(x, GEBat)
+
         logging.info("Invertor connection successful, registers retrieved")
     except:
         e = sys.exc_info()
@@ -49,9 +54,10 @@ def runAll():
         return json.dumps(temp)
 
     if Print_Raw:
-        multi_output['raw/invertor']=GEInv.dict()
-        multi_output['raw/battery']=GEBat.dict()
-        
+        multi_output['raw/invertor/'+GEInv.inverter_serial_number]=GEInv.dict()
+        for b in batteries:
+            multi_output['raw/battery/'+b.battery_serial_number]=b.dict()
+
     try:
     #Total Energy Figures
         logging.info("Getting Total Energy Data")
@@ -291,11 +297,15 @@ def runAll():
 
         #Get Battery Details
         battery={}
-        logging.info("Getting Invertor Details")
-        battery['Battery Serial Number']=GEBat.battery_serial_number
-        battery['Battery SOC']=GEBat.battery_soc
-        battery['Battery Capacity']=GEBat.battery_full_capacity
-        battery['Battery Firmware Version']=GEBat.bms_firmware_version
+        logging.info("Getting Battery Details")
+        for b in batteries:
+            sn=b.battery_serial_number
+            battery[sn]={}
+            battery[sn]['Battery Serial Number']="sn"
+            battery[sn]['Battery SOC']=b.battery_soc
+            battery[sn]['Battery Capacity']=b.battery_full_capacity
+            battery[sn]['Battery Firmware Version']=b.bms_firmware_version
+            b.
 
 
         #Create multioutput and publish
