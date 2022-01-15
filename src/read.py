@@ -40,7 +40,13 @@ def runAll():
         client.update_inverter_registers(InvRegCache)
         GEInv=Inverter.from_orm(InvRegCache)
 
-        for x in range(0, GiV_Settings.numBatteries):
+        numBatteries=1
+        try:
+            numBatteries=int(GiV_Settings.numBatteries)
+        except ValueError:
+            logging.error("error parsing numbatteries defaulting to 1")
+
+        for x in range(0, numBatteries):
             BatRegCache = RegisterCache()
             client.update_battery_registers(BatRegCache, battery_number=x)
             GEBat=Battery.from_orm(BatRegCache)
