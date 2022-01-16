@@ -45,8 +45,21 @@ class GivMQTT():
         for p_load in array:
             payload=array[p_load]
             logging.info('Publishing: '+rootTopic+p_load)
-            for reg in payload:
-                client.publish(rootTopic+p_load+'/'+reg,payload[reg])
+            output=GivMQTT.iterate_dict(payload,rootTopic+p_load)   #create LUT for MQTT publishing
+            for value in output:
+                client.publish(value,output[value])
         client.loop_stop()                      			#Stop loop
         client.disconnect()
         return client
+
+    def iterate_dict(array,topic):      #Create LUT of topics and datapoints
+        MQTT_LUT={}
+        # Create a publish safe version of the output
+        for p_load in array:
+            output=array[p_load]
+            if isinstance(output, dict):
+                MQTT_LUT.update(GivMQTT.iterate_dict(output,topic+"/"+p_load))
+                logging.info('Prepping '+p_load+" for publishing")
+            else:
+                MQTT_LUT[topic+"/"+p_load]=output
+        return(MQTT_LUT)

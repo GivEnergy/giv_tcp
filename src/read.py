@@ -33,7 +33,7 @@ def runAll():
     controlmode={}
     power_flow_output={}
     invertor={}
-    batteries = []
+    batteries = {}
     multi_output={}
     temp={}
     logging.info("----------------------------Starting----------------------------")
@@ -56,7 +56,7 @@ def runAll():
             BatRegCache = RegisterCache()
             client.update_battery_registers(BatRegCache, battery_number=x)
             GEBat=Battery.from_orm(BatRegCache)
-            batteries.insert(x, GEBat)
+            batteries[GEBat.battery_serial_number]=GEBat.dict()
 
         logging.info("Invertor connection successful, registers retrieved")
     except:
@@ -66,9 +66,11 @@ def runAll():
         return json.dumps(temp)
 
     if Print_Raw:
-        multi_output['raw/invertor/'+GEInv.inverter_serial_number]=GEInv.dict()
-        for b in batteries:
-            multi_output['raw/battery/'+b.battery_serial_number]=b.dict()
+
+        raw={}
+        raw["invertor"]=GEInv.dict()
+        raw["batteries"]=batteries
+        multi_output['raw']=raw
 
     try:
     #Total Energy Figures
@@ -220,10 +222,14 @@ def runAll():
 
 
     #Combine all outputs
-        multi_output["Energy/Total"]=energy_total_output
-        multi_output["Energy/Today"]=energy_today_output
-        multi_output["Power"]=power_output
-        multi_output["Power/Flows"]=power_flow_output
+        energy={}
+        energy["Total"]=energy_total_output
+        energy["Today"]=energy_today_output
+        multi_output["Energy"]=energy
+        power={}
+        power["Power"]=power_output
+        power["Flows"]=power_flow_output
+        multi_output["Power"]=power
         multi_output["Invertor Details"]=invertor
 
     ################ Run Holding Reg now ###################
@@ -309,49 +315,50 @@ def runAll():
 
         #Get Battery Details
         battery={}
+        batteries2={}
         logging.info("Getting Battery Details")
         for b in batteries:
-            sn=b.battery_serial_number
-            battery[sn]={}
-            battery[sn]['Battery Serial Number']=sn
-            battery[sn]['Battery SOC']=b.battery_soc
-            battery[sn]['Battery Capacity']=b.battery_full_capacity
-            battery[sn]['Battery Design Capacity']=b.battery_design_capacity
-            battery[sn]['Battery Remaining Capcity']=b.battery_remaining_capacity
-            battery[sn]['Battery Firmware Version']=b.bms_firmware_version
-            battery[sn]['Battery Cells']=b.battery_num_cells
-            battery[sn]['Battery Cycles']=b.battery_num_cycles
-            battery[sn]['Battery USB present']=b.usb_inserted
-            battery[sn]['Battery Temperature']=b.temp_bms_mos
-            battery[sn]['Battery Voltage']=b.v_battery_cells_sum
+            logging.info("Building battery output: "+b)
+            battery={}
+            battery['Battery Serial Number']=batteries[b]['battery_serial_number']
+            battery['Battery SOC']=batteries[b]['battery_soc']
+            battery['Battery Capacity']=batteries[b]['battery_full_capacity']
+            battery['Battery Design Capacity']=batteries[b]['battery_design_capacity']
+            battery['Battery Remaining Capcity']=batteries[b]['battery_remaining_capacity']
+            battery['Battery Firmware Version']=batteries[b]['bms_firmware_version']
+            battery['Battery Cells']=batteries[b]['battery_num_cells']
+            battery['Battery Cycles']=batteries[b]['battery_num_cycles']
+            battery['Battery USB present']=batteries[b]['usb_inserted']
+            battery['Battery Temperature']=batteries[b]['temp_bms_mos']
+            battery['Battery Voltage']=batteries[b]['v_battery_cells_sum']
 
-            battery[sn]['Battery Cell 1 Voltage'] = b.v_battery_cell_01
-            battery[sn]['Battery Cell 2 Voltage'] = b.v_battery_cell_02
-            battery[sn]['Battery Cell 3 Voltage'] = b.v_battery_cell_03
-            battery[sn]['Battery Cell 4 Voltage'] = b.v_battery_cell_04
-            battery[sn]['Battery Cell 5 Voltage'] = b.v_battery_cell_05
-            battery[sn]['Battery Cell 6 Voltage'] = b.v_battery_cell_06
-            battery[sn]['Battery Cell 7 Voltage'] = b.v_battery_cell_07
-            battery[sn]['Battery Cell 8 Voltage'] = b.v_battery_cell_08
-            battery[sn]['Battery Cell 9 Voltage'] = b.v_battery_cell_09
-            battery[sn]['Battery Cell 10 Voltage'] = b.v_battery_cell_10
-            battery[sn]['Battery Cell 11 Voltage'] = b.v_battery_cell_11
-            battery[sn]['Battery Cell 12 Voltage'] = b.v_battery_cell_12
-            battery[sn]['Battery Cell 13 Voltage'] = b.v_battery_cell_13
-            battery[sn]['Battery Cell 14 Voltage'] = b.v_battery_cell_14
-            battery[sn]['Battery Cell 15 Voltage'] = b.v_battery_cell_15
-            battery[sn]['Battery Cell 16 Voltage'] = b.v_battery_cell_16
+            battery['Battery Cell 1 Voltage'] = batteries[b]['v_battery_cell_01']
+            battery['Battery Cell 2 Voltage'] = batteries[b]['v_battery_cell_02']
+            battery['Battery Cell 3 Voltage'] = batteries[b]['v_battery_cell_03']
+            battery['Battery Cell 4 Voltage'] = batteries[b]['v_battery_cell_04']
+            battery['Battery Cell 5 Voltage'] = batteries[b]['v_battery_cell_05']
+            battery['Battery Cell 6 Voltage'] = batteries[b]['v_battery_cell_06']
+            battery['Battery Cell 7 Voltage'] = batteries[b]['v_battery_cell_07']
+            battery['Battery Cell 8 Voltage'] = batteries[b]['v_battery_cell_08']
+            battery['Battery Cell 9 Voltage'] = batteries[b]['v_battery_cell_09']
+            battery['Battery Cell 10 Voltage'] = batteries[b]['v_battery_cell_10']
+            battery['Battery Cell 11 Voltage'] = batteries[b]['v_battery_cell_11']
+            battery['Battery Cell 12 Voltage'] = batteries[b]['v_battery_cell_12']
+            battery['Battery Cell 13 Voltage'] = batteries[b]['v_battery_cell_13']
+            battery['Battery Cell 14 Voltage'] = batteries[b]['v_battery_cell_14']
+            battery['Battery Cell 15 Voltage'] = batteries[b]['v_battery_cell_15']
+            battery['Battery Cell 16 Voltage'] = batteries[b]['v_battery_cell_16']
 
-            battery[sn]['Battery Cell 1 Temperature'] = b.temp_battery_cells_1
-            battery[sn]['Battery Cell 2 Temperature'] = b.temp_battery_cells_2
-            battery[sn]['Battery Cell 3 Temperature'] = b.temp_battery_cells_3
-            battery[sn]['Battery Cell 4 Temperature'] = b.temp_battery_cells_4
-
+            battery['Battery Cell 1 Temperature'] = batteries[b]['temp_battery_cells_1']
+            battery['Battery Cell 2 Temperature'] = batteries[b]['temp_battery_cells_2']
+            battery['Battery Cell 3 Temperature'] = batteries[b]['temp_battery_cells_3']
+            battery['Battery Cell 4 Temperature'] = batteries[b]['temp_battery_cells_4']
+            batteries2[b]=battery
         #Create multioutput and publish
         multi_output["Timeslots"]=timeslots
         multi_output["Control"]=controlmode
         multi_output["Invertor Details"]=invertor
-        multi_output["Battery Details"]=battery
+        multi_output["Battery Details"]=batteries2
         publishOutput(multi_output,GEInv.inverter_serial_number)
         
     except:
@@ -362,37 +369,8 @@ def runAll():
     return json.dumps(multi_output, indent=4, sort_keys=True, default=str)
 
 def publishOutput(array,SN):
-    safeoutput={}
     tempoutput={}
-    # Create a publish safe version of the output
-    for p_load in array:
-        output=array[p_load]
-        safeoutput={}
-        for reg in output:
-        # Check output[reg] is print safe (not dateTime)
-            if isinstance(output[reg], tuple):
-                if "slot" in str(reg):
-                    logging.info('Converting Timeslots to publish safe string')
-                    safeoutput[reg+"_start"]=output[reg][0].strftime("%H%M")
-                    safeoutput[reg+"_end"]=output[reg][1].strftime("%H%M")
-                else:
-                    #Deal with other tuples _ Print each value
-                    for index, key in enumerate(output[reg]):
-                        logging.info('Converting Tuple to multiple publish safe strings')
-                        safeoutput[reg+"_"+str(index)]=str(key)
-            elif isinstance(output[reg], datetime.datetime):
-                logging.info('Converting datetime to publish safe string')
-                safeoutput[reg]=output[reg].strftime("%d-%m-%Y %H:%M:%S")
-            elif isinstance(output[reg], datetime.time):
-                logging.info('Converting time to publish safe string')
-                safeoutput[reg]=output[reg].strftime("%H:%M")
-            elif isinstance(output[reg], Model):
-                logging.info('Converting time to publish safe string')
-                safeoutput[reg]=output[reg].name
-            else:
-                safeoutput[reg]=output[reg]
-        tempoutput[p_load]=safeoutput
-
+    tempoutput=iterate_dict(array)
 
     if GiV_Settings.MQTT_Output.lower()=="true":
         from mqtt import GivMQTT
@@ -408,6 +386,37 @@ def publishOutput(array,SN):
         from influx import GivInflux
         logging.info("Pushing output to Influx")
         GivInflux.publish(SN,tempoutput)
+
+def iterate_dict(array):        # Create a publish safe version of the output (convert non string or int datapoints)
+    safeoutput={}
+    for p_load in array:
+        output=array[p_load]
+        if isinstance(output, dict):
+            temp=iterate_dict(output)
+            safeoutput[p_load]=temp
+            logging.info('Dealt with '+p_load)
+        elif isinstance(output, tuple):
+            if "slot" in str(p_load):
+                logging.info('Converting Timeslots to publish safe string')
+                safeoutput[p_load+"_start"]=output[0].strftime("%H%M")
+                safeoutput[p_load+"_end"]=output[1].strftime("%H%M")
+            else:
+                #Deal with other tuples _ Print each value
+                for index, key in enumerate(output):
+                    logging.info('Converting Tuple to multiple publish safe strings')
+                    safeoutput[p_load+"_"+str(index)]=str(key)
+        elif isinstance(output, datetime.datetime):
+            logging.info('Converting datetime to publish safe string')
+            safeoutput[p_load]=output.strftime("%d-%m-%Y %H:%M:%S")
+        elif isinstance(output, datetime.time):
+            logging.info('Converting time to publish safe string')
+            safeoutput[p_load]=output.strftime("%H:%M")
+        elif isinstance(output, Model):
+            logging.info('Converting time to publish safe string')
+            safeoutput[p_load]=output.name
+        else:
+            safeoutput[p_load]=output
+    return(safeoutput)
 
 if __name__ == '__main__':
     globals()[sys.argv[1]]()
