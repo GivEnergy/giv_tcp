@@ -78,7 +78,7 @@ def runAll():
         energy_total_output['AC Charge Energy Total kWh']=round(GEInv.e_inverter_in_total,2)
         energy_total_output['Import Energy Total kWh']=round(GEInv.e_grid_in_total,2)
         energy_total_output['Invertor Energy Total kWh']=round(GEInv.e_inverter_out_total,2)
-        energy_total_output['PV Energy Total kWh']=round(GEInv.p_inverter_out,2)    #CHECK-CHECK
+        energy_total_output['PV Energy Total kWh']=round(GEInv.p_pv_total_generating_capacity,2)    #CHECK-CHECK
         
         if  GEInv.inverter_model==Model.Hybrid:
             energy_total_output['Load Energy Total kWh']=round((energy_total_output['Invertor Energy Total kWh']-energy_total_output['AC Charge Energy Total kWh'])-(energy_total_output['Export Energy Total kWh']-energy_total_output['Import Energy Total kWh']),3)
