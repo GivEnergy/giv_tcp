@@ -27,7 +27,8 @@ GivTCP can be executed in a number of ways and can be set to output data in mult
 ## MQTT
 The script will publish directly to the nominated MQTT broker all the requested read data.
 
-![image](https://user-images.githubusercontent.com/69121158/122302074-847e9980-cef9-11eb-87eb-f4010b0874ed.png)
+<img width="245" alt="image" src="https://user-images.githubusercontent.com/69121158/149670766-0d9a6c92-8ee2-44d6-9045-2d21b6db7ebf.png">
+
   
 ## JSON
 The functions return a JSON formated object which can then be consumed by other systems or functions, default output is to stdout
@@ -37,12 +38,14 @@ The functions return a JSON formated object which can then be consumed by other 
 GivTCP is able to retrieve key information from the GivEnergy Invertors through predefined functions:
 
 ### Available read functions are:
-| Function          | Payload       |  Description                      |
-| ----------------- | ------------- |  -------------------------------- |
-| getTimeslots      | None          | Gets all currently stored timeslots for Charge1, Discharge1 and Discharge2      |
-| getCombinedStats  | None          | Gets power and Energy Stats (real-time, Today and Total)   |
-| getModesandTimes  | None          | Gets the Timeslots and control state info including: Mode, Target Charge SOC, Battery Reserve, Charge and Discharge Schedule state (Paused/Active) and Battery Capacity    |
-| runAll            | None          | Runs all of the above  |
+GivTCP collects all invertor ad battery data through the "runAll" function. It creates a nested data structure with all data available in a structured format.
+Data Elements are:
+*Energy - Today and all-time Total
+*Power - Real-time stats and power flow data
+*Invertor Details - Status details such as Serial Number
+*Timeslots - Charge and Discharge
+*Control - Charge/Discharge rates, Battery SOC
+*Battery Details - Status and real-time cell voltages
 
 
 ## Control functions
@@ -78,7 +81,7 @@ The full call to get all information by running the runAll function would then b
 ## Control
 `python3 write.py {{functionName}} '{{controlPayload}}'`
 
-An example payload can be found below and further details can be seen in the GivEnergy Docs to be found here: XXXXXXX  
+An example payload can be found below.
 Note: In order to send json payloads via CLI you will need to place the JSON string inside single quotes  
 
 The full call to set  Charge Timeslot 1 would then be:  
@@ -122,6 +125,7 @@ https://hub.docker.com/repository/docker/britkat/giv_tcp-ma
 | ENV Name                | Example       |  Description                      |
 | ----------------------- | ------------- |  -------------------------------- |
 | INVERTOR_IP |192.168.10.1 | Docker container can auto detect Invertors if running on your host network. If this fails then add the IP manually to this ENV |
+| NUMBATTERIES | 1 | Number of battery units connected to the invertor |
 | MQTT_OUTPUT | True | Optional if set to True then MQTT_ADDRESS is required |
 | MQTT_ADDRESS | 127.0.0.1 | Optional (but required if OUTPUT is set to MQTT) |
 | MQTT_USERNAME | bob | Optional |
@@ -151,9 +155,6 @@ URL's below are based off the root http address of http://IP:6345
 | URL                | Method       |  payload              |
 | ------------------ | ------------ |  -------------------- |
 | /runAll| GET | None |  |
-| /getTimeslots| GET | None | | 
-| /getCombinedStats| GET | None | | 
-| /getModesandTimes| GET | None | | 
   
 #### Control Functions
 | URL                | Method       |  payload              |
