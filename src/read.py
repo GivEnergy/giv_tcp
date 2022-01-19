@@ -75,43 +75,44 @@ def runAll():
     try:
     #Total Energy Figures
         logging.info("Getting Total Energy Data")
-        energy_total_output['Export Energy Total kWh']=round(GEInv.e_grid_out_total,2)
-        energy_total_output['Battery Throughput Total kWh']=round(GEInv.e_battery_discharge_total_2,2)
-        energy_total_output['AC Charge Energy Total kWh']=round(GEInv.e_inverter_in_total,2)
-        energy_total_output['Import Energy Total kWh']=round(GEInv.e_grid_in_total,2)
-        energy_total_output['Invertor Energy Total kWh']=round(GEInv.e_inverter_out_total,2)
-        energy_total_output['PV Energy Total kWh']=round(GEInv.p_pv_total_generating_capacity,2)    #CHECK-CHECK
+        energy_total_output['Export Energy Total kWh']=GEInv.e_grid_out_total
+        energy_total_output['Battery Throughput Total kWh']=GEInv.e_battery_discharge_total_2
+        energy_total_output['AC Charge Energy Total kWh']=GEInv.e_inverter_in_total
+        energy_total_output['Import Energy Total kWh']=GEInv.e_grid_in_total
+        energy_total_output['Invertor Energy Total kWh']=GEInv.e_inverter_out_total
+        energy_total_output['PV Energy Total kWh']=GEInv.p_pv_total_generating_capacity    #CHECK-CHECK
         
         if  GEInv.inverter_model==Model.Hybrid:
-            energy_total_output['Load Energy Total kWh']=round((energy_total_output['Invertor Energy Total kWh']-energy_total_output['AC Charge Energy Total kWh'])-(energy_total_output['Export Energy Total kWh']-energy_total_output['Import Energy Total kWh']),3)
-            energy_total_output['Battery Charge Energy Total kWh']=GEInv.e_battery_charge_total
-            energy_total_output['Battery Discharge Energy Total kWh']=round(GEInv.e_battery_discharge_total,2)
+            energy_total_output['Load Energy Total kWh']=(energy_total_output['Invertor Energy Total kWh']-energy_total_output['AC Charge Energy Total kWh'])-(energy_total_output['Export Energy Total kWh']-energy_total_output['Import Energy Total kWh'])
+            if GEInv.arm_firmware_version>=449:      #Only add in battery totals if firmware is high enough
+                energy_total_output['Battery Charge Energy Total kWh']=GEInv.e_battery_charge_total
+                energy_total_output['Battery Discharge Energy Total kWh']=GEInv.e_battery_discharge_total
         else:
-            energy_total_output['Load Energy Total kWh']=round((energy_total_output['Invertor Energy Total kWh']-energy_total_output['AC Charge Energy Total kWh'])-(energy_total_output['Export Energy Total kWh']-energy_total_output['Import Energy Total kWh'])+energy_total_output['PV Energy Total kWh'],3)
+            energy_total_output['Load Energy Total kWh']=(energy_total_output['Invertor Energy Total kWh']-energy_total_output['AC Charge Energy Total kWh'])-(energy_total_output['Export Energy Total kWh']-energy_total_output['Import Energy Total kWh'])+energy_total_output['PV Energy Total kWh']
+            if GEInv.arm_firmware_version>=553:      #Only add in battery totals if firmware is high enough
+                energy_total_output['Battery Charge Energy Total kWh']=GEInv.e_battery_charge_total
+                energy_total_output['Battery Discharge Energy Total kWh']=GEInv.e_battery_discharge_total
 
-        if GEInv.inverter_model==Model.Hybrid: 
-            energy_total_output['Battery Charge Energy Total kWh']=GEInv.e_battery_discharge_total_2
-            energy_total_output['Battery Discharge Energy Total kWh']=GEInv.e_battery_discharge_total_2
         
-        energy_total_output['Self Consumption Energy Total kWh']=round(energy_total_output['PV Energy Total kWh']-energy_total_output['Export Energy Total kWh'],2)
+        energy_total_output['Self Consumption Energy Total kWh']=energy_total_output['PV Energy Total kWh']-energy_total_output['Export Energy Total kWh']
 
 #Energy Today Figures
         logging.info("Getting Today Energy Data")
-        energy_today_output['Battery Throughput Today kWh']=round(GEInv.e_battery_charge_day+GEInv.e_battery_discharge_day,2)
-        energy_today_output['PV Energy Today kWh']=round(GEInv.e_pv1_day+GEInv.e_pv2_day,2)
-        energy_today_output['Import Energy Today kWh']=round(GEInv.e_grid_in_day,2)
-        energy_today_output['Export Energy Today kWh']=round(GEInv.e_grid_out_day,2)
-        energy_today_output['AC Charge Energy Today kWh']=round(GEInv.e_inverter_in_day,2)
-        energy_today_output['Invertor Energy Today kWh']=round(GEInv.e_inverter_out_total,2)
-        energy_today_output['Battery Charge Energy Today kWh']=round(GEInv.e_battery_charge_day,2)
-        energy_today_output['Battery Discharge Energy Today kWh']=round(GEInv.e_battery_discharge_day,2)
-        energy_today_output['Import for Load Energy Today kWh']=round(GEInv.e_grid_in_day - GEInv.e_inverter_in_day,2)
-        energy_today_output['Self Consumption Energy Today kWh']=round(energy_today_output['PV Energy Today kWh']-energy_today_output['Export Energy Today kWh'],2)
+        energy_today_output['Battery Throughput Today kWh']=GEInv.e_battery_charge_day+GEInv.e_battery_discharge_day
+        energy_today_output['PV Energy Today kWh']=GEInv.e_pv1_day+GEInv.e_pv2_day
+        energy_today_output['Import Energy Today kWh']=GEInv.e_grid_in_day
+        energy_today_output['Export Energy Today kWh']=GEInv.e_grid_out_day
+        energy_today_output['AC Charge Energy Today kWh']=GEInv.e_inverter_in_day
+        energy_today_output['Invertor Energy Today kWh']=GEInv.e_inverter_out_total
+        energy_today_output['Battery Charge Energy Today kWh']=GEInv.e_battery_charge_day
+        energy_today_output['Battery Discharge Energy Today kWh']=GEInv.e_battery_discharge_day
+        energy_today_output['Import for Load Energy Today kWh']=GEInv.e_grid_in_day - GEInv.e_inverter_in_day
+        energy_today_output['Self Consumption Energy Today kWh']=energy_today_output['PV Energy Today kWh']-energy_today_output['Export Energy Today kWh']
                 
         if GEInv.inverter_model==Model.Hybrid: 
-            energy_today_output['Load Energy Today kWh']=round((energy_today_output['Invertor Energy Today kWh']-energy_today_output['AC Charge Energy Today kWh'])-(energy_today_output['Export Energy Today kWh']-energy_today_output['Import Energy Today kWh']),3)
+            energy_today_output['Load Energy Today kWh']=(energy_today_output['Invertor Energy Today kWh']-energy_today_output['AC Charge Energy Today kWh'])-(energy_today_output['Export Energy Today kWh']-energy_today_output['Import Energy Today kWh'])
         else:
-            energy_today_output['Load Energy Today kWh']=round((energy_today_output['Invertor Energy Today kWh']-energy_today_output['AC Charge Energy Today kWh'])-(energy_today_output['Export Energy Today kWh']-energy_today_output['Import Energy Today kWh'])+energy_today_output['PV Energy Today kWh'],3)
+            energy_today_output['Load Energy Today kWh']=(energy_today_output['Invertor Energy Today kWh']-energy_today_output['AC Charge Energy Today kWh'])-(energy_today_output['Export Energy Today kWh']-energy_today_output['Import Energy Today kWh'])+energy_today_output['PV Energy Today kWh']
 
         
 ############  Core Power Stats    ############
@@ -303,15 +304,15 @@ def runAll():
         if GEInv.battery_type==1: batterytype="Lithium" 
         if GEInv.battery_type==0: batterytype="Lead Acid" 
         invertor['Battery Type']=batterytype
-        invertor['Battery Capacity kWh']=round(((GEInv.battery_nominal_capacity*51.2)/1000),2)
+        invertor['Battery Capacity kWh']=((GEInv.battery_nominal_capacity*51.2)/1000)
         invertor['Invertor Serial Number']=GEInv.inverter_serial_number
         invertor['Battery Serial Number']=GEInv.first_battery_serial_number
-        invertor['Modbus Version']=round(GEInv.modbus_version,2)
+        invertor['Modbus Version']=GEInv.modbus_version
         if GEInv.meter_type==1: metertype="EM115" 
         if GEInv.meter_type==0: metertype="EM418" 
         invertor['Meter Type']=metertype
         invertor['Invertor Type']= GEInv.inverter_model.name
-        invertor['Invertor Temperature']=round(GEInv.temp_inverter_heatsink,2)
+        invertor['Invertor Temperature']=GEInv.temp_inverter_heatsink
 
         #Get Battery Details
         battery={}
@@ -414,6 +415,8 @@ def iterate_dict(array):        # Create a publish safe version of the output (c
         elif isinstance(output, Model):
             logging.info('Converting time to publish safe string')
             safeoutput[p_load]=output.name
+        elif isinstance(output, float):
+            safeoutput[p_load]=round(output,2)
         else:
             safeoutput[p_load]=output
     return(safeoutput)
