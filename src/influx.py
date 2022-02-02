@@ -3,12 +3,12 @@ from influxdb_client import InfluxDBClient, WriteApi, WriteOptions
 import logging
 from settings import GiV_Settings
 
-if GiV_Settings.log_level.lower()=="debug":
+if GiV_Settings.Log_Level.lower()=="debug":
     if GiV_Settings.Debug_File_Location=="":
         logging.basicConfig(level=logging.DEBUG)
     else:
         logging.basicConfig(filename=GiV_Settings.Debug_File_Location, encoding='utf-8', level=logging.DEBUG)
-elif GiV_Settings.log_level.lower()=="info":
+elif GiV_Settings.Log_Level.lower()=="info":
     if GiV_Settings.Debug_File_Location=="":
         logging.basicConfig(level=logging.INFO)
     else:

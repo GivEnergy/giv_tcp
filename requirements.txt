@@ -5,3 +5,4 @@ scapy
 schedule
 influxdb_client
 requests
+flask
