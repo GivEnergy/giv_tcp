@@ -4,3 +4,4 @@ __pycache__
 givtcp_debug.log
 .venv
 .vscode
+/givenergy_modbus

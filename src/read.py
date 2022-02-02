@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-# version 2021.01.13
+# version 2022.01.31
 import array
 import sys
 import json
@@ -15,17 +15,24 @@ Print_Raw=False
 if GiV_Settings.Print_Raw_Registers.lower()=="true":
     Print_Raw=True
 
-if GiV_Settings.debug.lower()=="true":
+if GiV_Settings.log_level.lower()=="debug":
     if GiV_Settings.Debug_File_Location=="":
         logging.basicConfig(level=logging.DEBUG)
     else:
         logging.basicConfig(filename=GiV_Settings.Debug_File_Location, encoding='utf-8', level=logging.DEBUG)
-else:
+elif GiV_Settings.log_level.lower()=="info":
     if GiV_Settings.Debug_File_Location=="":
         logging.basicConfig(level=logging.INFO)
     else:
         logging.basicConfig(filename=GiV_Settings.Debug_File_Location, encoding='utf-8', level=logging.INFO)
-    
+else:
+    if GiV_Settings.Debug_File_Location=="":
+        logging.basicConfig(level=logging.ERROR)
+    else:
+        logging.basicConfig(filename=GiV_Settings.Debug_File_Location, encoding='utf-8', level=logging.ERROR)
+
+logger = logging.getLogger("GivTCP")
+
 def runAll():
     energy_total_output={}
     energy_today_output={}
@@ -36,7 +43,7 @@ def runAll():
     batteries = {}
     multi_output={}
     temp={}
-    logging.info("----------------------------Starting----------------------------")
+    logger.info("----------------------------Starting----------------------------")
     logging.info("Getting All Registers")
     
     #Connect to Invertor and load data
@@ -50,7 +57,7 @@ def runAll():
         try:
             numBatteries=int(GiV_Settings.numBatteries)
         except ValueError:
-            logging.error("error parsing numbatteries defaulting to 1")
+            logger.error("error parsing numbatteries defaulting to 1")
 
         for x in range(0, numBatteries):
             BatRegCache = RegisterCache()
@@ -58,10 +65,10 @@ def runAll():
             GEBat=Battery.from_orm(BatRegCache)
             batteries[GEBat.battery_serial_number]=GEBat.dict()
 
-        logging.info("Invertor connection successful, registers retrieved")
+        logger.info("Invertor connection successful, registers retrieved")
     except:
         e = sys.exc_info()
-        logging.error("Error collecting registers: " + str(e))
+        logger.error("Error collecting registers: " + str(e))
         temp['result']="Error collecting registers: " + str(e)
         return json.dumps(temp)
 
@@ -74,39 +81,38 @@ def runAll():
 
     try:
     #Total Energy Figures
-        logging.info("Getting Total Energy Data")
+        logger.info("Getting Total Energy Data")
         energy_total_output['Export Energy Total kWh']=GEInv.e_grid_out_total
-        energy_total_output['Battery Throughput Total kWh']=GEInv.e_battery_discharge_total_2
+        energy_total_output['Battery Throughput Total kWh']=GEInv.e_battery_throughput_total
         energy_total_output['AC Charge Energy Total kWh']=GEInv.e_inverter_in_total
         energy_total_output['Import Energy Total kWh']=GEInv.e_grid_in_total
         energy_total_output['Invertor Energy Total kWh']=GEInv.e_inverter_out_total
-        energy_total_output['PV Energy Total kWh']=GEInv.p_pv_total_generating_capacity    #CHECK-CHECK
+        energy_total_output['PV Energy Total kWh']=GEInv.e_pv_total
         
         if  GEInv.inverter_model==Model.Hybrid:
             energy_total_output['Load Energy Total kWh']=(energy_total_output['Invertor Energy Total kWh']-energy_total_output['AC Charge Energy Total kWh'])-(energy_total_output['Export Energy Total kWh']-energy_total_output['Import Energy Total kWh'])
-            if GEInv.arm_firmware_version>=449:      #Only add in battery totals if firmware is high enough
-                energy_total_output['Battery Charge Energy Total kWh']=GEInv.e_battery_charge_total
-                energy_total_output['Battery Discharge Energy Total kWh']=GEInv.e_battery_discharge_total
         else:
             energy_total_output['Load Energy Total kWh']=(energy_total_output['Invertor Energy Total kWh']-energy_total_output['AC Charge Energy Total kWh'])-(energy_total_output['Export Energy Total kWh']-energy_total_output['Import Energy Total kWh'])+energy_total_output['PV Energy Total kWh']
-            if GEInv.arm_firmware_version>=553:      #Only add in battery totals if firmware is high enough
-                energy_total_output['Battery Charge Energy Total kWh']=GEInv.e_battery_charge_total
-                energy_total_output['Battery Discharge Energy Total kWh']=GEInv.e_battery_discharge_total
 
-        
+        if GEInv.e_battery_charge_total==0 and GEInv.e_battery_discharge_total==0:        #If no values in "nomal" registers then grab from battery
+            energy_total_output['Battery Charge Energy Total kWh']=GEBat.e_battery_charge_total_2
+            energy_total_output['Battery Discharge Energy Total kWh']=GEBat.e_battery_discharge_total_2
+        else:
+            energy_total_output['Battery Charge Energy Total kWh']=GEInv.e_battery_charge_total
+            energy_total_output['Battery Discharge Energy Total kWh']=GEInv.e_battery_discharge_total
+
         energy_total_output['Self Consumption Energy Total kWh']=energy_total_output['PV Energy Total kWh']-energy_total_output['Export Energy Total kWh']
 
 #Energy Today Figures
-        logging.info("Getting Today Energy Data")
+        logger.info("Getting Today Energy Data")
         energy_today_output['Battery Throughput Today kWh']=GEInv.e_battery_charge_day+GEInv.e_battery_discharge_day
         energy_today_output['PV Energy Today kWh']=GEInv.e_pv1_day+GEInv.e_pv2_day
         energy_today_output['Import Energy Today kWh']=GEInv.e_grid_in_day
         energy_today_output['Export Energy Today kWh']=GEInv.e_grid_out_day
         energy_today_output['AC Charge Energy Today kWh']=GEInv.e_inverter_in_day
-        energy_today_output['Invertor Energy Today kWh']=GEInv.e_inverter_out_total
+        energy_today_output['Invertor Energy Today kWh']=GEInv.e_inverter_out_day
         energy_today_output['Battery Charge Energy Today kWh']=GEInv.e_battery_charge_day
         energy_today_output['Battery Discharge Energy Today kWh']=GEInv.e_battery_discharge_day
-        energy_today_output['Import for Load Energy Today kWh']=GEInv.e_grid_in_day - GEInv.e_inverter_in_day
         energy_today_output['Self Consumption Energy Today kWh']=energy_today_output['PV Energy Today kWh']-energy_today_output['Export Energy Today kWh']
                 
         if GEInv.inverter_model==Model.Hybrid: 
@@ -118,7 +124,7 @@ def runAll():
 ############  Core Power Stats    ############
 
     #PV Power
-        logging.info("Getting PV Power")
+        logger.info("Getting PV Power")
         PV_power_1=GEInv.p_pv1
         PV_power_2=GEInv.p_pv2
         PV_power=PV_power_1+PV_power_2
@@ -128,7 +134,7 @@ def runAll():
             power_output['PV Power']= PV_power
 
     #Grid Power
-        logging.info("Getting Grid Power")
+        logger.info("Getting Grid Power")
         grid_power= GEInv.p_grid_out
         if grid_power<0:
             import_power=abs(grid_power)
@@ -144,11 +150,11 @@ def runAll():
         power_output['Export Power']=export_power
 
     #EPS Power
-        logging.info("Getting EPS Power")
+        logger.info("Getting EPS Power")
         power_output['EPS Power']= GEInv.p_eps_backup
 
     #Invertor Power
-        logging.info("Getting PInv Power")
+        logger.info("Getting PInv Power")
         Invertor_power=GEInv.p_inverter_out
         if -6000 <= Invertor_power <= 6000:
             power_output['Invertor Power']= Invertor_power
@@ -156,13 +162,13 @@ def runAll():
             power_output['AC Charge Power']= abs(Invertor_power)
 
     #Load Power
-        logging.info("Getting Load Power")
+        logger.info("Getting Load Power")
         Load_power=GEInv.p_load_demand 
         if Load_power<15500:
             power_output['Load Power']=Load_power
 
     #Self Consumption
-        logging.info("Getting Self Consumption Power")
+        logger.info("Getting Self Consumption Power")
         power_output['Self Consumption Power']=max(Load_power - import_power,0)
 
     #Battery Power
@@ -178,13 +184,13 @@ def runAll():
         power_output['Discharge Power']=discharge_power
 
     #SOC
-        logging.info("Getting SOC")
+        logger.info("Getting SOC")
         power_output['SOC']=GEInv.battery_percent
 
 ############  Power Flow Stats    ############
 
     #Solar to H/B/G
-        logging.info("Getting Solar to H/B/G Power Flows")
+        logger.info("Getting Solar to H/B/G Power Flows")
         if PV_power>0:
             S2H=min(PV_power,Load_power)
             power_flow_output['Solar to House']=S2H
@@ -198,12 +204,12 @@ def runAll():
             power_flow_output['Solar to Grid']=0
 
     #Battery to House
-        logging.info("Getting Battery to House Power Flow")
+        logger.info("Getting Battery to House Power Flow")
         B2H=max(discharge_power-export_power,0)
         power_flow_output['Battery to House']=B2H
 
     #Grid to Battery/House Power
-        logging.info("Getting Grid to Battery/House Power Flow")
+        logger.info("Getting Grid to Battery/House Power Flow")
         if import_power>0:
             power_flow_output['Grid to Battery']=charge_power-max(PV_power-Load_power,0)
             power_flow_output['Grid to House']=max(import_power-charge_power,0)
@@ -213,7 +219,7 @@ def runAll():
             power_flow_output['Grid to House']=0
 
     #Battery to Grid Power
-        logging.info("Getting Battery to Grid Power Flow")
+        logger.info("Getting Battery to Grid Power Flow")
         if export_power>0:
             power_flow_output['Battery to Grid']=max(discharge_power-B2H,0)
         else:
@@ -234,7 +240,7 @@ def runAll():
         multi_output["Invertor Details"]=invertor
 
     ################ Run Holding Reg now ###################
-        logging.info("Getting mode control figures")
+        logger.info("Getting mode control figures")
         # Get Control Mode registers
         shallow_charge=GEInv.battery_soc_reserve
         self_consumption=GEInv.battery_power_mode 
@@ -252,7 +258,7 @@ def runAll():
             discharge_enable="Active"
         else:
             discharge_enable="Paused"
-        logging.info("Shallow Charge= "+str(shallow_charge)+" Self Consumption= "+str(self_consumption)+" Discharge Enable= "+str(discharge_enable))
+        logger.info("Shallow Charge= "+str(shallow_charge)+" Self Consumption= "+str(self_consumption)+" Discharge Enable= "+str(discharge_enable))
 
         #Get Charge/Discharge Active status
         discharge_state=GEInv.battery_discharge_limit
@@ -272,9 +278,9 @@ def runAll():
 
 
         #Calculate Mode
-        logging.info("Calculating Mode...")
+        logger.info("Calculating Mode...")
         mode=GEInv.system_mode
-        logging.info("Mode is: " + str(mode))
+        logger.info("Mode is: " + str(mode))
 
         controlmode['Mode']=mode
         controlmode['Battery Power Reserve']=battery_reserve
@@ -288,7 +294,7 @@ def runAll():
 
         #Grab Timeslots
         timeslots={}
-        logging.info("Getting TimeSlot data")
+        logger.info("Getting TimeSlot data")
         timeslots['Discharge start time slot 1']=GEInv.discharge_slot_1[0]
         timeslots['Discharge end time slot 1']=GEInv.discharge_slot_1[1]
         timeslots['Discharge start time slot 2']=GEInv.discharge_slot_2[0]
@@ -300,7 +306,7 @@ def runAll():
 
         #Get Invertor Details
         invertor={}
-        logging.info("Getting Invertor Details")
+        logger.info("Getting Invertor Details")
         if GEInv.battery_type==1: batterytype="Lithium" 
         if GEInv.battery_type==0: batterytype="Lead Acid" 
         invertor['Battery Type']=batterytype
@@ -317,9 +323,9 @@ def runAll():
         #Get Battery Details
         battery={}
         batteries2={}
-        logging.info("Getting Battery Details")
+        logger.info("Getting Battery Details")
         for b in batteries:
-            logging.info("Building battery output: "+b)
+            logger.info("Building battery output: "+b)
             battery={}
             battery['Battery Serial Number']=batteries[b]['battery_serial_number']
             battery['Battery SOC']=batteries[b]['battery_soc']
@@ -364,10 +370,14 @@ def runAll():
         
     except:
         e = sys.exc_info()
-        logging.error("Error processing registers: " + str(e))
+        logger.error("Error processing registers: " + str(e))
         temp['result']="Error processing registers: " + str(e)
         return json.dumps(temp)
     return json.dumps(multi_output, indent=4, sort_keys=True, default=str)
+
+####### Addiitonal Publish options can be added here. 
+####### A seperate file in the folder can be added with a new publish "plugin" 
+####### then referenced here with any settings required added into settings.py
 
 def publishOutput(array,SN):
     tempoutput={}
@@ -375,17 +385,17 @@ def publishOutput(array,SN):
 
     if GiV_Settings.MQTT_Output.lower()=="true":
         from mqtt import GivMQTT
-        logging.info("Publish all to MQTT")
+        logger.info("Publish all to MQTT")
         if GiV_Settings.MQTT_Topic=="":
             GiV_Settings.MQTT_Topic="GivEnergy"
         GivMQTT.multi_MQTT_publish(str(GiV_Settings.MQTT_Topic+"/"+SN+"/"), tempoutput)
     if GiV_Settings.JSON_Output.lower()=="true":
         from GivJson import GivJSON
-        logging.info("Pushing JSON output")
+        logger.info("Pushing JSON output")
         GivJSON.output_JSON(tempoutput)
     if GiV_Settings.Influx_Output.lower()=="true":
         from influx import GivInflux
-        logging.info("Pushing output to Influx")
+        logger.info("Pushing output to Influx")
         GivInflux.publish(SN,tempoutput)
 
 def iterate_dict(array):        # Create a publish safe version of the output (convert non string or int datapoints)
@@ -395,25 +405,25 @@ def iterate_dict(array):        # Create a publish safe version of the output (c
         if isinstance(output, dict):
             temp=iterate_dict(output)
             safeoutput[p_load]=temp
-            logging.info('Dealt with '+p_load)
+            logger.info('Dealt with '+p_load)
         elif isinstance(output, tuple):
             if "slot" in str(p_load):
-                logging.info('Converting Timeslots to publish safe string')
+                logger.info('Converting Timeslots to publish safe string')
                 safeoutput[p_load+"_start"]=output[0].strftime("%H%M")
                 safeoutput[p_load+"_end"]=output[1].strftime("%H%M")
             else:
                 #Deal with other tuples _ Print each value
                 for index, key in enumerate(output):
-                    logging.info('Converting Tuple to multiple publish safe strings')
+                    logger.info('Converting Tuple to multiple publish safe strings')
                     safeoutput[p_load+"_"+str(index)]=str(key)
         elif isinstance(output, datetime.datetime):
-            logging.info('Converting datetime to publish safe string')
+            logger.info('Converting datetime to publish safe string')
             safeoutput[p_load]=output.strftime("%d-%m-%Y %H:%M:%S")
         elif isinstance(output, datetime.time):
-            logging.info('Converting time to publish safe string')
+            logger.info('Converting time to publish safe string')
             safeoutput[p_load]=output.strftime("%H:%M")
         elif isinstance(output, Model):
-            logging.info('Converting time to publish safe string')
+            logger.info('Converting time to publish safe string')
             safeoutput[p_load]=output.name
         elif isinstance(output, float):
             safeoutput[p_load]=round(output,2)

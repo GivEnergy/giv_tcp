@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-# version 2022.01.14
+# version 2022.01.31
 import sys
 import json
 import logging
@@ -7,16 +7,24 @@ from datetime import datetime
 from settings import GiV_Settings
 from givenergy_modbus.client import GivEnergyClient
 
-if GiV_Settings.debug.lower()=="true":
+if GiV_Settings.log_level.lower()=="debug":
     if GiV_Settings.Debug_File_Location=="":
         logging.basicConfig(level=logging.DEBUG)
     else:
         logging.basicConfig(filename=GiV_Settings.Debug_File_Location, encoding='utf-8', level=logging.DEBUG)
-else:
+elif GiV_Settings.log_level.lower()=="info":
     if GiV_Settings.Debug_File_Location=="":
         logging.basicConfig(level=logging.INFO)
     else:
         logging.basicConfig(filename=GiV_Settings.Debug_File_Location, encoding='utf-8', level=logging.INFO)
+else:
+    if GiV_Settings.Debug_File_Location=="":
+        logging.basicConfig(level=logging.ERROR)
+    else:
+        logging.basicConfig(filename=GiV_Settings.Debug_File_Location, encoding='utf-8', level=logging.ERROR)
+
+logger = logging.getLogger("GivTCP")
+
 
 def disableChargeTarget():
     temp={}
@@ -26,7 +34,7 @@ def disableChargeTarget():
     except:
         e = sys.exc_info()
         temp['result']="Disabling Charge Target failed: " + str(e)
-    logging.info (temp['result'])
+    logger.info (temp['result'])
     return json.dumps(temp)
 
 def enableChargeTarget():
@@ -37,7 +45,7 @@ def enableChargeTarget():
     except:
         e = sys.exc_info()
         temp['result']="Enabling Charge Target failed: " + str(e)
-    logging.info (temp['result'])
+    logger.info (temp['result'])
     return json.dumps(temp)
 
 def pauseChargeSchedule():
@@ -48,7 +56,7 @@ def pauseChargeSchedule():
     except:
         e = sys.exc_info()
         temp['result']="Pausing Charge Schedule failed: " + str(e)
-    logging.info (temp['result'])
+    logger.info (temp['result'])
     return json.dumps(temp)
 
 def resumeChargeSchedule():
@@ -59,7 +67,7 @@ def resumeChargeSchedule():
     except:
         e = sys.exc_info()
         temp['result']="Resuming Charge Schedule failed: " + str(e)
-    logging.info (temp['result'])
+    logger.info (temp['result'])
     return json.dumps(temp)
 
 def pauseDischargeSchedule():
@@ -70,7 +78,7 @@ def pauseDischargeSchedule():
     except:
         e = sys.exc_info()
         temp['result']="Pausing Discharge Schedule failed: " + str(e)
-    logging.info (temp['result'])
+    logger.info (temp['result'])
     return json.dumps(temp)
 
 def resumeDischargeSchedule():
@@ -81,7 +89,7 @@ def resumeDischargeSchedule():
     except:
         e = sys.exc_info()
         temp['result']="Resuming Discharge Schedule failed: " + str(e)
-    logging.info (temp['result'])
+    logger.info (temp['result'])
     return json.dumps(temp)
 
 def pauseBatteryCharge():
@@ -92,7 +100,7 @@ def pauseBatteryCharge():
     except:
         e = sys.exc_info()
         temp['result']="Pausing Charge failed: " + str(e)
-    logging.info (temp['result'])
+    logger.info (temp['result'])
     return json.dumps(temp)
 
 def resumeBatteryCharge():
@@ -103,7 +111,7 @@ def resumeBatteryCharge():
     except:
         e = sys.exc_info()
         temp['result']="Resuming Charge failed: " + str(e)
-    logging.info (temp['result'])
+    logger.info (temp['result'])
     return json.dumps(temp)
 
 def pauseBatteryDischarge():
@@ -114,7 +122,7 @@ def pauseBatteryDischarge():
     except:
         e = sys.exc_info()
         temp['result']="Pausing Discharge failed: " + str(e)
-    logging.info (temp['result'])
+    logger.info (temp['result'])
     return json.dumps(temp)
 
 def resumeBatteryDischarge():
@@ -125,7 +133,7 @@ def resumeBatteryDischarge():
     except:
         e = sys.exc_info()
         temp['result']="Resuming Discharge failed: " + str(e)
-    logging.info (temp['result'])
+    logger.info (temp['result'])
     return json.dumps(temp)
 
 def setChargeTarget(payload):
@@ -139,7 +147,7 @@ def setChargeTarget(payload):
     except:
         e = sys.exc_info()
         temp['result']="Setting Charge Target failed: " + str(e)
-    logging.info (temp['result'])
+    logger.info (temp['result'])
     return json.dumps(temp)
 
 def setBatteryReserve(payload):
@@ -148,14 +156,14 @@ def setBatteryReserve(payload):
     target=int(payload['dischargeToPercent'])
     #Only allow minimum of 4%
     if target<4: target=4
-    logging.info ("Setting battery reserve target to: " + str(target))
+    logger.info ("Setting battery reserve target to: " + str(target))
     try:
         GivEnergyClient(host=GiV_Settings.invertorIP).set_battery_power_reserve(target)
         temp['result']="Setting Battery Reserve was a success"
     except:
         e = sys.exc_info()
         temp['result']="Setting Battery Reserve failed: " + str(e)
-    logging.info (temp['result'])
+    logger.info (temp['result'])
     return json.dumps(temp)
 
 def setChargeRate(payload):
@@ -166,14 +174,14 @@ def setChargeRate(payload):
         target=50
     else:
         target=int(int(payload['chargeRate'])/3)
-    logging.info ("Setting battery charge rate to: " + str(target))
+    logger.info ("Setting battery charge rate to: " + str(target))
     try:
         GivEnergyClient(host=GiV_Settings.invertorIP).set_battery_charge_limit(target)
         temp['result']="Setting Charge Rate was a success"
     except:
         e = sys.exc_info()
         temp['result']="Setting Charge Rate failed: " + str(e)
-    logging.info (temp['result'])
+    logger.info (temp['result'])
     return json.dumps(temp)
 
 
@@ -185,14 +193,14 @@ def setDischargeRate(payload):
         target=50
     else:
         target=int(int(payload['dischargeRate'])/3)
-    logging.info ("Setting battery discharge rate to: " + str(target))
+    logger.info ("Setting battery discharge rate to: " + str(target))
     try:
         GivEnergyClient(host=GiV_Settings.invertorIP).set_battery_discharge_limit(target)
         temp['result']="Setting Discharge Rate was a success"
     except:
         e = sys.exc_info()
         temp['result']="Setting Discharge Rate failed: " + str(e)
-    logging.info (temp['result'])
+    logger.info (temp['result'])
     return json.dumps(temp)
 
 
@@ -210,7 +218,7 @@ def setChargeSlot1(payload):
     except:
         e = sys.exc_info()
         temp['result']="Setting Charge Slot 1 failed: " + str(e)
-    logging.info (temp['result'])
+    logger.info (temp['result'])
     return json.dumps(temp)
 
 def setChargeSlot2(payload):
@@ -227,7 +235,7 @@ def setChargeSlot2(payload):
     except:
         e = sys.exc_info()
         temp['result']="Setting Charge Slot 2 failed: " + str(e)
-    logging.info (temp['result'])
+    logger.info (temp['result'])
     return json.dumps(temp)
 
 def setDischargeSlot1(payload):
@@ -244,7 +252,7 @@ def setDischargeSlot1(payload):
     except:
         e = sys.exc_info()
         temp['result']="Setting Discharge Slot 1 failed: " + str(e)
-    logging.info (temp['result'])
+    logger.info (temp['result'])
     return json.dumps(temp)
 
 def setDischargeSlot2(payload):
@@ -261,7 +269,7 @@ def setDischargeSlot2(payload):
     except:
         e = sys.exc_info()
         temp['result']="Setting Discharge Slot 2 failed: " + str(e)
-    logging.info (temp['result'])
+    logger.info (temp['result'])
     return json.dumps(temp)
 
 
@@ -279,14 +287,14 @@ def setBatteryMode(payload):
         elif mode==4:
             client=GivEnergyClient(host=GiV_Settings.invertorIP).set_mode_storage(export=True)
         else:
-            logging.info ("Invalid Mode requested: "+ mode)
+            logger.info ("Invalid Mode requested: "+ mode)
             temp['result']="Invalid Mode requested"
             return json.dumps(temp)
         temp['result']="Setting Battery Mode was a success"
     except:
         e = sys.exc_info()
         temp['result']="Setting Battery Mode failed: " + str(e)
-    logging.info (temp['result'])
+    logger.info (temp['result'])
     return json.dumps(temp)
 
 def setDateTime(payload):
@@ -302,7 +310,7 @@ def setDateTime(payload):
     except:
         e = sys.exc_info()
         temp['result']="Setting Battery Mode failed: " + str(e) 
-    logging.info (temp['result'])
+    logger.info (temp['result'])
     return json.dumps(temp)
 
 if __name__ == '__main__':
