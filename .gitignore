@@ -1,6 +1,7 @@
-settings.py
-settings.old
-__pycache__
-givtcp_debug.log
+src/settings.py
+src/settings.old
+src/__pycache__
+src/givtcp_debug.log
 .venv
 .vscode
+buildx.bat
