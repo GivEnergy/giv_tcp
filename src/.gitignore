@@ -1,5 +1,0 @@
-#Ignore settings file
-settings.py
-settings.old
-__pycache__
-read_debug.log
