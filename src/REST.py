@@ -1,7 +1,6 @@
 # -*- coding: utf-8 -*-
 # version 2021.12.22
-import sys
-import json
+
 from flask import Flask, json, request
 import read as rd       #grab passthrough functions from main read file
 import write as wr      #grab passthrough functions from main write file
@@ -10,17 +9,6 @@ import write as wr      #grab passthrough functions from main write file
 giv_api = Flask(__name__)
 
 #Proxy Read Functions
-@giv_api.route('/getTimeslots', methods=['GET'])
-def getTimes():
-    return rd.getTimeslots()
-
-@giv_api.route('/getCombinedStats', methods=['GET'])
-def getStats():
-    return rd.getCombinedStats()
-
-@giv_api.route('/getModesandTimes', methods=['GET'])
-def getcontrols():
-    return rd.getModesandTimes()
 
 @giv_api.route('/runAll', methods=['GET'])
 def getAll():
@@ -116,3 +104,6 @@ def setBattMode():
 def setDate():
     payload = request.get_json(silent=True, force=True)
     return wr.setDateTime(payload)
+
+if __name__ == "__main__":
+    giv_api.run()

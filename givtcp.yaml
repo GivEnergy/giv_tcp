@@ -1,0 +1,236 @@
+sensor:
+  - platform: rest
+    name: GivTCP
+    resource: http://192.168.2.10:6345/runAll                       #GivTCP Invertor connection
+    method: GET
+    scan_interval: 20                                               # refresh
+    timeout: 15
+    value_template: 'Connected'
+    json_attributes:                                                # define the entrys I want to retrive
+      - Energy
+      - Power
+      - Invertor Details
+      - Timeslots
+      - Control
+      - Battery Details
+
+template:
+  - sensor:
+      - name: "GivTCP Import Energy Total"
+        unit_of_measurement: "kWh"
+        device_class: energy
+        state_class: measurement
+        state: "{{ state_attr('sensor.givtcp','Energy')['Total']['Import Energy Total kWh'] }}"
+      - name: "GivTCP Export Energy Total"
+        unit_of_measurement: "kWh"
+        device_class: energy
+        state_class: measurement
+        state: "{{ state_attr('sensor.givtcp','Energy')['Total']['Export Energy Total kWh'] }}"
+      - name: "GivTCP Battery Throughput Total"
+        unit_of_measurement: "kWh"
+        device_class: energy
+        state_class: measurement
+        state: "{{ state_attr('sensor.givtcp','Energy')['Total']['Battery Throughput Total kWh'] }}"
+      - name: "GivTCP AC Charge Energy Total"
+        unit_of_measurement: "kWh"
+        device_class: energy
+        state_class: measurement
+        state: "{{ state_attr('sensor.givtcp','Energy')['Total']['AC Charge Energy Total kWh'] }}"
+      - name: "GivTCP Invertor Energy Total"
+        unit_of_measurement: "kWh"
+        device_class: energy
+        state_class: measurement
+        state: "{{ state_attr('sensor.givtcp','Energy')['Total']['Invertor Energy Total kWh'] }}"
+      - name: "GivTCP PV Energy Total"
+        unit_of_measurement: "kWh"
+        device_class: energy
+        state_class: measurement
+        state: "{{ state_attr('sensor.givtcp','Energy')['Total']['PV Energy Total kWh'] }}"
+      - name: "GivTCP Load Energy Total"
+        unit_of_measurement: "kWh"
+        device_class: energy
+        state_class: measurement
+        state: "{{ state_attr('sensor.givtcp','Energy')['Total']['Load Energy Total kWh'] }}"
+      - name: "GivTCP Battery Charge Energy Total"
+        unit_of_measurement: "kWh"
+        device_class: energy
+        state_class: measurement
+        state: "{{ state_attr('sensor.givtcp','Energy')['Total']['Battery Charge Energy Total kWh'] }}"
+      - name: "GivTCP Battery Discharge Energy Total"
+        unit_of_measurement: "kWh"
+        device_class: energy
+        state_class: measurement
+        state: "{{ state_attr('sensor.givtcp','Energy')['Total']['Battery Discharge Energy Total kWh'] }}"
+      - name: "GivTCP Self Consumption Energy Total"
+        unit_of_measurement: "kWh"
+        device_class: energy
+        state_class: measurement
+        state: "{{ state_attr('sensor.givtcp','Energy')['Total']['Self Consumption Energy Total kWh'] }}"
+        
+        
+      - name: "GivTCP Import Energy Today"
+        unit_of_measurement: "kWh"
+        device_class: energy
+        state_class: measurement
+        state: "{{ state_attr('sensor.givtcp','Energy')['Today']['Import Energy Today kWh'] }}"
+      - name: "GivTCP Export Energy Today"
+        unit_of_measurement: "kWh"
+        device_class: energy
+        state_class: measurement
+        state: "{{ state_attr('sensor.givtcp','Energy')['Today']['Export Energy Today kWh'] }}"
+      - name: "GivTCP Battery Throughput Today"
+        unit_of_measurement: "kWh"
+        device_class: energy
+        state_class: measurement
+        state: "{{ state_attr('sensor.givtcp','Energy')['Today']['Battery Throughput Today kWh'] }}"
+      - name: "GivTCP AC Charge Energy Today"
+        unit_of_measurement: "kWh"
+        device_class: energy
+        state_class: measurement
+        state: "{{ state_attr('sensor.givtcp','Energy')['Today']['AC Charge Energy Today kWh'] }}"
+      - name: "GivTCP Invertor Energy Today"
+        unit_of_measurement: "kWh"
+        device_class: energy
+        state_class: measurement
+        state: "{{ state_attr('sensor.givtcp','Energy')['Today']['Invertor Energy Today kWh'] }}"
+      - name: "GivTCP PV Energy Today"
+        unit_of_measurement: "kWh"
+        device_class: energy
+        state_class: measurement
+        state: "{{ state_attr('sensor.givtcp','Energy')['Today']['PV Energy Today kWh'] }}"
+      - name: "GivTCP Load Energy Today"
+        unit_of_measurement: "kWh"
+        device_class: energy
+        state_class: measurement
+        state: "{{ state_attr('sensor.givtcp','Energy')['Today']['Load Energy Today kWh'] }}"
+      - name: "GivTCP Battery Charge Energy Today"
+        unit_of_measurement: "kWh"
+        device_class: energy
+        state_class: measurement
+        state: "{{ state_attr('sensor.givtcp','Energy')['Today']['Battery Charge Energy Today kWh'] }}"
+      - name: "GivTCP Battery Discharge Energy Today"
+        unit_of_measurement: "kWh"
+        device_class: energy
+        state_class: measurement
+        state: "{{ state_attr('sensor.givtcp','Energy')['Today']['Battery Discharge Energy Today kWh'] }}"
+      - name: "GivTCP Self Consumption Energy Today"
+        unit_of_measurement: "kWh"
+        device_class: energy
+        state_class: measurement
+        state: "{{ state_attr('sensor.givtcp','Energy')['Today']['Self Consumption Energy Today kWh'] }}"
+        
+        
+      - name: "GivTCP PV Power"
+        unit_of_measurement: "W"
+        device_class: power
+        state_class: measurement
+        state: "{{ state_attr('sensor.givtcp','Power')['Power']['PV Power'] }}"
+      - name: "GivTCP Grid Power"
+        unit_of_measurement: "W"
+        device_class: power
+        state_class: measurement
+        state: "{{ state_attr('sensor.givtcp','Power')['Power']['Grid Power'] }}"
+      - name: "GivTCP Import Power"
+        unit_of_measurement: "W"
+        device_class: power
+        state_class: measurement
+        state: "{{ state_attr('sensor.givtcp','Power')['Power']['Import Power'] }}"
+      - name: "GivTCP Export Power"
+        unit_of_measurement: "W"
+        device_class: power
+        state_class: measurement
+        state: "{{ state_attr('sensor.givtcp','Power')['Power']['Export Power'] }}"
+      - name: "GivTCP EPS Power"
+        unit_of_measurement: "W"
+        device_class: power
+        state_class: measurement
+        state: "{{ state_attr('sensor.givtcp','Power')['Power']['EPS Power'] }}"
+      - name: "GivTCP Invertor Power"
+        unit_of_measurement: "W"
+        device_class: power
+        state_class: measurement
+        state: "{{ state_attr('sensor.givtcp','Power')['Power']['Invertor Power'] }}"
+      - name: "GivTCP Load Power"
+        unit_of_measurement: "W"
+        device_class: power
+        state_class: measurement
+        state: "{{ state_attr('sensor.givtcp','Power')['Power']['Load Power'] }}"
+      - name: "GivTCP Self Consumption Power"
+        unit_of_measurement: "W"
+        device_class: power
+        state_class: measurement
+        state: "{{ state_attr('sensor.givtcp','Power')['Power']['Self Consumption Power'] }}"
+      - name: "GivTCP Battery Power"
+        unit_of_measurement: "W"
+        device_class: power
+        state_class: measurement
+        state: "{{ state_attr('sensor.givtcp','Power')['Power']['Battery Power'] }}"
+      - name: "GivTCP Battery Charge Power"
+        unit_of_measurement: "W"
+        device_class: power
+        state_class: measurement
+        state: "{{ state_attr('sensor.givtcp','Power')['Power']['Charge Power'] }}"
+      - name: "GivTCP Battery Discharge Power"
+        unit_of_measurement: "W"
+        device_class: power
+        state_class: measurement
+        state: "{{ state_attr('sensor.givtcp','Power')['Power']['Discharge Power'] }}"
+        
+      - name: "GivTCP Battery SOC"
+        unit_of_measurement: "%"
+        device_class: battery
+        state_class: measurement
+        state: "{{ state_attr('sensor.givtcp','Power')['Power']['SOC'] }}"
+
+
+      - name: "GivTCP Control Mode"
+        state: "{{ state_attr('sensor.givtcp','Control')['Mode'] }}"
+      - name: "GivTCP Target Charge SOC"
+        state: "{{ state_attr('sensor.givtcp','Control')['Target SOC'] }}"
+        unit_of_measurement: "%"
+        device_class: battery
+        state_class: measurement
+      - name: "GivTCP Battery Charge Rate"
+        state: "{{ state_attr('sensor.givtcp','Control')['Battery Charge Rate'] }}"
+        unit_of_measurement: "%"
+      - name: "GivTCP Battery Discharge Rate"
+        state: "{{ state_attr('sensor.givtcp','Control')['Battery Discharge Rate'] }}"
+        unit_of_measurement: "%"
+      - name: "GivTCP Invertor Temperature"
+        state: "{{ state_attr('sensor.givtcp','Invertor Details')['Invertor Temperature'] }}"
+        device_class: temperature
+        unit_of_measurement: "°C"
+
+      - name: "GivTCP Charge Slot 1 Start"
+        device_class: timestamp
+        state: "{{ strptime(state_attr('sensor.givtcp','Timeslots')['Charge start time slot 1'],'%H:%M:%S').replace(year=now().year,month=now().month,day=now().day).timestamp()|timestamp_local()  }}"
+        icon: "mdi:calendar-clock"
+      - name: "GivTCP Charge Slot 1 End"
+        device_class: timestamp
+        state: "{{ strptime(state_attr('sensor.givtcp','Timeslots')['Charge end time slot 1'],'%H:%M:%S').replace(year=now().year,month=now().month,day=now().day).timestamp()|timestamp_local()  }}"
+        icon: "mdi:calendar-clock"
+      - name: "GivTCP Charge Slot 2 Start"
+        device_class: timestamp
+        state: "{{ strptime(state_attr('sensor.givtcp','Timeslots')['Charge start time slot 2'],'%H:%M:%S').replace(year=now().year,month=now().month,day=now().day).timestamp()|timestamp_local()  }}"
+        icon: "mdi:calendar-clock"
+      - name: "GivTCP Charge Slot 2 End"
+        device_class: timestamp
+        state: "{{ strptime(state_attr('sensor.givtcp','Timeslots')['Charge end time slot 2'],'%H:%M:%S').replace(year=now().year,month=now().month,day=now().day).timestamp()|timestamp_local()  }}"
+        icon: "mdi:calendar-clock"
+      - name: "GivTCP Discharge Slot 1 Start"
+        device_class: timestamp
+        state: "{{ strptime(state_attr('sensor.givtcp','Timeslots')['Discharge start time slot 1'],'%H:%M:%S').replace(year=now().year,month=now().month,day=now().day).timestamp()|timestamp_local()  }}"
+        icon: "mdi:calendar-clock"
+      - name: "GivTCP Discharge Slot 1 End"
+        device_class: timestamp
+        state: "{{ strptime(state_attr('sensor.givtcp','Timeslots')['Discharge end time slot 1'],'%H:%M:%S').replace(year=now().year,month=now().month,day=now().day).timestamp()|timestamp_local()  }}"
+        icon: "mdi:calendar-clock"
+      - name: "GivTCP Discharge Slot 2 Start"
+        device_class: timestamp
+        state: "{{ strptime(state_attr('sensor.givtcp','Timeslots')['Discharge start time slot 2'],'%H:%M:%S').replace(year=now().year,month=now().month,day=now().day).timestamp()|timestamp_local()  }}"
+        icon: "mdi:calendar-clock"
+      - name: "GivTCP Discharge Slot 2 End"
+        device_class: timestamp
+        state: "{{ strptime(state_attr('sensor.givtcp','Timeslots')['Discharge end time slot 2'],'%H:%M:%S').replace(year=now().year,month=now().month,day=now().day).timestamp()|timestamp_local()  }}"
+        icon: "mdi:calendar-clock"
+        

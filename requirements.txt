@@ -1,10 +1,8 @@
-Flask
 gunicorn
 paho-mqtt
-crccheck
+givenergy-modbus
 scapy
 schedule
-rx
 influxdb_client
 requests
-simplejson
+flask
