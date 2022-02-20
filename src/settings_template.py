@@ -3,9 +3,9 @@ class GiV_Settings:
     invertorIP=""                   #Required - IP address of Invertor on local network
     numBatteries=""
 #Debug Settings
-    Log_Level="True"                #Optional - Enables verbose debug "True" or "False".
+    Log_Level="Error"               #Optional - Enables logging level. Default is "Error", but can be "Info" or "Debug"
     Debug_File_Location=""          #Optional - Location of logs (Default is console)
-    Print_Raw_Registers="False"     #Optional - "True" prints all raw registers to the MQTT broker
+    Print_Raw_Registers="True"      #Optional - "True" publishes all available registers.
 #MQTT Output Settings
     MQTT_Output=""                  #True or False
     MQTT_Address=""                 #IP address of MQTT broker (local or remote)

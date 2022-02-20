@@ -1,7 +1,7 @@
 sensor:
   - platform: rest
     name: GivTCP
-    resource: http://192.168.2.10:6345/runAll                       #GivTCP Invertor connection
+    resource: http://192.168.2.10:6345/runAll                       #GivTCP docker container connection
     method: GET
     scan_interval: 20                                               # refresh
     timeout: 15

@@ -5,6 +5,7 @@ import sys
 import json
 import logging
 import datetime
+from HA_Discovery import HAMQTT
 from settings import GiV_Settings
 from givenergy_modbus.client import GivEnergyClient
 from givenergy_modbus.model.inverter import Inverter, Model
@@ -48,11 +49,12 @@ def runAll():
     
     #Connect to Invertor and load data
     try:
+    #    starttime=datetime.datetime.now()
+    #    logger.error("Start time for library invertor call: "+ datetime.datetime.strftime(starttime,"%H:%M:%S"))
         client=GivEnergyClient(host=GiV_Settings.invertorIP)
         InvRegCache = RegisterCache()
         client.update_inverter_registers(InvRegCache)
         GEInv=Inverter.from_orm(InvRegCache)
-
         numBatteries=1
         try:
             numBatteries=int(GiV_Settings.numBatteries)
@@ -64,7 +66,9 @@ def runAll():
             client.update_battery_registers(BatRegCache, battery_number=x)
             GEBat=Battery.from_orm(BatRegCache)
             batteries[GEBat.battery_serial_number]=GEBat.dict()
-
+    #    endtime=datetime.datetime.now()
+    #    logger.error("End time for library invertor call: "+ datetime.datetime.strftime(endtime,"%H:%M:%S"))
+    #    logger.error("End time for library invertor call: "+ str(endtime-starttime))
         logger.info("Invertor connection successful, registers retrieved")
     except:
         e = sys.exc_info()
@@ -317,7 +321,7 @@ def runAll():
         if GEInv.meter_type==1: metertype="EM115" 
         if GEInv.meter_type==0: metertype="EM418" 
         invertor['Meter Type']=metertype
-        invertor['Invertor Type']= GEInv.inverter_model.name
+        invertor['Invertor Type']= GEInv.inverter_model
         invertor['Invertor Temperature']=GEInv.temp_inverter_heatsink
 
         #Get Battery Details
@@ -382,7 +386,7 @@ def runAll():
 def publishOutput(array,SN):
     tempoutput={}
     tempoutput=iterate_dict(array)
-
+    HAMQTT.publish_discovery(tempoutput,SN)
     if GiV_Settings.MQTT_Output.lower()=="true":
         from mqtt import GivMQTT
         logger.info("Publish all to MQTT")

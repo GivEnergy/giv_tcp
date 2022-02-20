@@ -6,6 +6,7 @@ import datetime
 
 import logging  
 from settings import GiV_Settings
+#from HA_Discovery import HAMQTT
 from givenergy_modbus.model.inverter import Model
 
 if GiV_Settings.Log_Level.lower()=="debug":
@@ -51,7 +52,9 @@ class GivMQTT():
     def multi_MQTT_publish(rootTopic,array):   #Recieve multiple payloads with Topics and publish in a single MQTT connection
         mqtt.Client.connected_flag=False        			#create flag in class
         client=mqtt.Client("GivEnergy_GivTCP")
-
+        
+        ##Check if first run then publish auto discovery message
+        
         if GivMQTT.MQTTCredentials:
             client.username_pw_set(GivMQTT.MQTT_Username,GivMQTT.MQTT_Password)
         client.on_connect=GivMQTT.on_connect     			#bind call back function

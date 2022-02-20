@@ -51,10 +51,12 @@ else
     printf "    influxOrg=\"$INFLUX_ORG\"\n" >> settings.py
 fi
 
+#TODO Update givTCP if a newer release is available
+
 if [ "$MQTT_ADDRESS" = "127.0.0.1" ]        #Only run Mosquitto if its using local broker
 then
     echo Starting Mosquitto on port "$MQTT_PORT"
-    /usr/sbin/mosquitto -p "$MQTT_PORT" &        #Run local MQTT brker as default
+    /usr/sbin/mosquitto -p "$MQTT_PORT" &        #Run local MQTT broker as default
 fi
 
 if [ "$SELF_RUN" = "True" ]        #Only run Schedule if requested
@@ -65,3 +67,5 @@ fi
 
 echo Starting Gunicorn on port 6345
 gunicorn -w 3 -b :6345 REST:giv_api      #Use for on-demand read and control
+
+

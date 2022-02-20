@@ -5,3 +5,4 @@ src/givtcp_debug.log
 .venv
 .vscode
 buildx.bat
+/givenergy_modbus
