@@ -5,7 +5,6 @@ import sys
 import json
 import logging
 import datetime
-from HA_Discovery import HAMQTT
 from settings import GiV_Settings
 from givenergy_modbus.client import GivEnergyClient
 from givenergy_modbus.model.inverter import Inverter, Model
@@ -386,7 +385,6 @@ def runAll():
 def publishOutput(array,SN):
     tempoutput={}
     tempoutput=iterate_dict(array)
-    HAMQTT.publish_discovery(tempoutput,SN)
     if GiV_Settings.MQTT_Output.lower()=="true":
         from mqtt import GivMQTT
         logger.info("Publish all to MQTT")

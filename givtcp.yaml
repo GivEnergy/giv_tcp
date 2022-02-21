@@ -6,7 +6,7 @@ sensor:
     scan_interval: 20                                               # refresh
     timeout: 15
     value_template: 'Connected'
-    json_attributes:                                                # define the entrys I want to retrive
+    json_attributes:                                                # define the entrys I want to retrieve
       - Energy
       - Power
       - Invertor Details
