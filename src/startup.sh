@@ -5,51 +5,54 @@
 FILE=/app/settings.py
 if [ -f "$FILE" ]
 then
-    echo "$FILE exists."
+    echo "$FILE exists, deleting and re-creating."
+    rm settings.py    #delete file and re-create
 else
-    echo "$FILE does not exist"
-    if [ -z "$INVERTOR_IP" ]; then
-        echo 'IP not set in ENV'
-        for i in 1 2 3
-        do
-            echo 'IP not set in ENV, scanning network attempt ' "$i"
-            outputString=`python3 findInvertor.py`
-            if [ ! -z "$outputString" ]
-            then
-                break
-            fi
-        done
-
-        if [ -z "$outputString" ]
-        then
-            echo 'No invertor found... Please add into ENV manually'
-            exit 1
-        else
-            echo Invertor found at "$outputString"
-            printf "class GiV_Settings:\n" >> settings.py
-            printf "    invertorIP=\"$outputString\"\n" >> settings.py
-        fi
-    else
-            printf "class GiV_Settings:\n" >> settings.py
-            printf "    invertorIP=\"$INVERTOR_IP\"\n" >> settings.py
-    fi
-    printf "    numBatteries=\"$NUM_BATTERIES\"\n" >> settings.py
-    printf "    Print_Raw_Registers=\"$PRINT_RAW\"\n" >> settings.py
-    printf "    MQTT_Output=\"$MQTT_OUTPUT\"\n" >> settings.py
-    printf "    MQTT_Address=\"$MQTT_ADDRESS\"\n" >> settings.py
-    printf "    MQTT_Username=\"$MQTT_USERNAME\"\n" >> settings.py
-    printf "    MQTT_Password=\"$MQTT_PASSWORD\"\n" >> settings.py
-    printf "    MQTT_Topic=\"$MQTT_TOPIC\"\n" >> settings.py
-    printf "    MQTT_Port=\"$MQTT_PORT\"\n" >> settings.py
-    printf "    JSON_Output=\"$JSON_OUTPUT\"\n" >> settings.py
-    printf "    Log_Level=\"$LOG_LEVEL\"\n" >> settings.py
-    printf "    Debug_File_Location=\"$DEBUG_FILE_LOCATION\"\n" >> settings.py
-    printf "    Influx_Output=\"$INFLUX_OUTPUT\"\n" >> settings.py
-    printf "    influxURL=\"$INFLUX_URL\"\n" >> settings.py
-    printf "    influxToken=\"$INFLUX_TOKEN\"\n" >> settings.py
-    printf "    influxBucket=\"$INFLUX_BUCKET\"\n" >> settings.py
-    printf "    influxOrg=\"$INFLUX_ORG\"\n" >> settings.py
+    echo "$FILE does not exist, creating."
 fi
+if [ -z "$INVERTOR_IP" ]; then
+    echo 'IP not set in ENV'
+    for i in 1 2 3
+    do
+        echo 'IP not set in ENV, scanning network attempt ' "$i"
+        outputString=`python3 findInvertor.py`
+        if [ ! -z "$outputString" ]
+        then
+            break
+        fi
+    done
+
+    if [ -z "$outputString" ]
+    then
+        echo 'No invertor found... Please add into ENV manually'
+        exit 1
+    else
+        echo Invertor found at "$outputString"
+        printf "class GiV_Settings:\n" >> settings.py
+        printf "    invertorIP=\"$outputString\"\n" >> settings.py
+    fi
+else
+        printf "class GiV_Settings:\n" >> settings.py
+        printf "    invertorIP=\"$INVERTOR_IP\"\n" >> settings.py
+fi
+printf "    numBatteries=$NUM_BATTERIES\n" >> settings.py
+printf "    Print_Raw_Registers=$PRINT_RAW\n" >> settings.py
+printf "    MQTT_Output=$MQTT_OUTPUT\n" >> settings.py
+printf "    MQTT_Address=\"$MQTT_ADDRESS\"\n" >> settings.py
+printf "    MQTT_Username=\"$MQTT_USERNAME\"\n" >> settings.py
+printf "    MQTT_Password=\"$MQTT_PASSWORD\"\n" >> settings.py
+printf "    MQTT_Topic=\"$MQTT_TOPIC\"\n" >> settings.py
+printf "    MQTT_Port=$MQTT_PORT\n" >> settings.py
+printf "    JSON_Output=$JSON_OUTPUT\n" >> settings.py
+printf "    Log_Level=\"$LOG_LEVEL\"\n" >> settings.py
+printf "    Debug_File_Location=\"$DEBUG_FILE_LOCATION\"\n" >> settings.py
+printf "    Influx_Output=$INFLUX_OUTPUT\n" >> settings.py
+printf "    influxURL=\"$INFLUX_URL\"\n" >> settings.py
+printf "    influxToken=\"$INFLUX_TOKEN\"\n" >> settings.py
+printf "    influxBucket=\"$INFLUX_BUCKET\"\n" >> settings.py
+printf "    influxOrg=\"$INFLUX_ORG\"\n" >> settings.py
+printf "    HA_Auto_D=$HA_AUTO_D\n" >> settings.py 
+printf "    first_run= True\n" >> settings.py
 
 #TODO Update givTCP if a newer release is available
 

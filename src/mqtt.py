@@ -76,12 +76,15 @@ class GivMQTT():
 
     def iterate_dict(array,topic):      #Create LUT of topics and datapoints
         MQTT_LUT={}
-        # Create a publish safe version of the output
-        for p_load in array:
-            output=array[p_load]
-            if isinstance(output, dict):
-                MQTT_LUT.update(GivMQTT.iterate_dict(output,topic+"/"+p_load))
-                logger.info('Prepping '+p_load+" for publishing")
-            else:
-                MQTT_LUT[topic+"/"+p_load]=output
+        if isinstance(array, dict):
+            # Create a publish safe version of the output
+            for p_load in array:
+                output=array[p_load]
+                if isinstance(output, dict):
+                    MQTT_LUT.update(GivMQTT.iterate_dict(output,topic+"/"+p_load))
+                    logger.info('Prepping '+p_load+" for publishing")
+                else:
+                    MQTT_LUT[topic+"/"+p_load]=output
+        else:
+            MQTT_LUT[topic]=array
         return(MQTT_LUT)

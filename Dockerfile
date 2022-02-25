@@ -15,6 +15,7 @@ RUN pip install -r requirements.txt
 
 # copy the content of the local src directory to the working directory
 COPY src/ .
+COPY givenergy_modbus/ /usr/local/lib/python3.10/site-packages/givenergy_modbus
 
 ENV INVERTOR_IP=""
 ENV NUM_BATTERIES="1"
@@ -27,14 +28,15 @@ ENV MQTT_PORT="1883"
 ENV JSON_OUTPUT="False"
 ENV LOG_LEVEL="Error"
 ENV DEBUG_FILE_LOCATION=""
-ENV PRINT_RAW="False"
+ENV PRINT_RAW="True"
 ENV SELF_RUN="True"
-ENV SELF_RUN_LOOP_TIMER="20"
+ENV SELF_RUN_LOOP_TIMER="10"
 ENV INFLUX_OUTPUT="False"
 ENV INFLUX_URL=""
 ENV INFLUX_TOKEN=""
 ENV INFLUX_BUCKET=""
 ENV INFLUX_ORG=""
+ENV HA_AUTO_D="False"
 
 EXPOSE 6345 1883
 

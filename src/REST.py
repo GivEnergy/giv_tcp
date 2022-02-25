@@ -10,9 +10,20 @@ giv_api = Flask(__name__)
 
 #Proxy Read Functions
 
+#Read from Invertor put in cache and publish
 @giv_api.route('/runAll', methods=['GET'])
 def getAll():
     return rd.runAll()
+
+#Publish last cached Invertor Data
+@giv_api.route('/readData', methods=['GET'])
+def rdData():
+    return rd.pubFromPickle()
+
+#Read from Invertor put in cache 
+@giv_api.route('/getData', methods=['GET'])
+def getData2():
+    return rd.getData()
 
 #Proxy Write Functions
 @giv_api.route('/disableChargeTarget', methods=['POST'])

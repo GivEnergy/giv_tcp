@@ -29,20 +29,6 @@ else:
 
 logger = logging.getLogger("GivTCP")
 
-class discovery_message():
-        name: str
-        stat_t: str
-        avty_t: str
-        pl_avail: str
-        pl_not_avail: str
-        json_attr_t: str
-        unit_of_meas: str
-        ic: str
-        uniq_id: str
-        device_class: str
-        ids: str
-        mf: str
-
 class HAMQTT():
 
     if GiV_Settings.MQTT_Port=='':
@@ -81,34 +67,57 @@ class HAMQTT():
         while not client.connected_flag:        			#wait in loop
             logger.info ("In wait loop")
             time.sleep(0.2)
+            ##publish the status message
+            client.publish("GivEnergy/status","online", retain=True)
         ### For each topic create a discovery message
             for p_load in array:
-                payload=array[p_load]
-                logger.info('Publishing: '+rootTopic+p_load)
-                output=GivMQTT.iterate_dict(payload,rootTopic+p_load)   #create LUT for MQTT publishing
-                for topic in output:
-                    client.publish("homeassistant/sensor/GivEnergy/"+str(topic).split("/")[-1]+"/config",HAMQTT.create_payload(topic))
+                if p_load != "raw":
+                    payload=array[p_load]
+                    logger.info('Publishing: '+rootTopic+p_load)
+                    output=GivMQTT.iterate_dict(payload,rootTopic+p_load)   #create LUT for MQTT publishing
+                    for topic in output:
+                        client.publish("homeassistant/sensor/GivEnergy/"+str(topic).split("/")[-1]+"/config",HAMQTT.create_payload(topic,SN),retain=True)
         client.loop_stop()                      			#Stop loop
         client.disconnect()
         return client
 
-    def create_payload(topic):      #Create LUT of topics and datapoints
+    def create_payload(topic,SN):      #Create LUT of topics and datapoints
         tempObj={}
-        tempObj["xxxx"]=str(topic).split("/")[-1] #Just final bit past the last "/"
-        tempObj['avty_t'] = "Givenergy/status"
-        tempObj['json_attr_t']=str(topic)
-        tempObj['stat_t']=str(topic)
-        tempObj['uniq_id']=tempObj["xxxx"]
+        tempObj["name"]="GivTCP "+str(topic).split("/")[-1].replace("_"," ") #Just final bit past the last "/"
+        tempObj['stat_t']=str(topic).replace(" ","_")
+        tempObj['avty_t'] = "GivEnergy/status"
+        tempObj["pl_avail"]= "online"
+        tempObj["pl_not_avail"]= "offline"
+        #tempObj['json_attr_t']=str(topic)
+        tempObj['unit_of_meas']=""
         if "Energy" in str(topic):
             tempObj['unit_of_meas']="kWh"
             tempObj['device_class']="Energy"
-        elif "Power" in str(topic):
+        if "Power" in str(topic):
             tempObj['unit_of_meas']="W"
             tempObj['device_class']="Power"
-        tempObj['dev']={}
-        tempObj['dev']['ids']=str(tempObj["xxxx"]).replace(" ","_")
-        tempObj['dev']['mf']="GivEnergy"
+        if "Temperature" in str(topic):
+            tempObj['unit_of_meas']="C"
+            tempObj['device_class']="Temperature"
+        if "Voltage" in str(topic):
+            tempObj['unit_of_meas']="V"
+            tempObj['device_class']="Voltage"
+        if "SOC" in str(topic):
+            tempObj['unit_of_meas']="%"
+            tempObj['device_class']="Battery"
+        if "time" in str(topic).lower():
+            tempObj['device_class']="timestamp"
+            del(tempObj['unit_of_meas'])
+        if "rate" in str(topic):
+            tempObj['unit_of_meas']="%"
+        if "Time_Since_Last_Update" in str(topic):
+            tempObj['unit_of_meas']="s"
+            del(tempObj['device_class'])
+        tempObj['uniq_id']=SN+"_"+str(topic).split("/")[-1].replace(" ","_")
+        tempObj['device']={}
+        tempObj['device']['identifiers']=tempObj['uniq_id']
+        tempObj['device']['name']="GivTCP_"+str(topic).split("/")[-1]
+        tempObj['device']['manufacturer']="GivEnergy"
         ## Convert this object to json string
         jsonOut=json.dumps(tempObj)
-        jsonOut=str(jsonOut).replace("xxxx","name")
         return(jsonOut)
