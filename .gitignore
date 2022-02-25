@@ -6,3 +6,5 @@ src/givtcp_debug.log
 .vscode
 buildx.bat
 /givenergy_modbus
+lastUpdate.pkl
+regCache.pkl
