@@ -53,7 +53,7 @@ def getData():      #Read from Invertor put in cache
     
     ### Only run if no lockfile present
     if exists(".lockfile"):
-        logger.info("Lockfile set so aborting getData")
+        logger.error("Lockfile set so aborting getData")
         result['result']="Error: Lockfile set so aborting getData"
         return json.dumps(result)
 
