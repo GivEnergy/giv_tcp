@@ -8,7 +8,6 @@ import logging
 import datetime
 import pickle
 from settings import GiV_Settings
-from HA_Discovery import HAMQTT
 from givenergy_modbus.client import GivEnergyClient
 from givenergy_modbus.model.inverter import Inverter, Model
 from givenergy_modbus.model.battery import Battery
@@ -54,7 +53,7 @@ def getData():      #Read from Invertor put in cache
     
     ### Only run if no lockfile present
     if exists(".lockfile"):
-        logger.error("Lockfile set so aborting getData")
+        logger.info("Lockfile set so aborting getData")
         result['result']="Error: Lockfile set so aborting getData"
         return json.dumps(result)
 
@@ -64,7 +63,7 @@ def getData():      #Read from Invertor put in cache
     #    logger.error("Start time for library invertor call: "+ datetime.datetime.strftime(starttime,"%H:%M:%S"))
         
         # SET Lockfile to prevent clashes
-        logger.error(" setting lock file at"+str(datetime.datetime.now))
+        logger.error(" setting lock file")
         open(".lockfile", 'w').close()
         
         client=GivEnergyClient(host=GiV_Settings.invertorIP)
@@ -84,7 +83,7 @@ def getData():      #Read from Invertor put in cache
             batteries[GEBat.battery_serial_number]=GEBat.dict()
             
         #Close Lockfile to allow access
-        logger.error("Removing lock file at"+str(datetime.datetime.now))
+        logger.info("Removing lock file")
         os.remove(".lockfile")
 
         multi_output['Last_Updated_Time']= datetime.datetime.utcnow().replace(tzinfo=datetime.timezone.utc).isoformat()   
@@ -107,6 +106,9 @@ def getData():      #Read from Invertor put in cache
         e = sys.exc_info()
         logger.error("Error collecting registers: " + str(e))
         temp['result']="Error collecting registers: " + str(e)
+        #Close Lockfile to allow access in the event of an error
+        logger.error("Removing lock file due to read error")
+        os.remove(".lockfile")
         return json.dumps(temp)
 
     if Print_Raw:
@@ -439,11 +441,12 @@ def pubFromPickle():        #Publish last cached Invertor Data
 def publishOutput(array,SN):
     tempoutput={}
     tempoutput=iterate_dict(array)
-    if GiV_Settings.first_run and GiV_Settings.MQTT_Output:
-        HAMQTT.publish_discovery(tempoutput,SN)
-        GiV_Settings.first_run=False
-        updateFirstRun()
     if GiV_Settings.MQTT_Output:
+        if GiV_Settings.first_run and GiV_Settings.HA_Auto_D:        # Home Assistant MQTT Discovery
+            from HA_Discovery import HAMQTT
+            HAMQTT.publish_discovery(tempoutput,SN)
+            GiV_Settings.first_run=False
+            updateFirstRun()
         from mqtt import GivMQTT
         logger.info("Publish all to MQTT")
         if GiV_Settings.MQTT_Topic=="":
