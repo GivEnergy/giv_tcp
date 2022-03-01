@@ -1,6 +1,5 @@
 # -*- coding: utf-8 -*-
 # version 2022.01.31
-import array
 from pickletools import read_uint1
 import sys
 import json
@@ -63,7 +62,7 @@ def getData():      #Read from Invertor put in cache
     #    logger.error("Start time for library invertor call: "+ datetime.datetime.strftime(starttime,"%H:%M:%S"))
         
         # SET Lockfile to prevent clashes
-        logger.error(" setting lock file")
+        logger.info(" setting lock file")
         open(".lockfile", 'w').close()
         
         client=GivEnergyClient(host=GiV_Settings.invertorIP)
@@ -446,7 +445,7 @@ def publishOutput(array,SN):
             from HA_Discovery import HAMQTT
             HAMQTT.publish_discovery(tempoutput,SN)
             GiV_Settings.first_run=False
-            updateFirstRun()
+            updateFirstRun(SN)
         from mqtt import GivMQTT
         logger.info("Publish all to MQTT")
         if GiV_Settings.MQTT_Topic=="":
@@ -457,7 +456,7 @@ def publishOutput(array,SN):
         logger.info("Pushing output to Influx")
         GivInflux.publish(SN,tempoutput)
 
-def updateFirstRun():
+def updateFirstRun(SN):
     script_dir = os.path.dirname(__file__) #<-- absolute dir the script is in
     rel_path = "settings.py"
     abs_file_path = os.path.join(script_dir, rel_path)
@@ -469,6 +468,7 @@ def updateFirstRun():
                 f.write("    first_run = False\n")
             else:
                 f.write(line)
+        f.writelines("    serial_number = \""+SN+"\"")
 
 def iterate_dict(array):        # Create a publish safe version of the output (convert non string or int datapoints)
     safeoutput={}

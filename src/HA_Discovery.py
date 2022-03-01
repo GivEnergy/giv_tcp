@@ -68,7 +68,7 @@ class HAMQTT():
             logger.info ("In wait loop")
             time.sleep(0.2)
             ##publish the status message
-            client.publish(GiV_Settings.MQTT_Topic+"/status","online", retain=True)
+            client.publish(GiV_Settings.MQTT_Topic+"/"+SN+"/status","online", retain=True)
         ### For each topic create a discovery message
             for p_load in array:
                 if p_load != "raw":

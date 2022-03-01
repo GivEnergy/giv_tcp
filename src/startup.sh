@@ -16,6 +16,12 @@ then
     echo "$FILE2 exists, deleting."
     rm $FILE2    #delete file and re-create
 fi
+FILE3=/app/.lockfile
+if [ -f "$FILE3" ]
+then
+    echo "$FILE3 exists, deleting."
+    rm $FILE3    #delete file and re-create
+fi
 
 if [ -z "$INVERTOR_IP" ]; then
     echo 'IP not set in ENV'
@@ -62,20 +68,26 @@ printf "    first_run= True\n" >> settings.py
 
 #TODO Update givTCP if a newer release is available
 
-if [ "$MQTT_ADDRESS" = "127.0.0.1" ]        #Only run Mosquitto if its using local broker
+if [ "$MQTT_ADDRESS" = "127.0.0.1" ]                #Only run Mosquitto if its using local broker
 then
     echo Starting Mosquitto on port "$MQTT_PORT"
-    /usr/sbin/mosquitto -p "$MQTT_PORT" &        #Run local MQTT broker as default
+    /usr/sbin/mosquitto -p "$MQTT_PORT" &           #Run local MQTT broker as default
 fi
 
-if [ "$SELF_RUN" = "True" ]        #Only run Schedule if requested
+if [ "$SELF_RUN" = "True" ]                         #Only run Schedule if requested
 then
     echo Running Invertor read loop every "$SELF_RUN_LOOP_TIMER"s...
-    python3 sched.py "$SELF_RUN_LOOP_TIMER" &     #Use to run periodically and push to MQTT
+    python3 sched.py "$SELF_RUN_LOOP_TIMER" &       #Use to run periodically and push to MQTT
+fi
+
+if [ "$MQTT_OUTPUT" = "True" ]                      #If we are running MQTT then start up the listener for control
+then
+    echo subscribing Mosquitto on port "$MQTT_PORT"
+    python3 mqtt_client.py listener &
 fi
 
 GUPORT=$(($GIVTCPINSTANCE+6344))
 echo Starting Gunicorn on port "$GUPORT"
-gunicorn -w 3 -b :"$GUPORT" REST:giv_api      #Use for on-demand read and control
+gunicorn -w 3 -b :"$GUPORT" REST:giv_api            #Use for on-demand read and control
 
 
