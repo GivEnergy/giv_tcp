@@ -10,6 +10,13 @@ then
 else
     echo "$FILE does not exist, creating."
 fi
+FILE2=/app/lastUpdate.pkl
+if [ -f "$FILE2" ]
+then
+    echo "$FILE2 exists, deleting."
+    rm $FILE2    #delete file and re-create
+fi
+
 if [ -z "$INVERTOR_IP" ]; then
     echo 'IP not set in ENV'
     for i in 1 2 3
@@ -43,7 +50,6 @@ printf "    MQTT_Username=\"$MQTT_USERNAME\"\n" >> settings.py
 printf "    MQTT_Password=\"$MQTT_PASSWORD\"\n" >> settings.py
 printf "    MQTT_Topic=\"$MQTT_TOPIC\"\n" >> settings.py
 printf "    MQTT_Port=$MQTT_PORT\n" >> settings.py
-printf "    JSON_Output=$JSON_OUTPUT\n" >> settings.py
 printf "    Log_Level=\"$LOG_LEVEL\"\n" >> settings.py
 printf "    Debug_File_Location=\"$DEBUG_FILE_LOCATION\"\n" >> settings.py
 printf "    Influx_Output=$INFLUX_OUTPUT\n" >> settings.py
@@ -68,7 +74,8 @@ then
     python3 sched.py "$SELF_RUN_LOOP_TIMER" &     #Use to run periodically and push to MQTT
 fi
 
-echo Starting Gunicorn on port 6345
-gunicorn -w 3 -b :6345 REST:giv_api      #Use for on-demand read and control
+GUPORT=$(($GIVTCPINSTANCE+6344))
+echo Starting Gunicorn on port "$GUPORT"
+gunicorn -w 3 -b :"$GUPORT" REST:giv_api      #Use for on-demand read and control
 
 

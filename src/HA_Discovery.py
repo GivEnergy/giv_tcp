@@ -68,7 +68,7 @@ class HAMQTT():
             logger.info ("In wait loop")
             time.sleep(0.2)
             ##publish the status message
-            client.publish("GivEnergy/status","online", retain=True)
+            client.publish(GiV_Settings.MQTT_Topic+"/status","online", retain=True)
         ### For each topic create a discovery message
             for p_load in array:
                 if p_load != "raw":
@@ -85,7 +85,7 @@ class HAMQTT():
         tempObj={}
         tempObj["name"]="GivTCP "+str(topic).split("/")[-1].replace("_"," ") #Just final bit past the last "/"
         tempObj['stat_t']=str(topic).replace(" ","_")
-        tempObj['avty_t'] = "GivEnergy/status"
+        tempObj['avty_t'] = GiV_Settings.MQTT_Topic+"/status"
         tempObj["pl_avail"]= "online"
         tempObj["pl_not_avail"]= "offline"
         #tempObj['json_attr_t']=str(topic)

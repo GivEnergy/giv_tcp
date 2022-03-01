@@ -52,10 +52,21 @@ def getData():      #Read from Invertor put in cache
     logger.info("----------------------------Starting----------------------------")
     logging.info("Getting All Registers")
     
+    ### Only run if no lockfile present
+    if exists(".lockfile"):
+        logger.error("Lockfile set so aborting getData")
+        result['result']="Error: Lockfile set so aborting getData"
+        return json.dumps(result)
+
     #Connect to Invertor and load data
     try:
     #    starttime=datetime.datetime.now()
     #    logger.error("Start time for library invertor call: "+ datetime.datetime.strftime(starttime,"%H:%M:%S"))
+        
+        # SET Lockfile to prevent clashes
+        logger.error(" setting lock file at"+str(datetime.datetime.now))
+        open(".lockfile", 'w').close()
+        
         client=GivEnergyClient(host=GiV_Settings.invertorIP)
         InvRegCache = RegisterCache()
         client.update_inverter_registers(InvRegCache)
@@ -71,20 +82,22 @@ def getData():      #Read from Invertor put in cache
             client.update_battery_registers(BatRegCache, battery_number=x)
             GEBat=Battery.from_orm(BatRegCache)
             batteries[GEBat.battery_serial_number]=GEBat.dict()
-            multi_output['Last_Updated_Time']= datetime.datetime.utcnow().replace(tzinfo=datetime.timezone.utc).isoformat()
             
-            #Get lastupdate from pickle
-            if not exists("lastUpdate.pkl"):
-                previousUpdate=multi_output['Last_Updated_Time']
-            else:
-                with open('lastUpdate.pkl', 'rb') as inp:
-                    previousUpdate= pickle.load(inp)
+        #Close Lockfile to allow access
+        logger.error("Removing lock file at"+str(datetime.datetime.now))
+        os.remove(".lockfile")
+
+        multi_output['Last_Updated_Time']= datetime.datetime.utcnow().replace(tzinfo=datetime.timezone.utc).isoformat()   
+        #Get lastupdate from pickle if it exists
+        if exists("lastUpdate.pkl"):
+            with open('lastUpdate.pkl', 'rb') as inp:
+                previousUpdate= pickle.load(inp)
             timediff=datetime.datetime.fromisoformat(multi_output['Last_Updated_Time'],)-datetime.datetime.fromisoformat(previousUpdate)
             multi_output['Time_Since_Last_Update']=(((timediff.seconds*1000000)+timediff.microseconds)/1000000)
-            
-            #Save new time to pickle
-            with open('lastUpdate.pkl', 'wb') as outp:
-                pickle.dump(multi_output['Last_Updated_Time'], outp, pickle.HIGHEST_PROTOCOL)
+        
+        #Save new time to pickle
+        with open('lastUpdate.pkl', 'wb') as outp:
+            pickle.dump(multi_output['Last_Updated_Time'], outp, pickle.HIGHEST_PROTOCOL)
 
     #    endtime=datetime.datetime.now()
     #    logger.error("End time for library invertor call: "+ datetime.datetime.strftime(endtime,"%H:%M:%S"))
@@ -403,12 +416,12 @@ def getData():      #Read from Invertor put in cache
 def runAll():       #Read from Invertor put in cache and publish
     result=getData()
     multi_output=pubFromPickle()
-    return json.dumps(multi_output, indent=4, sort_keys=True, default=str)
+    return multi_output
 
 def pubFromPickle():        #Publish last cached Invertor Data
     multi_output={}
     result="Success"
-    if not exists("regCache.pkl"):
+    if not exists("regCache.pkl"):      #if there is no cache, create it
         result=getData()
     if "Success" in result:
         with open('regCache.pkl', 'rb') as inp:
@@ -436,10 +449,6 @@ def publishOutput(array,SN):
         if GiV_Settings.MQTT_Topic=="":
             GiV_Settings.MQTT_Topic="GivEnergy"
         GivMQTT.multi_MQTT_publish(str(GiV_Settings.MQTT_Topic+"/"+SN+"/"), tempoutput)
-    if GiV_Settings.JSON_Output:
-        from GivJson import GivJSON
-        logger.info("Pushing JSON output")
-        GivJSON.output_JSON(tempoutput)
     if GiV_Settings.Influx_Output:
         from influx import GivInflux
         logger.info("Pushing output to Influx")
