@@ -33,43 +33,45 @@ def on_message(client, userdata, message):
     command=str(message.topic).split("/")[-1]
     if command=="setDischargeRate":
         writecommand['dischargeRate']=str(message.payload.decode("utf-8"))
-        wr.setDischargeRate(writecommand)
+        result=wr.setDischargeRate(writecommand)
     elif command=="setChargeRate":
         writecommand['chargeRate']=str(message.payload.decode("utf-8"))
-        wr.setChargeRate(writecommand)
+        result=wr.setChargeRate(writecommand)
     elif command=="disableChargeTarget":
-        wr.disableChargeTarget()
+        result=wr.disableChargeTarget()
     elif command=="enableChargeTarget":
-        wr.enableChargeTarget()
+        result=wr.enableChargeTarget()
     elif command=="pauseChargeSchedule":
-        wr.pauseChargeSchedule()
+        result=wr.pauseChargeSchedule()
     elif command=="resumeChargeSchedule":
-        wr.resumeChargeSchedule()
+        result=wr.resumeChargeSchedule()
     elif command=="pauseDischargeSchedule":
-        wr.pauseDischargeSchedule()
+        result=wr.pauseDischargeSchedule()
     elif command=="resumeDischargeSchedule":
-        wr.resumeDischargeSchedule()
+        result=wr.resumeDischargeSchedule()
     elif command=="pauseBatteryCharge":
-        wr.pauseBatteryCharge()
+        result=wr.pauseBatteryCharge()
     elif command=="resumeBatteryCharge":
-        wr.resumeBatteryCharge()
+        result=wr.resumeBatteryCharge()
     elif command=="pauseBatteryDischarge":
-        wr.pauseBatteryDischarge()
+        result=wr.pauseBatteryDischarge()
     elif command=="resumeBatteryDischarge":
-        wr.resumeBatteryDischarge()
+        result=wr.resumeBatteryDischarge()
     elif command=="setChargeTarget":
         writecommand['chargeToPercent']=str(message.payload.decode("utf-8"))
-        wr.setChargeTarget(writecommand)
+        result=wr.setChargeTarget(writecommand)
     elif command=="setBatteryReserve":
         writecommand['dischargeToPercent']=str(message.payload.decode("utf-8"))
-        wr.setBatteryReserve(writecommand)
+        result=wr.setBatteryReserve(writecommand)
     elif command=="setBatteryMode":
         writecommand['mode']=str(message.payload.decode("utf-8"))
-        wr.setBatteryMode(writecommand)
+        result=wr.setBatteryMode(writecommand)
     elif command=="setDateTime":
         writecommand['dateTime']=str(message.payload.decode("utf-8"))
-        wr.setDateTime(writecommand)
+        result=wr.setDateTime(writecommand)
 ## How to deal with ChargeSlots... require json payload?
+
+    #Do something with the result??
 
 def on_connect(client, userdata, flags, rc):
     if rc==0:
