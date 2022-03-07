@@ -54,13 +54,13 @@ Data Elements are:
     * Battery 2
     * ...
 
-| Function      | Description                                                                                  | REST URL  |
-|---------------|----------------------------------------------------------------------------------------------|-----------|
-| getData       | This connects to the invertor   collects all invertor data and stores a cache for publishing | /getData  |
-| pubFromPickle | Retrieves data from the local   cache and publishes data according to the settings           | /readData |
-| RunAll        | Runs both getData and   pubFromPickle to refreshdata and then publish                        | /runAll   |
+| Function      | Description                                                                        | REST URL  |
+|---------------|------------------------------------------------------------------------------------|-----------|
+| getData       | This connects to the invertor, collects all data and stores a cache for publishing | /getData  |
+| pubFromPickle | Retrieves data from the local cache and publishes data according to the settings   | /readData |
+| RunAll        | Runs both getData and pubFromPickle to refresh data and then publish               | /runAll   |
 
-# Available control functions are:
+# GivTCP Control
 | Function                | Description                                                                                                                                                                                               | REST URL                 | REST payload                                               | MQTT Topic              | MQTT Payload                                               |
 |-------------------------|-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|--------------------------|------------------------------------------------------------|-------------------------|------------------------------------------------------------|
 | enableChargeTarget      | Sets   invertor to follow setChargeTarget value when charging from grid (will stop   charging when battery SOC= ChargeTarget)                                                                             | /enableChargeTarget      | {"state","enable"}                                         | enableChargeTarget      | enable                                                     |
@@ -86,14 +86,13 @@ Data is published to "GivEnergy/<serial_number>/" by default or you can nominate
 
 <img width="245" alt="image" src="https://user-images.githubusercontent.com/69121158/149670766-0d9a6c92-8ee2-44d6-9045-2d21b6db7ebf.png">
 
-## MQTT Control
 Control is available using MQTT. By publishing data to the smae MQTT broker as above you can trigger the control methods as per the above table.
 Root topic for control is:
 "GivEnergy/<serial_number>/control/"    - Default
 "<MQTT_TOPIC>/<serial_number>/control/" - If MQTT_TOPIC is set
 
 
-# RESTful Service
+## RESTful Service
 GivTCP provides a wrapper function REST.py which uses Flask to expose the read and control functions as RESTful http calls. To utilise this service you will need to either use a WSGI serivce such as gunicorn or use the pre-built Docker container.
 
 If Docker is running in Host mode then the REST service is available on port 6345
