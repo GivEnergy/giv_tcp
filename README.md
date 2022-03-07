@@ -54,6 +54,12 @@ Data Elements are:
     * Battery 2
     * ...
 
+| Function      | Description                                                                                  | REST URL  |
+|---------------|----------------------------------------------------------------------------------------------|-----------|
+| getData       | This connects to the invertor   collects all invertor data and stores a cache for publishing | /getData  |
+| pubFromPickle | Retrieves data from the local   cache and publishes data according to the settings           | /readData |
+| RunAll        | Runs both getData and   pubFromPickle to refreshdata and then publish                        | /runAll   |
+
 # Available control functions are:
 | Function                | Description                                                                                                                                                                                               | REST URL                 | REST payload                                               | MQTT Topic              | MQTT Payload                                               |
 |-------------------------|-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|--------------------------|------------------------------------------------------------|-------------------------|------------------------------------------------------------|
@@ -76,7 +82,7 @@ Data Elements are:
 ## MQTT
 By setting MQTT_OUTPUT = True The script will publish directly to the nominated MQTT broker (MQTT_ADDRESS) all the requested read data.
 
-Data is published to "GivEnergy/<serial_number>/" by default or you can nominate s specific root topic by setting "MQTT_TOPIC" in the settings.
+Data is published to "GivEnergy/<serial_number>/" by default or you can nominate a specific root topic by setting "MQTT_TOPIC" in the settings.
 
 <img width="245" alt="image" src="https://user-images.githubusercontent.com/69121158/149670766-0d9a6c92-8ee2-44d6-9045-2d21b6db7ebf.png">
 
