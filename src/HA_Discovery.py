@@ -34,6 +34,7 @@ class HAMQTT():
     entity_type={
         "Last_Updated_Time":["sensor","timestamp"],
         "Time_Since_Last_Update":["sensor",""],
+        "status":["sensor",""],
         "Export_Energy_Total_kWh":["sensor","energy"],
         "Battery_Throughput_Total_kWh":["sensor","energy"],
         "AC_Charge_Energy_Total_kWh":["sensor","energy"],
@@ -65,6 +66,7 @@ class HAMQTT():
         "EPS_Power":["sensor","power"],
         "Invertor_Power":["sensor","power"],
         "Load_Power":["sensor","power"],
+        "AC_Charge_Power":["sensor","power"],
         "Self_Consumption_Power":["sensor","power"],
         "Battery_Power":["sensor","power"],
         "Charge_Power":["sensor","power"],
@@ -77,21 +79,21 @@ class HAMQTT():
         "Grid_to_Battery":["sensor","power"],
         "Grid_to_House":["sensor","power"],
         "Battery_to_Grid":["sensor","power"],
-        "Battery_Type":["sensor","timestamp"],
+        "Battery_Type":["sensor",""],
         "Battery_Capacity_kWh":["sensor",""],
         "Invertor_Serial_Number":["sensor","",""],
         "Modbus_Version":["sensor",""],
         "Meter_Type":["sensor",""],
         "Invertor_Type":["sensor",""],
         "Invertor_Temperature":["sensor","temperature"],
-        "Discharge_start_time_slot_1":["sensor","timestamp"],
-        "Discharge_end_time_slot_1":["sensor","timestamp"],
-        "Discharge_start_time_slot_2":["sensor","timestamp"],
-        "Discharge_end_time_slot_2":["sensor","timestamp"],
-        "Charge_start_time_slot_1":["sensor","timestamp"],
-        "Charge_end_time_slot_1":["sensor","timestamp"],
-        "Charge_start_time_slot_2":["sensor","timestamp"],
-        "Charge_end_time_slot_2":["sensor","timestamp"],
+        "Discharge_start_time_slot_1":["sensor",""],
+        "Discharge_end_time_slot_1":["sensor",""],
+        "Discharge_start_time_slot_2":["sensor",""],
+        "Discharge_end_time_slot_2":["sensor",""],
+        "Charge_start_time_slot_1":["sensor",""],
+        "Charge_end_time_slot_1":["sensor",""],
+        "Charge_start_time_slot_2":["sensor",""],
+        "Charge_end_time_slot_2":["sensor",""],
         "Battery_Serial_Number":["sensor","",""],
         "Battery_SOC":["sensor","battery"],
         "Battery_Capacity":["sensor","",""],
@@ -126,10 +128,9 @@ class HAMQTT():
         "Mode":["select","","setBatteryMode"],
         "Battery_Power_Reserve":["number","","setBatteryReserve"],
         "Target_SOC":["number","","setChargeTarget"],
-        "Charge_Schedule_State":["switch","",""],
-        "Discharge_Schedule_State":["switch","",""],
-        "Battery_Charge_State":["switch","",""],
-        "Battery_Discharge_State":["switch",""],
+        "Enable_Charge_Schedule":["switch","","enableChargeSchedule"],
+        "Enable_Discharge_Schedule":["switch","","enableDishargeSchedule"],
+        "Enable_Discharge":["switch","","enableDischarge"],
         "Battery_Charge_Rate":["number","","setChargeRate"],
         "Battery_Discharge_Rate":["number","","setDischargeRate"]
         }
@@ -181,90 +182,73 @@ class HAMQTT():
                     for topic in output:
                         #Determine Entitiy type (switch/sensor/number) and publish the right message
                         if HAMQTT.entity_type[str(topic).split("/")[-1]][0]=="sensor":
-                            client.publish("homeassistant/sensor/GivEnergy/"+str(topic).split("/")[-1]+"/config",HAMQTT.create_sensor_payload(topic,SN),retain=True)
-                    #    elif HAMQTT.entity_type[str(topic).split("/")[-1]][0]=="switch":
-                    #        client.publish("homeassistant/switch/GivEnergy/"+str(topic).split("/")[-1]+"/config",HAMQTT.create_switch_payload(topic,SN),retain=True)
+                            client.publish("homeassistant/sensor/GivEnergy/"+str(topic).split("/")[-1]+"/config",HAMQTT.create_device_payload(topic,SN),retain=True)
+                        elif HAMQTT.entity_type[str(topic).split("/")[-1]][0]=="switch":
+                            client.publish("homeassistant/switch/GivEnergy/"+str(topic).split("/")[-1]+"/config",HAMQTT.create_device_payload(topic,SN),retain=True)
                         elif HAMQTT.entity_type[str(topic).split("/")[-1]][0]=="number":
-                            client.publish("homeassistant/number/GivEnergy/"+str(topic).split("/")[-1]+"/config",HAMQTT.create_number_payload(topic,SN),retain=True)
+                            client.publish("homeassistant/number/GivEnergy/"+str(topic).split("/")[-1]+"/config",HAMQTT.create_device_payload(topic,SN),retain=True)
                     #    elif HAMQTT.entity_type[str(topic).split("/")[-1]][0]=="binary_sensor":
                     #        client.publish("homeassistant/binary_sensor/GivEnergy/"+str(topic).split("/")[-1]+"/config",HAMQTT.create_binary_sensor_payload(topic,SN),retain=True)
-                    #    elif HAMQTT.entity_type[str(topic).split("/")[-1]][0]=="select":
-                    #        client.publish("homeassistant/select/GivEnergy/"+str(topic).split("/")[-1]+"/config",HAMQTT.create_select_payload(topic,SN),retain=True)
+                        elif HAMQTT.entity_type[str(topic).split("/")[-1]][0]=="select":
+                            client.publish("homeassistant/select/GivEnergy/"+str(topic).split("/")[-1]+"/config",HAMQTT.create_device_payload(topic,SN),retain=True)
                            
         client.loop_stop()                      			#Stop loop
         client.disconnect()
         return client
 
-    def create_switch_payload(topic,SN):      #Create LUT of topics and datapoints
+    def create_device_payload(topic,SN):
         tempObj={}
         tempObj["name"]="GivTCP "+str(topic).split("/")[-1].replace("_"," ") #Just final bit past the last "/"
         tempObj['stat_t']=str(topic).replace(" ","_")
-        tempObj['avty_t'] = GiV_Settings.MQTT_Topic+"/status"
+        tempObj['avty_t'] = GiV_Settings.MQTT_Topic+"/"+SN+"/status"
         tempObj["pl_avail"]= "online"
         tempObj["pl_not_avail"]= "offline"
-        #tempObj['json_attr_t']=str(topic)
-        tempObj['command_topic']=GiV_Settings.MQTT_Topic+"/control/"+SN+"/"+HAMQTT.entity_type[str(topic).split("/")[-1]][2]
-        tempObj['uniq_id']=SN+"_"+str(topic).split("/")[-1].replace(" ","_")
+        GiVTCP_Device=str(topic).split("/")[2]
+        tempObj['uniq_id']=SN+"_"+GiVTCP_Device+"_"+str(topic).split("/")[-1]
         tempObj['device']={}
-        tempObj['device']['identifiers']=tempObj['uniq_id']
-        tempObj['device']['name']="GivTCP_"+str(topic).split("/")[-1]
+        tempObj['device']['identifiers']=SN+"_"+GiVTCP_Device
+        #Group entities by Device as per main topics
+        tempObj['device']['name']="GivTCP_"+SN+"_"+GiVTCP_Device
         tempObj['device']['manufacturer']="GivEnergy"
-        ## Convert this object to json string
-        jsonOut=json.dumps(tempObj)
-        return(jsonOut)
+        try:
+            tempObj['command_topic']=GiV_Settings.MQTT_Topic+"/control/"+SN+"/"+HAMQTT.entity_type[str(topic).split("/")[-1]][2]
+        except:
+            logger.info("No command topic avaiable, skipping")
+#set device specific elements here:
+        if HAMQTT.entity_type[str(topic).split("/")[-1]][0]=="sensor":
+            tempObj['unit_of_meas']=""
+            if HAMQTT.entity_type[str(topic).split("/")[-1]][1]=="energy":
+                tempObj['unit_of_meas']="kWh"
+                tempObj['device_class']="Energy"
+                tempObj['state_class']="total_increasing"
+            if HAMQTT.entity_type[str(topic).split("/")[-1]][1]=="power":
+                tempObj['unit_of_meas']="W"
+                tempObj['device_class']="Power"
+                tempObj['state_class']="measurement"
+            if HAMQTT.entity_type[str(topic).split("/")[-1]][1]=="temperature":
+                tempObj['unit_of_meas']="C"
+                tempObj['device_class']="Temperature"
+            if HAMQTT.entity_type[str(topic).split("/")[-1]][1]=="voltage":
+                tempObj['unit_of_meas']="V"
+                tempObj['device_class']="Voltage"
+            if HAMQTT.entity_type[str(topic).split("/")[-1]][1]=="battery":
+                tempObj['unit_of_meas']="%"
+                tempObj['device_class']="Battery"
+            if HAMQTT.entity_type[str(topic).split("/")[-1]][1]=="timestamp":
+                #if "slot" in topic:
+                #    tempObj['value_template']= "{{now().replace(hour=int(value[:2]), minute=int(value[3:5]), second=0, microsecond=0).timestamp() }}"
+                del(tempObj['unit_of_meas'])
+                tempObj['device_class']="timestamp"
+        elif HAMQTT.entity_type[str(topic).split("/")[-1]][0]=="switch":
+            tempObj['payload_on']="enable"
+            tempObj['payload_off']="disable"
+    #    elif HAMQTT.entity_type[str(topic).split("/")[-1]][0]=="binary_sensor":
+    #        client.publish("homeassistant/binary_sensor/GivEnergy/"+str(topic).split("/")[-1]+"/config",HAMQTT.create_binary_sensor_payload(topic,SN),retain=True)
+        elif HAMQTT.entity_type[str(topic).split("/")[-1]][0]=="select":
+            options=["Eco","Timed Demand","Timed Export","Unknown", "Eco (Paused)"]
+            tempObj['options']=options
+                         
 
-    def create_number_payload(topic,SN):      #Create LUT of topics and datapoints
-        tempObj={}
-        tempObj["name"]="GivTCP "+str(topic).split("/")[-1].replace("_"," ") #Just final bit past the last "/"
-        tempObj['stat_t']=str(topic).replace(" ","_")
-        tempObj['avty_t'] = GiV_Settings.MQTT_Topic+"/status"
-        tempObj["pl_avail"]= "online"
-        tempObj["pl_not_avail"]= "offline"
-        #tempObj['json_attr_t']=str(topic)
-        tempObj['command_topic']=GiV_Settings.MQTT_Topic+"/control/"+SN+"/"+HAMQTT.entity_type[str(topic).split("/")[-1]][2]
-        tempObj['uniq_id']=SN+"_"+str(topic).split("/")[-1].replace(" ","_")
-        tempObj['device']={}
-        tempObj['device']['identifiers']=tempObj['uniq_id']
-        tempObj['device']['name']="GivTCP_"+str(topic).split("/")[-1]
-        tempObj['device']['manufacturer']="GivEnergy"
-        ## Convert this object to json string
-        jsonOut=json.dumps(tempObj)
-        return(jsonOut)
-
-    def create_sensor_payload(topic,SN):      #Create LUT of topics and datapoints
-        tempObj={}
-        tempObj["name"]="GivTCP "+str(topic).split("/")[-1].replace("_"," ") #Just final bit past the last "/"
-        tempObj['stat_t']=str(topic).replace(" ","_")
-        tempObj['avty_t'] = GiV_Settings.MQTT_Topic+"/status"
-        tempObj["pl_avail"]= "online"
-        tempObj["pl_not_avail"]= "offline"
-        #tempObj['json_attr_t']=str(topic)
-        tempObj['unit_of_meas']=""
-        if HAMQTT.entity_type[str(topic).split("/")[-1]][1]=="energy":
-            tempObj['unit_of_meas']="kWh"
-            tempObj['device_class']="Energy"
-            tempObj['state_class']="total_increasing"
-        if HAMQTT.entity_type[str(topic).split("/")[-1]][1]=="power":
-            tempObj['unit_of_meas']="W"
-            tempObj['device_class']="Power"
-            tempObj['state_class']="measurement"
-        if HAMQTT.entity_type[str(topic).split("/")[-1]][1]=="temperature":
-            tempObj['unit_of_meas']="C"
-            tempObj['device_class']="Temperature"
-        if HAMQTT.entity_type[str(topic).split("/")[-1]][1]=="voltage":
-            tempObj['unit_of_meas']="V"
-            tempObj['device_class']="Voltage"
-        if HAMQTT.entity_type[str(topic).split("/")[-1]][1]=="battery":
-            tempObj['unit_of_meas']="%"
-            tempObj['device_class']="Battery"
-        if HAMQTT.entity_type[str(topic).split("/")[-1]][1]=="timestamp":
-            del(tempObj['unit_of_meas'])
-            tempObj['device_class']="timestamp"
-        tempObj['uniq_id']=SN+"_"+str(topic).split("/")[-1].replace(" ","_")
-        tempObj['device']={}
-        tempObj['device']['identifiers']=tempObj['uniq_id']
-        tempObj['device']['name']="GivTCP_"+str(topic).split("/")[-1]
-        tempObj['device']['manufacturer']="GivEnergy"
         ## Convert this object to json string
         jsonOut=json.dumps(tempObj)
         return(jsonOut)

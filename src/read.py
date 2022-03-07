@@ -6,13 +6,17 @@ import json
 import logging
 import datetime
 import pickle
+import schedule
+import time
 from settings import GiV_Settings
 from givenergy_modbus.client import GivEnergyClient
-from givenergy_modbus.model.inverter import Inverter, Model
+from givenergy_modbus.model.inverter import Model
 from givenergy_modbus.model.battery import Battery
-from givenergy_modbus.model.register_cache import RegisterCache
+#from givenergy_modbus.model.register_cache import RegisterCache
+from givenergy_modbus.model.plant import Plant
 from os.path import exists
 import os
+
 
 Print_Raw=False
 if GiV_Settings.Print_Raw_Registers:
@@ -35,8 +39,9 @@ else:
         logging.basicConfig(filename=GiV_Settings.Debug_File_Location, encoding='utf-8', level=logging.ERROR)
 
 logger = logging.getLogger("GivTCP")
+plant=Plant(number_batteries=GiV_Settings.numBatteries)
 
-def getData():      #Read from Invertor put in cache 
+def getData(fullrefresh):      #Read from Invertor put in cache 
     energy_total_output={}
     energy_today_output={}
     power_output={}
@@ -65,21 +70,17 @@ def getData():      #Read from Invertor put in cache
         logger.info(" setting lock file")
         open(".lockfile", 'w').close()
         
-        client=GivEnergyClient(host=GiV_Settings.invertorIP)
-        InvRegCache = RegisterCache()
-        client.update_inverter_registers(InvRegCache)
-        GEInv=Inverter.from_orm(InvRegCache)
-        numBatteries=1
-        try:
-            numBatteries=GiV_Settings.numBatteries
-        except ValueError:
-            logger.error("error parsing numbatteries defaulting to 1")
 
-        for x in range(0, numBatteries):
-            BatRegCache = RegisterCache()
-            client.update_battery_registers(BatRegCache, battery_number=x)
-            GEBat=Battery.from_orm(BatRegCache)
-            batteries[GEBat.battery_serial_number]=GEBat.dict()
+        client=GivEnergyClient(host=GiV_Settings.invertorIP)
+        client.refresh_plant(plant,full_refresh=fullrefresh)
+        GEInv=plant.inverter
+        GEBat=plant.batteries
+
+#        for x in range(0, numBatteries):
+#            BatRegCache = RegisterCache()
+#            client.update_battery_registers(BatRegCache, battery_number=x)
+#            GEBat=Battery.from_orm(BatRegCache)
+#            batteries[GEBat.battery_serial_number]=GEBat.dict()
             
         #Close Lockfile to allow access
         logger.info("Removing lock file")
@@ -90,7 +91,7 @@ def getData():      #Read from Invertor put in cache
         if exists("lastUpdate.pkl"):
             with open('lastUpdate.pkl', 'rb') as inp:
                 previousUpdate= pickle.load(inp)
-            timediff=datetime.datetime.fromisoformat(multi_output['Last_Updated_Time'],)-datetime.datetime.fromisoformat(previousUpdate)
+            timediff=datetime.datetime.fromisoformat(multi_output['Last_Updated_Time'])-datetime.datetime.fromisoformat(previousUpdate)
             multi_output['Time_Since_Last_Update']=(((timediff.seconds*1000000)+timediff.microseconds)/1000000)
         
         #Save new time to pickle
@@ -100,6 +101,8 @@ def getData():      #Read from Invertor put in cache
     #    endtime=datetime.datetime.now()
     #    logger.error("End time for library invertor call: "+ datetime.datetime.strftime(endtime,"%H:%M:%S"))
     #    logger.error("End time for library invertor call: "+ str(endtime-starttime))
+        multi_output['status']="online"
+        
         logger.info("Invertor connection successful, registers retrieved")
     except:
         e = sys.exc_info()
@@ -132,8 +135,8 @@ def getData():      #Read from Invertor put in cache
         else:
             energy_total_output['Load_Energy_Total_kWh']=(energy_total_output['Invertor_Energy_Total_kWh']-energy_total_output['AC_Charge_Energy_Total_kWh'])-(energy_total_output['Export_Energy_Total_kWh']-energy_total_output['Import_Energy_Total_kWh'])+energy_total_output['PV_Energy_Total_kWh']
         if GEInv.e_battery_charge_total==0 and GEInv.e_battery_discharge_total==0:        #If no values in "nomal" registers then grab from back up registers - for some f/w versions
-            energy_total_output['Battery_Charge_Energy_Total_kWh']=GEBat.e_battery_charge_total_2
-            energy_total_output['Battery_Discharge_Energy_Total_kWh']=GEBat.e_battery_discharge_total_2
+            energy_total_output['Battery_Charge_Energy_Total_kWh']=GEBat[0].e_battery_charge_total_2
+            energy_total_output['Battery_Discharge_Energy_Total_kWh']=GEBat[0].e_battery_discharge_total_2
         else:
             energy_total_output['Battery_Charge_Energy_Total_kWh']=GEInv.e_battery_charge_total
             energy_total_output['Battery_Discharge_Energy_Total_kWh']=GEInv.e_battery_discharge_total
@@ -199,6 +202,8 @@ def getData():      #Read from Invertor put in cache
             power_output['Invertor_Power']= Invertor_power
         if Invertor_power<0:
             power_output['AC_Charge_Power']= abs(Invertor_power)
+        else:
+            power_output['AC_Charge_Power']=0
 
     #Load Power
         logger.info("Getting Load Power")
@@ -281,66 +286,73 @@ def getData():      #Read from Invertor put in cache
     ################ Run Holding Reg now ###################
         logger.info("Getting mode control figures")
         # Get Control Mode registers
-        shallow_charge=GEInv.battery_soc_reserve
-        self_consumption=GEInv.battery_power_mode 
-        charge_enable=GEInv.enable_charge
-        if charge_enable==True:
-            charge_enable="Active"
+        #shallow_charge=GEInv.battery_soc_reserve
+        #self_consumption=GEInv.battery_power_mode 
+        if GEInv.enable_charge==True:
+            charge_schedule="enable"
         else:
-            charge_enable="Paused"
-
+            charge_schedule="disable"
+        if GEInv.enable_discharge==True:
+            discharge_schedule="enable"
+        else:
+            discharge_schedule="disable"
         #Get Battery Stat registers
         battery_reserve=GEInv.battery_discharge_min_power_reserve
         target_soc=GEInv.charge_target_soc
-        discharge_enable=GEInv.enable_discharge
-        if discharge_enable==True:
-            discharge_enable="Active"
+        if GEInv.battery_soc_reserve<=GEInv.battery_percent:
+            discharge_enable="enable"
         else:
-            discharge_enable="Paused"
-        logger.info("Shallow Charge= "+str(shallow_charge)+" Self Consumption= "+str(self_consumption)+" Discharge Enable= "+str(discharge_enable))
+            discharge_enable="disable"
+        #logger.info("Shallow Charge= "+str(shallow_charge)+" Self Consumption= "+str(self_consumption)+" Discharge Enable= "+str(discharge_enable))
 
         #Get Charge/Discharge Active status
         discharge_rate=GEInv.battery_discharge_limit*3
         if discharge_rate>100: discharge_rate=100
-        if discharge_rate==0:
-            discharge_state="Paused"
-        else:
-            discharge_state="Active"
         
         charge_rate=GEInv.battery_charge_limit*3
         if charge_rate>100: charge_rate=100
-        if charge_rate==0:
-            charge_state="Paused"
-        else:
-            charge_state="Active"
-
 
         #Calculate Mode
         logger.info("Calculating Mode...")
-        mode=GEInv.system_mode
+        #Calc Mode
+        
+        if GEInv.battery_power_mode==1 and GEInv.enable_discharge==False and GEInv.battery_soc_reserve==4:
+            #Dynamic r27=1 r110=4 r59=0
+            mode="Eco"
+        elif GEInv.battery_power_mode==1 and GEInv.enable_discharge==False and GEInv.battery_soc_reserve==100:
+            #Dynamic r27=1 r110=4 r59=0
+            mode="Eco (Paused)"
+        elif GEInv.battery_power_mode==1 and GEInv.enable_discharge==True and GEInv.battery_soc_reserve==100:
+            #Storage (demand) r27=1 r110=100 r59=1
+            mode="Timed Demand"
+        elif GEInv.battery_power_mode==0 and GEInv.enable_discharge==True and GEInv.battery_soc_reserve==100:
+            #Storage (export) r27=0 r110=100 r59=1
+            mode="Timed Export"
+        else:
+            mode="Unknown"
+        
         logger.info("Mode is: " + str(mode))
 
         controlmode['Mode']=mode
         controlmode['Battery_Power_Reserve']=battery_reserve
         controlmode['Target_SOC']=target_soc
-        controlmode['Charge_Schedule_State']=charge_enable
-        controlmode['Discharge_Schedule_State']=discharge_enable
-        controlmode['Battery_Charge_State']=charge_state
-        controlmode['Battery_Discharge_State']=discharge_state
+        controlmode['Enable_Charge_Schedule']=charge_schedule
+        controlmode['Enable_Discharge_Schedule']=discharge_schedule
+        controlmode['Enable_Discharge']=discharge_enable
         controlmode['Battery_Charge_Rate']=charge_rate
         controlmode['Battery_Discharge_Rate']=discharge_rate
 
         #Grab Timeslots
         timeslots={}
         logger.info("Getting TimeSlot data")
-        timeslots['Discharge_start_time_slot_1']=GEInv.discharge_slot_1[0]
-        timeslots['Discharge_end_time_slot_1']=GEInv.discharge_slot_1[1]
-        timeslots['Discharge_start_time_slot_2']=GEInv.discharge_slot_2[0]
-        timeslots['Discharge_end_time_slot_2']=GEInv.discharge_slot_2[1]
-        timeslots['Charge_start_time_slot_1']=GEInv.charge_slot_1[0]
-        timeslots['Charge_end_time_slot_1']=GEInv.charge_slot_1[1]
-        timeslots['Charge_start_time_slot_2']=GEInv.charge_slot_2[0]
-        timeslots['Charge_end_time_slot_2']=GEInv.charge_slot_2[1]
+        timeslots['Discharge_start_time_slot_1']= GEInv.discharge_slot_1[0].isoformat()
+        timeslots['Discharge_end_time_slot_1']=GEInv.discharge_slot_1[1].isoformat()
+        timeslots['Discharge_start_time_slot_2']=GEInv.discharge_slot_2[0].isoformat()
+        timeslots['Discharge_end_time_slot_2']=GEInv.discharge_slot_2[1].isoformat()
+        timeslots['Charge_start_time_slot_1']=GEInv.charge_slot_1[0].isoformat()
+        timeslots['Charge_end_time_slot_1']=GEInv.charge_slot_1[1].isoformat()
+        timeslots['Charge_start_time_slot_2']=GEInv.charge_slot_2[0].isoformat()
+        timeslots['Charge_end_time_slot_2']=GEInv.charge_slot_2[1].isoformat()
 
         #Get Invertor Details
         invertor={}
@@ -391,7 +403,6 @@ def getData():      #Read from Invertor put in cache
             battery['Battery_Cell_14_Voltage'] = batteries[b]['v_battery_cell_14']
             battery['Battery_Cell_15_Voltage'] = batteries[b]['v_battery_cell_15']
             battery['Battery_Cell_16_Voltage'] = batteries[b]['v_battery_cell_16']
-
             battery['Battery_Cell_1_Temperature'] = batteries[b]['temp_battery_cells_1']
             battery['Battery_Cell_2_Temperature'] = batteries[b]['temp_battery_cells_2']
             battery['Battery_Cell_3_Temperature'] = batteries[b]['temp_battery_cells_3']
@@ -414,8 +425,9 @@ def getData():      #Read from Invertor put in cache
         return json.dumps(result)
     return json.dumps(result, indent=4, sort_keys=True, default=str)
 
-def runAll():       #Read from Invertor put in cache and publish
-    result=getData()
+def runAll(full_refresh):       #Read from Invertor put in cache and publish
+    #full_refresh=True
+    result=getData(full_refresh)
     multi_output=pubFromPickle()
     return multi_output
 
@@ -432,6 +444,16 @@ def pubFromPickle():        #Publish last cached Invertor Data
     else:
         multi_output['result']="Failure to find data cache"
     return json.dumps(multi_output, indent=4, sort_keys=True, default=str)
+
+def self_run(loop_timer):
+    quick_loop_timer=int(loop_timer[0])
+    full_loop_timer=quick_loop_timer*3
+    fullRefresh=True
+    schedule.every(quick_loop_timer).seconds.do(runAll,True)
+    #schedule.every(full_loop_timer).seconds.do(runAll(True))
+    while True:
+        schedule.run_pending()
+        time.sleep(1)
 
 
 ####### Addiitonal Publish options can be added here. 
@@ -481,8 +503,8 @@ def iterate_dict(array):        # Create a publish safe version of the output (c
         elif isinstance(output, tuple):
             if "slot" in str(p_load):
                 logger.info('Converting Timeslots to publish safe string')
-                safeoutput[p_load+"_start"]=output[0].strftime("%H%M")
-                safeoutput[p_load+"_end"]=output[1].strftime("%H%M")
+                safeoutput[p_load+"_start"]=output[0].strftime("%H:%M")
+                safeoutput[p_load+"_end"]=output[1].strftime("%H:%M")
             else:
                 #Deal with other tuples _ Print each value
                 for index, key in enumerate(output):
@@ -505,5 +527,5 @@ def iterate_dict(array):        # Create a publish safe version of the output (c
 
 
 if __name__ == '__main__':
-    globals()[sys.argv[1]]()
+    globals()[sys.argv[1]]([sys.argv[2]])
 

@@ -15,7 +15,7 @@ RUN pip install -r requirements.txt
 
 # copy the content of the local src directory to the working directory
 COPY src/ .
-COPY givenergy_modbus/ /usr/local/lib/python3.10/site-packages/givenergy_modbus
+#COPY givenergy_modbus/ /usr/local/lib/python3.10/site-packages/givenergy_modbus
 
 ENV INVERTOR_IP=""
 ENV NUM_BATTERIES="1"
@@ -35,7 +35,7 @@ ENV INFLUX_URL=""
 ENV INFLUX_TOKEN=""
 ENV INFLUX_BUCKET=""
 ENV INFLUX_ORG=""
-ENV HA_AUTO_D="False"
+ENV HA_AUTO_D="True"
 ENV GIVTCPINSTANCE=1
 
 EXPOSE 6345 1883

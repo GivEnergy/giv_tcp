@@ -26,113 +26,70 @@ else:
 logger = logging.getLogger("GivTCP")
 
 
-def disableChargeTarget():
+def enableChargeTarget(payload):
     temp={}
     try:
-        GivEnergyClient(host=GiV_Settings.invertorIP).disable_charge_target()
-        temp['result']="Disabling Charge Target was a success"
+        if payload['state']=="enable":
+            GivEnergyClient(host=GiV_Settings.invertorIP).enable_charge_target()
+        elif payload['state']=="disable":
+            GivEnergyClient(host=GiV_Settings.invertorIP).disable_charge_target()
+        temp['result']="Setting Charge Target was a success"
     except:
         e = sys.exc_info()
-        temp['result']="Disabling Charge Target failed: " + str(e)
+        temp['result']="Setting Charge Target failed: " + str(e)
     logger.info (temp['result'])
     return json.dumps(temp)
 
-def enableChargeTarget():
+def enableChargeSchedule(payload):
     temp={}
     try:
-        GivEnergyClient(host=GiV_Settings.invertorIP).enable_charge_target()
-        temp['result']="Enabling Charge Target was a success"
+        if payload['state']=="enable":
+            GivEnergyClient(host=GiV_Settings.invertorIP).enable_charge()
+        elif payload['state']=="disable":
+            GivEnergyClient(host=GiV_Settings.invertorIP).disable_charge()
+        temp['result']="Setting Charge Enable was a success"
     except:
         e = sys.exc_info()
-        temp['result']="Enabling Charge Target failed: " + str(e)
+        temp['result']="Setting Charge Enable failed: " + str(e)
     logger.info (temp['result'])
     return json.dumps(temp)
 
-def pauseChargeSchedule():
+def enableDischargeSchedule(payload):
     temp={}
     try:
-        GivEnergyClient(host=GiV_Settings.invertorIP).disable_charge()
-        temp['result']="Pausing Charge Schedule was a success"
+        if payload['state']=="enable":
+            GivEnergyClient(host=GiV_Settings.invertorIP).enable_discharge()
+        elif payload['state']=="disable":
+            GivEnergyClient(host=GiV_Settings.invertorIP).disable_discharge()
+        temp['result']="Setting Charge Enable was a success"
     except:
         e = sys.exc_info()
-        temp['result']="Pausing Charge Schedule failed: " + str(e)
+        temp['result']="Setting Charge Enable failed: " + str(e)
     logger.info (temp['result'])
     return json.dumps(temp)
 
-def resumeChargeSchedule():
+def setShallowCharge(payload):
     temp={}
     try:
-        GivEnergyClient(host=GiV_Settings.invertorIP).enable_charge()
-        temp['result']="Resuming Charge Schedule was a success"
+        GivEnergyClient(host=GiV_Settings.invertorIP).set_shallow_charge(int(payload['val']))
+        temp['result']="Setting Charge Enable was a success"
     except:
         e = sys.exc_info()
-        temp['result']="Resuming Charge Schedule failed: " + str(e)
+        temp['result']="Setting Charge Enable failed: " + str(e)
     logger.info (temp['result'])
     return json.dumps(temp)
 
-def pauseDischargeSchedule():
+def enableDischarge(payload):
     temp={}
     try:
-        GivEnergyClient(host=GiV_Settings.invertorIP).enable_discharge()
-        temp['result']="Pausing Discharge Schedule was a success"
+        if payload['state']=="enable":
+            GivEnergyClient(host=GiV_Settings.invertorIP).set_shallow_charge(4)
+        elif payload['state']=="disable":
+            GivEnergyClient(host=GiV_Settings.invertorIP).set_shallow_charge(100)
+        temp['result']="Setting Discharge Enable was a success"
     except:
         e = sys.exc_info()
-        temp['result']="Pausing Discharge Schedule failed: " + str(e)
-    logger.info (temp['result'])
-    return json.dumps(temp)
-
-def resumeDischargeSchedule():
-    temp={}
-    try:
-        GivEnergyClient(host=GiV_Settings.invertorIP).disable_discharge()
-        temp['result']="Resuming Discharge Schedule was a success"
-    except:
-        e = sys.exc_info()
-        temp['result']="Resuming Discharge Schedule failed: " + str(e)
-    logger.info (temp['result'])
-    return json.dumps(temp)
-
-def pauseBatteryCharge():
-    temp={}
-    try:
-        GivEnergyClient(host=GiV_Settings.invertorIP).set_battery_charge_limit(0)
-        temp['result']="Pausing Charge was a success"
-    except:
-        e = sys.exc_info()
-        temp['result']="Pausing Charge failed: " + str(e)
-    logger.info (temp['result'])
-    return json.dumps(temp)
-
-def resumeBatteryCharge():
-    temp={}
-    try:
-        GivEnergyClient(host=GiV_Settings.invertorIP).set_battery_charge_limit(50)
-        temp['result']="Resuming Charge was a success"
-    except:
-        e = sys.exc_info()
-        temp['result']="Resuming Charge failed: " + str(e)
-    logger.info (temp['result'])
-    return json.dumps(temp)
-
-def pauseBatteryDischarge():
-    temp={}
-    try:
-        GivEnergyClient(host=GiV_Settings.invertorIP).set_battery_discharge_limit(0)
-        temp['result']="Pausing Discharge was a success"
-    except:
-        e = sys.exc_info()
-        temp['result']="Pausing Discharge failed: " + str(e)
-    logger.info (temp['result'])
-    return json.dumps(temp)
-
-def resumeBatteryDischarge():
-    temp={}
-    try:
-        GivEnergyClient(host=GiV_Settings.invertorIP).set_battery_discharge_limit(50)
-        temp['result']="Resuming Discharge was a success"
-    except:
-        e = sys.exc_info()
-        temp['result']="Resuming Discharge failed: " + str(e)
+        temp['result']="Setting Discharge Enable failed: " + str(e)
     logger.info (temp['result'])
     return json.dumps(temp)
 
@@ -276,18 +233,19 @@ def setDischargeSlot2(payload):
 def setBatteryMode(payload):
     temp={}
     if type(payload) is not dict: payload=json.loads(payload)
-    mode=int(payload['mode'])
     try:
-        if mode==1:
-            client=GivEnergyClient(host=GiV_Settings.invertorIP).set_mode_dynamic
-        elif mode==2:
-            client=GivEnergyClient(host=GiV_Settings.invertorIP).set_mode_storage
-        elif mode==3:
-            client=GivEnergyClient(host=GiV_Settings.invertorIP).set_mode_storage(export=True)
-        elif mode==4:
+        if payload['mode']=="Eco":
+            client=GivEnergyClient(host=GiV_Settings.invertorIP).set_mode_dynamic()
+        if payload['mode']=="Eco (Paused)":
+            client=GivEnergyClient(host=GiV_Settings.invertorIP).set_mode_dynamic()
+            client=GivEnergyClient(host=GiV_Settings.invertorIP).set_shallow_charge(100)
+        
+        elif payload['mode']=="Timed Demand":
+            client=GivEnergyClient(host=GiV_Settings.invertorIP).set_mode_storage()
+        elif payload['mode']=="Timed Export":
             client=GivEnergyClient(host=GiV_Settings.invertorIP).set_mode_storage(export=True)
         else:
-            logger.info ("Invalid Mode requested: "+ mode)
+            logger.info ("Invalid Mode requested: "+ payload['mode'])
             temp['result']="Invalid Mode requested"
             return json.dumps(temp)
         temp['result']="Setting Battery Mode was a success"

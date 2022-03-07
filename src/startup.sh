@@ -68,16 +68,16 @@ printf "    first_run= True\n" >> settings.py
 
 #TODO Update givTCP if a newer release is available
 
+if [ "$SELF_RUN" = "True" ]                         #Only run Schedule if requested
+then
+    echo Running Invertor read loop every "$SELF_RUN_LOOP_TIMER"s...
+    python3 read.py "self_run" "$SELF_RUN_LOOP_TIMER" &       #Use to run periodically and push to MQTT
+fi
+
 if [ "$MQTT_ADDRESS" = "127.0.0.1" ]                #Only run Mosquitto if its using local broker
 then
     echo Starting Mosquitto on port "$MQTT_PORT"
     /usr/sbin/mosquitto -p "$MQTT_PORT" &           #Run local MQTT broker as default
-fi
-
-if [ "$SELF_RUN" = "True" ]                         #Only run Schedule if requested
-then
-    echo Running Invertor read loop every "$SELF_RUN_LOOP_TIMER"s...
-    python3 sched.py "$SELF_RUN_LOOP_TIMER" &       #Use to run periodically and push to MQTT
 fi
 
 if [ "$MQTT_OUTPUT" = "True" ]                      #If we are running MQTT then start up the listener for control

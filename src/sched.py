@@ -3,10 +3,14 @@
 import schedule
 import time
 import sys
-from read import runAll
+import read as rd
 
-loop_timer=int(sys.argv[1])
-schedule.every(loop_timer).seconds.do(runAll)
+quick_loop_timer=int(sys.argv[1])
+full_loop_timer=quick_loop_timer*3
+
+schedule.every(quick_loop_timer).seconds.do(rd.runAll())
+#schedule.every(full_loop_timer).seconds.do(runAll(fullrefresh=True))
+
 
 while True:
     schedule.run_pending()

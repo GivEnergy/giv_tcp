@@ -5,7 +5,8 @@ import sys
 import importlib
 import datetime
 import logging
-import settings
+import settings as settings
+import json
 from settings import GiV_Settings
 import write as wr
 
@@ -37,26 +38,18 @@ def on_message(client, userdata, message):
     elif command=="setChargeRate":
         writecommand['chargeRate']=str(message.payload.decode("utf-8"))
         result=wr.setChargeRate(writecommand)
-    elif command=="disableChargeTarget":
-        result=wr.disableChargeTarget()
     elif command=="enableChargeTarget":
-        result=wr.enableChargeTarget()
-    elif command=="pauseChargeSchedule":
-        result=wr.pauseChargeSchedule()
-    elif command=="resumeChargeSchedule":
-        result=wr.resumeChargeSchedule()
-    elif command=="pauseDischargeSchedule":
-        result=wr.pauseDischargeSchedule()
-    elif command=="resumeDischargeSchedule":
-        result=wr.resumeDischargeSchedule()
-    elif command=="pauseBatteryCharge":
-        result=wr.pauseBatteryCharge()
-    elif command=="resumeBatteryCharge":
-        result=wr.resumeBatteryCharge()
-    elif command=="pauseBatteryDischarge":
-        result=wr.pauseBatteryDischarge()
-    elif command=="resumeBatteryDischarge":
-        result=wr.resumeBatteryDischarge()
+        writecommand['state']=str(message.payload.decode("utf-8"))
+        result=wr.enableChargeTarget(writecommand)
+    elif command=="enableChargeSchedule":
+        writecommand['state']=str(message.payload.decode("utf-8"))
+        result=wr.enableChargeSchedule(writecommand)
+    elif command=="enableDishargeSchedule":
+        writecommand['state']=str(message.payload.decode("utf-8"))
+        result=wr.enableDischargeSchedule(writecommand)
+    elif command=="enableDischarge":
+        writecommand['state']=str(message.payload.decode("utf-8"))
+        result=wr.enableDischarge(writecommand)
     elif command=="setChargeTarget":
         writecommand['chargeToPercent']=str(message.payload.decode("utf-8"))
         result=wr.setChargeTarget(writecommand)
@@ -69,8 +62,17 @@ def on_message(client, userdata, message):
     elif command=="setDateTime":
         writecommand['dateTime']=str(message.payload.decode("utf-8"))
         result=wr.setDateTime(writecommand)
-## How to deal with ChargeSlots... require json payload?
-
+    elif command=="setShallowCharge":
+        writecommand['val']=str(message.payload.decode("utf-8"))
+        result=wr.setShallowCharge(writecommand)
+    elif command=="setChargeSlot1":
+        result=wr.setChargeSlot1(message.payload)
+    elif command=="setChargeSlot2":
+        result=wr.setChargeSlot2(message.payload)
+    elif command=="setDischargeSlot1":
+        result=wr.setDischargeSlot1(message.payload)
+    elif command=="setDischargeSlot1":
+        result=wr.setDischargeSlot1(message.payload)
     #Do something with the result??
 
 def on_connect(client, userdata, flags, rc):
