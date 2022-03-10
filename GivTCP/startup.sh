@@ -2,7 +2,7 @@
 #Only used for Docker Deployment
 # version 1.0
 
-FILE=/app/settings.py
+FILE=/app/GivTCP/settings.py
 if [ -f "$FILE" ]
 then
     echo "$FILE exists, deleting and re-creating."
@@ -71,7 +71,7 @@ printf "    first_run= True\n" >> settings.py
 if [ "$SELF_RUN" = "True" ]                         #Only run Schedule if requested
 then
     echo Running Invertor read loop every "$SELF_RUN_LOOP_TIMER"s...
-    python3 read.py "self_run" "$SELF_RUN_LOOP_TIMER" &       #Use to run periodically and push to MQTT
+    python3 -m GivTCP.read.self_run "$SELF_RUN_LOOP_TIMER" &       #Use to run periodically and push to MQTT
 fi
 
 if [ "$MQTT_ADDRESS" = "127.0.0.1" ]                #Only run Mosquitto if its using local broker
@@ -83,11 +83,11 @@ fi
 if [ "$MQTT_OUTPUT" = "True" ]                      #If we are running MQTT then start up the listener for control
 then
     echo subscribing Mosquitto on port "$MQTT_PORT"
-    python3 mqtt_client.py listener &
+    python3 -m GivTCP.services.mqtt_client &
 fi
 
 GUPORT=$(($GIVTCPINSTANCE+6344))
 echo Starting Gunicorn on port "$GUPORT"
-gunicorn -w 3 -b :"$GUPORT" REST:giv_api            #Use for on-demand read and control
+gunicorn -w 3 -b :"$GUPORT" GivTCP.REST:giv_api            #Use for on-demand read and control
 
 

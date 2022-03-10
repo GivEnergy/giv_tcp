@@ -2,8 +2,8 @@
 # version 2021.12.22
 
 from flask import Flask, json, request
-import read as rd       #grab passthrough functions from main read file
-import write as wr      #grab passthrough functions from main write file
+import GivTCP.read as rd       #grab passthrough functions from main read file
+import GivTCP.write as wr      #grab passthrough functions from main write file
 
 #set-up Flask details
 giv_api = Flask(__name__)
@@ -22,7 +22,7 @@ def rdData():
 
 #Read from Invertor put in cache 
 @giv_api.route('/getData', methods=['GET'])
-def getData2():
+def gtData():
     return rd.getData()
 
 #Proxy Write Functions

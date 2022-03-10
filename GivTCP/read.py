@@ -1,7 +1,8 @@
 # -*- coding: utf-8 -*-
 # version 2022.01.31
-from pickletools import read_uint1
 import sys
+sys.path.append('/app/GivTCP')
+from pickletools import read_uint1
 import json
 import logging
 import datetime
@@ -12,7 +13,6 @@ from settings import GiV_Settings
 from givenergy_modbus.client import GivEnergyClient
 from givenergy_modbus.model.inverter import Model
 from givenergy_modbus.model.battery import Battery
-#from givenergy_modbus.model.register_cache import RegisterCache
 from givenergy_modbus.model.plant import Plant
 from os.path import exists
 import os
@@ -435,7 +435,7 @@ def pubFromPickle():        #Publish last cached Invertor Data
     multi_output={}
     result="Success"
     if not exists("regCache.pkl"):      #if there is no cache, create it
-        result=getData()
+        result=getData(True)
     if "Success" in result:
         with open('regCache.pkl', 'rb') as inp:
             multi_output= pickle.load(inp)

@@ -7,7 +7,7 @@ import datetime
 import json
 
 import logging  
-from settings import GiV_Settings
+from GivTCP.settings import GiV_Settings
 from givenergy_modbus.model.inverter import Model
 from mqtt import GivMQTT
 

@@ -2,10 +2,10 @@ from logging import Logger
 import paho.mqtt.client as mqtt
 import time
 import sys
+sys.path.append('/app/GivTCP')
 import importlib
 import datetime
 import logging
-import settings as settings
 import json
 from settings import GiV_Settings
 import write as wr
@@ -105,9 +105,12 @@ else:
 while not hasattr(GiV_Settings,'serial_number'):
     logger.error("No serial_number available waiting for first read run to occur")
     time.sleep(2)
-    #del sys.modules['settings.GiV_Settings'] 
+    #del sys.modules['settings.GiV_Settings']
     importlib.reload(settings)
     from settings import GiV_Settings
+    count=+1
+    if count==20:
+        break
 logger.info("Serial Number retrieved: "+GiV_Settings.serial_number)
 
 

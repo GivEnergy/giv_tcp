@@ -14,7 +14,7 @@ COPY requirements.txt .
 RUN pip install -r requirements.txt
 
 # copy the content of the local src directory to the working directory
-COPY src/ .
+COPY GivTCP/ ./GivTCP
 #COPY givenergy_modbus/ /usr/local/lib/python3.10/site-packages/givenergy_modbus
 
 ENV INVERTOR_IP=""
@@ -37,7 +37,8 @@ ENV INFLUX_BUCKET=""
 ENV INFLUX_ORG=""
 ENV HA_AUTO_D="True"
 ENV GIVTCPINSTANCE=1
+ENV PYTHONPATH="/app"
 
 EXPOSE 6345 1883
 
-ENTRYPOINT ["sh", "/app/startup.sh"]
+ENTRYPOINT ["sh", "/app/GivTCP/startup.sh"]
