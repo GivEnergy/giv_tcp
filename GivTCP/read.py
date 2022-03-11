@@ -69,23 +69,14 @@ def getData(fullrefresh):      #Read from Invertor put in cache
         # SET Lockfile to prevent clashes
         logger.info(" setting lock file")
         open(".lockfile", 'w').close()
-        
-
         client=GivEnergyClient(host=GiV_Settings.invertorIP)
         client.refresh_plant(plant,full_refresh=fullrefresh)
         GEInv=plant.inverter
         GEBat=plant.batteries
-
-#        for x in range(0, numBatteries):
-#            BatRegCache = RegisterCache()
-#            client.update_battery_registers(BatRegCache, battery_number=x)
-#            GEBat=Battery.from_orm(BatRegCache)
-#            batteries[GEBat.battery_serial_number]=GEBat.dict()
-            
         #Close Lockfile to allow access
         logger.info("Removing lock file")
         os.remove(".lockfile")
-
+  
         multi_output['Last_Updated_Time']= datetime.datetime.utcnow().replace(tzinfo=datetime.timezone.utc).isoformat()   
         #Get lastupdate from pickle if it exists
         if exists("lastUpdate.pkl"):
@@ -373,41 +364,41 @@ def getData(fullrefresh):      #Read from Invertor put in cache
         battery={}
         batteries2={}
         logger.info("Getting Battery Details")
-        for b in batteries:
-            logger.info("Building battery output: "+b)
+        for b in GEBat:
+            logger.info("Building battery output: ")
             battery={}
-            battery['Battery_Serial_Number']=batteries[b]['battery_serial_number']
-            battery['Battery_SOC']=batteries[b]['battery_soc']
-            battery['Battery_Capacity']=batteries[b]['battery_full_capacity']
-            battery['Battery_Design_Capacity']=batteries[b]['battery_design_capacity']
-            battery['Battery_Remaining_Capcity']=batteries[b]['battery_remaining_capacity']
-            battery['Battery_Firmware_Version']=batteries[b]['bms_firmware_version']
-            battery['Battery_Cells']=batteries[b]['battery_num_cells']
-            battery['Battery_Cycles']=batteries[b]['battery_num_cycles']
-            battery['Battery_USB_present']=batteries[b]['usb_inserted']
-            battery['Battery_Temperature']=batteries[b]['temp_bms_mos']
-            battery['Battery_Voltage']=batteries[b]['v_battery_cells_sum']
-            battery['Battery_Cell_1_Voltage'] = batteries[b]['v_battery_cell_01']
-            battery['Battery_Cell_2_Voltage'] = batteries[b]['v_battery_cell_02']
-            battery['Battery_Cell_3_Voltage'] = batteries[b]['v_battery_cell_03']
-            battery['Battery_Cell_4_Voltage'] = batteries[b]['v_battery_cell_04']
-            battery['Battery_Cell_5_Voltage'] = batteries[b]['v_battery_cell_05']
-            battery['Battery_Cell_6_Voltage'] = batteries[b]['v_battery_cell_06']
-            battery['Battery_Cell_7_Voltage'] = batteries[b]['v_battery_cell_07']
-            battery['Battery_Cell_8_Voltage'] = batteries[b]['v_battery_cell_08']
-            battery['Battery_Cell_9_Voltage'] = batteries[b]['v_battery_cell_09']
-            battery['Battery_Cell_10_Voltage'] = batteries[b]['v_battery_cell_10']
-            battery['Battery_Cell_11_Voltage'] = batteries[b]['v_battery_cell_11']
-            battery['Battery_Cell_12_Voltage'] = batteries[b]['v_battery_cell_12']
-            battery['Battery_Cell_13_Voltage'] = batteries[b]['v_battery_cell_13']
-            battery['Battery_Cell_14_Voltage'] = batteries[b]['v_battery_cell_14']
-            battery['Battery_Cell_15_Voltage'] = batteries[b]['v_battery_cell_15']
-            battery['Battery_Cell_16_Voltage'] = batteries[b]['v_battery_cell_16']
-            battery['Battery_Cell_1_Temperature'] = batteries[b]['temp_battery_cells_1']
-            battery['Battery_Cell_2_Temperature'] = batteries[b]['temp_battery_cells_2']
-            battery['Battery_Cell_3_Temperature'] = batteries[b]['temp_battery_cells_3']
-            battery['Battery_Cell_4_Temperature'] = batteries[b]['temp_battery_cells_4']
-            batteries2[b]=battery
+            battery['Battery_Serial_Number']=b.battery_serial_number
+            battery['Battery_SOC']=b.battery_soc
+            battery['Battery_Capacity']=b.battery_full_capacity
+            battery['Battery_Design_Capacity']=b.battery_design_capacity
+            battery['Battery_Remaining_Capcity']=b.battery_remaining_capacity
+            battery['Battery_Firmware_Version']=b.bms_firmware_version
+            battery['Battery_Cells']=b.battery_num_cells
+            battery['Battery_Cycles']=b.battery_num_cycles
+            battery['Battery_USB_present']=b.usb_inserted
+            battery['Battery_Temperature']=b.temp_bms_mos
+            battery['Battery_Voltage']=b.v_battery_cells_sum
+            battery['Battery_Cell_1_Voltage'] = b.v_battery_cell_01
+            battery['Battery_Cell_2_Voltage'] = b.v_battery_cell_02
+            battery['Battery_Cell_3_Voltage'] = b.v_battery_cell_03
+            battery['Battery_Cell_4_Voltage'] = b.v_battery_cell_04
+            battery['Battery_Cell_5_Voltage'] = b.v_battery_cell_05
+            battery['Battery_Cell_6_Voltage'] = b.v_battery_cell_06
+            battery['Battery_Cell_7_Voltage'] = b.v_battery_cell_07
+            battery['Battery_Cell_8_Voltage'] = b.v_battery_cell_08
+            battery['Battery_Cell_9_Voltage'] = b.v_battery_cell_09
+            battery['Battery_Cell_10_Voltage'] = b.v_battery_cell_10
+            battery['Battery_Cell_11_Voltage'] = b.v_battery_cell_11
+            battery['Battery_Cell_12_Voltage'] = b.v_battery_cell_12
+            battery['Battery_Cell_13_Voltage'] = b.v_battery_cell_13
+            battery['Battery_Cell_14_Voltage'] = b.v_battery_cell_14
+            battery['Battery_Cell_15_Voltage'] = b.v_battery_cell_15
+            battery['Battery_Cell_16_Voltage'] = b.v_battery_cell_16
+            battery['Battery_Cell_1_Temperature'] = b.temp_battery_cells_1
+            battery['Battery_Cell_2_Temperature'] = b.temp_battery_cells_2
+            battery['Battery_Cell_3_Temperature'] = b.temp_battery_cells_3
+            battery['Battery_Cell_4_Temperature'] = b.temp_battery_cells_4
+            batteries2[b.battery_serial_number]=battery
 
         #Create multioutput and publish
         multi_output["Timeslots"]=timeslots
