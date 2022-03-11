@@ -5,6 +5,7 @@ import sys
 sys.path.append('/app/GivTCP')
 import importlib
 import logging
+import settings
 from settings import GiV_Settings
 import write as wr
 
@@ -25,6 +26,35 @@ else:
         logging.basicConfig(filename=GiV_Settings.Debug_File_Location, encoding='utf-8', level=logging.ERROR)
 
 logger = logging.getLogger("GivTCP")
+
+if GiV_Settings.MQTT_Port=='':
+    MQTT_Port=1883
+else:
+    MQTT_Port=int(GiV_Settings.MQTT_Port)
+MQTT_Address=GiV_Settings.MQTT_Address
+if GiV_Settings.MQTT_Username=='':
+    MQTTCredentials=False
+else:
+    MQTTCredentials=True
+    MQTT_Username=GiV_Settings.MQTT_Username
+    MQTT_Password=GiV_Settings.MQTT_Password
+if GiV_Settings.MQTT_Topic=='':
+    MQTT_Topic='GivEnergy'
+else:
+    MQTT_Topic=GiV_Settings.MQTT_Topic
+
+#loop till serial number has been found
+while not hasattr(GiV_Settings,'serial_number'):
+    logger.error("No serial_number available waiting for first read run to occur")
+    time.sleep(2)
+    #del sys.modules['settings.GiV_Settings']
+    importlib.reload(settings)
+    from settings import GiV_Settings
+    count=+1
+    if count==20:
+        break
+    
+logger.info("Serial Number retrieved: "+GiV_Settings.serial_number)
 
 def on_message(client, userdata, message):
     logger.info("MQTT Message Recieved: "+str(message.topic)+"= "+str(message.payload.decode("utf-8")))
@@ -83,34 +113,6 @@ def on_connect(client, userdata, flags, rc):
     else:
         logger.error("Bad connection Returned code= "+str(rc))
 
-if GiV_Settings.MQTT_Port=='':
-    MQTT_Port=1883
-else:
-    MQTT_Port=int(GiV_Settings.MQTT_Port)
-MQTT_Address=GiV_Settings.MQTT_Address
-if GiV_Settings.MQTT_Username=='':
-    MQTTCredentials=False
-else:
-    MQTTCredentials=True
-    MQTT_Username=GiV_Settings.MQTT_Username
-    MQTT_Password=GiV_Settings.MQTT_Password
-if GiV_Settings.MQTT_Topic=='':
-    MQTT_Topic='GivEnergy'
-else:
-    MQTT_Topic=GiV_Settings.MQTT_Topic
-
-#loop till serial number has been found
-while not hasattr(GiV_Settings,'serial_number'):
-    logger.error("No serial_number available waiting for first read run to occur")
-    time.sleep(2)
-    #del sys.modules['settings.GiV_Settings']
-    importlib.reload(settings)
-    from settings import GiV_Settings
-    count=+1
-    if count==20:
-        break
-logger.info("Serial Number retrieved: "+GiV_Settings.serial_number)
-
 
 client=mqtt.Client("GivEnergy_GivTCP_Control")
 mqtt.Client.connected_flag=False        			#create flag in class
@@ -123,6 +125,3 @@ client.on_message=on_message                        #bind call back function
 logger.info ("Connecting to broker(sub): "+ MQTT_Address)
 client.connect(MQTT_Address,port=MQTT_Port)
 client.loop_forever()
-
-if __name__ == '__main__':
-    globals()[sys.argv[1]]()
