@@ -28,7 +28,8 @@ The simplist installation method for GivTCP is to use the built-in self-run opti
 5. Scoll down to the "Advanced container settings" and select the Env tab
 6. Add in the following ENV:
    1. INVERTOR_IP=<ip_of_your_invertor>
-7. If you don't know your invertor IP you can leave this blank and the container will attempt to find your invertor on the network
+   2. See the below table for other optional variables which you can also use. (after deploying these container these will all appear in the container config)
+7. If you don't know your invertor IP you can leave this blank and the container will attempt to find your invertor on the network. If this fails you wll need to add the IP address in manually for this to work.
 8. Set the Network to "Host"
 9. Deploy the container
 
