@@ -247,7 +247,8 @@ class HAMQTT():
         elif HAMQTT.entity_type[str(topic).split("/")[-1]][0]=="select":
             options=["Eco","Timed Demand","Timed Export","Unknown", "Eco (Paused)"]
             tempObj['options']=options
-                         
+        elif HAMQTT.entity_type[str(topic).split("/")[-1]][0]=="number":
+            tempObj['unit_of_meas']="%"
 
         ## Convert this object to json string
         jsonOut=json.dumps(tempObj)
