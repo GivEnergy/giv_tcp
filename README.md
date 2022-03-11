@@ -8,7 +8,7 @@ In basis of this project is a connection to a Modbus TCP server which runs on th
 * IP address of the invertor
 
 
-# Docker
+## Docker
 Reccomended usage is through the Docker container found here: https://hub.docker.com/repository/docker/britkat/giv_tcp-ma
 This will set up a self-running service which will publish data as required and provide a REST interface for control. An internal MQTT broker can be activiated to make data avalable on the network.
   
@@ -17,6 +17,26 @@ This will set up a self-running service which will publish data as required and 
 * Set the container to auto-restart to ensure reliability
 * Out of the box the default setup enables local MQTT broker and REST service (see below for details)
 * For Invertor autodiscovery to function your container must run on the "Host" network within docker (not Bridge). If it fails then you will need to manually add in INVERTOR_IP to the env variables
+
+### Installation
+The simplist installation method for GivTCP is to use the built-in self-run option which will automatically connect to your invertor and grab the data.
+
+1. Install docker on a suitable machine which is "always on" in your network.
+2. Open up your docker interface (I prefer portainer https://www.portainer.io/)
+3. Navigate to "Containers" and click "add container"
+4. search for the GivTCP docker image using this tag: "giv_tcp-ma:latest"
+5. Scoll down to the "Advanced container settings" and select the Env tab
+6. Add in the following ENV:
+   1. INVERTOR_IP=<ip_of_your_invertor>
+7. If you don't know your invertor IP you can leave this blank and the container will attempt to find your invertor on the network
+8. Set the Network to "Host"
+9. Deploy the container
+
+Once this has been done the container should start-up and begin publishing data to its internal MQTT broker. You can test this by using an MQTT client, such as MQTT Explorer(http://mqtt-explorer.com/) and connect using the IP address of the machine you are running docker on.
+
+From here your invertor data is available through either MQTT or REST as described below. 
+
+### Docker Envirnoment Variables
 
 | ENV Name                | Example       |  Description                      |
 | ----------------------- | ------------- |  -------------------------------- |
@@ -36,7 +56,7 @@ This will set up a self-running service which will publish data as required and 
 | INFLUX_ORG |giv_tcp| Optional - If using influx this is the org that the token is assigned to | 
 | HA_AUTO_D | True | Optional - If set to true and MQTT is enabled, it will publish Home Assistant Auto Discovery messages, which will allow Home Assistant to automagically create all entitites and devices to allow read and control of your Invertor |
 
-# GivTCP Read data
+## GivTCP Read data
 
 GivTCP collects all invertor and battery data through the "runAll" function. It creates a nested data structure with all data available in a structured format.
 Data Elements are:
@@ -60,7 +80,7 @@ Data Elements are:
 | pubFromPickle | Retrieves data from the local cache and publishes data according to the settings   | /readData |
 | RunAll        | Runs both getData and pubFromPickle to refresh data and then publish               | /runAll   |
 
-# GivTCP Control
+## GivTCP Control
 | Function                | Description                                                                                                                                                                                               | REST URL                 | REST payload                                               | MQTT Topic              | MQTT Payload                                               |
 |-------------------------|-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|--------------------------|------------------------------------------------------------|-------------------------|------------------------------------------------------------|
 | enableChargeTarget      | Sets   invertor to follow setChargeTarget value when charging from grid (will stop   charging when battery SOC= ChargeTarget)                                                                             | /enableChargeTarget      | {"state","enable"}                                         | enableChargeTarget      | enable                                                     |
@@ -78,8 +98,8 @@ Data Elements are:
 | setBatteryMode          | Sets   battery operation mode. Mode value must be in the range 1-4                                                                                                                                        | /setBatteryMode          | {"mode":"1"}                                               | setBatteryMode          | 1                                                          |
 | setDateTime             | Sets   invertor time, format must be as define in payload                                                                                                                                                 | /setDateTime             | {"dateTime":"dd/mm/yyyy   hh:mm:ss"}                       | setDateTime             | "dd/mm/yyyy hh:mm:ss"                                      |
 
-# Usage methods:
-## MQTT
+## Usage methods:
+### MQTT
 By setting MQTT_OUTPUT = True The script will publish directly to the nominated MQTT broker (MQTT_ADDRESS) all the requested read data.
 
 Data is published to "GivEnergy/<serial_number>/" by default or you can nominate a specific root topic by setting "MQTT_TOPIC" in the settings.
@@ -92,7 +112,7 @@ Root topic for control is:
 "<MQTT_TOPIC>/<serial_number>/control/" - If MQTT_TOPIC is set
 
 
-## RESTful Service
+### RESTful Service
 GivTCP provides a wrapper function REST.py which uses Flask to expose the read and control functions as RESTful http calls. To utilise this service you will need to either use a WSGI serivce such as gunicorn or use the pre-built Docker container.
 
 If Docker is running in Host mode then the REST service is available on port 6345
