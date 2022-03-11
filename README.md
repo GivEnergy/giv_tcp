@@ -6,81 +6,38 @@ This project allows connection to the GivEnergy invertors via TCP Modbus. Access
 In basis of this project is a connection to a Modbus TCP server which runs on the wifi dongle, so all you need is somewhere to run the script on the same network. You will need the following to make it work:
 * GivEnergy Invertor properly commissioned and working
 * IP address of the invertor
-* Machine/Pi/VM running Python which has  pip modules installed as per the requirements.txt file:
-   
-(To install these run `pip install -r requirements.txt`)
 
-# Settings
-A settings.py file is required in the root directory. Use the supplied settings_template.py and populate with the relevant details. Only InvertorIP is required as a minimum, but output should be selected to ensure the data is passed out as either JSON or MQTT. All other settings must be there but can be left blank if not needed.
 
-# Execution of GivTCP
-GivTCP can be executed in a number of ways and can be set to output data in multiple formats. Exact usage is dependent on your use-case and needs:
-
+## Docker
 Reccomended usage is through the Docker container found here: https://hub.docker.com/repository/docker/britkat/giv_tcp-ma
 This will set up a self-running service which will publish data as required and provide a REST interface for control. An internal MQTT broker can be activiated to make data avalable on the network.
-
-
-# Output formats:
-## MQTT
-The script will publish directly to the nominated MQTT broker all the requested read data.
-
-<img width="245" alt="image" src="https://user-images.githubusercontent.com/69121158/149670766-0d9a6c92-8ee2-44d6-9045-2d21b6db7ebf.png">
-  
-## JSON
-The functions return a JSON formated object which can then be consumed by other systems or functions, default output is to stdout
-
-## InfluxDB
-Publish Power and energy stats to your InfluxDB database using credentials you provide.
-
-# GivTCP functions
-## Read functions
-
-GivTCP collects all invertor ad battery data through the "runAll" function. It creates a nested data structure with all data available in a structured format.
-Data Elements are:
-* Energy - Today and all-time Total
-    * Today
-    * Total
-* Power - Real-time stats and power flow data
-    * Power stats (eg. Import)
-    * Power Flow (eg. Grid to House)
-* Invertor Details - Status details such as Serial Number
-* Timeslots - Charge and Discharge
-* Control - Charge/Discharge rates, Battery SOC
-* Battery Details - Status and real-time cell voltages
-    * Battery 1
-    * Battery 2
-    * ...
-
-
-## Control functions
-Control is available through predefined functions. The format of the function call matches the published GivEnegry cloud based battery.api. It requires a JSON payload as per the below:
-
-### Available control functions are:
-| Function                | Payload       |  Description                      |
-| ----------------------- | ------------- |  -------------------------------- |
-| enableChargeTarget     | None          | Sets invertor to follow setChargeTarget value when charging from grid (will stop charging when battery SOC= ChargeTarget)     |
-| disableChargeTarget     | None          | Sets invertor to ignore setChargeTarget value when charging from grid (will continue to charge to 100% during ChargeSlot)     |
-| pauseChargeSchedule     | None          | Pauses the Charging schedule      |
-| pauseDischargeSchedule  | None          | Pauses the Discharging schedule   |
-| resumeChargeSchedule    | None          | Resumes the Charging schedule     |
-| resumeDischargeSchedule | None          | Resumes the Discharging schedule  |
-| setChargeTarget         | {"chargeToPercent":"50"}  | Sets the Target charge SOC |
-| setBatteryReserve|{"dischargeToPercent":"5"}| Sets the Battery Reserve discharge cut-off limit|
-| setChargeSlot1|{"start":"0100","finish":"0400","chargeToPercent":"55")| Sets the time and target SOC of the first chargeslot. Times must be expressed in hhmm format. Enable flag show in the battery.api documentation is not needed and chargeToPercent is optional|
-| setDischargeSlot1|{"start":"0100","finish":"0400","dischargeToPercent":"55")| Sets the time and target SOC of the first dischargeslot. Times must be expressed in hhmm format. Enable flag show in the battery.api documentation is not needed and dischargeToPercent is optional |
-| setDischargeSlot2|{"start":"0100","finish":"0400","dischargeToPercent":"55")| Sets the time and target SOC of the first dischargeslot. Times must be expressed in hhmm format.  Enable flag show in the battery.api documentation is not needed and dischargeToPercent is optional |
-|setBatteryMode|{"mode":"1"}| Sets battery operation mode. Mode value must be in the range 1-4|
-|setDateTime|{"dateTime":"dd/mm/yyyy hh:mm:ss"}| Sets invertor time, format must be as shown here|
-
-# Docker
-The docker container can be downloaded at the Docker hub here:   
-https://hub.docker.com/repository/docker/britkat/giv_tcp-ma
   
 * Docker image is multi-architecture so docker should grab the correct version for your system (tested on x86 and rpi3)
 * Create a container with the relevant ENV variables below (mimicing the settings.py file)
 * Set the container to auto-restart to ensure reliability
 * Out of the box the default setup enables local MQTT broker and REST service (see below for details)
 * For Invertor autodiscovery to function your container must run on the "Host" network within docker (not Bridge). If it fails then you will need to manually add in INVERTOR_IP to the env variables
+
+### Installation
+The simplist installation method for GivTCP is to use the built-in self-run option which will automatically connect to your invertor and grab the data.
+
+1. Install docker on a suitable machine which is "always on" in your network.
+2. Open up your docker interface (I prefer portainer https://www.portainer.io/)
+3. Navigate to "Containers" and click "add container"
+4. search for the GivTCP docker image using this tag: "giv_tcp-ma:latest"
+5. Scoll down to the "Advanced container settings" and select the Env tab
+6. Add in the following ENV:
+   1. INVERTOR_IP=<ip_of_your_invertor>
+   2. See the below table for other optional variables which you can also use. (after deploying these container these will all appear in the container config)
+7. If you don't know your invertor IP you can leave this blank and the container will attempt to find your invertor on the network. If this fails you wll need to add the IP address in manually for this to work.
+8. Set the Network to "Host"
+9. Deploy the container
+
+Once this has been done the container should start-up and begin publishing data to its internal MQTT broker. You can test this by using an MQTT client, such as MQTT Explorer(http://mqtt-explorer.com/) and connect using the IP address of the machine you are running docker on.
+
+From here your invertor data is available through either MQTT or REST as described below. 
+
+### Docker Envirnoment Variables
 
 | ENV Name                | Example       |  Description                      |
 | ----------------------- | ------------- |  -------------------------------- |
@@ -98,62 +55,68 @@ https://hub.docker.com/repository/docker/britkat/giv_tcp-ma
 | INFLUX_TOKEN |abcdefg123456789| Optional - If using influx this is the token generated from within influxdb itself |
 | INFLUX_BUCKET |giv_bucket| Optional - If using influx this is data bucket to use|
 | INFLUX_ORG |giv_tcp| Optional - If using influx this is the org that the token is assigned to | 
+| HA_AUTO_D | True | Optional - If set to true and MQTT is enabled, it will publish Home Assistant Auto Discovery messages, which will allow Home Assistant to automagically create all entitites and devices to allow read and control of your Invertor |
 
-# RESTful Service
+## GivTCP Read data
+
+GivTCP collects all invertor and battery data through the "runAll" function. It creates a nested data structure with all data available in a structured format.
+Data Elements are:
+* Energy - Today and all-time Total
+    * Today
+    * Total
+* Power - Real-time stats and power flow data
+    * Power stats (eg. Import)
+    * Power Flow (eg. Grid to House)
+* Invertor Details - Status details such as Serial Number
+* Timeslots - Charge and Discharge
+* Control - Charge/Discharge rates, Battery SOC
+* Battery Details - Status and real-time cell voltages
+    * Battery 1
+    * Battery 2
+    * ...
+
+| Function      | Description                                                                        | REST URL  |
+|---------------|------------------------------------------------------------------------------------|-----------|
+| getData       | This connects to the invertor, collects all data and stores a cache for publishing | /getData  |
+| pubFromPickle | Retrieves data from the local cache and publishes data according to the settings   | /readData |
+| RunAll        | Runs both getData and pubFromPickle to refresh data and then publish               | /runAll   |
+
+## GivTCP Control
+| Function                | Description                                                                                                                                                                                               | REST URL                 | REST payload                                               | MQTT Topic              | MQTT Payload                                               |
+|-------------------------|-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|--------------------------|------------------------------------------------------------|-------------------------|------------------------------------------------------------|
+| enableChargeTarget      | Sets   invertor to follow setChargeTarget value when charging from grid (will stop   charging when battery SOC= ChargeTarget)                                                                             | /enableChargeTarget      | {"state","enable"}                                         | enableChargeTarget      | enable                                                     |
+| disableChargeTarget     | Sets   invertor to ignore setChargeTarget value when charging from grid (will   continue to charge to 100% during ChargeSlot)                                                                             | /disableChargeTarget     | {"state","enable"}                                         | disableChargeTarget     | enable                                                     |
+| enableChargeSchedule    | Sets   the Charging schedule state, if disabled the battery will not charge as per   the schedule                                                                                                         | /enableChargeSchedule    | {"state","enable"}                                         | enableChargeSchedule    | enable                                                     |
+| enableDischargeSchedule | Sets   the Discharging schedule state, if disabled the battery will will ignore rhe   discharge schedule and discharge as per demand (similar to eco mode)                                                | /enableDischargeSchedule | {"state","enable"}                                         | enableDischargeSchedule | enable                                                     |
+| enableDischarge         | Enable/Disables Discharging to instantly pause discharging,   use 'enable' or 'disable'                                                                                                                   | /enableDischarge         | {"state","enable"}                                         | enableDischarge         | enable                                                     |
+| setChargeRate           | Sets the charge power as a percentage. 100% == 2.6kW                                                                                                                                                      | /setChargeRate           | {"dischargeRate","100"}                                    | setChargeRate           | 100                                                        |
+| setDischargeRate        | Sets the discharge power as a percentage. 100% == 2.6kW                                                                                                                                                   | /setDischargeRate        | {"chargeRate","100"}                                       | setDischargeRate        | 100                                                        |
+| setChargeTarget         | Sets   the Target charge SOC                                                                                                                                                                              | /setChargeTarget         | {"chargeToPercent":"50"}                                   | setChargeTarget         | 50                                                         |
+| setBatteryReserve       | Sets   the Battery Reserve discharge cut-off limit                                                                                                                                                        | /setBatteryReserve       | {"dischargeToPercent":"5"}                                 | setBatteryReserve       | 5                                                          |
+| setChargeSlot1          | Sets   the time and target SOC of the first chargeslot. Times must be expressed in   hhmm format. Enable flag show in the battery.api documentation is not needed   and chargeToPercent is optional       | /setChargeSlot1          | {"start":"0100","finish":"0400","chargeToPercent":"55")    | setChargeSlot1          | {"start":"0100","finish":"0400","chargeToPercent":"55")    |
+| setDischargeSlot1       | Sets   the time and target SOC of the first dischargeslot. Times must be expressed   in hhmm format. Enable flag show in the battery.api documentation is not   needed and dischargeToPercent is optional | /setDischargeSlot1       | {"start":"0100","finish":"0400","dischargeToPercent":"55") | setDischargeSlot1       | {"start":"0100","finish":"0400","dischargeToPercent":"55") |
+| setDischargeSlot2       | Sets   the time and target SOC of the first dischargeslot. Times must be expressed   in hhmm format. Enable flag show in the battery.api documentation is not   needed and dischargeToPercent is optional | /setDischargeSlot2       | {"start":"0100","finish":"0400","dischargeToPercent":"55") | setDischargeSlot2       | {"start":"0100","finish":"0400","dischargeToPercent":"55") |
+| setBatteryMode          | Sets   battery operation mode. Mode value must be in the range 1-4                                                                                                                                        | /setBatteryMode          | {"mode":"1"}                                               | setBatteryMode          | 1                                                          |
+| setDateTime             | Sets   invertor time, format must be as define in payload                                                                                                                                                 | /setDateTime             | {"dateTime":"dd/mm/yyyy   hh:mm:ss"}                       | setDateTime             | "dd/mm/yyyy hh:mm:ss"                                      |
+
+## Usage methods:
+### MQTT
+By setting MQTT_OUTPUT = True The script will publish directly to the nominated MQTT broker (MQTT_ADDRESS) all the requested read data.
+
+Data is published to "GivEnergy/<serial_number>/" by default or you can nominate a specific root topic by setting "MQTT_TOPIC" in the settings.
+
+<img width="245" alt="image" src="https://user-images.githubusercontent.com/69121158/149670766-0d9a6c92-8ee2-44d6-9045-2d21b6db7ebf.png">
+
+Control is available using MQTT. By publishing data to the smae MQTT broker as above you can trigger the control methods as per the above table.
+Root topic for control is:
+"GivEnergy/<serial_number>/control/"    - Default
+"<MQTT_TOPIC>/<serial_number>/control/" - If MQTT_TOPIC is set
+
+
+### RESTful Service
 GivTCP provides a wrapper function REST.py which uses Flask to expose the read and control functions as RESTful http calls. To utilise this service you will need to either use a WSGI serivce such as gunicorn or use the pre-built Docker container.
+
+If Docker is running in Host mode then the REST service is available on port 6345
 
 This can be used within a Node-Red flow to integrate into your automation or using Home Assistany REST sensors unsing the Home Assistant yaml package provided.
 NB.This does require the Docker container running on your network.
-
-## Calling RESTFul Functions
-
-The following table outlines the http methods needed to call the various read and control functions. For each control function the payload is an identical JSON string as above (minus the single quotes).  
-The RESTful Service will return a JSON object which you can then parse as you so desire   
-
-URL's below are based off the root http address of http://IP:6345
-(Port may change if you are running yourself using gunicorn, in which case use the details specified in the gunicorn command)
-  
-### Read Functions
-| URL                | Method       |  payload              |
-| ------------------ | ------------ |  -------------------- |
-| /runAll| GET | None |  |
-  
-### Control Functions
-| URL                | Method       |  payload              |
-| ------------------ | ------------ |  -------------------- |
-| /disableChargeTarget| POST | None | 
-| /enableChargeTarget| POST | None |
-| /pauseChargeSchedule| POST | None |
-| /resumeChargeSchedule| POST | None |
-| /pauseDischargeSchedule| POST | None |
-| /resumeDischargeSchedule| POST | None | 
-| /setChargeTarget| POST | {"chargeToPercent":"50"} |
-| /setBatteryReserve| POST | {"dischargeToPercent":"5"} |
-| /setChargeSlot1| POST | {"start":"0100","finish":"0400","chargeToPercent":"55"} |
-| /setChargeSlot2| POST | {"start":"0100","finish":"0400","chargeToPercent":"55"} |
-| /setDischargeSlot1| POST | {"start":"0100","finish":"0400","dischargeToPercent":"55"} |
-| /setDischargeSlot2| POST | {"start":"0100","finish":"0400","dischargeToPercent":"55"} |
-| /setBatteryMode| POST | {"mode":"1"} |
-| /setDateTime|POST | {"dateTime":"dd/mm/yyyy hh:mm:ss"}|
-
-
-## Gunicorn
-If you don't wish to run the docker container, you can set up your own wysg application using Gunicorn/Flask.
-Ensure Gunicorn is installed by running:  
-
-`pip install gunicorn`  
-
-Then call the service by initiating the following command from the same directory as the downloaded src files:  
-
-`gunicorn -w 4 -b 127.0.0.1:6345 REST:giv_api`  
-
-(where the 127.0.0.1:6345 is the IP address and port you want to bind the service to)  
-
-# CLI Usage
-GivTCP can be called from any machine running Python3. The relevant script must be called and a function name passed to it as an argument. 
-
-An example payload can be found below.
-Note: In order to send json payloads via CLI you will need to place the JSON string inside single quotes  
-
-The full call to set  Charge Timeslot 1 would then be:  
-`python3 write.py setChargeSlot1 '{"enable": true,"start": "0100","finish": "0400","chargeToPercent": "100"}'` 

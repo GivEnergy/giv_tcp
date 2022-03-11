@@ -1,8 +1,0 @@
-src/settings.py
-src/settings.old
-src/__pycache__
-src/givtcp_debug.log
-.venv
-.vscode
-buildx.bat
-/givenergy_modbus
