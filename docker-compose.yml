@@ -7,11 +7,11 @@ services:
       - "6345:6345"
     environment:
       - INVERTOR_IP=192.168.2.146     # Set this to the IP address of your Invertor on you rlocal network
-      - NUM_BATTERIES=1               # Number o fbattery modules instaled and connected to the above invertor
+      - NUM_BATTERIES=1               # Number of battery modules installed and connected to the above invertor
       - MQTT_OUTPUT=True              # "True" if you want to publish your data to MQTT, "False" otherwise
       - MQTT_ADDRESS=127.0.0.1        # IP address of an existing MQTT broker, or leave as "127.0.0.1" to use the internal broker
-      - MQTT_USERNAME=                # Username of your existing broker, if needed
-      - MQTT_PASSWORD=                # Password of your existing broker, if needed
+      - MQTT_USERNAME=                # Username of your existing broker, if needed. Not required for internal broker
+      - MQTT_PASSWORD=                # Password of your existing broker, if needed. Not required for internal broker
       - MQTT_TOPIC=                   # Root topic to publish data to. If left blank it will default to GivEnergy/<invertor_serial_number>
       - MQTT_PORT=1883                # Port of your existing broker, leave as "1883" for internal broker
       - LOG_LEVEL=Error               # Level of logs to be reported: "Error", "Info" or "Debug"
@@ -19,8 +19,8 @@ services:
       - PRINT_RAW=True                # If True this will publish all inverotr data unprocessed as well as standard data
       - SELF_RUN=True                 # If True the container will self-run and connect and publish data. If "False" the you will need to trigger externally via REST
       - SELF_RUN_LOOP_TIMER=10        # Wait time between every read command to the invertor
-      - INFLUX_OUTPUT=False           # True if you want to publish to Influx
-      - INFLUX_URL=                   # URL of your Influx instance
+      - INFLUX_OUTPUT=False           # "True" if you want to publish your data to InfluxDB, "False" otherwise
+      - INFLUX_URL=                   # URL of an external Influx instance
       - INFLUX_TOKEN=                 # Access Token for your Influx instance
       - INFLUX_BUCKET=                # Data Bucket of your Influx instance you want data sent to
       - INFLUX_ORG=                   # Influx instance Organisation
