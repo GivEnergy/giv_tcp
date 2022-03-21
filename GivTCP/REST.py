@@ -3,7 +3,7 @@
 
 from flask import Flask, json, request
 import GivTCP.read as rd       #grab passthrough functions from main read file
-import GivTCP.write as wr      #grab passthrough functions from main write file
+import write as wr      #grab passthrough functions from main write file
 
 #set-up Flask details
 giv_api = Flask(__name__)

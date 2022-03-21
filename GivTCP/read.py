@@ -446,6 +446,22 @@ def self_run(loop_timer):
         schedule.run_pending()
         time.sleep(1)
 
+def self_run2():
+    counter=0
+    runAll(True)
+    while True:
+        counter=counter+1
+        if exists(".forceFullRefresh"):
+            runAll(True)
+            os.remove(".forceFullRefresh")
+            counter=0
+        elif counter==20:
+            counter=0
+            runAll(True)
+        else:
+            runAll(False)
+        time.sleep(1)
+
 
 ####### Addiitonal Publish options can be added here. 
 ####### A seperate file in the folder can be added with a new publish "plugin" 
@@ -470,6 +486,7 @@ def publishOutput(array,SN):
         GivInflux.publish(SN,tempoutput)
 
 def updateFirstRun(SN):
+    isSN=False
     script_dir = os.path.dirname(__file__) #<-- absolute dir the script is in
     rel_path = "settings.py"
     abs_file_path = os.path.join(script_dir, rel_path)
@@ -477,11 +494,14 @@ def updateFirstRun(SN):
         lines = f.readlines()
     with open(abs_file_path, "w") as f:
         for line in lines:
-            if line.strip("\n") == "    first_run = True":
-                f.write("    first_run = False\n")
+            if line.strip("\n") == "    first_run= True":
+                f.write("    first_run= False\n")
             else:
                 f.write(line)
-        f.writelines("    serial_number = \""+SN+"\"")
+            if "serial_number" in line: 
+                isSN=True
+
+        if not isSN: f.writelines("    serial_number = \""+SN+"\"\n")   #only add SN if its not there
 
 def iterate_dict(array):        # Create a publish safe version of the output (convert non string or int datapoints)
     safeoutput={}
@@ -518,5 +538,7 @@ def iterate_dict(array):        # Create a publish safe version of the output (c
 
 
 if __name__ == '__main__':
-    globals()[sys.argv[1]]([sys.argv[2]])
-
+    if len(sys.argv)==2:
+        globals()[sys.argv[1]]()
+    elif len(sys.argv)==3:
+        globals()[sys.argv[1]](sys.argv[2])

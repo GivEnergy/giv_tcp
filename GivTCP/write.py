@@ -34,6 +34,7 @@ def enableChargeTarget(payload):
         elif payload['state']=="disable":
             GivEnergyClient(host=GiV_Settings.invertorIP).disable_charge_target()
         temp['result']="Setting Charge Target was a success"
+        open(".forceFullRefresh", 'w').close()
     except:
         e = sys.exc_info()
         temp['result']="Setting Charge Target failed: " + str(e)
@@ -48,6 +49,7 @@ def enableChargeSchedule(payload):
         elif payload['state']=="disable":
             GivEnergyClient(host=GiV_Settings.invertorIP).disable_charge()
         temp['result']="Setting Charge Enable was a success"
+        open(".forceFullRefresh", 'w').close()
     except:
         e = sys.exc_info()
         temp['result']="Setting Charge Enable failed: " + str(e)
@@ -62,6 +64,7 @@ def enableDischargeSchedule(payload):
         elif payload['state']=="disable":
             GivEnergyClient(host=GiV_Settings.invertorIP).disable_discharge()
         temp['result']="Setting Charge Enable was a success"
+        open(".forceFullRefresh", 'w').close()
     except:
         e = sys.exc_info()
         temp['result']="Setting Charge Enable failed: " + str(e)
@@ -73,6 +76,7 @@ def setShallowCharge(payload):
     try:
         GivEnergyClient(host=GiV_Settings.invertorIP).set_shallow_charge(int(payload['val']))
         temp['result']="Setting Charge Enable was a success"
+        open(".forceFullRefresh", 'w').close()
     except:
         e = sys.exc_info()
         temp['result']="Setting Charge Enable failed: " + str(e)
@@ -87,6 +91,7 @@ def enableDischarge(payload):
         elif payload['state']=="disable":
             GivEnergyClient(host=GiV_Settings.invertorIP).set_shallow_charge(100)
         temp['result']="Setting Discharge Enable was a success"
+        open(".forceFullRefresh", 'w').close()
     except:
         e = sys.exc_info()
         temp['result']="Setting Discharge Enable failed: " + str(e)
@@ -101,6 +106,7 @@ def setChargeTarget(payload):
         client=GivEnergyClient(host=GiV_Settings.invertorIP)
         client.enable_charge_target(target)
         temp['result']="Setting Charge Target was a success"
+        open(".forceFullRefresh", 'w').close()
     except:
         e = sys.exc_info()
         temp['result']="Setting Charge Target failed: " + str(e)
@@ -117,6 +123,7 @@ def setBatteryReserve(payload):
     try:
         GivEnergyClient(host=GiV_Settings.invertorIP).set_battery_power_reserve(target)
         temp['result']="Setting Battery Reserve was a success"
+        open(".forceFullRefresh", 'w').close()
     except:
         e = sys.exc_info()
         temp['result']="Setting Battery Reserve failed: " + str(e)
@@ -135,6 +142,7 @@ def setChargeRate(payload):
     try:
         GivEnergyClient(host=GiV_Settings.invertorIP).set_battery_charge_limit(target)
         temp['result']="Setting Charge Rate was a success"
+        open(".forceFullRefresh", 'w').close()
     except:
         e = sys.exc_info()
         temp['result']="Setting Charge Rate failed: " + str(e)
@@ -154,6 +162,7 @@ def setDischargeRate(payload):
     try:
         GivEnergyClient(host=GiV_Settings.invertorIP).set_battery_discharge_limit(target)
         temp['result']="Setting Discharge Rate was a success"
+        open(".forceFullRefresh", 'w').close()
     except:
         e = sys.exc_info()
         temp['result']="Setting Discharge Rate failed: " + str(e)
@@ -172,6 +181,7 @@ def setChargeSlot1(payload):
     try:
         client.set_charge_slot_1((datetime.strptime(payload['start'],"%H:%M"),datetime.strptime(payload['finish'],"%H:%M")))
         temp['result']="Setting Charge Slot 1 was a success"
+        open(".forceFullRefresh", 'w').close()
     except:
         e = sys.exc_info()
         temp['result']="Setting Charge Slot 1 failed: " + str(e)
@@ -189,6 +199,7 @@ def setChargeSlot2(payload):
     try:
         client.set_charge_slot_2((datetime.strptime(payload['start'],"%H:%M"),datetime.strptime(payload['finish'],"%H:%M")))
         temp['result']="Setting Charge Slot 2 was a success"
+        open(".forceFullRefresh", 'w').close()
     except:
         e = sys.exc_info()
         temp['result']="Setting Charge Slot 2 failed: " + str(e)
@@ -206,6 +217,7 @@ def setDischargeSlot1(payload):
     try:
         client.set_discharge_slot_1((datetime.strptime(payload['start'],"%H:%M"),datetime.strptime(payload['finish'],"%H:%M")))
         temp['result']="Setting Discharge Slot 1 was a success"
+        open(".forceFullRefresh", 'w').close()
     except:
         e = sys.exc_info()
         temp['result']="Setting Discharge Slot 1 failed: " + str(e)
@@ -223,6 +235,7 @@ def setDischargeSlot2(payload):
     try:
         client.set_discharge_slot_2((datetime.strptime(payload['start'],"%H:%M"),datetime.strptime(payload['finish'],"%H:%M")))
         temp['result']="Setting Discharge Slot 2 was a success"
+        open(".forceFullRefresh", 'w').close()
     except:
         e = sys.exc_info()
         temp['result']="Setting Discharge Slot 2 failed: " + str(e)
@@ -249,6 +262,7 @@ def setBatteryMode(payload):
             temp['result']="Invalid Mode requested"
             return json.dumps(temp)
         temp['result']="Setting Battery Mode was a success"
+        open(".forceFullRefresh", 'w').close()
     except:
         e = sys.exc_info()
         temp['result']="Setting Battery Mode failed: " + str(e)
@@ -265,6 +279,7 @@ def setDateTime(payload):
         #Set Date and Time on Invertor
         GivEnergyClient(host=GiV_Settings.invertorIP).set_datetime(iDateTime)
         temp['result']="Invertor time setting was a success"
+        open(".forceFullRefresh", 'w').close()
     except:
         e = sys.exc_info()
         temp['result']="Setting Battery Mode failed: " + str(e) 

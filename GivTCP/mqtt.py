@@ -5,7 +5,7 @@ import time
 import datetime
 
 import logging  
-from GivTCP.settings import GiV_Settings
+from settings import GiV_Settings
 #from HA_Discovery import HAMQTT
 from givenergy_modbus.model.inverter import Model
 

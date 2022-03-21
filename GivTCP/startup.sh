@@ -71,7 +71,7 @@ printf "    first_run= True\n" >> $FILE
 if [ "$SELF_RUN" = "True" ]                         #Only run Schedule if requested
 then
     echo Running Invertor read loop every "$SELF_RUN_LOOP_TIMER"s...
-    python3 /app/GivTCP/read.py self_run "$SELF_RUN_LOOP_TIMER" &       #Use to run periodically and push to MQTT
+    python3 /app/GivTCP/read.py self_run2 &       #Use to run periodically and push to MQTT
 fi
 
 if [ "$MQTT_ADDRESS" = "127.0.0.1" ]                #Only run Mosquitto if its using local broker
