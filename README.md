@@ -30,6 +30,8 @@ The simplist installation method for GivTCP is to use the built-in self-run opti
    1. See the below table for other optional variables which you can also use.
 7. Deploy the container
 
+Alternatively you can run the container from the command line by downloading the docker-compose.yml file, modifying it and then run the following commmand in the same file location: "docker-compose up".
+
 Once this has been done the container should start-up and begin publishing data to its internal MQTT broker. You can test this by using an MQTT client, such as MQTT Explorer(http://mqtt-explorer.com/) and connect using the IP address of the machine you are running docker on.
 
 From here your invertor data is available through either MQTT or REST as described below. 
