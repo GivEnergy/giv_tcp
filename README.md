@@ -23,15 +23,12 @@ The simplist installation method for GivTCP is to use the built-in self-run opti
 
 1. Install docker on a suitable machine which is "always on" in your network.
 2. Open up your docker interface (I prefer portainer https://www.portainer.io/)
-3. Navigate to "Containers" and click "add container"
-4. search for the GivTCP docker image using this tag: "giv_tcp-ma:latest"
+3. Navigate to "Stacks" and click "Add Stack"
+4. Copy the contents of the docker-compose.yml file in this repo into the web editor pane
 5. Scoll down to the "Advanced container settings" and select the Env tab
-6. Add in the following ENV:
-   1. INVERTOR_IP=<ip_of_your_invertor>
-   2. See the below table for other optional variables which you can also use. (after deploying these container these will all appear in the container config)
-7. If you don't know your invertor IP you can leave this blank and the container will attempt to find your invertor on the network. If this fails you wll need to add the IP address in manually for this to work.
-8. Set the Network to "Host"
-9. Deploy the container
+6. Edit any settings you wish. Specifically the INVERTOR_IP
+   1. See the below table for other optional variables which you can also use.
+7. Deploy the container
 
 Once this has been done the container should start-up and begin publishing data to its internal MQTT broker. You can test this by using an MQTT client, such as MQTT Explorer(http://mqtt-explorer.com/) and connect using the IP address of the machine you are running docker on.
 
