@@ -2,7 +2,7 @@
 # version 2021.12.22
 
 from flask import Flask, json, request
-import read as rd       #grab passthrough functions from main read file
+import GivTCP.read as rd       #grab passthrough functions from main read file
 import write as wr      #grab passthrough functions from main write file
 
 #set-up Flask details
@@ -10,50 +10,41 @@ giv_api = Flask(__name__)
 
 #Proxy Read Functions
 
+#Read from Invertor put in cache and publish
 @giv_api.route('/runAll', methods=['GET'])
 def getAll():
-    return rd.runAll()
+    return rd.runAll(True)
+
+#Publish last cached Invertor Data
+@giv_api.route('/readData', methods=['GET'])
+def rdData():
+    return rd.pubFromPickle()
+
+#Read from Invertor put in cache 
+@giv_api.route('/getData', methods=['GET'])
+def gtData():
+    return rd.getData()
 
 #Proxy Write Functions
-@giv_api.route('/disableChargeTarget', methods=['POST'])
-def disChargeTrgt():
-    return wr.disableChargeTarget()
-
 @giv_api.route('/enableChargeTarget', methods=['POST'])
 def enChargeTrgt():
-    return wr.enableChargeTarget()
+    payload = request.get_json(silent=True, force=True)
+    return wr.enableChargeTarget(payload)
+    
+@giv_api.route('/enableChargeSchedule', methods=['POST'])
+def enableChrgSchedule():
+    payload = request.get_json(silent=True, force=True)
+    return wr.enableChargeSchedule(payload)
 
-@giv_api.route('/pauseChargeSchedule', methods=['POST'])
-def pauseChrgSchedule():
-    return wr.pauseChargeSchedule()
+@giv_api.route('/enableDischargeSchedule', methods=['POST'])
+def enableDischrgSchedule():
+    payload = request.get_json(silent=True, force=True)
+    return wr.enableDischargeSchedule(payload)
 
-@giv_api.route('/resumeChargeSchedule', methods=['POST'])
-def resumeChrgSchedule():
-    return wr.resumeChargeSchedule()
-
-@giv_api.route('/pauseDischargeSchedule', methods=['POST'])
-def pauseDischrgSchedule():
-    return wr.pauseDischargeSchedule()
-
-@giv_api.route('/resumeDischargeSchedule', methods=['POST'])
-def resumeDischrgSchedule():
-    return wr.resumeDischargeSchedule()
-
-@giv_api.route('/pauseBatteryCharge', methods=['POST'])
-def pauseBatCharge():
-    return wr.pauseBatteryCharge()
-
-@giv_api.route('/resumeBatteryCharge', methods=['POST'])
-def resumeBatCharge():
-    return wr.resumeBatteryCharge()
-
-@giv_api.route('/pauseBatteryDischarge', methods=['POST'])
-def pauseBatDisharge():
-    return wr.pauseBatteryDischarge()
-
-@giv_api.route('/resumeBatteryDischarge', methods=['POST'])
-def resumeBatDisharge():
-    return wr.resumeBatteryDischarge()
+@giv_api.route('/enableDischarge', methods=['POST'])
+def enableBatDisharge():
+    payload = request.get_json(silent=True, force=True)
+    return wr.enableDischarge(payload)
 
 @giv_api.route('/setChargeTarget', methods=['POST'])
 def setChrgTarget():

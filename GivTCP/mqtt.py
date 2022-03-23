@@ -6,6 +6,7 @@ import datetime
 
 import logging  
 from settings import GiV_Settings
+#from HA_Discovery import HAMQTT
 from givenergy_modbus.model.inverter import Model
 
 if GiV_Settings.Log_Level.lower()=="debug":
@@ -51,7 +52,9 @@ class GivMQTT():
     def multi_MQTT_publish(rootTopic,array):   #Recieve multiple payloads with Topics and publish in a single MQTT connection
         mqtt.Client.connected_flag=False        			#create flag in class
         client=mqtt.Client("GivEnergy_GivTCP")
-
+        
+        ##Check if first run then publish auto discovery message
+        
         if GivMQTT.MQTTCredentials:
             client.username_pw_set(GivMQTT.MQTT_Username,GivMQTT.MQTT_Password)
         client.on_connect=GivMQTT.on_connect     			#bind call back function
@@ -73,12 +76,15 @@ class GivMQTT():
 
     def iterate_dict(array,topic):      #Create LUT of topics and datapoints
         MQTT_LUT={}
-        # Create a publish safe version of the output
-        for p_load in array:
-            output=array[p_load]
-            if isinstance(output, dict):
-                MQTT_LUT.update(GivMQTT.iterate_dict(output,topic+"/"+p_load))
-                logger.info('Prepping '+p_load+" for publishing")
-            else:
-                MQTT_LUT[topic+"/"+p_load]=output
+        if isinstance(array, dict):
+            # Create a publish safe version of the output
+            for p_load in array:
+                output=array[p_load]
+                if isinstance(output, dict):
+                    MQTT_LUT.update(GivMQTT.iterate_dict(output,topic+"/"+p_load))
+                    logger.info('Prepping '+p_load+" for publishing")
+                else:
+                    MQTT_LUT[topic+"/"+p_load]=output
+        else:
+            MQTT_LUT[topic]=array
         return(MQTT_LUT)

@@ -1,7 +1,7 @@
 # version 2022.01.31
 from influxdb_client import InfluxDBClient, WriteApi, WriteOptions
 import logging
-from settings import GiV_Settings
+from GivTCP.settings import GiV_Settings
 
 if GiV_Settings.Log_Level.lower()=="debug":
     if GiV_Settings.Debug_File_Location=="":
