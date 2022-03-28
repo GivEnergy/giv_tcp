@@ -19,52 +19,52 @@ template:
       - name: "GivTCP Import Energy Total"
         unit_of_measurement: "kWh"
         device_class: energy
-        state_class: measurement
+        state_class: total_increasing
         state: "{{ state_attr('sensor.givtcp','Energy')['Total']['Import_Energy_Total_kWh'] }}"
       - name: "GivTCP Export Energy Total"
         unit_of_measurement: "kWh"
         device_class: energy
-        state_class: measurement
+        state_class: total_increasing
         state: "{{ state_attr('sensor.givtcp','Energy')['Total']['Export_Energy_Total_kWh'] }}"
       - name: "GivTCP Battery Throughput Total"
         unit_of_measurement: "kWh"
         device_class: energy
-        state_class: measurement
+        state_class: total_increasing
         state: "{{ state_attr('sensor.givtcp','Energy')['Total']['Battery_Throughput_Total_kWh'] }}"
       - name: "GivTCP AC Charge Energy Total"
         unit_of_measurement: "kWh"
         device_class: energy
-        state_class: measurement
+        state_class: total_increasing
         state: "{{ state_attr('sensor.givtcp','Energy')['Total']['AC_Charge_Energy_Total_kWh'] }}"
       - name: "GivTCP Invertor Energy Total"
         unit_of_measurement: "kWh"
         device_class: energy
-        state_class: measurement
+        state_class: total_increasing
         state: "{{ state_attr('sensor.givtcp','Energy')['Total']['Invertor_Energy_Total_kWh'] }}"
       - name: "GivTCP PV Energy Total"
         unit_of_measurement: "kWh"
         device_class: energy
-        state_class: measurement
+        state_class: total_increasing
         state: "{{ state_attr('sensor.givtcp','Energy')['Total']['PV_Energy_Total_kWh'] }}"
       - name: "GivTCP Load Energy Total"
         unit_of_measurement: "kWh"
         device_class: energy
-        state_class: measurement
+        state_class: total_increasing
         state: "{{ state_attr('sensor.givtcp','Energy')['Total']['Load_Energy_Total_kWh'] }}"
       - name: "GivTCP Battery Charge Energy Total"
         unit_of_measurement: "kWh"
         device_class: energy
-        state_class: measurement
+        state_class: total_increasing
         state: "{{ state_attr('sensor.givtcp','Energy')['Total']['Battery_Charge_Energy_Total_kWh'] }}"
       - name: "GivTCP Battery Discharge Energy Total"
         unit_of_measurement: "kWh"
         device_class: energy
-        state_class: measurement
+        state_class: total_increasing
         state: "{{ state_attr('sensor.givtcp','Energy')['Total']['Battery_Discharge_Energy_Total_kWh'] }}"
       - name: "GivTCP Self Consumption Energy Total"
         unit_of_measurement: "kWh"
         device_class: energy
-        state_class: measurement
+        state_class: total_increasing
         state: "{{ state_attr('sensor.givtcp','Energy')['Total']['Self_Consumption_Energy_Total_kWh'] }}"
 
 
