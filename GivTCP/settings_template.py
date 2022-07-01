@@ -20,3 +20,5 @@ class GiV_Settings:
     influxToken=""
     influxBucket="GivEnergy"
     influxOrg="GivTCP"
+#Other settings
+    selfRunLoopTimer = "10"         # Time in seconds to pause between inverter read cycles  

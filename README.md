@@ -41,7 +41,7 @@ From here your invertor data is available through either MQTT or REST as describ
 | ENV Name                | Example       |  Description                      |
 | ----------------------- | ------------- |  -------------------------------- |
 | INVERTOR_IP |192.168.10.1 | Docker container can auto detect Invertors if running on your host network. If this fails then add the IP manually to this ENV |
-| NUMBATTERIES | 1 | Number of battery units connected to the invertor |
+| NUM_BATTERIES | 1 | Number of battery units connected to the invertor |
 | MQTT_OUTPUT | True | Optional if set to True then MQTT_ADDRESS is required |
 | MQTT_ADDRESS | 127.0.0.1 | Optional (but required if OUTPUT is set to MQTT) |
 | MQTT_USERNAME | bob | Optional |
@@ -55,6 +55,7 @@ From here your invertor data is available through either MQTT or REST as describ
 | INFLUX_BUCKET |giv_bucket| Optional - If using influx this is data bucket to use|
 | INFLUX_ORG |giv_tcp| Optional - If using influx this is the org that the token is assigned to | 
 | HA_AUTO_D | True | Optional - If set to true and MQTT is enabled, it will publish Home Assistant Auto Discovery messages, which will allow Home Assistant to automagically create all entitites and devices to allow read and control of your Invertor |
+| SELF_RUN_LOOP_TIMER |10| Time in seconds to pause between inverter read cycles |
 
 ## GivTCP Read data
 
