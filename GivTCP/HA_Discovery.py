@@ -183,17 +183,17 @@ class HAMQTT():
                         #Determine Entitiy type (switch/sensor/number) and publish the right message
                         if HAMQTT.entity_type[str(topic).split("/")[-1]][0]=="sensor":
                             if ("Battery_Details" in topic) and (GiV_Settings.numBatteries>1):
-                                client.publish("homeassistant2/sensor/GivEnergy/"+str(topic).split("/")[-2]+"_"+str(topic).split("/")[-1]+"/config",HAMQTT.create_device_payload(topic,SN),retain=True)
+                                client.publish("homeassistant/sensor/GivEnergy/"+str(topic).split("/")[-2]+"_"+str(topic).split("/")[-1]+"/config",HAMQTT.create_device_payload(topic,SN),retain=True)
                             else:
-                                client.publish("homeassistant2/sensor/GivEnergy/"+str(topic).split("/")[-1]+"/config",HAMQTT.create_device_payload(topic,SN),retain=True)
+                                client.publish("homeassistant/sensor/GivEnergy/"+str(topic).split("/")[-1]+"/config",HAMQTT.create_device_payload(topic,SN),retain=True)
                         elif HAMQTT.entity_type[str(topic).split("/")[-1]][0]=="switch":
-                            client.publish("homeassistant2/switch/GivEnergy/"+str(topic).split("/")[-1]+"/config",HAMQTT.create_device_payload(topic,SN),retain=True)
+                            client.publish("homeassistant/switch/GivEnergy/"+str(topic).split("/")[-1]+"/config",HAMQTT.create_device_payload(topic,SN),retain=True)
                         elif HAMQTT.entity_type[str(topic).split("/")[-1]][0]=="number":
-                            client.publish("homeassistant2/number/GivEnergy/"+str(topic).split("/")[-1]+"/config",HAMQTT.create_device_payload(topic,SN),retain=True)
+                            client.publish("homeassistant/number/GivEnergy/"+str(topic).split("/")[-1]+"/config",HAMQTT.create_device_payload(topic,SN),retain=True)
                     #    elif HAMQTT.entity_type[str(topic).split("/")[-1]][0]=="binary_sensor":
                     #        client.publish("homeassistant2/binary_sensor/GivEnergy/"+str(topic).split("/")[-1]+"/config",HAMQTT.create_binary_sensor_payload(topic,SN),retain=True)
                         elif HAMQTT.entity_type[str(topic).split("/")[-1]][0]=="select":
-                            client.publish("homeassistant2/select/GivEnergy/"+str(topic).split("/")[-1]+"/config",HAMQTT.create_device_payload(topic,SN),retain=True)
+                            client.publish("homeassistant/select/GivEnergy/"+str(topic).split("/")[-1]+"/config",HAMQTT.create_device_payload(topic,SN),retain=True)
                            
         client.loop_stop()                      			#Stop loop
         client.disconnect()
@@ -220,7 +220,7 @@ class HAMQTT():
             tempObj['device']['identifiers']=SN+"_"+GiVTCP_Device
             tempObj['device']['name']="GivTCP_"+SN+"_"+GiVTCP_Device
         tempObj['device']['manufacturer']="GivEnergy"
-        
+
         try:
             tempObj['command_topic']=GiV_Settings.MQTT_Topic+"/control/"+SN+"/"+HAMQTT.entity_type[str(topic).split("/")[-1]][2]
         except:
