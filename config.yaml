@@ -1,0 +1,55 @@
+name: "GivTCP"
+description: "TCP Modbus connection to MQTT/JSON for Givenergy Battery/PV Invertors"
+version: "1.1.0"
+slug: "givtcp"
+init: true
+boot: auto
+url: https://github.com/britkat1980/giv_tcp
+legacy: true
+arch:
+  - aarch64
+  - amd64
+  - armhf
+  - armv7
+  - i386
+host_network: true
+options:
+  INVERTOR_IP: null
+  NUM_BATTERIES: 1
+  MQTT_OUTPUT: True
+  MQTT_ADDRESS: "127.0.0.1"
+  MQTT_USERNAME: null
+  MQTT_PASSWORD: null
+  MQTT_TOPIC: ""
+  MQTT_PORT: 1883
+  LOG_LEVEL: "Error"
+  DEBUG_FILE_LOCATION: ""
+  PRINT_RAW: True
+  SELF_RUN: True
+  SELF_RUN_LOOP_TIMER: 10
+  INFLUX_OUTPUT: False
+  INFLUX_URL: ""
+  INFLUX_TOKEN: ""
+  INFLUX_BUCKET: ""
+  INFLUX_ORG: ""
+  HA_AUTO_D: True
+schema:
+  INVERTOR_IP: str
+  NUM_BATTERIES: int
+  MQTT_OUTPUT: bool
+  MQTT_ADDRESS: str
+  MQTT_USERNAME: str
+  MQTT_PASSWORD: str
+  MQTT_TOPIC: "str?"
+  MQTT_PORT: int
+  LOG_LEVEL: str
+  DEBUG_FILE_LOCATION: "str?"
+  PRINT_RAW: bool
+  SELF_RUN: bool
+  SELF_RUN_LOOP_TIMER: int
+  INFLUX_OUTPUT: bool
+  INFLUX_URL: "str?"
+  INFLUX_TOKEN: "str?"
+  INFLUX_BUCKET: "str?"
+  INFLUX_ORG: "str?"
+  HA_AUTO_D: bool
