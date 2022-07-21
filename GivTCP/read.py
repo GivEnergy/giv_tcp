@@ -18,6 +18,8 @@ from os.path import exists
 import os
 
 
+
+
 Print_Raw=False
 if GiV_Settings.Print_Raw_Registers:
     Print_Raw=True
@@ -419,6 +421,12 @@ def runAll(full_refresh):       #Read from Invertor put in cache and publish
     result=getData(full_refresh)
     multi_output=pubFromPickle()
     return multi_output
+
+def pubFromJSON():
+    temp=open('GivTCP\\testdata.json')
+    data=json.load(temp)
+    SN=data["Invertor_Details"]['Invertor_Serial_Number']
+    publishOutput(data,SN)
 
 def pubFromPickle():        #Publish last cached Invertor Data
     multi_output={}

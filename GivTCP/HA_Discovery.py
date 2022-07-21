@@ -182,13 +182,16 @@ class HAMQTT():
                     for topic in output:
                         #Determine Entitiy type (switch/sensor/number) and publish the right message
                         if HAMQTT.entity_type[str(topic).split("/")[-1]][0]=="sensor":
-                            client.publish("homeassistant/sensor/GivEnergy/"+str(topic).split("/")[-1]+"/config",HAMQTT.create_device_payload(topic,SN),retain=True)
+                            if ("Battery_Details" in topic) and (GiV_Settings.numBatteries>1):
+                                client.publish("homeassistant/sensor/GivEnergy/"+str(topic).split("/")[-2]+"_"+str(topic).split("/")[-1]+"/config",HAMQTT.create_device_payload(topic,SN),retain=True)
+                            else:
+                                client.publish("homeassistant/sensor/GivEnergy/"+str(topic).split("/")[-1]+"/config",HAMQTT.create_device_payload(topic,SN),retain=True)
                         elif HAMQTT.entity_type[str(topic).split("/")[-1]][0]=="switch":
                             client.publish("homeassistant/switch/GivEnergy/"+str(topic).split("/")[-1]+"/config",HAMQTT.create_device_payload(topic,SN),retain=True)
                         elif HAMQTT.entity_type[str(topic).split("/")[-1]][0]=="number":
                             client.publish("homeassistant/number/GivEnergy/"+str(topic).split("/")[-1]+"/config",HAMQTT.create_device_payload(topic,SN),retain=True)
                     #    elif HAMQTT.entity_type[str(topic).split("/")[-1]][0]=="binary_sensor":
-                    #        client.publish("homeassistant/binary_sensor/GivEnergy/"+str(topic).split("/")[-1]+"/config",HAMQTT.create_binary_sensor_payload(topic,SN),retain=True)
+                    #        client.publish("homeassistant2/binary_sensor/GivEnergy/"+str(topic).split("/")[-1]+"/config",HAMQTT.create_binary_sensor_payload(topic,SN),retain=True)
                         elif HAMQTT.entity_type[str(topic).split("/")[-1]][0]=="select":
                             client.publish("homeassistant/select/GivEnergy/"+str(topic).split("/")[-1]+"/config",HAMQTT.create_device_payload(topic,SN),retain=True)
                            
@@ -198,7 +201,10 @@ class HAMQTT():
 
     def create_device_payload(topic,SN):
         tempObj={}
-        tempObj["name"]="GivTCP "+str(topic).split("/")[-1].replace("_"," ") #Just final bit past the last "/"
+        if GiV_Settings.numBatteries>1:
+            tempObj["name"]="GivTCP "+str(topic).split("/")[-2].replace("_"," ")+" "+str(topic).split("/")[-1].replace("_"," ") #Just final bit past the last "/"
+        else:
+            tempObj["name"]="GivTCP "+str(topic).split("/")[-1].replace("_"," ") #Just final bit past the last "/"
         tempObj['stat_t']=str(topic).replace(" ","_")
         tempObj['avty_t'] = GiV_Settings.MQTT_Topic+"/"+SN+"/status"
         tempObj["pl_avail"]= "online"
