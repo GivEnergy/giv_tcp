@@ -18,6 +18,16 @@ This will set up a self-running service which will publish data as required and 
 * Out of the box the default setup enables local MQTT broker and REST service (see below for details)
 * For Invertor autodiscovery to function your container must run on the "Host" network within docker (not Bridge). If it fails then you will need to manually add in INVERTOR_IP to the env variables
 
+## Home Assistant Add-on
+This container can also be used as an add-on in Home Assistant.
+The add-on requires an existing MQTT broker such as Mosquitto, also available to install from the Add-on store.
+To install GivTCP as an add-on, add this repository (https://github.com/britkat1980/giv_tcp) to the Add-on Store repository list.
+The following configuration items are mandatory before the add-on can be started:
+* Inverter IP address
+* MQTT username (can also be a Home Assistant user - used to authenticate againt your MQTT broker)
+* MQTT password
+All other configuration items can be left as-is unless you need to change them.
+
 ### Installation
 The simplist installation method for GivTCP is to use the built-in self-run option which will automatically connect to your invertor and grab the data.
 
