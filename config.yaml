@@ -5,7 +5,6 @@ slug: "givtcp"
 init: true
 boot: auto
 url: https://github.com/britkat1980/giv_tcp
-image: https://hub.docker.com/repository/docker/britkat/giv_tcp-ma
 legacy: true
 arch:
   - aarch64
