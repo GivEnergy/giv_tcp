@@ -63,9 +63,6 @@ def getData(fullrefresh):      #Read from Invertor put in cache
 
     #Connect to Invertor and load data
     try:
-    #    starttime=datetime.datetime.now()
-    #    logger.error("Start time for library invertor call: "+ datetime.datetime.strftime(starttime,"%H:%M:%S"))
-        
         # SET Lockfile to prevent clashes
         logger.info(" setting lock file")
         open(".lockfile", 'w').close()
@@ -89,9 +86,6 @@ def getData(fullrefresh):      #Read from Invertor put in cache
         with open('lastUpdate.pkl', 'wb') as outp:
             pickle.dump(multi_output['Last_Updated_Time'], outp, pickle.HIGHEST_PROTOCOL)
 
-    #    endtime=datetime.datetime.now()
-    #    logger.error("End time for library invertor call: "+ datetime.datetime.strftime(endtime,"%H:%M:%S"))
-    #    logger.error("End time for library invertor call: "+ str(endtime-starttime))
         multi_output['status']="online"
         
         logger.info("Invertor connection successful, registers retrieved")
@@ -133,6 +127,13 @@ def getData(fullrefresh):      #Read from Invertor put in cache
             energy_total_output['Battery_Discharge_Energy_Total_kWh']=GEInv.e_battery_discharge_total
 
         energy_total_output['Self_Consumption_Energy_Total_kWh']=energy_total_output['PV_Energy_Total_kWh']-energy_total_output['Export_Energy_Total_kWh']
+
+        #Check for all zeros
+        checksum=0
+        for item in energy_total_output:
+            checksum=checksum+energy_total_output[item]
+        if checksum==0:
+            raise ValueError("All zeros returned by Invertor, skipping update")
 
 #Energy Today Figures
         logger.info("Getting Today Energy Data")
@@ -277,8 +278,6 @@ def getData(fullrefresh):      #Read from Invertor put in cache
     ################ Run Holding Reg now ###################
         logger.info("Getting mode control figures")
         # Get Control Mode registers
-        #shallow_charge=GEInv.battery_soc_reserve
-        #self_consumption=GEInv.battery_power_mode 
         if GEInv.enable_charge==True:
             charge_schedule="enable"
         else:
@@ -294,7 +293,6 @@ def getData(fullrefresh):      #Read from Invertor put in cache
             discharge_enable="enable"
         else:
             discharge_enable="disable"
-        #logger.info("Shallow Charge= "+str(shallow_charge)+" Self Consumption= "+str(self_consumption)+" Discharge Enable= "+str(discharge_enable))
 
         #Get Charge/Discharge Active status
         discharge_rate=GEInv.battery_discharge_limit*3
@@ -469,6 +467,7 @@ def self_run2():
 def publishOutput(array,SN):
     tempoutput={}
     tempoutput=iterate_dict(array)
+
     if GiV_Settings.MQTT_Output:
         if GiV_Settings.first_run and GiV_Settings.HA_Auto_D:        # Home Assistant MQTT Discovery
             from HA_Discovery import HAMQTT

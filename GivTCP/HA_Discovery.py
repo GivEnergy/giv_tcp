@@ -220,7 +220,10 @@ class HAMQTT():
             if HAMQTT.entity_type[str(topic).split("/")[-1]][1]=="energy":
                 tempObj['unit_of_meas']="kWh"
                 tempObj['device_class']="Energy"
-                tempObj['state_class']="total_increasing"
+                if topic.split("/")[-2]=="Total":
+                    tempObj['state_class']="total"
+                else:
+                    tempObj['state_class']="total_increasing"
             if HAMQTT.entity_type[str(topic).split("/")[-1]][1]=="power":
                 tempObj['unit_of_meas']="W"
                 tempObj['device_class']="Power"

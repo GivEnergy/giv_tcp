@@ -74,7 +74,7 @@ then
     python3 /app/GivTCP/read.py self_run2 &       #Use to run periodically and push to MQTT
 fi
 
-if [ "$MQTT_ADDRESS" = "127.0.0.1" ]                #Only run Mosquitto if its using local broker
+if [ "$MQTT_ADDRESS" = "127.0.0.1" ] && [ "$MQTT_OUTPUT" = "True" ]                #Only run Mosquitto if its using local broker
 then
     echo Starting Mosquitto on port "$MQTT_PORT"
     /usr/sbin/mosquitto -c /app/GivTCP/mqtt.conf &           #Run local MQTT broker as default
