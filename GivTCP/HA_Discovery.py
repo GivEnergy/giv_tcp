@@ -182,7 +182,7 @@ class HAMQTT():
                     for topic in output:
                         #Determine Entitiy type (switch/sensor/number) and publish the right message
                         if HAMQTT.entity_type[str(topic).split("/")[-1]][0]=="sensor":
-                            if ("Battery_Details" in topic) and (GiV_Settings.numBatteries>1):
+                            if "Battery_Details" in topic:
                                 client.publish("homeassistant/sensor/GivEnergy/"+str(topic).split("/")[-2]+"_"+str(topic).split("/")[-1]+"/config",HAMQTT.create_device_payload(topic,SN),retain=True)
                             else:
                                 client.publish("homeassistant/sensor/GivEnergy/"+str(topic).split("/")[-1]+"/config",HAMQTT.create_device_payload(topic,SN),retain=True)
