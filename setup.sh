@@ -49,7 +49,7 @@ do
 
     printf "{\n" >> $FILE3
     printf "\"givTcpHostname\": \"${HOSTIP}:6345\",\n" >> $FILE3
-    printf "\"solarRate\": ${SOLARRATE},\n" >> $FILE3
+    printf "\"solarRate\": ${DAYRATE},\n" >> $FILE3
     printf "\"exportRate\": ${EXPORTRATE}\n" >> $FILE3
     printf "}" >> $FILE3
 
