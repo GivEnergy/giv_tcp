@@ -188,8 +188,8 @@ def getData(fullrefresh):      #Read from Invertor put in cache
             power_output['PV_Power']= PV_power
         power_output['PV_Voltage_String_1']=GEInv.v_pv1
         power_output['PV_Voltage_String_2']=GEInv.v_pv2
-        power_output['PV_Current_String_1']=GEInv.i_pv1
-        power_output['PV_Current_String_2']=GEInv.i_pv1
+        power_output['PV_Current_String_1']=GEInv.i_pv1*10
+        power_output['PV_Current_String_2']=GEInv.i_pv1*10
         
 
     #Grid Power
