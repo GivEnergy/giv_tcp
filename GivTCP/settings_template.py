@@ -1,8 +1,12 @@
 # version 2022.01.31
 class GiV_Settings:
-    invertorIP=""                   #Required - IP address of Invertor on local network
-    numBatteries=1                  #Required - The number of batteries connected this invertor
+    numInvertors=1                  #Required - Number of different invertors you want to connect to (MAX 4)
+    invertorIP_1=""                 #Required - IP address of first Invertor on local network
+    invertorIP_2=""                 #Optional - IP address of second Invertor on local network. More lines like this can be added for each invertor. The number of these lines must match the numInvertors line above
+    numBatteries_1=1                #Required - The number of batteries connected the first invertor
+    numBatteries_2=1                #Optional - The number of batteries connected the second invertor. More lines like this can be added for each invertor. The number of these lines must match the numInvertors line above
     HA_Auto_D=True                  #Optional - Bool - Publishes Home assistant MQTT Auto Discovery messages to push data into HA automagically (requires MQTT to be enabled below)
+    self_run_timer=1                #Required - The wait time between invertor read calls. Can be as low as 1 or longer if you want to allow the cloud portal a better chance of polling
 #Debug Settings
     Log_Level="Error"               #Optional - Enables logging level. Default is "Error", but can be "Info" or "Debug"
     Debug_File_Location=""          #Optional - Location of logs (Default is console)

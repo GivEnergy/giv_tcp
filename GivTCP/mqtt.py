@@ -25,7 +25,7 @@ else:
     else:
         logging.basicConfig(filename=GiV_Settings.Debug_File_Location, encoding='utf-8', level=logging.ERROR)
 
-logger = logging.getLogger("GivTCP")
+logger = logging.getLogger("GivTCP_"+str(GiV_Settings.givtcp_instance))
 
 class GivMQTT():
 
@@ -51,7 +51,7 @@ class GivMQTT():
     
     def multi_MQTT_publish(rootTopic,array):   #Recieve multiple payloads with Topics and publish in a single MQTT connection
         mqtt.Client.connected_flag=False        			#create flag in class
-        client=mqtt.Client("GivEnergy_GivTCP")
+        client=mqtt.Client("GivEnergy_GivTCP_"+str(GiV_Settings.givtcp_instance))
         
         ##Check if first run then publish auto discovery message
         

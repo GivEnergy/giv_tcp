@@ -1,12 +1,13 @@
-name: "GivTCP"
-description: "TCP Modbus connection to MQTT/JSON for Givenergy Battery/PV Invertors"
-version: "1.1.3"
-slug: "givtcp"
-init: true
-boot: auto
-url: https://github.com/britkat1980/giv_tcp
-legacy: true
-arch:
+name:  "GivTCP"
+description:  "TCP Modbus connection to MQTT/JSON for Givenergy Battery/PV Invertors"
+version:  "1.1.4"
+image: https://hub.docker.com/r/britkat/giv_tcp-ma
+slug:  "givtcp"
+init:  true
+boot:  auto
+url:  https://github.com/britkat1980/giv_tcp
+legacy:  true
+arch: 
   - aarch64
   - amd64
   - armhf
@@ -14,32 +15,42 @@ arch:
   - i386
 host_network: true
 options:
-  INVERTOR_IP: null
-  NUM_BATTERIES: 1
-  MQTT_OUTPUT: True
+  NUMINVERTORS: "1"
+  INVERTOR_IP_1:  ""
+  NUMBATTERIES_1:  "1"
+  MQTT_OUTPUT: "True"
   MQTT_ADDRESS: "127.0.0.1"
-  MQTT_USERNAME: null
-  MQTT_PASSWORD: null
+  MQTT_USERNAME: ""
+  MQTT_PASSWORD: ""
   MQTT_TOPIC: ""
-  MQTT_PORT: 1883
+  MQTT_PORT: "1883"
   LOG_LEVEL: "Error"
   DEBUG_FILE_LOCATION: ""
-  PRINT_RAW: True
-  SELF_RUN: True
-  SELF_RUN_LOOP_TIMER: 10
-  INFLUX_OUTPUT: False
+  PRINT_RAW: "True"
+  SELF_RUN: "True"
+  SELF_RUN_LOOP_TIMER: "5"
+  INFLUX_OUTPUT: "False"
   INFLUX_URL: ""
   INFLUX_TOKEN: ""
   INFLUX_BUCKET: ""
   INFLUX_ORG: ""
-  HA_AUTO_D: True
-schema:
-  INVERTOR_IP: str
-  NUM_BATTERIES: int
+  HA_AUTO_D: "True"
+  HADEVICEPREFIX: "GivTCP"
+  PYTHONPATH: "/app"
+  DAYRATE: 0.155
+  NIGHTRATE: 0.055
+  HOSTIP: "192.168.2.10"
+  DAYRATESTART: "04:30"
+  NIGHTRATESTART: "00:00"
+  TZ: "Europe/London"
+schema: 
+  NUMINVERTORS: int
+  INVERTOR_IP_1:  str
+  NUMBATTERIES_1:  int
   MQTT_OUTPUT: bool
   MQTT_ADDRESS: str
-  MQTT_USERNAME: str
-  MQTT_PASSWORD: str
+  MQTT_USERNAME: "str?"
+  MQTT_PASSWORD: "str?"
   MQTT_TOPIC: "str?"
   MQTT_PORT: int
   LOG_LEVEL: str
@@ -47,9 +58,17 @@ schema:
   PRINT_RAW: bool
   SELF_RUN: bool
   SELF_RUN_LOOP_TIMER: int
-  INFLUX_OUTPUT: bool
+  INFLUX_OUTPUT: "str?"
   INFLUX_URL: "str?"
   INFLUX_TOKEN: "str?"
   INFLUX_BUCKET: "str?"
   INFLUX_ORG: "str?"
   HA_AUTO_D: bool
+  HADEVICEPREFIX: "str?"
+  PYTHONPATH: str
+  DAYRATE: float
+  NIGHTRATE: float
+  HOSTIP: str
+  DAYRATESTART: str
+  NIGHTRATESTART: str
+  TZ: str

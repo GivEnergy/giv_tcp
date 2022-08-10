@@ -7,3 +7,4 @@ influxdb_client
 requests
 flask
 pickle-mixin
+flask-cors

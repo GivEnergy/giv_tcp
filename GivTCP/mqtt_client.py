@@ -2,12 +2,12 @@ from logging import Logger
 import paho.mqtt.client as mqtt
 import time
 import sys
-sys.path.append('/app/GivTCP')
 import importlib
 import logging
 import settings
 from settings import GiV_Settings
 import write as wr
+sys.path.append(GiV_Settings.default_path)
 
 if GiV_Settings.Log_Level.lower()=="debug":
     if GiV_Settings.Debug_File_Location=="":
@@ -25,7 +25,7 @@ else:
     else:
         logging.basicConfig(filename=GiV_Settings.Debug_File_Location, encoding='utf-8', level=logging.ERROR)
 
-logger = logging.getLogger("GivTCP")
+logger = logging.getLogger("GivTCP_"+str(GiV_Settings.givtcp_instance)+"_MQTT_client")
 
 if GiV_Settings.MQTT_Port=='':
     MQTT_Port=1883
@@ -114,7 +114,7 @@ def on_connect(client, userdata, flags, rc):
         logger.error("Bad connection Returned code= "+str(rc))
 
 
-client=mqtt.Client("GivEnergy_GivTCP_Control")
+client=mqtt.Client("GivEnergy_GivTCP_"+str(GiV_Settings.givtcp_instance)+"_Control")
 mqtt.Client.connected_flag=False        			#create flag in class
 if MQTTCredentials:
     client.username_pw_set(MQTT_Username,MQTT_Password)

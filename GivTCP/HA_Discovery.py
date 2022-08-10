@@ -27,7 +27,7 @@ else:
     else:
         logging.basicConfig(filename=GiV_Settings.Debug_File_Location, encoding='utf-8', level=logging.ERROR)
 
-logger = logging.getLogger("GivTCP")
+logger = logging.getLogger("GivTCP_"+str(GiV_Settings.givtcp_instance))
 
 class HAMQTT():
 
@@ -60,6 +60,8 @@ class HAMQTT():
         "PV_Power":["sensor","power"],
         "PV_Voltage_String_1":["sensor","voltage"],
         "PV_Voltage_String_2":["sensor","voltage"],
+        "PV_Current_String_1":["sensor","current"],
+        "PV_Current_String_2":["sensor","current"],
         "Grid_Power":["sensor","power"],
         "Import_Power":["sensor","power"],
         "Export_Power":["sensor","power"],
@@ -132,7 +134,16 @@ class HAMQTT():
         "Enable_Discharge_Schedule":["switch","","enableDishargeSchedule"],
         "Enable_Discharge":["switch","","enableDischarge"],
         "Battery_Charge_Rate":["number","","setChargeRate"],
-        "Battery_Discharge_Rate":["number","","setDischargeRate"]
+        "Battery_Discharge_Rate":["number","","setDischargeRate"],
+        "night_start_energy":["sensor","energy"],
+        "night_energy":["sensor","energy"],
+        "night_cost":["sensor","money"],
+        "night_rate":["sensor","money"],
+        "day_start_energy":["sensor","energy"],
+        "day_energy":["sensor","energy"],
+        "day_cost":["sensor","money"],
+        "day_rate":["sensor","money"],
+        "current_rate":["sensor",""]
         }
 
     if GiV_Settings.MQTT_Port=='':
@@ -160,7 +171,7 @@ class HAMQTT():
     
     def publish_discovery(array,SN):   #Recieve multiple payloads with Topics and publish in a single MQTT connection
         mqtt.Client.connected_flag=False        			#create flag in class
-        client=mqtt.Client("GivEnergy_GivTCP")
+        client=mqtt.Client("GivEnergy_GivTCP_"+str(GiV_Settings.givtcp_instance))
         rootTopic=str(GiV_Settings.MQTT_Topic+"/"+SN+"/")
         if HAMQTT.MQTTCredentials:
             client.username_pw_set(HAMQTT.MQTT_Username,HAMQTT.MQTT_Password)
@@ -208,15 +219,15 @@ class HAMQTT():
         tempObj['device']={}
         GiVTCP_Device=str(topic).split("/")[2]
         if "Battery_Details" in topic:
-            tempObj["name"]="GivTCP "+str(topic).split("/")[3].replace("_"," ")+" "+str(topic).split("/")[-1].replace("_"," ") #Just final bit past the last "/"
+            tempObj["name"]=GiV_Settings.ha_device_prefix+" "+str(topic).split("/")[3].replace("_"," ")+" "+str(topic).split("/")[-1].replace("_"," ") #Just final bit past the last "/"
             tempObj['uniq_id']=str(topic).split("/")[3]+"_"+GiVTCP_Device+"_"+str(topic).split("/")[-1]
             tempObj['device']['identifiers']=str(topic).split("/")[3]+"_"+GiVTCP_Device
-            tempObj['device']['name']="GivTCP_"+str(topic).split("/")[3]+"_"+GiVTCP_Device
+            tempObj['device']['name']=GiV_Settings.ha_device_prefix+" "+str(topic).split("/")[3].replace("_"," ")+" "+GiVTCP_Device
         else:
             tempObj['uniq_id']=SN+"_"+GiVTCP_Device+"_"+str(topic).split("/")[-1]
             tempObj['device']['identifiers']=SN+"_"+GiVTCP_Device
-            tempObj['device']['name']="GivTCP_"+SN+"_"+GiVTCP_Device
-            tempObj["name"]="GivTCP "+str(topic).split("/")[-1].replace("_"," ") #Just final bit past the last "/"
+            tempObj['device']['name']=GiV_Settings.ha_device_prefix+" "+SN+" "+str(GiVTCP_Device).replace("_"," ")
+            tempObj["name"]=GiV_Settings.ha_device_prefix+" "+SN+" "+str(topic).split("/")[-1].replace("_"," ") #Just final bit past the last "/"
         tempObj['device']['manufacturer']="GivEnergy"
 
         try:
@@ -233,6 +244,9 @@ class HAMQTT():
                     tempObj['state_class']="total"
                 else:
                     tempObj['state_class']="total_increasing"
+            if HAMQTT.entity_type[str(topic).split("/")[-1]][1]=="money":
+                tempObj['unit_of_meas']="£"
+                tempObj['device_class']="Monetary"
             if HAMQTT.entity_type[str(topic).split("/")[-1]][1]=="power":
                 tempObj['unit_of_meas']="W"
                 tempObj['device_class']="Power"
@@ -243,12 +257,13 @@ class HAMQTT():
             if HAMQTT.entity_type[str(topic).split("/")[-1]][1]=="voltage":
                 tempObj['unit_of_meas']="V"
                 tempObj['device_class']="Voltage"
+            if HAMQTT.entity_type[str(topic).split("/")[-1]][1]=="current":
+                tempObj['unit_of_meas']="A"
+                tempObj['device_class']="Current"
             if HAMQTT.entity_type[str(topic).split("/")[-1]][1]=="battery":
                 tempObj['unit_of_meas']="%"
                 tempObj['device_class']="Battery"
             if HAMQTT.entity_type[str(topic).split("/")[-1]][1]=="timestamp":
-                #if "slot" in topic:
-                #    tempObj['value_template']= "{{now().replace(hour=int(value[:2]), minute=int(value[3:5]), second=0, microsecond=0).timestamp() }}"
                 del(tempObj['unit_of_meas'])
                 tempObj['device_class']="timestamp"
         elif HAMQTT.entity_type[str(topic).split("/")[-1]][0]=="switch":

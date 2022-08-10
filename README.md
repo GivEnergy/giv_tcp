@@ -50,8 +50,9 @@ From here your invertor data is available through either MQTT or REST as describ
 
 | ENV Name                | Example       |  Description                      |
 | ----------------------- | ------------- |  -------------------------------- |
-| INVERTOR_IP |192.168.10.1 | Docker container can auto detect Invertors if running on your host network. If this fails then add the IP manually to this ENV |
-| NUMBATTERIES | 1 | Number of battery units connected to the invertor |
+| NUMINVERTORS | 1 | Number of invertors on the network. Currently reserved for future development. Leave it at 1 |
+| INVERTOR_IP_1 |192.168.10.1 | Docker container can auto detect Invertors if running on your host network. If this fails then add the IP manually to this ENV |
+| NUMBATTERIES_1 | 1 | Number of battery units connected to the invertor |
 | MQTT_OUTPUT | True | Optional if set to True then MQTT_ADDRESS is required |
 | MQTT_ADDRESS | 127.0.0.1 | Optional (but required if OUTPUT is set to MQTT) |
 | MQTT_USERNAME | bob | Optional |
@@ -60,11 +61,22 @@ From here your invertor data is available through either MQTT or REST as describ
 | LOG_LEVEL | Error | Optional - you can choose Error, Info or Debug. Output will be sent to the debug file location if specified, otherwise it is sent to stdout|
 | DEBUG_FILE_LOCATION | /usr/pi/data | Optional  |
 | PRINT_RAW | False | Optional - If set to True the raw register values will be returned alongside the normal data |
+| SELF_RUN | True | Optional - If set to True the system will loop round connecting to invertor and publishing its data |
+| SELF_RUN_LOOP_TIMER | 5 | Optional - The wait time bewtween invertor calls when using SELF_RUN |
 | INFLUX_OUTPUT | False | Optional - Used to enable publishing of energy and power data to influx |
 | INFLUX_TOKEN |abcdefg123456789| Optional - If using influx this is the token generated from within influxdb itself |
 | INFLUX_BUCKET |giv_bucket| Optional - If using influx this is data bucket to use|
 | INFLUX_ORG |giv_tcp| Optional - If using influx this is the org that the token is assigned to | 
 | HA_AUTO_D | True | Optional - If set to true and MQTT is enabled, it will publish Home Assistant Auto Discovery messages, which will allow Home Assistant to automagically create all entitites and devices to allow read and control of your Invertor |
+| HADEVICEPREFIX | GivTCP | Optional - Prefix to be placed in front of every Home Assistent entity created by the above |
+| DAYRATE | 0.155 | Optional - Cost of your daytime energy if using Economy 7 or Octopus Go |
+| NIGHTRATE | 0.155 | Optional - Cost of your night time energy if using Economy 7 or Octopus Go |
+| DAYRATESTART | 04:30 | Optional - Start time of your daytime energy if using Economy 7 or Octopus Go |
+| NIGHTRATESTART | 00:00 | Optional - Start time of your night time energy if using Economy 7 or Octopus Go |
+| HOSTIP | 192.168.1.20 | Optional - The host IP address of your container. Required to access the web dashboard from any browser |
+
+
+
 
 ## GivTCP Read data
 
