@@ -40,7 +40,7 @@ options:
   DAYRATE: 0.155
   NIGHTRATE: 0.055
   EXPORTRATE: 0.04
-  HOSTIP: "192.168.2.10"
+  HOSTIP: "homeassistant.local"
   DAYRATESTART: "04:30"
   NIGHTRATESTART: "00:00"
   TZ: "Europe/London"
