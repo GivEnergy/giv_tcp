@@ -8,11 +8,10 @@ boot:  auto
 url:  https://github.com/britkat1980/giv_tcp
 legacy:  true
 arch: 
-  - aarch64
   - amd64
-  - armhf
+  - arm64
   - armv7
-  - i386
+  - armv6
 host_network: true
 options:
   NUMINVERTORS: "1"
