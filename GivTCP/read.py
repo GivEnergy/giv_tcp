@@ -606,8 +606,11 @@ def ratecalcs(import_energy):
     if datetime.datetime.now().hour==0 and datetime.datetime.now().minute==0:
         rate_data['night_cost']=0.00
         rate_data['day_cost']=0.00
+        rate_data['night_energy']=0.00
+        rate_data['day_energy']=0.00
         rate_data['day_start_energy']=import_energy
         rate_data['night_start_energy']=import_energy
+
 
     logger.info("Calculating current tariff costs")
     if datetime.datetime.strptime(GiV_Settings.day_rate_start, '%H:%M').hour == datetime.datetime.now().hour and datetime.datetime.strptime(GiV_Settings.day_rate_start, '%H:%M').minute == datetime.datetime.now().minute:
