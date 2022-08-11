@@ -108,23 +108,28 @@ do
     printf "# version 1.0\n" >> "$FILE2"
     printf "/usr/bin/find -type f -name 'regCache.pkl' -delete     #Remove any legacy pickle files\n" >> "$FILE2"
     printf "/usr/bin/find -type f -name '*lockfile*' -delete     #Remove any legacy lockfiles\n" >> "$FILE2"
+    ### Run main invertor read loop ###
     printf "if [ \"\$SELF_RUN\" = \"True\" ]                         #Only run Schedule if requested\n" >> "$FILE2"
     printf "then\n" >> "$FILE2"
     printf "    echo Running Invertor read loop every \"\$SELF_RUN_LOOP_TIMER\"s...\n" >> "$FILE2"
     printf "    /usr/local/bin/python3 ${PATH}/read.py self_run2  &       #Use to run periodically and push to MQTT\n" >> "$FILE2"
     printf "fi\n" >> "$FILE2"
+    ### Run MQTT Broker if requested ###
     printf "if [ \"\$MQTT_ADDRESS\" = \"127.0.0.1\" ] && [ \"\$MQTT_OUTPUT\" = \"True\" ]                #Only run Mosquitto if its using local broker\n" >> "$FILE2"
     printf "then\n" >> "$FILE2"
     printf "    echo Starting Mosquitto on port \"\$MQTT_PORT\"\n" >> "$FILE2"
     printf "    /usr/sbin/mosquitto -c ${PATH}/mqtt.conf &           #Run local MQTT broker as default\n" >> "$FILE2"
     printf "fi\n" >> "$FILE2"
+    ### Run MQTT client to listen for MQTT control commands ###
     printf "if [ \"\$MQTT_OUTPUT\" = \"True\" ]                      #If we are running MQTT then start up the listener for control\n" >> "$FILE2"
     printf "then\n" >> "$FILE2"
     printf "    echo subscribing Mosquitto on port \"\$MQTT_PORT\"\n" >> "$FILE2"
     printf "    /usr/local/bin/python3 ${PATH}/mqtt_client.py &\n" >> "$FILE2"
     printf "fi\n" >> "$FILE2"
+    ### Run Web Dashboard ###
     printf "echo instance is \"$i\"\n" >> "$FILE2"
     printf "(cd /app/GivEnergy-Smart-Home-Display; /usr/bin/node /usr/local/bin/serve &)\n">> "$FILE2"
+    ### Run REST API ###
     printf "GUPORT=$((${i}+6344))\n" >> "$FILE2"
     printf "echo Starting Gunicorn on port \"\$GUPORT\"\n" >> "$FILE2"
     printf "(cd \$PATH; /usr/local/bin/gunicorn -w 3 -b :\"\$GUPORT\" REST:giv_api)" >> "$FILE2"

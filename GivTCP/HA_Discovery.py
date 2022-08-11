@@ -217,6 +217,7 @@ class HAMQTT():
         tempObj["pl_avail"]= "online"
         tempObj["pl_not_avail"]= "offline"
         tempObj['device']={}
+        
         GiVTCP_Device=str(topic).split("/")[2]
         if "Battery_Details" in topic:
             tempObj["name"]=GiV_Settings.ha_device_prefix+" "+str(topic).split("/")[3].replace("_"," ")+" "+str(topic).split("/")[-1].replace("_"," ") #Just final bit past the last "/"
