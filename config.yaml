@@ -1,6 +1,6 @@
 name:  "GivTCP"
 description:  "TCP Modbus connection to MQTT/JSON for Givenergy Battery/PV Invertors"
-version:  "1.1.4a"
+version:  "1.1.4"
 #image: britkat/giv_tcp-ma
 slug:  "givtcp"
 init:  true
@@ -12,6 +12,8 @@ arch:
   - arm64
   - armv7
   - armv6
+  - i386
+  - aarch64
 host_network: true
 options:
   NUMINVERTORS: "1"
