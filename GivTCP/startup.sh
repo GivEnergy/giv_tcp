@@ -23,7 +23,8 @@ then
     rm $FILE3    #delete file and re-create
 fi
 
-if [ -z "$INVERTOR_IP" ]; then
+if [ -z "$INVERTOR_IP" ]
+then
     echo 'IP not set in ENV'
     for i in 1 2 3
     do
@@ -64,6 +65,7 @@ printf "    influxToken=\"$INFLUX_TOKEN\"\n" >> $FILE
 printf "    influxBucket=\"$INFLUX_BUCKET\"\n" >> $FILE
 printf "    influxOrg=\"$INFLUX_ORG\"\n" >> $FILE
 printf "    HA_Auto_D=$HA_AUTO_D\n" >> $FILE 
+printf "    selfRunLoopTimer=\"$SELF_RUN_LOOP_TIMER\"\n" >>$FILE
 printf "    first_run= True\n" >> $FILE
 
 #TODO Update givTCP if a newer release is available
@@ -89,5 +91,3 @@ fi
 GUPORT=$(($GIVTCPINSTANCE+6344))
 echo Starting Gunicorn on port "$GUPORT"
 gunicorn -w 3 -b :"$GUPORT" GivTCP.REST:giv_api            #Use for on-demand read and control
-
-

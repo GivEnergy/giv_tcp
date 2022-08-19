@@ -447,20 +447,21 @@ def self_run(loop_timer):
         time.sleep(1)
 
 def self_run2():
-    counter=0
-    runAll(True)
+    counter = 0
+    fullrefresh = True
     while True:
-        counter=counter+1
+        runAll(fullrefresh)
+        counter = counter + 1
         if exists(".forceFullRefresh"):
-            runAll(True)
+            fullrefresh = True
             os.remove(".forceFullRefresh")
-            counter=0
-        elif counter==20:
-            counter=0
-            runAll(True)
+            counter = 0
+        elif counter == 20:
+            counter = 0
+            fullrefresh = True
         else:
-            runAll(False)
-        time.sleep(1)
+            fullrefresh = False
+        time.sleep(int(GiV_Settings.selfRunLoopTimer))
 
 
 ####### Addiitonal Publish options can be added here. 
