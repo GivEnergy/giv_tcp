@@ -1,22 +1,22 @@
 # GivTCP
 ## TCP Modbus connection to MQTT/JSON for Givenergy Battery/PV Invertors
 
-This project allows connection to the GivEnergy invertors via TCP Modbus. Access is through the native Wifi/Ethernet dongle and can be connected to through either the local LAN network or directly through the inbuilt SSID AP.
+This project opens a connection to the GivEnergy invertors via TCP Modbus. Access is given through the native Wifi/Ethernet dongle and can be connected via either LAN or directly through the inbuilt SSID AP.
 
-In basis of this project is a connection to a Modbus TCP server which runs on the wifi dongle, so all you need is somewhere to run the script on the same network. You will need the following to make it work:
-* GivEnergy Invertor properly commissioned and working
+The basis of this project is a connection to the Modbus TCP server which runs on the wifi dongle. All you need is run the script on the same network. The following is needed to make it work:
+* GivEnergy Invertor that is commissioned and online.
 * IP address of the invertor
 
 
 ## Docker
-Reccomended usage is through the Docker container found here: https://hub.docker.com/repository/docker/britkat/giv_tcp-ma
+You can find the Docker container repo here: https://hub.docker.com/repository/docker/britkat/giv_tcp-ma
 This will set up a self-running service which will publish data as required and provide a REST interface for control. An internal MQTT broker can be activiated to make data avalable on the network.
   
 * Docker image is multi-architecture so docker should grab the correct version for your system (tested on x86 and rpi3)
 * Create a container with the relevant ENV variables below (mimicing the settings.py file)
 * Set the container to auto-restart to ensure reliability
-* Out of the box the default setup enables local MQTT broker and REST service (see below for details)
-* For Invertor autodiscovery to function your container must run on the "Host" network within docker (not Bridge). If it fails then you will need to manually add in INVERTOR_IP to the env variables
+* From out of the box, the default setup enables local MQTT broker and REST service (see below for details)
+* For Invertor autodiscovery to function, your container must run on the "Host" network within docker (not Bridge). If it fails then you will need to manually add in INVERTOR_IP to the env variables
 
 ### Installation
 The simplist installation method for GivTCP is to use the built-in self-run option which will automatically connect to your invertor and grab the data.
