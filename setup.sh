@@ -41,7 +41,7 @@ do
 
 
 
-    if [ $WEB_DASH = "True" ]
+    if [ $WEB_DASH ]
     then
         if [ -f "$FILE3" ]
         then
@@ -133,7 +133,7 @@ do
     printf "    /usr/local/bin/python3 ${PATH}/mqtt_client.py &\n" >> "$FILE2"
     printf "fi\n" >> "$FILE2"
     ### Run Web Dashboard ###
-    printf "if [ \"\$WEB_DASH\" = \"True\" ]\n" >> "$FILE2"
+    printf "if [ \"\$WEB_DASH\" ]\n" >> "$FILE2"
     printf "then\n" >> "$FILE2"
     printf "    (cd /app/GivEnergy-Smart-Home-Display; /usr/bin/node /usr/local/bin/serve -p ${WEB_DASH_PORT}&)\n">> "$FILE2"
     printf "fi\n" >> "$FILE2"
