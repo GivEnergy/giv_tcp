@@ -5,7 +5,7 @@ services:
     ports:
       - "1883:1883"
       - "6345:6345"
-      - "3000:3000"
+      - "3000:3000"                     #This should match the WEB_DASH_PORT ENV below
     environment:
       - NUMINVERTORS="1"                # Set this to the number of Invertors in your setup, then replicate the next two lines for each invertor (changing the last number of the ENV)
       - INVERTOR_IP_1=""   # Set this to the IP address of your Invertor on you rlocal network
@@ -27,15 +27,18 @@ services:
       - INFLUX_BUCKET=""                # Data Bucket of your Influx instance you want data sent to
       - INFLUX_ORG=""                   # Influx instance Organisation
       - HA_AUTO_D="True"                # If True (and if MQTT_OUTPUT is True) this will publish Home Assistant Auto Discovery messages to the broker
-      - HADEVICEPREFIX="GivTCP"
+      - HADEVICEPREFIX="GivTCP"         # Defines the preficfor all entities in Home Assistant
       - PYTHONPATH="/app"
-      - DAYRATE=0.155
-      - NIGHTRATE=0.055
-      - EXPORTRATE=0.04
-      - HOSTIP=""
-      - DAYRATESTART="04:30"
-      - NIGHTRATESTART="00:00"
-      - TZ="Europe/London"
+      - DAYRATE=0.155                   # Price in £/$ for your daytime electricity per kWh
+      - NIGHTRATE=0.055                 # Price in £/$ for your night time electricity per kWh
+      - EXPORTRATE=0.04                 # Price in £/$ for your export electricity per kWh
+      - HOSTIP=""                       # External IP address of the docker host (needed for web dashboard)
+      - DAYRATESTART="04:30"            # Time in HH:MM when your day time tariff kicks in
+      - NIGHTRATESTART="00:00"          # Time in HH:MM when your night time tariff kicks in
+      - TZ="Europe/London"              # Set to your Timezone
+      - WEB_DASH="False"                # Enable the wed dashboard
+      - WEB_DASH_PORT="3000"            # Port to serve the web dashboard on
+      - 
 
     restart: always
     privileged: true

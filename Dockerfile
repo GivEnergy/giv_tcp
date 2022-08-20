@@ -23,6 +23,7 @@ RUN pip install -r requirements.txt
 
 # copy the content of the local src directory to the working directory
 COPY GivTCP/ ./GivTCP
+COPY GivEnergy-Smart-Home-Display-givtcp/ ./GivEnergy-Smart-Home-Display-givtcp
 
 COPY setup.sh setup.sh
 #COPY givenergy_modbus/ /usr/local/lib/python3.10/site-packages/givenergy_modbus
@@ -56,7 +57,8 @@ ENV HOSTIP="192.168.2.10"
 ENV DAYRATESTART="04:30"
 ENV NIGHTRATESTART="00:00"
 ENV TZ="Europe/London"
-
+ENV WEB_DASH="False"
+ENV WEB_DASH_PORT="3000"
 
 EXPOSE 6345 1883 3000
 

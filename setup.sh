@@ -39,19 +39,24 @@ do
         echo "$FILE2 does not exist, creating."
     fi
 
-    if [ -f "$FILE3" ]
-    then
-        echo "$FILE3 exists, deleting and re-creating."
-        /bin/rm "$FILE3"    #delete file and re-create
-    else
-        echo "$FILE3 does not exist, creating."
-    fi
 
-    printf "{\n" >> $FILE3
-    printf "\"givTcpHostname\": \"${HOSTIP}:6345\",\n" >> $FILE3
-    printf "\"solarRate\": ${DAYRATE},\n" >> $FILE3
-    printf "\"exportRate\": ${EXPORTRATE}\n" >> $FILE3
-    printf "}" >> $FILE3
+
+    if [ $WEB_DASH = "True" ]
+    then
+        if [ -f "$FILE3" ]
+        then
+            echo "$FILE3 exists, deleting and re-creating."
+            /bin/rm "$FILE3"    #delete file and re-create
+        else
+            echo "$FILE3 does not exist, creating."
+        fi
+        echo "Creating web dashboard config file"
+        printf "{\n" >> $FILE3
+        printf "\"givTcpHostname\": \"${HOSTIP}:6345\",\n" >> $FILE3
+        printf "\"solarRate\": ${DAYRATE},\n" >> $FILE3
+        printf "\"exportRate\": ${EXPORTRATE}\n" >> $FILE3
+        printf "}" >> $FILE3
+    fi
 
     ############################
     ### Create Settings File ###
@@ -108,6 +113,7 @@ do
     printf "# version 1.0\n" >> "$FILE2"
     printf "/usr/bin/find -type f -name 'regCache.pkl' -delete     #Remove any legacy pickle files\n" >> "$FILE2"
     printf "/usr/bin/find -type f -name '*lockfile*' -delete     #Remove any legacy lockfiles\n" >> "$FILE2"
+    printf "echo GivTCP instance is \"$i\"\n" >> "$FILE2"
     ### Run main invertor read loop ###
     printf "if [ \"\$SELF_RUN\" = \"True\" ]                         #Only run Schedule if requested\n" >> "$FILE2"
     printf "then\n" >> "$FILE2"
@@ -127,8 +133,10 @@ do
     printf "    /usr/local/bin/python3 ${PATH}/mqtt_client.py &\n" >> "$FILE2"
     printf "fi\n" >> "$FILE2"
     ### Run Web Dashboard ###
-    printf "echo instance is \"$i\"\n" >> "$FILE2"
-    printf "(cd /app/GivEnergy-Smart-Home-Display; /usr/bin/node /usr/local/bin/serve &)\n">> "$FILE2"
+    printf "if [ \"\$WEB_DASH\" = \"True\" ]\n" >> "$FILE2"
+    printf "then\n" >> "$FILE2"
+    printf "    (cd /app/GivEnergy-Smart-Home-Display; /usr/bin/node /usr/local/bin/serve -p ${WEB_DASH_PORT}&)\n">> "$FILE2"
+    printf "fi\n" >> "$FILE2"
     ### Run REST API ###
     printf "GUPORT=$((${i}+6344))\n" >> "$FILE2"
     printf "echo Starting Gunicorn on port \"\$GUPORT\"\n" >> "$FILE2"

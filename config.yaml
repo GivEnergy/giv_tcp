@@ -44,6 +44,8 @@ options:
   DAYRATESTART: "04:30"
   NIGHTRATESTART: "00:00"
   TZ: "Europe/London"
+  WEB_DASH: "False"
+  WEB_DASH_PORT: "3000"
 schema: 
   NUMINVERTORS: int
   INVERTOR_IP_1:  str
@@ -74,3 +76,5 @@ schema:
   DAYRATESTART: str
   NIGHTRATESTART: str
   TZ: str
+  WEB_DASH: bool
+  WEB_DASH_PORT: int

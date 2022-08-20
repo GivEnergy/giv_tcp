@@ -45,13 +45,13 @@ else:
 
 #loop till serial number has been found
 while not hasattr(GiV_Settings,'serial_number'):
-    logger.error("No serial_number available waiting for first read run to occur")
-    time.sleep(2)
+    time.sleep(5)
     #del sys.modules['settings.GiV_Settings']
     importlib.reload(settings)
     from settings import GiV_Settings
     count=+1
     if count==20:
+        logger.error("No serial_number found in MQTT queue. MQTT Control not available.")
         break
     
 logger.info("Serial Number retrieved: "+GiV_Settings.serial_number)

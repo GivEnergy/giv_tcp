@@ -143,7 +143,8 @@ class HAMQTT():
         "day_energy":["sensor","energy"],
         "day_cost":["sensor","money"],
         "day_rate":["sensor","money"],
-        "current_rate":["sensor",""]
+        "current_rate":["sensor",""],
+        "Average_ppkwh_today":["sensor","money"],
         }
 
     if GiV_Settings.MQTT_Port=='':
