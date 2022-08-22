@@ -87,8 +87,8 @@ for inv in range(1,int(os.getenv('NUMINVERTORS'))+1):
             outp.write("\"solarRate\": "+os.getenv('DAYRATE')+",")
             outp.write("\"exportRate\": "+os.getenv('EXPORTRATE')+"")
             outp.write("}")
-        logger.info ("Serving Web Dashboard from port "+str(os.getenv('WEB_DASH_PORT')))
         WDPORT=int(os.getenv('WEB_DASH_PORT'))+inv
+        logger.info ("Serving Web Dashboard from port "+str(WDPORT))
         command=shlex.split("/usr/bin/node /usr/local/bin/serve -p "+ str(WDPORT))
         webDash[inv]=subprocess.Popen(command)
 
@@ -113,8 +113,9 @@ while True:
         elif os.getenv('WEB_DASH') and not webDash[inv].poll()==None:
             logger.info("Web Dashboard process died. Restarting...")
             os.chdir(PATH2)
-            logger.info ("Serving Web Dashboard from port "+str(os.getenv('WEB_DASH_PORT')))
-            command=shlex.split("/usr/bin/node /usr/local/bin/serve -p "+ str(os.getenv('WEB_DASH_PORT')))
+            WDPORT=int(os.getenv('WEB_DASH_PORT'))+inv
+            logger.info ("Serving Web Dashboard from port "+str(WDPORT))
+            command=shlex.split("/usr/bin/node /usr/local/bin/serve -p "+ str(WDPORT))
             webDash[inv]=subprocess.Popen(command)
         elif not gunicorn[inv].poll()==None:
             logger.info("REST API process died. Restarting...")
