@@ -21,7 +21,7 @@ options:
   INVERTOR_IP_1:  ""
   NUMBATTERIES_1:  1
   MQTT_OUTPUT: True
-  MQTT_ADDRESS: "127.0.0.1"
+  MQTT_ADDRESS: "homeassistant.local"
   MQTT_USERNAME: ""
   MQTT_PASSWORD: ""
   MQTT_TOPIC: ""
@@ -44,7 +44,7 @@ options:
   EXPORTRATE: 0.04
   HOSTIP: "homeassistant.local"
   DAYRATESTART: "04:30"
-  NIGHTRATESTART: "00:00"
+  NIGHTRATESTART: "00:30"
   TZ: "Europe/London"
   WEB_DASH: False
   WEB_DASH_PORT: 3000
@@ -63,7 +63,7 @@ schema:
   PRINT_RAW: bool
   SELF_RUN: bool
   SELF_RUN_LOOP_TIMER: int
-  INFLUX_OUTPUT: "str?"
+  INFLUX_OUTPUT: bool
   INFLUX_URL: "str?"
   INFLUX_TOKEN: "str?"
   INFLUX_BUCKET: "str?"
