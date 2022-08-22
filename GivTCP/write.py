@@ -23,7 +23,7 @@ else:
     else:
         logging.basicConfig(filename=GiV_Settings.Debug_File_Location, encoding='utf-8', level=logging.ERROR)
 
-logger = logging.getLogger("GivTCP")
+logger = logging.getLogger("GivTCP_Write")
 
 
 def enableChargeTarget(payload):
