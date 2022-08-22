@@ -100,17 +100,17 @@ if os.getenv('MQTT_ADDRESS')=="127.0.0.1" and os.getenv('MQTT_OUTPUT')=="True":
 while True:
     for inv in range(1,int(os.getenv('NUMINVERTORS'))+1):
         PATH= "/app/GivTCP_"+str(inv)
-        if os.getenv('SELF_RUN') and not selfRun[inv].poll()==None:
+        if os.getenv('SELF_RUN')==True and not selfRun[inv].poll()==None:
             logger.error("Self Run loop process died. restarting...")
             os.chdir(PATH)
             logger.critical ("Running Invertor read loop every "+str(os.getenv('SELF_RUN_LOOP_TIMER')))
             selfRun[inv]=subprocess.Popen(["/usr/local/bin/python3",PATH+"/read.py", "self_run2"])
-        elif os.getenv('MQTT_OUTPUT') and not mqttClient[inv].poll()==None:
+        elif os.getenv('MQTT_OUTPUT')==True and not mqttClient[inv].poll()==None:
             logger.error("MQTT Client process died. Restarting...")
             os.chdir(PATH)
             logger.critical ("Subscribing Mosquitto on port "+str(os.getenv('MQTT_PORT')))
             mqttClient[inv]=subprocess.Popen(["/usr/local/bin/python3",PATH+"/mqtt_client.py"])
-        elif os.getenv('WEB_DASH') and not webDash[inv].poll()==None:
+        elif os.getenv('WEB_DASH')==True and not webDash[inv].poll()==None:
             logger.error("Web Dashboard process died. Restarting...")
             os.chdir(PATH2)
             WDPORT=int(os.getenv('WEB_DASH_PORT'))+inv-1
