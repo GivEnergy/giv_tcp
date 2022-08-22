@@ -348,10 +348,10 @@ def getData(fullrefresh):      #Read from Invertor put in cache
             discharge_enable="disable"
 
         #Get Charge/Discharge Active status
-        discharge_rate=max(GEInv.battery_discharge_limit*3,100)
+        discharge_rate=min(GEInv.battery_discharge_limit*3,100)
         #if discharge_rate>100: discharge_rate=100
         
-        charge_rate=max(GEInv.battery_charge_limit*3,100)
+        charge_rate=min(GEInv.battery_charge_limit*3,100)
         #if charge_rate>100: charge_rate=100
 
         #Calculate Mode
