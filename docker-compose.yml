@@ -1,7 +1,7 @@
 version: "3.9"
 services:
   GivTCP:
-    image: britkat/giv_tcp-ma:1.1.5
+    image: britkat/giv_tcp-ma:1.1.6
     ports:
       - "1883:1883"
       - "6345:6345"
@@ -34,7 +34,7 @@ services:
       - EXPORTRATE=0.04                 # Price in £/$ for your export electricity per kWh
       - HOSTIP=""                       # External IP address of the docker host (needed for web dashboard)
       - DAYRATESTART="04:30"            # Time in HH:MM when your day time tariff kicks in
-      - NIGHTRATESTART="00:00"          # Time in HH:MM when your night time tariff kicks in
+      - NIGHTRATESTART="00:30"          # Time in HH:MM when your night time tariff kicks in
       - TZ="Europe/London"              # Set to your Timezone
       - WEB_DASH="False"                # Enable the wed dashboard
       - WEB_DASH_PORT="3000"            # Port to serve the web dashboard on
