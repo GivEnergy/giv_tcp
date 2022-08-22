@@ -421,10 +421,11 @@ def getData(fullrefresh):      #Read from Invertor put in cache
             logger.info("Building battery output: ")
             battery={}
             battery['Battery_Serial_Number']=b.battery_serial_number
-            #if b.battery_soc!=0:
-            battery['Battery_SOC']=b.battery_soc
-            #else:
-            #    if 'multi_output_old' in locals(): battery['Battery_SOC']=multi_output_old['Battery_Details'][b.battery_serial_number]['Battery_SOC']
+            if b.battery_soc!=0:
+                battery['Battery_SOC']=b.battery_soc
+            elif 'multi_output_old' in locals(): 
+                battery['Battery_SOC']=multi_output_old['Battery_Details'][b.battery_serial_number]['Battery_SOC']
+                battery['Battery_SOC']=1
             battery['Battery_Capacity']=b.battery_full_capacity
             battery['Battery_Design_Capacity']=b.battery_design_capacity
             battery['Battery_Remaining_Capcity']=b.battery_remaining_capacity
