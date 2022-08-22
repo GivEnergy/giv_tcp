@@ -77,7 +77,7 @@ for inv in range(1,int(os.getenv('NUMINVERTORS'))+1):
     command=shlex.split("/usr/local/bin/gunicorn -w 3 -b :"+str(GUPORT)+" REST:giv_api")
     gunicorn[inv]=subprocess.Popen(command)
     
-    os.chdir("/app/GivEnergy-Smart-Home-Display-givtcp")
+    os.chdir(PATH2)
     if os.getenv('WEB_DASH')=="True":
         # Create app.json
         print ("Creating web dashbaord config")

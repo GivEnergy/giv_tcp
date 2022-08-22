@@ -21,7 +21,7 @@ options:
   INVERTOR_IP_1:  ""
   NUMBATTERIES_1:  1
   MQTT_OUTPUT: True
-  MQTT_ADDRESS: "homeassistant.local"
+  MQTT_ADDRESS: "core-mosquitto"
   MQTT_USERNAME: ""
   MQTT_PASSWORD: ""
   MQTT_TOPIC: ""
