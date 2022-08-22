@@ -235,7 +235,7 @@ class HAMQTT():
         try:
             tempObj['command_topic']=GiV_Settings.MQTT_Topic+"/control/"+SN+"/"+HAMQTT.entity_type[str(topic).split("/")[-1]][2]
         except:
-            logger.info("No command topic avaiable, skipping")
+            pass
 #set device specific elements here:
         if HAMQTT.entity_type[str(topic).split("/")[-1]][0]=="sensor":
             tempObj['unit_of_meas']=""
