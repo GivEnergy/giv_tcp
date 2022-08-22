@@ -42,6 +42,8 @@ logger = logging.getLogger("GivTCP_"+str(GiV_Settings.givtcp_instance))
 
 #my_logger = logging.getLogger('givenergy_modbus')
 #my_logger.setLevel(logging.CRITICAL)
+lockfile=".lockfile"
+regcache="regCache.pkl"
 
 def getData(fullrefresh):      #Read from Invertor put in cache 
     plant=Plant(number_batteries=int(GiV_Settings.numBatteries))
@@ -57,7 +59,7 @@ def getData(fullrefresh):      #Read from Invertor put in cache
     temp={}
     logger.info("----------------------------Starting----------------------------")
     logging.info("Getting All Registers")
-    lockfile=".lockfile"
+
     
     ### Only run if no lockfile present
     if exists(lockfile):
@@ -81,6 +83,7 @@ def getData(fullrefresh):      #Read from Invertor put in cache
         os.remove(lockfile)
   
         multi_output['Last_Updated_Time']= datetime.datetime.utcnow().replace(tzinfo=datetime.timezone.utc).isoformat()  
+        
         #Get lastupdate from pickle if it exists
         if exists("lastUpdate.pkl"):
             with open('lastUpdate.pkl', 'rb') as inp:
@@ -112,8 +115,8 @@ def getData(fullrefresh):      #Read from Invertor put in cache
         multi_output['raw']=raw
 
         #Grab previous data from Pickle and validate any outrageous changes
-        if exists("regCache.pkl"):      #if there is no cache, create it
-            with open('regCache.pkl', 'rb') as inp:
+        if exists(regcache):      #if there is no cache, create it
+            with open(regcache, 'rb') as inp:
                 multi_output_old= pickle.load(inp)
 
     try:
@@ -163,6 +166,14 @@ def getData(fullrefresh):      #Read from Invertor put in cache
             energy_today_output['Load_Energy_Today_kWh']=round((energy_today_output['Invertor_Energy_Today_kWh']-energy_today_output['AC_Charge_Energy_Today_kWh'])-(energy_today_output['Export_Energy_Today_kWh']-energy_today_output['Import_Energy_Today_kWh']),2)
         else:
             energy_today_output['Load_Energy_Today_kWh']=round((energy_today_output['Invertor_Energy_Today_kWh']-energy_today_output['AC_Charge_Energy_Today_kWh'])-(energy_today_output['Export_Energy_Today_kWh']-energy_today_output['Import_Energy_Today_kWh'])+energy_today_output['PV_Energy_Today_kWh'],2)
+
+        checksum=0
+        for item in energy_today_output:
+            checksum=checksum+energy_today_output[item]
+        if checksum==0 and GEInv.system_time.hour==0 and GEInv.system_time.minute==0:
+            #remove regcache at midnight
+            logger.error("Energy Today is Zero and its midnight so removing regCache")
+            os.remove(regcache)
 
         
 ############  Core Power Stats    ############
@@ -456,7 +467,7 @@ def getData(fullrefresh):      #Read from Invertor put in cache
         multi_output["Battery_Details"]=batteries2
 
         # Save new data to Pickle
-        with open('regCache.pkl', 'wb') as outp:
+        with open(regcache, 'wb') as outp:
             pickle.dump(multi_output, outp, pickle.HIGHEST_PROTOCOL)
         result['result']="Success retrieving data"
     except:
@@ -482,10 +493,10 @@ def pubFromJSON():
 def pubFromPickle():        #Publish last cached Invertor Data
     multi_output={}
     result="Success"
-    if not exists("regCache.pkl"):      #if there is no cache, create it
+    if not exists(regcache):      #if there is no cache, create it
         result=getData(True)
     if "Success" in result:
-        with open('regCache.pkl', 'rb') as inp:
+        with open(regcache, 'rb') as inp:
             multi_output= pickle.load(inp)
         SN=multi_output["Invertor_Details"]['Invertor_Serial_Number']
         publishOutput(multi_output,SN)

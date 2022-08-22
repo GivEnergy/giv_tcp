@@ -19,7 +19,7 @@ do
     # create settings.py file in the directory
     FILE=${PATH}/settings.py
     FILE2=${PATH}/startup.sh
-    FILE3=/app/GivEnergy-Smart-Home-Display/app.json
+    FILE3=/app/GivEnergy-Smart-Home-Display-givtcp/app.json
 
     #Remove settings file if its already there
     if [ -f "$FILE" ]
@@ -135,12 +135,14 @@ do
     ### Run Web Dashboard ###
     printf "if [ \"\$WEB_DASH\" ]\n" >> "$FILE2"
     printf "then\n" >> "$FILE2"
-    printf "    (cd /app/GivEnergy-Smart-Home-Display; /usr/bin/node /usr/local/bin/serve -p ${WEB_DASH_PORT}&)\n">> "$FILE2"
+    printf "    (cd /app/GivEnergy-Smart-Home-Display-givtcp; /usr/bin/node /usr/local/bin/serve -p ${WEB_DASH_PORT}) &\n">> "$FILE2"
     printf "fi\n" >> "$FILE2"
     ### Run REST API ###
     printf "GUPORT=$((${i}+6344))\n" >> "$FILE2"
     printf "echo Starting Gunicorn on port \"\$GUPORT\"\n" >> "$FILE2"
-    printf "(cd \$PATH; /usr/local/bin/gunicorn -w 3 -b :\"\$GUPORT\" REST:giv_api)" >> "$FILE2"
+    printf "(cd \$PATH; /usr/local/bin/gunicorn -w 3 -b :\"\$GUPORT\" REST:giv_api) &\n" >> "$FILE2"
+    printf "wait -n\n" >> "$FILE2"
+    printf "exit \$?\n" >> "$FILE2"
 
     if [ "$i" = "$NUMINVERTORS" ]
     then
@@ -149,5 +151,3 @@ do
         (cd $PATH; /bin/sh startup.sh &)   #Launch the individual startup script and carry on executing
     fi
 done
-
-/bin/sh
