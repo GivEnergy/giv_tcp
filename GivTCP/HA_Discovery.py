@@ -247,7 +247,7 @@ class HAMQTT():
                 else:
                     tempObj['state_class']="total_increasing"
             if HAMQTT.entity_type[str(topic).split("/")[-1]][1]=="money":
-                tempObj['unit_of_meas']="\{currency\}/kwh"
+                tempObj['unit_of_meas']="{{currency}}/kwh"
                 tempObj['device_class']="Monetary"
             if HAMQTT.entity_type[str(topic).split("/")[-1]][1]=="power":
                 tempObj['unit_of_meas']="W"
