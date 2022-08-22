@@ -51,6 +51,7 @@ for inv in range(1,int(os.getenv('NUMINVERTORS'))+1):
         outp.write("    default_path=\""+str(os.getenv("PATH")+"\"\n"))
         outp.write("    day_rate=\""+str(os.getenv("DAYRATE")+"\"\n"))
         outp.write("    night_rate=\""+str(os.getenv("NIGHTRATE")+"\"\n"))
+        outp.write("    export_rate=\""+str(os.getenv("EXPORTRATE")+"\"\n"))
         outp.write("    day_rate_start=\""+str(os.getenv("DAYRATESTART")+"\"\n"))
         outp.write("    night_rate_start=\""+str(os.getenv("NIGHTRATESTART")+"\"\n"))
         outp.write("    ha_device_prefix=\""+str(os.getenv("HADEVICEPREFIX")+"\"\n"))

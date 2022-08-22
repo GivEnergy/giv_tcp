@@ -661,6 +661,7 @@ def ratecalcs(import_energy):
 
     rate_data['day_rate']= GiV_Settings.day_rate
     rate_data['night_rate']= GiV_Settings.night_rate
+    rate_data['export_rate']=GiV_Settings.export_rate
 
 
     # dump current data to Pickle
