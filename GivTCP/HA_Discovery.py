@@ -143,7 +143,7 @@ class HAMQTT():
         "day_energy":["sensor","energy"],
         "day_cost":["sensor","money"],
         "day_rate":["sensor","money"],
-        "current_rate":["sensor",""],
+        "current_rate":["sensor","money"],
         "Average_ppkwh_today":["sensor","money"],
         }
 

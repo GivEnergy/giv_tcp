@@ -643,11 +643,12 @@ def ratecalcs(import_energy):
     if night_start <= datetime.datetime.now() < day_start:
         rate_data['night_energy']=import_energy-rate_data['night_start_energy']
         rate_data['night_cost']=rate_data['night_energy']*float(GiV_Settings.night_rate)
-        rate_data['current_rate']="Night"
+        rate_data['current_rate']=GiV_Settings.night_rate
+        
     else:
         rate_data['day_energy']=import_energy-rate_data['day_start_energy']
         rate_data['day_cost']=rate_data['day_energy']*float(GiV_Settings.day_rate)
-        rate_data['current_rate']="Day"
+        rate_data['current_rate']=GiV_Settings.day_rate
 
     rate_data['day_rate']= GiV_Settings.day_rate
     rate_data['night_rate']= GiV_Settings.night_rate
