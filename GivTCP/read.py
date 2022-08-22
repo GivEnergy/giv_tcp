@@ -428,7 +428,7 @@ def getData(fullrefresh):      #Read from Invertor put in cache
                 battery['Battery_SOC']=multi_output_old['Battery_Details'][b.battery_serial_number]['Battery_SOC']
             elif b.battery_soc==0 and not 'multi_output_old' in locals():
                 battery['Battery_SOC']=1
-                
+
             battery['Battery_Capacity']=b.battery_full_capacity
             battery['Battery_Design_Capacity']=b.battery_design_capacity
             battery['Battery_Remaining_Capcity']=b.battery_remaining_capacity
@@ -670,15 +670,18 @@ def dataSmoother(dataNew, dataOld, lastUpdate):
     ### perform test to validate data and smooth out spikes
     if isinstance(dataNew,int) or isinstance(dataNew,float):
         ### Remove High velocity changes
-        then=datetime.datetime.fromisoformat(lastUpdate)
-        now=datetime.datetime.now(then.tzinfo)
-        timeDelta=(now-then).total_seconds()
-        dataDelta=dataNew-dataOld
-        if abs(dataDelta/dataNew) > 0.25 and timeDelta<60:
-            data=dataOld
-            logger.info("Datapoint jumped too high in a single read, using previous value")
+        if dataNew!=0:
+            then=datetime.datetime.fromisoformat(lastUpdate)
+            now=datetime.datetime.now(then.tzinfo)
+            timeDelta=(now-then).total_seconds()
+            dataDelta=dataNew-dataOld
+            if abs(dataDelta/dataNew) > 0.25 and timeDelta<60:
+                data=dataOld
+                logger.info("Datapoint jumped too high in a single read, using previous value")
+            else:
+                data=dataNew
         else:
-            data=dataNew
+            data=dataNew   
     else:
         data=dataNew
     return(data)
