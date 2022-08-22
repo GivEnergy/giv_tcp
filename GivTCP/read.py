@@ -218,6 +218,25 @@ def getData(fullrefresh):      #Read from Invertor put in cache
         power_output['Self_Consumption_Power']=max(Load_power - import_power,0)
 
 
+############  Power Flow Stats    ############
+
+    #Solar to H/B/G
+        logger.info("Getting Solar to H/B/G Power Flows")
+        if PV_power>0:
+            S2H=min(PV_power,Load_power)
+            power_flow_output['Solar_to_House']=S2H
+            power_flow_output['Solar_to_Grid']=export_power
+
+        else:
+            power_flow_output['Solar_to_House']=0
+            power_flow_output['Solar_to_Grid']=0
+
+    #Grid to Battery/House Power
+        logger.info("Getting Grid to Battery/House Power Flow")
+        if import_power>0:
+            power_flow_output['Grid_to_House']=max(import_power-charge_power,0)
+        else:
+            power_flow_output['Grid_to_House']=0
 
 ########### Battery Stats only if there are batteries...
 
@@ -252,6 +271,40 @@ def getData(fullrefresh):      #Read from Invertor put in cache
             else:
                 energy_total_output['Battery_Charge_Energy_Total_kWh']=GEInv.e_battery_charge_total
                 energy_total_output['Battery_Discharge_Energy_Total_kWh']=GEInv.e_battery_discharge_total
+        ### Power flows
+            logger.info("Getting Solar to H/B/G Power Flows")
+            if PV_power>0:
+                S2H=min(PV_power,Load_power)
+                power_flow_output['Solar_to_House']=S2H
+                S2B=max((PV_power-S2H)-export_power,0)
+                power_flow_output['Solar_to_Battery']=S2B
+                power_flow_output['Solar_to_Grid']=max(PV_power - S2H - S2B,0)
+
+            else:
+                power_flow_output['Solar_to_House']=0
+                power_flow_output['Solar_to_Battery']=0
+                power_flow_output['Solar_to_Grid']=0
+        #Battery to House
+            logger.info("Getting Battery to House Power Flow")
+            B2H=max(discharge_power-export_power,0)
+            power_flow_output['Battery_to_House']=B2H
+
+        #Grid to Battery/House Power
+            logger.info("Getting Grid to Battery/House Power Flow")
+            if import_power>0:
+                power_flow_output['Grid_to_Battery']=charge_power-max(PV_power-Load_power,0)
+                power_flow_output['Grid_to_House']=max(import_power-charge_power,0)
+
+            else:
+                power_flow_output['Grid_to_Battery']=0
+                power_flow_output['Grid_to_House']=0
+
+        #Battery to Grid Power
+            logger.info("Getting Battery to Grid Power Flow")
+            if export_power>0:
+                power_flow_output['Battery_to_Grid']=max(discharge_power-B2H,0)
+            else:
+                power_flow_output['Battery_to_Grid']=0
 
         #Check for all zeros
         checksum=0
@@ -259,46 +312,6 @@ def getData(fullrefresh):      #Read from Invertor put in cache
             checksum=checksum+energy_total_output[item]
         if checksum==0:
             raise ValueError("All zeros returned by Invertor, skipping update")
-
-############  Power Flow Stats    ############
-
-    #Solar to H/B/G
-        logger.info("Getting Solar to H/B/G Power Flows")
-        if PV_power>0:
-            S2H=min(PV_power,Load_power)
-            power_flow_output['Solar_to_House']=S2H
-            S2B=max((PV_power-S2H)-export_power,0)
-            power_flow_output['Solar_to_Battery']=S2B
-            power_flow_output['Solar_to_Grid']=max(PV_power - S2H - S2B,0)
-
-        else:
-            power_flow_output['Solar_to_House']=0
-            power_flow_output['Solar_to_Battery']=0
-            power_flow_output['Solar_to_Grid']=0
-
-    #Battery to House
-        logger.info("Getting Battery to House Power Flow")
-        B2H=max(discharge_power-export_power,0)
-        power_flow_output['Battery_to_House']=B2H
-
-    #Grid to Battery/House Power
-        logger.info("Getting Grid to Battery/House Power Flow")
-        if import_power>0:
-            power_flow_output['Grid_to_Battery']=charge_power-max(PV_power-Load_power,0)
-            power_flow_output['Grid_to_House']=max(import_power-charge_power,0)
-
-        else:
-            power_flow_output['Grid_to_Battery']=0
-            power_flow_output['Grid_to_House']=0
-
-    #Battery to Grid Power
-        logger.info("Getting Battery to Grid Power Flow")
-        if export_power>0:
-            power_flow_output['Battery_to_Grid']=max(discharge_power-B2H,0)
-        else:
-            power_flow_output['Battery_to_Grid']=0
-
-    #Get Invertor Temperature
 
 
     #Combine all outputs
