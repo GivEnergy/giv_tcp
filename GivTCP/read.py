@@ -43,9 +43,9 @@ logger = logging.getLogger("GivTCP_"+str(GiV_Settings.givtcp_instance))
 #my_logger = logging.getLogger('givenergy_modbus')
 #my_logger.setLevel(logging.CRITICAL)
 lockfile=".lockfile"
-regcache="/config/regCache.pkl"
-ratedata="/config/rateData.pkl"
-lastupdate="/config/lastUpdate.pkl"
+regcache="/config/GivTCPregCache.pkl"
+ratedata="/config/GivTCPrateData.pkl"
+lastupdate="/config/GivTCPlastUpdate.pkl"
 
 def getData(fullrefresh):      #Read from Invertor put in cache 
     plant=Plant(number_batteries=int(GiV_Settings.numBatteries))
