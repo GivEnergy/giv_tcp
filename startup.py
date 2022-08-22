@@ -12,7 +12,7 @@ mqttClient={}
 gunicorn={}
 webDash={}
 for inv in range(1,int(os.getenv('NUMINVERTORS'))+1):
-    print ("Instance is inv: "+str(inv)+"/"+str(os.getenv('NUMINVERTORS')))
+    logger.info ("Instance is inv: "+str(inv)+"/"+str(os.getenv('NUMINVERTORS')))
     PATH= "/app/GivTCP_"+str(inv)
     PATH2= "/app/GivEnergy-Smart-Home-Display-givtcp_"+str(inv)
 
@@ -25,7 +25,7 @@ for inv in range(1,int(os.getenv('NUMINVERTORS'))+1):
         os.remove(PATH+"/settings.py")
     
     # create settings file
-    print ("Recreating settings.py for invertor "+str(inv))
+    logger.info ("Recreating settings.py for invertor "+str(inv))
     with open(PATH+"/settings.py", 'w') as outp:
         outp.write("class GiV_Settings:\n")
         outp.write("    invertorIP=\""+str(os.getenv("INVERTOR_IP_"+str(inv)))+"\"\n")
@@ -62,38 +62,38 @@ for inv in range(1,int(os.getenv('NUMINVERTORS'))+1):
     if exists(PATH+"/.lockfile"):
         os.remove(PATH+"/.lockfile")
     
-    print ("GivTCP Instance is "+str(inv))
+    logger.info ("GivTCP Instance is "+str(inv))
 
     os.chdir(PATH)
     if os.getenv('SELF_RUN')=="True":
-        print ("Running Invertor read loop every "+str(os.getenv('SELF_RUN_LOOP_TIMER')))
+        logger.info ("Running Invertor read loop every "+str(os.getenv('SELF_RUN_LOOP_TIMER')))
         selfRun[inv]=subprocess.Popen(["/usr/local/bin/python3",PATH+"/read.py", "self_run2"])
     if os.getenv('MQTT_OUTPUT')=="True":
-        print ("Subscribing Mosquitto on port "+str(os.getenv('MQTT_PORT')))
+        logger.info ("Subscribing Mosquitto on port "+str(os.getenv('MQTT_PORT')))
         mqttClient[inv]=subprocess.Popen(["/usr/local/bin/python3",PATH+"/mqtt_client.py"])
     
     GUPORT=6344+inv
-    print ("Starting Gunicorn on port "+str(GUPORT))
+    logger.info ("Starting Gunicorn on port "+str(GUPORT))
     command=shlex.split("/usr/local/bin/gunicorn -w 3 -b :"+str(GUPORT)+" REST:giv_api")
     gunicorn[inv]=subprocess.Popen(command)
     
     os.chdir(PATH2)
     if os.getenv('WEB_DASH')=="True":
         # Create app.json
-        print ("Creating web dashbaord config")
+        logger.info ("Creating web dashbaord config")
         with open(PATH2+"/app.json", 'w') as outp:
             outp.write("{\n")
             outp.write("\"givTcpHostname\": \""+os.getenv('HOSTIP')+":6345\",")
             outp.write("\"solarRate\": "+os.getenv('DAYRATE')+",")
             outp.write("\"exportRate\": "+os.getenv('EXPORTRATE')+"")
             outp.write("}")
-        print ("Serving Web Dashboard from port "+str(os.getenv('WEB_DASH_PORT')))
+        logger.info ("Serving Web Dashboard from port "+str(os.getenv('WEB_DASH_PORT')))
         WDPORT=int(os.getenv('WEB_DASH_PORT'))+inv
         command=shlex.split("/usr/bin/node /usr/local/bin/serve -p "+ str(WDPORT))
         webDash[inv]=subprocess.Popen(command)
 
 if os.getenv('MQTT_ADDRESS')=="127.0.0.1" and os.getenv('MQTT_OUTPUT')=="True":
-    print ("Starting Mosquitto on port "+str(os.getenv('MQTT_PORT')))
+    logger.info ("Starting Mosquitto on port "+str(os.getenv('MQTT_PORT')))
     mqttBroker=subprocess.Popen(["/usr/sbin/mosquitto", "-c",PATH+"/mqtt.conf"])
     
 # Loop round checking all processes are running
@@ -101,31 +101,31 @@ while True:
     for inv in range(1,int(os.getenv('NUMINVERTORS'))+1):
         PATH= "/app/GivTCP_"+str(inv)
         if os.getenv('SELF_RUN') and not selfRun[inv].poll()==None:
-            print("Self Run loop process died. restarting...")
+            logger.info("Self Run loop process died. restarting...")
             os.chdir(PATH)
-            print ("Running Invertor read loop every "+str(os.getenv('SELF_RUN_LOOP_TIMER')))
+            logger.info ("Running Invertor read loop every "+str(os.getenv('SELF_RUN_LOOP_TIMER')))
             selfRun[inv]=subprocess.Popen(["/usr/local/bin/python3",PATH+"/read.py", "self_run2"])
         elif os.getenv('MQTT_OUTPUT') and not mqttClient[inv].poll()==None:
-            print("MQTT Client process died. Restarting...")
+            logger.info("MQTT Client process died. Restarting...")
             os.chdir(PATH)
-            print ("Subscribing Mosquitto on port "+str(os.getenv('MQTT_PORT')))
+            logger.info ("Subscribing Mosquitto on port "+str(os.getenv('MQTT_PORT')))
             mqttClient[inv]=subprocess.Popen(["/usr/local/bin/python3",PATH+"/mqtt_client.py"])
         elif os.getenv('WEB_DASH') and not webDash[inv].poll()==None:
-            print("Web Dashboard process died. Restarting...")
+            logger.info("Web Dashboard process died. Restarting...")
             os.chdir(PATH2)
-            print ("Serving Web Dashboard from port "+str(os.getenv('WEB_DASH_PORT')))
+            logger.info ("Serving Web Dashboard from port "+str(os.getenv('WEB_DASH_PORT')))
             command=shlex.split("/usr/bin/node /usr/local/bin/serve -p "+ str(os.getenv('WEB_DASH_PORT')))
             webDash[inv]=subprocess.Popen(command)
         elif not gunicorn[inv].poll()==None:
-            print("REST API process died. Restarting...")
+            logger.info("REST API process died. Restarting...")
             os.chdir(PATH)
             GUPORT=6344+inv
-            print ("Starting Gunicorn on port "+str(GUPORT))
+            logger.info ("Starting Gunicorn on port "+str(GUPORT))
             command=shlex.split("/usr/local/bin/gunicorn -w 3 -b :"+str(GUPORT)+" REST:giv_api")
             gunicorn[inv]=subprocess.Popen(command)
     if os.getenv('MQTT_ADDRESS')=="127.0.0.1" and not mqttBroker.poll()==None:
-        print("MQTT Broker process died. Restarting...")
+        logger.info("MQTT Broker process died. Restarting...")
         os.chdir(PATH)
-        print ("Starting Mosquitto on port "+str(os.getenv('MQTT_PORT')))
+        logger.info ("Starting Mosquitto on port "+str(os.getenv('MQTT_PORT')))
         mqttBroker=subprocess.Popen(["/usr/sbin/mosquitto", "-c",PATH+"/mqtt.conf"])
     sleep (60)
