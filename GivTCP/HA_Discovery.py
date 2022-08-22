@@ -144,6 +144,7 @@ class HAMQTT():
         "day_cost":["sensor","money"],
         "day_rate":["sensor","money"],
         "current_rate":["sensor","money"],
+        "export_rate":["sensor","money"],
         "Average_ppkwh_today":["sensor","money"],
         }
 
