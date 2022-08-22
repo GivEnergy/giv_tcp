@@ -120,46 +120,29 @@ def getData(fullrefresh):      #Read from Invertor put in cache
                 multi_output_old= pickle.load(inp)
 
     try:
-    #Total Energy Figures
+#Total Energy Figures
         logger.info("Getting Total Energy Data")
         energy_total_output['Export_Energy_Total_kWh']=GEInv.e_grid_out_total
-        energy_total_output['Battery_Throughput_Total_kWh']=GEInv.e_battery_throughput_total
-        energy_total_output['AC_Charge_Energy_Total_kWh']=GEInv.e_inverter_in_total
         energy_total_output['Import_Energy_Total_kWh']=GEInv.e_grid_in_total
         energy_total_output['Invertor_Energy_Total_kWh']=GEInv.e_inverter_out_total
         energy_total_output['PV_Energy_Total_kWh']=GEInv.e_pv_total
+        energy_total_output['AC_Charge_Energy_Total_kWh']=GEInv.e_inverter_in_total
         
         if  GEInv.inverter_model==Model.Hybrid:
             energy_total_output['Load_Energy_Total_kWh']=round((energy_total_output['Invertor_Energy_Total_kWh']-energy_total_output['AC_Charge_Energy_Total_kWh'])-(energy_total_output['Export_Energy_Total_kWh']-energy_total_output['Import_Energy_Total_kWh']),2)
         else:
             energy_total_output['Load_Energy_Total_kWh']=round((energy_total_output['Invertor_Energy_Total_kWh']-energy_total_output['AC_Charge_Energy_Total_kWh'])-(energy_total_output['Export_Energy_Total_kWh']-energy_total_output['Import_Energy_Total_kWh'])+energy_total_output['PV_Energy_Total_kWh'],2)
 
-        if GEInv.e_battery_charge_total==0 and GEInv.e_battery_discharge_total==0:        #If no values in "nomal" registers then grab from back up registers - for some f/w versions
-            energy_total_output['Battery_Charge_Energy_Total_kWh']=GEBat[0].e_battery_charge_total_2
-            energy_total_output['Battery_Discharge_Energy_Total_kWh']=GEBat[0].e_battery_discharge_total_2
-        else:
-            energy_total_output['Battery_Charge_Energy_Total_kWh']=GEInv.e_battery_charge_total
-            energy_total_output['Battery_Discharge_Energy_Total_kWh']=GEInv.e_battery_discharge_total
-
         energy_total_output['Self_Consumption_Energy_Total_kWh']=round(energy_total_output['PV_Energy_Total_kWh'],2)-round(energy_total_output['Export_Energy_Total_kWh'],2)
 
-        #Check for all zeros
-        checksum=0
-        for item in energy_total_output:
-            checksum=checksum+energy_total_output[item]
-        if checksum==0:
-            raise ValueError("All zeros returned by Invertor, skipping update")
 
 #Energy Today Figures
         logger.info("Getting Today Energy Data")
-        energy_today_output['Battery_Throughput_Today_kWh']=GEInv.e_battery_charge_day+GEInv.e_battery_discharge_day
         energy_today_output['PV_Energy_Today_kWh']=GEInv.e_pv1_day+GEInv.e_pv2_day
         energy_today_output['Import_Energy_Today_kWh']=GEInv.e_grid_in_day
         energy_today_output['Export_Energy_Today_kWh']=GEInv.e_grid_out_day
         energy_today_output['AC_Charge_Energy_Today_kWh']=GEInv.e_inverter_in_day
         energy_today_output['Invertor_Energy_Today_kWh']=GEInv.e_inverter_out_day
-        energy_today_output['Battery_Charge_Energy_Today_kWh']=GEInv.e_battery_charge_day
-        energy_today_output['Battery_Discharge_Energy_Today_kWh']=GEInv.e_battery_discharge_day
         energy_today_output['Self_Consumption_Energy_Today_kWh']=round(energy_today_output['PV_Energy_Today_kWh'],2)-round(energy_today_output['Export_Energy_Today_kWh'],2)
                 
         if GEInv.inverter_model==Model.Hybrid: 
@@ -222,7 +205,6 @@ def getData(fullrefresh):      #Read from Invertor put in cache
             power_output['AC_Charge_Power']= abs(Invertor_power)
         else:
             power_output['AC_Charge_Power']=0
-
     #Load Power
         logger.info("Getting Load Power")
         Load_power=GEInv.p_load_demand 
@@ -233,19 +215,10 @@ def getData(fullrefresh):      #Read from Invertor put in cache
         logger.info("Getting Self Consumption Power")
         power_output['Self_Consumption_Power']=max(Load_power - import_power,0)
 
-    #Battery Power
-        Battery_power=GEInv.p_battery 
-        if Battery_power>=0:
-            discharge_power=abs(Battery_power)
-            charge_power=0
-        elif Battery_power<=0:
-            discharge_power=0
-            charge_power=abs(Battery_power)
-        power_output['Battery_Power']=Battery_power
-        power_output['Charge_Power']=charge_power
-        power_output['Discharge_Power']=discharge_power
 
-    #SOC
+
+########### Battery Stats only if there are batteries...
+
         logger.info("Getting SOC")
         if int(GiV_Settings.numBatteries)>0:     #only do this if there are batteries
             if GEInv.battery_percent!=0:
@@ -256,6 +229,34 @@ def getData(fullrefresh):      #Read from Invertor put in cache
             elif GEInv.battery_percent==0 and not 'multi_output_old' in locals():
                 power_output['SOC']=1
                 logger.error("\"Battery SOC\" reported as: "+str(GEInv.battery_percent)+"% and no previou value so setting to 1%")
+            energy_total_output['Battery_Throughput_Total_kWh']=GEInv.e_battery_throughput_total
+        #Battery Power
+            Battery_power=GEInv.p_battery 
+            if Battery_power>=0:
+                discharge_power=abs(Battery_power)
+                charge_power=0
+            elif Battery_power<=0:
+                discharge_power=0
+                charge_power=abs(Battery_power)
+            power_output['Battery_Power']=Battery_power
+            power_output['Charge_Power']=charge_power
+            power_output['Discharge_Power']=discharge_power
+            energy_today_output['Battery_Charge_Energy_Today_kWh']=GEInv.e_battery_charge_day
+            energy_today_output['Battery_Discharge_Energy_Today_kWh']=GEInv.e_battery_discharge_day
+            energy_today_output['Battery_Throughput_Today_kWh']=GEInv.e_battery_charge_day+GEInv.e_battery_discharge_day
+            if GEInv.e_battery_charge_total==0 and GEInv.e_battery_discharge_total==0:        #If no values in "nomal" registers then grab from back up registers - for some f/w versions
+                energy_total_output['Battery_Charge_Energy_Total_kWh']=GEBat[0].e_battery_charge_total_2
+                energy_total_output['Battery_Discharge_Energy_Total_kWh']=GEBat[0].e_battery_discharge_total_2
+            else:
+                energy_total_output['Battery_Charge_Energy_Total_kWh']=GEInv.e_battery_charge_total
+                energy_total_output['Battery_Discharge_Energy_Total_kWh']=GEInv.e_battery_discharge_total
+
+        #Check for all zeros
+        checksum=0
+        for item in energy_total_output:
+            checksum=checksum+energy_total_output[item]
+        if checksum==0:
+            raise ValueError("All zeros returned by Invertor, skipping update")
 
 ############  Power Flow Stats    ############
 
@@ -677,7 +678,7 @@ def dataSmoother(dataNew, dataOld, lastUpdate):
             dataDelta=dataNew-dataOld
             if abs(dataDelta/dataNew) > 0.25 and timeDelta<60:
                 data=dataOld
-                logger.info("Datapoint jumped too high in a single read, using previous value")
+                logger.info("Datapoint jumped too far in a single read, using previous value")
             else:
                 data=dataNew
         else:
