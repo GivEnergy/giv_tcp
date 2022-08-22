@@ -234,7 +234,7 @@ def getData(fullrefresh):      #Read from Invertor put in cache
     #Grid to Battery/House Power
         logger.info("Getting Grid to Battery/House Power Flow")
         if import_power>0:
-            power_flow_output['Grid_to_House']=max(import_power-charge_power,0)
+            power_flow_output['Grid_to_House']=import_power
         else:
             power_flow_output['Grid_to_House']=0
 
