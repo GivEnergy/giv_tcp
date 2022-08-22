@@ -38,7 +38,7 @@ def enableChargeTarget(payload):
     except:
         e = sys.exc_info()
         temp['result']="Setting Charge Target failed: " + str(e)
-    logger.info (temp['result'])
+        logger.error (temp['result'])
     return json.dumps(temp)
 
 def enableChargeSchedule(payload):
@@ -53,7 +53,7 @@ def enableChargeSchedule(payload):
     except:
         e = sys.exc_info()
         temp['result']="Setting Charge Enable failed: " + str(e)
-    logger.info (temp['result'])
+        logger.error (temp['result'])
     return json.dumps(temp)
 
 def enableDischargeSchedule(payload):
@@ -68,7 +68,7 @@ def enableDischargeSchedule(payload):
     except:
         e = sys.exc_info()
         temp['result']="Setting Charge Enable failed: " + str(e)
-    logger.info (temp['result'])
+        logger.error (temp['result'])
     return json.dumps(temp)
 
 def setShallowCharge(payload):
@@ -80,7 +80,7 @@ def setShallowCharge(payload):
     except:
         e = sys.exc_info()
         temp['result']="Setting Charge Enable failed: " + str(e)
-    logger.info (temp['result'])
+        logger.error (temp['result'])
     return json.dumps(temp)
 
 def enableDischarge(payload):
@@ -95,7 +95,7 @@ def enableDischarge(payload):
     except:
         e = sys.exc_info()
         temp['result']="Setting Discharge Enable failed: " + str(e)
-    logger.info (temp['result'])
+        logger.error (temp['result'])
     return json.dumps(temp)
 
 def setChargeTarget(payload):
@@ -110,7 +110,7 @@ def setChargeTarget(payload):
     except:
         e = sys.exc_info()
         temp['result']="Setting Charge Target failed: " + str(e)
-    logger.info (temp['result'])
+        logger.error (temp['result'])
     return json.dumps(temp)
 
 def setBatteryReserve(payload):
@@ -127,7 +127,7 @@ def setBatteryReserve(payload):
     except:
         e = sys.exc_info()
         temp['result']="Setting Battery Reserve failed: " + str(e)
-    logger.info (temp['result'])
+        logger.error (temp['result'])
     return json.dumps(temp)
 
 def setChargeRate(payload):
@@ -146,7 +146,7 @@ def setChargeRate(payload):
     except:
         e = sys.exc_info()
         temp['result']="Setting Charge Rate failed: " + str(e)
-    logger.info (temp['result'])
+        logger.error (temp['result'])
     return json.dumps(temp)
 
 
@@ -166,7 +166,7 @@ def setDischargeRate(payload):
     except:
         e = sys.exc_info()
         temp['result']="Setting Discharge Rate failed: " + str(e)
-    logger.info (temp['result'])
+        logger.error (temp['result'])
     return json.dumps(temp)
 
 
@@ -185,7 +185,7 @@ def setChargeSlot1(payload):
     except:
         e = sys.exc_info()
         temp['result']="Setting Charge Slot 1 failed: " + str(e)
-    logger.info (temp['result'])
+        logger.error (temp['result'])
     return json.dumps(temp)
 
 def setChargeSlot2(payload):
@@ -203,7 +203,7 @@ def setChargeSlot2(payload):
     except:
         e = sys.exc_info()
         temp['result']="Setting Charge Slot 2 failed: " + str(e)
-    logger.info (temp['result'])
+        logger.error (temp['result'])
     return json.dumps(temp)
 
 def setDischargeSlot1(payload):
@@ -221,7 +221,7 @@ def setDischargeSlot1(payload):
     except:
         e = sys.exc_info()
         temp['result']="Setting Discharge Slot 1 failed: " + str(e)
-    logger.info (temp['result'])
+        logger.error (temp['result'])
     return json.dumps(temp)
 
 def setDischargeSlot2(payload):
@@ -239,7 +239,7 @@ def setDischargeSlot2(payload):
     except:
         e = sys.exc_info()
         temp['result']="Setting Discharge Slot 2 failed: " + str(e)
-    logger.info (temp['result'])
+        logger.error (temp['result'])
     return json.dumps(temp)
 
 
@@ -266,7 +266,7 @@ def setBatteryMode(payload):
     except:
         e = sys.exc_info()
         temp['result']="Setting Battery Mode failed: " + str(e)
-    logger.info (temp['result'])
+        logger.error (temp['result'])
     return json.dumps(temp)
 
 def setDateTime(payload):
@@ -283,7 +283,7 @@ def setDateTime(payload):
     except:
         e = sys.exc_info()
         temp['result']="Setting Battery Mode failed: " + str(e) 
-    logger.info (temp['result'])
+        logger.error (temp['result'])
     return json.dumps(temp)
 
 if __name__ == '__main__':
