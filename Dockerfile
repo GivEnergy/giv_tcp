@@ -27,9 +27,7 @@ RUN pip install -r requirements.txt
 COPY GivTCP/ ./GivTCP
 COPY GivEnergy-Smart-Home-Display-givtcp/ ./GivEnergy-Smart-Home-Display-givtcp
 
-COPY setup.sh setup.sh
 COPY startup.py startup.py
-#COPY givenergy_modbus/ /usr/local/lib/python3.10/site-packages/givenergy_modbus
 
 ENV NUMINVERTORS=1
 ENV INVERTOR_IP_1=""

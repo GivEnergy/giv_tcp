@@ -43,7 +43,9 @@ logger = logging.getLogger("GivTCP_"+str(GiV_Settings.givtcp_instance))
 #my_logger = logging.getLogger('givenergy_modbus')
 #my_logger.setLevel(logging.CRITICAL)
 lockfile=".lockfile"
-regcache="regCache.pkl"
+regcache="/config/regCache.pkl"
+ratedata="/config/rateData.pkl"
+lastupdate="/config/lastUpdate.pkl"
 
 def getData(fullrefresh):      #Read from Invertor put in cache 
     plant=Plant(number_batteries=int(GiV_Settings.numBatteries))
@@ -85,14 +87,14 @@ def getData(fullrefresh):      #Read from Invertor put in cache
         multi_output['Last_Updated_Time']= datetime.datetime.utcnow().replace(tzinfo=datetime.timezone.utc).isoformat()  
         
         #Get lastupdate from pickle if it exists
-        if exists("lastUpdate.pkl"):
-            with open('lastUpdate.pkl', 'rb') as inp:
+        if exists(lastupdate):
+            with open(lastupdate, 'rb') as inp:
                 previousUpdate= pickle.load(inp)
             timediff=datetime.datetime.fromisoformat(multi_output['Last_Updated_Time'])-datetime.datetime.fromisoformat(previousUpdate)
             multi_output['Time_Since_Last_Update']=(((timediff.seconds*1000000)+timediff.microseconds)/1000000)
         
         #Save new time to pickle
-        with open('lastUpdate.pkl', 'wb') as outp:
+        with open(lastupdate, 'wb') as outp:
             pickle.dump(multi_output['Last_Updated_Time'], outp, pickle.HIGHEST_PROTOCOL)
 
         multi_output['status']="online"
@@ -605,8 +607,8 @@ def iterate_dict(array):        # Create a publish safe version of the output (c
 def ratecalcs(import_energy):
     rate_data={}
     #check if pickle data exists:
-    if exists('rateData.pkl'):
-        with open('rateData.pkl', 'rb') as inp:
+    if exists(ratedata):
+        with open(ratedata, 'rb') as inp:
             rate_data= pickle.load(inp)
 
     # if midnight then reset costs
@@ -662,7 +664,7 @@ def ratecalcs(import_energy):
 
 
     # dump current data to Pickle
-    with open('rateData.pkl', 'wb') as outp:
+    with open(ratedata, 'wb') as outp:
         pickle.dump(rate_data, outp, pickle.HIGHEST_PROTOCOL)
 
     return (rate_data)
