@@ -250,11 +250,12 @@ def getData(fullrefresh):      #Read from Invertor put in cache
         if int(GiV_Settings.numBatteries)>0:     #only do this if there are batteries
             if GEInv.battery_percent!=0:
                 power_output['SOC']=GEInv.battery_percent
-            elif 'multi_output_old' in locals():
+            elif GEInv.battery_percent==0 and 'multi_output_old' in locals():
                 power_output['SOC']=multi_output_old['Power']['Power']['SOC']
                 logger.error("\"Battery SOC\" reported as: "+str(GEInv.battery_percent)+"% so using previous value")
-            else:
+            elif GEInv.battery_percent==0 and not 'multi_output_old' in locals():
                 power_output['SOC']=1
+                logger.error("\"Battery SOC\" reported as: "+str(GEInv.battery_percent)+"% and no previou value so setting to 1%")
 
 ############  Power Flow Stats    ############
 
@@ -423,10 +424,11 @@ def getData(fullrefresh):      #Read from Invertor put in cache
             battery['Battery_Serial_Number']=b.battery_serial_number
             if b.battery_soc!=0:
                 battery['Battery_SOC']=b.battery_soc
-            elif 'multi_output_old' in locals(): 
+            elif b.battery_soc==0 and 'multi_output_old' in locals(): 
                 battery['Battery_SOC']=multi_output_old['Battery_Details'][b.battery_serial_number]['Battery_SOC']
-            else:
+            elif b.battery_soc==0 and not 'multi_output_old' in locals():
                 battery['Battery_SOC']=1
+                
             battery['Battery_Capacity']=b.battery_full_capacity
             battery['Battery_Design_Capacity']=b.battery_design_capacity
             battery['Battery_Remaining_Capcity']=b.battery_remaining_capacity
