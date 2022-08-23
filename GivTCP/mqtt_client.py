@@ -4,6 +4,7 @@ import time
 import sys
 import importlib
 import logging
+from logging.handlers import TimedRotatingFileHandler
 import settings
 from settings import GiV_Settings
 import write as wr
@@ -11,19 +12,20 @@ sys.path.append(GiV_Settings.default_path)
 
 if GiV_Settings.Log_Level.lower()=="debug":
     if GiV_Settings.Debug_File_Location=="":
-        logging.basicConfig(level=logging.DEBUG)
+        logging.basicConfig(level=logging.DEBUG, format="%(asctime)s [%(levelname)s] %(message)s", handlers=[logging.StreamHandler()])
     else:
-        logging.basicConfig(filename=GiV_Settings.Debug_File_Location, encoding='utf-8', level=logging.DEBUG)
+        logging.basicConfig(level=logging.DEBUG, format="%(asctime)s [%(levelname)s] %(message)s", handlers=[logging.StreamHandler(),TimedRotatingFileHandler(GiV_Settings.Debug_File_Location, when='D', interval=1, backupCount=7)])
 elif GiV_Settings.Log_Level.lower()=="info":
     if GiV_Settings.Debug_File_Location=="":
-        logging.basicConfig(level=logging.INFO)
+        logging.basicConfig(level=logging.INFO, format="%(asctime)s [%(levelname)s] %(message)s", handlers=[logging.StreamHandler()])
     else:
-        logging.basicConfig(filename=GiV_Settings.Debug_File_Location, encoding='utf-8', level=logging.INFO)
+        logging.basicConfig(level=logging.DEBUG, format="%(asctime)s [%(levelname)s] %(message)s", handlers=[logging.StreamHandler(),TimedRotatingFileHandler(GiV_Settings.Debug_File_Location, when='D', interval=1, backupCount=7)])
 else:
     if GiV_Settings.Debug_File_Location=="":
-        logging.basicConfig(level=logging.ERROR)
+        logging.basicConfig(level=logging.ERROR, format="%(asctime)s [%(levelname)s] %(message)s", handlers=[logging.StreamHandler()])
     else:
-        logging.basicConfig(filename=GiV_Settings.Debug_File_Location, encoding='utf-8', level=logging.ERROR)
+        logging.basicConfig(level=logging.ERROR, format="%(asctime)s [%(levelname)s] %(message)s", handlers=[logging.StreamHandler(),TimedRotatingFileHandler(GiV_Settings.Debug_File_Location, when='D', interval=1, backupCount=7)])
+
 
 logger = logging.getLogger("GivTCP_"+str(GiV_Settings.givtcp_instance)+"_MQTT_client")
 

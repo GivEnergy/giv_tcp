@@ -27,7 +27,7 @@ options:
   MQTT_TOPIC: ""
   MQTT_PORT: 1883
   LOG_LEVEL: "Error"
-  DEBUG_FILE_LOCATION: ""
+  DEBUG_FILE_LOCATION: "/config/GivTCP.log"
   PRINT_RAW: True
   SELF_RUN: True
   SELF_RUN_LOOP_TIMER: 5

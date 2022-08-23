@@ -11,6 +11,15 @@ selfRun={}
 mqttClient={}
 gunicorn={}
 webDash={}
+
+# Check if config firectory exists and creates it if not
+
+if not os.path.exists('/config/GivTCP'):
+    os.makedirs('/config/GivTCP')
+    logger.critical("No config directory exists, so creating it...")
+else:
+    logger.critical("Config directory already exists")
+
 for inv in range(1,int(os.getenv('NUMINVERTORS'))+1):
     logger.critical ("Instance is inv: "+str(inv)+"/"+str(os.getenv('NUMINVERTORS')))
     PATH= "/app/GivTCP_"+str(inv)

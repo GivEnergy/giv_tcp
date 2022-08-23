@@ -4,6 +4,7 @@ import sys
 from pickletools import read_uint1
 import json
 import logging
+from logging.handlers import TimedRotatingFileHandler
 import datetime
 import pickle
 import schedule
@@ -17,35 +18,34 @@ from os.path import exists
 import os
 sys.path.append(GiV_Settings.default_path)
 
-
 Print_Raw=False
 if GiV_Settings.Print_Raw_Registers:
     Print_Raw=True
 
 if GiV_Settings.Log_Level.lower()=="debug":
     if GiV_Settings.Debug_File_Location=="":
-        logging.basicConfig(level=logging.DEBUG)
+        logging.basicConfig(level=logging.DEBUG, format="%(asctime)s [%(levelname)s] %(message)s", handlers=[logging.StreamHandler()])
     else:
-        logging.basicConfig(filename=GiV_Settings.Debug_File_Location, encoding='utf-8', level=logging.DEBUG)
+        logging.basicConfig(level=logging.DEBUG, format="%(asctime)s [%(levelname)s] %(message)s", handlers=[logging.StreamHandler(),TimedRotatingFileHandler(GiV_Settings.Debug_File_Location, when='D', interval=1, backupCount=7)])
 elif GiV_Settings.Log_Level.lower()=="info":
     if GiV_Settings.Debug_File_Location=="":
-        logging.basicConfig(level=logging.INFO)
+        logging.basicConfig(level=logging.INFO, format="%(asctime)s [%(levelname)s] %(message)s", handlers=[logging.StreamHandler()])
     else:
-        logging.basicConfig(filename=GiV_Settings.Debug_File_Location, encoding='utf-8', level=logging.INFO)
+        logging.basicConfig(level=logging.DEBUG, format="%(asctime)s [%(levelname)s] %(message)s", handlers=[logging.StreamHandler(),TimedRotatingFileHandler(GiV_Settings.Debug_File_Location, when='D', interval=1, backupCount=7)])
 else:
     if GiV_Settings.Debug_File_Location=="":
-        logging.basicConfig(level=logging.ERROR)
+        logging.basicConfig(level=logging.ERROR, format="%(asctime)s [%(levelname)s] %(message)s", handlers=[logging.StreamHandler()])
     else:
-        logging.basicConfig(filename=GiV_Settings.Debug_File_Location, encoding='utf-8', level=logging.ERROR)
+        logging.basicConfig(level=logging.ERROR, format="%(asctime)s [%(levelname)s] %(message)s", handlers=[logging.StreamHandler(),TimedRotatingFileHandler(GiV_Settings.Debug_File_Location, when='D', interval=1, backupCount=7)])
 
 logger = logging.getLogger("GivTCP_"+str(GiV_Settings.givtcp_instance))
 
 #my_logger = logging.getLogger('givenergy_modbus')
 #my_logger.setLevel(logging.CRITICAL)
 lockfile=".lockfile"
-regcache="/config/GivTCPregCache_"+str(GiV_Settings.givtcp_instance)+".pkl"
-ratedata="/config/GivTCPrateData_"+str(GiV_Settings.givtcp_instance)+".pkl"
-lastupdate="/config/GivTCPlastUpdate_"+str(GiV_Settings.givtcp_instance)+".pkl"
+regcache="/config/GivTCP/regCache_"+str(GiV_Settings.givtcp_instance)+".pkl"
+ratedata="/config/GivTCP/rateData_"+str(GiV_Settings.givtcp_instance)+".pkl"
+lastupdate="/config/GivTCP/lastUpdate_"+str(GiV_Settings.givtcp_instance)+".pkl"
 
 def getData(fullrefresh):      #Read from Invertor put in cache 
     plant=Plant(number_batteries=int(GiV_Settings.numBatteries))
@@ -238,7 +238,7 @@ def getData(fullrefresh):      #Read from Invertor put in cache
         else:
             power_flow_output['Grid_to_House']=0
 
-########### Battery Stats only if there are batteries...
+########### Battery Stats only if there are batteries...  #######
 
         logger.info("Getting SOC")
         if int(GiV_Settings.numBatteries)>0:     #only do this if there are batteries
@@ -250,8 +250,19 @@ def getData(fullrefresh):      #Read from Invertor put in cache
             elif GEInv.battery_percent==0 and not 'multi_output_old' in locals():
                 power_output['SOC']=1
                 logger.error("\"Battery SOC\" reported as: "+str(GEInv.battery_percent)+"% and no previou value so setting to 1%")
+
+        ### Energy Stats
+            energy_today_output['Battery_Charge_Energy_Today_kWh']=GEInv.e_battery_charge_day
+            energy_today_output['Battery_Discharge_Energy_Today_kWh']=GEInv.e_battery_discharge_day
+            energy_today_output['Battery_Throughput_Today_kWh']=GEInv.e_battery_charge_day+GEInv.e_battery_discharge_day
             energy_total_output['Battery_Throughput_Total_kWh']=GEInv.e_battery_throughput_total
-        #Battery Power
+            if GEInv.e_battery_charge_total==0 and GEInv.e_battery_discharge_total==0:        #If no values in "nomal" registers then grab from back up registers - for some f/w versions
+                energy_total_output['Battery_Charge_Energy_Total_kWh']=GEBat[0].e_battery_charge_total_2
+                energy_total_output['Battery_Discharge_Energy_Total_kWh']=GEBat[0].e_battery_discharge_total_2
+            else:
+                energy_total_output['Battery_Charge_Energy_Total_kWh']=GEInv.e_battery_charge_total
+                energy_total_output['Battery_Discharge_Energy_Total_kWh']=GEInv.e_battery_discharge_total
+        ### Battery Power
             Battery_power=GEInv.p_battery 
             if Battery_power>=0:
                 discharge_power=abs(Battery_power)
@@ -262,15 +273,7 @@ def getData(fullrefresh):      #Read from Invertor put in cache
             power_output['Battery_Power']=Battery_power
             power_output['Charge_Power']=charge_power
             power_output['Discharge_Power']=discharge_power
-            energy_today_output['Battery_Charge_Energy_Today_kWh']=GEInv.e_battery_charge_day
-            energy_today_output['Battery_Discharge_Energy_Today_kWh']=GEInv.e_battery_discharge_day
-            energy_today_output['Battery_Throughput_Today_kWh']=GEInv.e_battery_charge_day+GEInv.e_battery_discharge_day
-            if GEInv.e_battery_charge_total==0 and GEInv.e_battery_discharge_total==0:        #If no values in "nomal" registers then grab from back up registers - for some f/w versions
-                energy_total_output['Battery_Charge_Energy_Total_kWh']=GEBat[0].e_battery_charge_total_2
-                energy_total_output['Battery_Discharge_Energy_Total_kWh']=GEBat[0].e_battery_discharge_total_2
-            else:
-                energy_total_output['Battery_Charge_Energy_Total_kWh']=GEInv.e_battery_charge_total
-                energy_total_output['Battery_Discharge_Energy_Total_kWh']=GEInv.e_battery_discharge_total
+
         ### Power flows
             logger.info("Getting Solar to H/B/G Power Flows")
             if PV_power>0:

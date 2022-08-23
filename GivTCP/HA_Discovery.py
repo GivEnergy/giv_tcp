@@ -1,6 +1,7 @@
 # version 2022.01.21
 from array import array
-from logging import Logger
+import logging
+from logging.handlers import TimedRotatingFileHandler
 import paho.mqtt.client as mqtt
 import time
 import datetime
@@ -13,19 +14,20 @@ from mqtt import GivMQTT
 
 if GiV_Settings.Log_Level.lower()=="debug":
     if GiV_Settings.Debug_File_Location=="":
-        logging.basicConfig(level=logging.DEBUG)
+        logging.basicConfig(level=logging.DEBUG, format="%(asctime)s [%(levelname)s] %(message)s", handlers=[logging.StreamHandler()])
     else:
-        logging.basicConfig(filename=GiV_Settings.Debug_File_Location, encoding='utf-8', level=logging.DEBUG)
+        logging.basicConfig(level=logging.DEBUG, format="%(asctime)s [%(levelname)s] %(message)s", handlers=[logging.StreamHandler(),TimedRotatingFileHandler(GiV_Settings.Debug_File_Location, when='D', interval=1, backupCount=7)])
 elif GiV_Settings.Log_Level.lower()=="info":
     if GiV_Settings.Debug_File_Location=="":
-        logging.basicConfig(level=logging.INFO)
+        logging.basicConfig(level=logging.INFO, format="%(asctime)s [%(levelname)s] %(message)s", handlers=[logging.StreamHandler()])
     else:
-        logging.basicConfig(filename=GiV_Settings.Debug_File_Location, encoding='utf-8', level=logging.INFO)
+        logging.basicConfig(level=logging.DEBUG, format="%(asctime)s [%(levelname)s] %(message)s", handlers=[logging.StreamHandler(),TimedRotatingFileHandler(GiV_Settings.Debug_File_Location, when='D', interval=1, backupCount=7)])
 else:
     if GiV_Settings.Debug_File_Location=="":
-        logging.basicConfig(level=logging.ERROR)
+        logging.basicConfig(level=logging.ERROR, format="%(asctime)s [%(levelname)s] %(message)s", handlers=[logging.StreamHandler()])
     else:
-        logging.basicConfig(filename=GiV_Settings.Debug_File_Location, encoding='utf-8', level=logging.ERROR)
+        logging.basicConfig(level=logging.ERROR, format="%(asctime)s [%(levelname)s] %(message)s", handlers=[logging.StreamHandler(),TimedRotatingFileHandler(GiV_Settings.Debug_File_Location, when='D', interval=1, backupCount=7)])
+
 
 logger = logging.getLogger("GivTCP_"+str(GiV_Settings.givtcp_instance))
 
@@ -248,7 +250,7 @@ class HAMQTT():
                 else:
                     tempObj['state_class']="total_increasing"
             if HAMQTT.entity_type[str(topic).split("/")[-1]][1]=="money":
-                tempObj['unit_of_meas']="{currency}/kWh"
+                tempObj['unit_of_meas']="{GBP}/kWh"
                 tempObj['device_class']="Monetary"
             if HAMQTT.entity_type[str(topic).split("/")[-1]][1]=="power":
                 tempObj['unit_of_meas']="W"
