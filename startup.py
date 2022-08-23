@@ -58,8 +58,8 @@ for inv in range(1,int(os.getenv('NUMINVERTORS'))+1):
 
     # replicate the startup script here:
 
-    if exists(PATH+"/regCache.pkl"):
-        os.remove(PATH+"/regCache.pkl")
+    if exists("/config/GivTCPregCache_"+str(inv)+".pkl"):
+        os.remove("/config/GivTCPregCache_"+str(inv)+".pkl")
     if exists(PATH+"/.lockfile"):
         os.remove(PATH+"/.lockfile")
     
