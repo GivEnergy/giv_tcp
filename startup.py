@@ -6,7 +6,7 @@ from time import sleep
 import logging
 import shutil, shlex
 
-logging.basicConfig(level=logging.CRITICAL, format="%(asctime)s - %(name)s [%(levelname)s] %(message)s", handlers=[logging.StreamHandler()])
+logging.basicConfig(level=logging.CRITICAL, format="%(asctime)s %(name)s - %(message)s", handlers=[logging.StreamHandler()])
 logger = logging.getLogger("GivTCP_STARTUP")
 
 selfRun={}
