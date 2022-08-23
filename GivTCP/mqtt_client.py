@@ -27,7 +27,7 @@ else:
         logging.basicConfig(level=logging.ERROR, format="%(asctime)s - %(name)s [%(levelname)s] %(message)s", handlers=[logging.StreamHandler(),TimedRotatingFileHandler(GiV_Settings.Debug_File_Location, when='D', interval=1, backupCount=7)])
 
 
-logger = logging.getLogger("GivTCP_MQTT_client")
+logger = logging.getLogger("GivTCP_MQTT_client_"+str(GiV_Settings.givtcp_instance))
 
 if GiV_Settings.MQTT_Port=='':
     MQTT_Port=1883
