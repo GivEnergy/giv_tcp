@@ -6,7 +6,9 @@ from time import sleep
 import logging
 import shutil, shlex
 
-logger = logging.getLogger("GivTCP_MAIN")
+logging.basicConfig(level=logging.CRTICAL, format="%(asctime)s - %(name)s [%(levelname)s] %(message)s", handlers=[logging.StreamHandler()])
+logger = logging.getLogger("GivTCP_STARTUP")
+
 selfRun={}
 mqttClient={}
 gunicorn={}
