@@ -85,6 +85,6 @@ schema:
   WEB_DASH: bool
   WEB_DASH_PORT: int
   INVERTOR_IP_2:  "str?"
-  NUMBATTERIES_2:  int
+  NUMBATTERIES_2:  "int?"
   INVERTOR_IP_3:  "str?"
-  NUMBATTERIES_3:  int
+  NUMBATTERIES_3:  "int?"
