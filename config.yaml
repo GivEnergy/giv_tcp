@@ -48,6 +48,10 @@ options:
   TZ: "Europe/London"
   WEB_DASH: False
   WEB_DASH_PORT: 3000
+  INVERTOR_IP_2:  ""
+  NUMBATTERIES_2:  1
+  INVERTOR_IP_3:  ""
+  NUMBATTERIES_3:  1
 schema: 
   NUMINVERTORS: int
   INVERTOR_IP_1:  str
@@ -80,3 +84,7 @@ schema:
   TZ: str
   WEB_DASH: bool
   WEB_DASH_PORT: int
+  INVERTOR_IP_2:  "str?"
+  NUMBATTERIES_2:  int
+  INVERTOR_IP_3:  "str?"
+  NUMBATTERIES_3:  int
