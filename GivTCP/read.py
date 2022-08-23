@@ -117,7 +117,7 @@ def getData(fullrefresh):      #Read from Invertor put in cache
         multi_output['raw']=raw
 
         #Grab previous data from Pickle and validate any outrageous changes
-        if exists(regcache):      #if there is no cache, create it
+        if exists(regcache):      # if there is a cache then grab it
             with open(regcache, 'rb') as inp:
                 multi_output_old= pickle.load(inp)
 
