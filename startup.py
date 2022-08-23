@@ -47,7 +47,9 @@ for inv in range(1,int(os.getenv('NUMINVERTORS'))+1):
         outp.write("    MQTT_Topic=\""+str(os.getenv("MQTT_TOPIC")+"\"\n"))
         outp.write("    MQTT_Port="+str(os.getenv("MQTT_PORT")+"\n"))
         outp.write("    Log_Level=\""+str(os.getenv("LOG_LEVEL")+"\"\n"))
-        outp.write("    Debug_File_Location=\""+str(os.getenv("DEBUG_FILE_LOCATION")+"\"\n"))
+        #setup debug filename for each inv
+        FILENAME=str(os.getenv("DEBUG_FILE_LOCATION")).split('.')[0]+"_"+str(inv)+"."+str(os.getenv("DEBUG_FILE_LOCATION")).split('.')[1]
+        outp.write("    Debug_File_Location=\""+str(FILENAME+"\"\n"))
         outp.write("    Influx_Output="+str(os.getenv("INFLUX_OUTPUT"))+"\n")
         outp.write("    influxURL=\""+str(os.getenv("INFLUX_URL")+"\"\n"))
         outp.write("    influxToken=\""+str(os.getenv("INFLUX_TOKEN")+"\"\n"))
