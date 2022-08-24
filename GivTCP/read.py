@@ -46,6 +46,7 @@ lockfile=".lockfile"
 regcache="/config/GivTCP/regCache_"+str(GiV_Settings.givtcp_instance)+".pkl"
 ratedata="/config/GivTCP/rateData_"+str(GiV_Settings.givtcp_instance)+".pkl"
 lastupdate="/config/GivTCP/lastUpdate_"+str(GiV_Settings.givtcp_instance)+".pkl"
+forcefullrefresh="/config/GivTCP/.forceFullRefresh_"+str(GiV_Settings.givtcp_instance)
 
 def getData(fullrefresh):      #Read from Invertor put in cache 
     plant=Plant(number_batteries=int(GiV_Settings.numBatteries))
@@ -116,11 +117,6 @@ def getData(fullrefresh):      #Read from Invertor put in cache
         raw["batteries"]=batteries
         multi_output['raw']=raw
 
-        #Grab previous data from Pickle and validate any outrageous changes
-        if exists(regcache):      # if there is a cache then grab it
-            with open(regcache, 'rb') as inp:
-                multi_output_old= pickle.load(inp)
-
     try:
 #Total Energy Figures
         logger.info("Getting Total Energy Data")
@@ -155,11 +151,15 @@ def getData(fullrefresh):      #Read from Invertor put in cache
         checksum=0
         for item in energy_today_output:
             checksum=checksum+energy_today_output[item]
-        if checksum==0 and GEInv.system_time.hour==0 and GEInv.system_time.minute==0:
+        if checksum==0 and GEInv.system_time.hour==0 and GEInv.system_time.minute==0 and exists(regcache):
             #remove regcache at midnight
-            logger.error("Energy Today is Zero and its midnight so removing regCache")
+            logger.critical("Energy Today is Zero and its midnight so resetting regCache")
             os.remove(regcache)
 
+        #Grab previous data from Pickle and use it validate any outrageous changes
+        if exists(regcache):      # if there is a cache then grab it
+            with open(regcache, 'rb') as inp:
+                multi_output_old= pickle.load(inp)
         
 ############  Core Power Stats    ############
 
@@ -340,7 +340,8 @@ def getData(fullrefresh):      #Read from Invertor put in cache
         #Perform rate calcs
 
         energy["Rates"]=ratecalcs(GEInv.e_grid_in_total)
-        energy["Rates"]['Average_ppkwh_today']=(energy["Rates"]['day_cost']+energy["Rates"]['night_cost'])/(energy['Today']['Load_Energy_Today_kWh'])
+        if (energy['Today']['Load_Energy_Today_kWh'])!=0:
+            energy["Rates"]['Average_ppkwh_today']=(energy["Rates"]['day_cost']+energy["Rates"]['night_cost'])/(energy['Today']['Load_Energy_Today_kWh'])
 
         multi_output["Energy"]=energy
 
@@ -534,9 +535,9 @@ def self_run2():
     runAll("True")
     while True:
         counter=counter+1
-        if exists(".forceFullRefresh"):
+        if exists(forcefullrefresh):
             runAll("True")
-            os.remove(".forceFullRefresh")
+            os.remove(forcefullrefresh)
             counter=0
         elif counter==20:
             counter=0

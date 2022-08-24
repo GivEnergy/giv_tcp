@@ -5,6 +5,7 @@ import subprocess
 from time import sleep
 import logging
 import shutil, shlex
+import schedule
 
 logging.basicConfig(level=logging.CRITICAL, format="%(asctime)s %(name)s - %(message)s", handlers=[logging.StreamHandler()])
 logger = logging.getLogger("GivTCP_STARTUP")
@@ -15,6 +16,9 @@ gunicorn={}
 webDash={}
 
 # Check if config firectory exists and creates it if not
+
+def job():
+    import GivTCP.palm_soc
 
 if not os.path.exists('/config/GivTCP'):
     os.makedirs('/config/GivTCP')
@@ -109,7 +113,11 @@ for inv in range(1,int(os.getenv('NUMINVERTORS'))+1):
 if os.getenv('MQTT_ADDRESS')=="127.0.0.1" and os.getenv('MQTT_OUTPUT')=="True":
     logger.critical ("Starting Mosquitto on port "+str(os.getenv('MQTT_PORT')))
     mqttBroker=subprocess.Popen(["/usr/sbin/mosquitto", "-c",PATH+"/mqtt.conf"])
-    
+
+#if str(os.getenv('SMARTTARGET'))==True:
+#    starttime=os.getenv('NIGHTRATESTART')
+#    schedule.every().day.at(starttime).do(job)
+
 # Loop round checking all processes are running
 while True:
     for inv in range(1,int(os.getenv('NUMINVERTORS'))+1):
@@ -143,4 +151,7 @@ while True:
         os.chdir(PATH)
         logger.critical ("Starting Mosquitto on port "+str(os.getenv('MQTT_PORT')))
         mqttBroker=subprocess.Popen(["/usr/sbin/mosquitto", "-c",PATH+"/mqtt.conf"])
+
+    #check if we need to run the smart target code
+#    schedule.run_pending()
     sleep (60)
