@@ -1,33 +1,15 @@
-from logging import Logger
 import paho.mqtt.client as mqtt
-import time
-import sys
-import importlib
-import logging
-from logging.handlers import TimedRotatingFileHandler
-import settings
+import time, sys, importlib, time
+from os.path import exists
 from settings import GiV_Settings
 import write as wr
+import pickle, settings
+from GivLUT import GivQueue, GivLUT
+from pickletools import read_uint1
+
 sys.path.append(GiV_Settings.default_path)
 
-if GiV_Settings.Log_Level.lower()=="debug":
-    if GiV_Settings.Debug_File_Location=="":
-        logging.basicConfig(level=logging.DEBUG, format="%(asctime)s - %(name)s [%(levelname)s] %(message)s", handlers=[logging.StreamHandler()])
-    else:
-        logging.basicConfig(level=logging.DEBUG, format="%(asctime)s - %(name)s [%(levelname)s] %(message)s", handlers=[logging.StreamHandler(),TimedRotatingFileHandler(GiV_Settings.Debug_File_Location, when='D', interval=1, backupCount=7)])
-elif GiV_Settings.Log_Level.lower()=="info":
-    if GiV_Settings.Debug_File_Location=="":
-        logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(name)s [%(levelname)s] %(message)s", handlers=[logging.StreamHandler()])
-    else:
-        logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(name)s [%(levelname)s] %(message)s", handlers=[logging.StreamHandler(),TimedRotatingFileHandler(GiV_Settings.Debug_File_Location, when='D', interval=1, backupCount=7)])
-else:
-    if GiV_Settings.Debug_File_Location=="":
-        logging.basicConfig(level=logging.ERROR, format="%(asctime)s - %(name)s [%(levelname)s] %(message)s", handlers=[logging.StreamHandler()])
-    else:
-        logging.basicConfig(level=logging.ERROR, format="%(asctime)s - %(name)s [%(levelname)s] %(message)s", handlers=[logging.StreamHandler(),TimedRotatingFileHandler(GiV_Settings.Debug_File_Location, when='D', interval=1, backupCount=7)])
-
-
-logger = logging.getLogger("GivTCP_MQTT_client_"+str(GiV_Settings.givtcp_instance))
+logger = GivLUT.logger
 
 if GiV_Settings.MQTT_Port=='':
     MQTT_Port=1883
@@ -59,50 +41,111 @@ while not hasattr(GiV_Settings,'serial_number'):
 logger.info("Serial Number retrieved: "+GiV_Settings.serial_number)
 
 def on_message(client, userdata, message):
+    payload={}
     logger.info("MQTT Message Recieved: "+str(message.topic)+"= "+str(message.payload.decode("utf-8")))
     writecommand={}
     command=str(message.topic).split("/")[-1]
     if command=="setDischargeRate":
         writecommand['dischargeRate']=str(message.payload.decode("utf-8"))
-        result=wr.setDischargeRate(writecommand)
+        result=GivQueue.q.enqueue(wr.setDischargeRate,writecommand)
     elif command=="setChargeRate":
         writecommand['chargeRate']=str(message.payload.decode("utf-8"))
-        result=wr.setChargeRate(writecommand)
+        result=GivQueue.q.enqueue(wr.setChargeRate,writecommand)
     elif command=="enableChargeTarget":
         writecommand['state']=str(message.payload.decode("utf-8"))
-        result=wr.enableChargeTarget(writecommand)
+        result=GivQueue.q.enqueue(wr.enableChargeTarget,writecommand)
     elif command=="enableChargeSchedule":
         writecommand['state']=str(message.payload.decode("utf-8"))
-        result=wr.enableChargeSchedule(writecommand)
+        result=GivQueue.q.enqueue(wr.enableChargeSchedule,writecommand)
     elif command=="enableDishargeSchedule":
         writecommand['state']=str(message.payload.decode("utf-8"))
-        result=wr.enableDischargeSchedule(writecommand)
+        result=GivQueue.q.enqueue(wr.enableDischargeSchedule,writecommand)
     elif command=="enableDischarge":
         writecommand['state']=str(message.payload.decode("utf-8"))
-        result=wr.enableDischarge(writecommand)
+        result=GivQueue.q.enqueue(wr.enableDischarge,writecommand)
     elif command=="setChargeTarget":
         writecommand['chargeToPercent']=str(message.payload.decode("utf-8"))
-        result=wr.setChargeTarget(writecommand)
+        result=GivQueue.q.enqueue(wr.setChargeTarget,writecommand)
     elif command=="setBatteryReserve":
         writecommand['dischargeToPercent']=str(message.payload.decode("utf-8"))
-        result=wr.setBatteryReserve(writecommand)
+        result=GivQueue.q.enqueue(wr.setBatteryReserve,writecommand)
     elif command=="setBatteryMode":
         writecommand['mode']=str(message.payload.decode("utf-8"))
-        result=wr.setBatteryMode(writecommand)
+        result=GivQueue.q.enqueue(wr.setBatteryMode,writecommand)
     elif command=="setDateTime":
         writecommand['dateTime']=str(message.payload.decode("utf-8"))
-        result=wr.setDateTime(writecommand)
+        result=GivQueue.q.enqueue(wr.setDateTime,writecommand)
     elif command=="setShallowCharge":
         writecommand['val']=str(message.payload.decode("utf-8"))
-        result=wr.setShallowCharge(writecommand)
-    elif command=="setChargeSlot1":
-        result=wr.setChargeSlot1(message.payload)
-    elif command=="setChargeSlot2":
-        result=wr.setChargeSlot2(message.payload)
-    elif command=="setDischargeSlot1":
-        result=wr.setDischargeSlot1(message.payload)
-    elif command=="setDischargeSlot1":
-        result=wr.setDischargeSlot1(message.payload)
+        result=GivQueue.q.enqueue(wr.setShallowCharge,writecommand)
+    elif command=="setChargeStart1":
+        if exists(GivLUT.regcache):
+            with open(GivLUT.regcache, 'rb') as inp:
+                regCacheStack= pickle.load(inp)
+            multi_output=regCacheStack[4]
+            finish=multi_output['Timeslots']['Charge_end_time_slot_1']
+            payload['start']=message.payload.decode("utf-8")[:5]
+            payload['finish']=finish[:5]
+            result=GivQueue.q.enqueue(wr.setChargeSlot1,payload)
+    elif command=="setChargeEnd1":
+        if exists(GivLUT.regcache):
+            with open(GivLUT.regcache, 'rb') as inp:
+                regCacheStack= pickle.load(inp)
+            multi_output=regCacheStack[4]
+            start=multi_output['Timeslots']['Charge_start_time_slot_1']
+            payload['finish']=message.payload.decode("utf-8")[:5]
+            payload['start']=start[:5]
+            result=GivQueue.q.enqueue(wr.setChargeSlot1,payload)
+    elif command=="setDischargeStart1":
+        if exists(GivLUT.regcache):
+            with open(GivLUT.regcache, 'rb') as inp:
+                regCacheStack= pickle.load(inp)
+            multi_output=regCacheStack[4]
+            finish=multi_output['Timeslots']['Discharge_end_time_slot_1']
+            payload['start']=message.payload.decode("utf-8")[:5]
+            payload['finish']=finish[:5]
+            result=GivQueue.q.enqueue(wr.setDischargeSlot1,payload)
+    elif command=="setDischargeEnd1":
+        if exists(GivLUT.regcache):
+            with open(GivLUT.regcache, 'rb') as inp:
+                regCacheStack= pickle.load(inp)
+            multi_output=regCacheStack[4]
+            start=multi_output['Timeslots']['Discharge_start_time_slot_1']
+            payload['finish']=message.payload.decode("utf-8")[:5]
+            payload['start']=start[:5]
+            result=GivQueue.q.enqueue(wr.setDischargeSlot1,payload)
+    elif command=="setDischargeStart2":
+        if exists(GivLUT.regcache):
+            with open(GivLUT.regcache, 'rb') as inp:
+                regCacheStack= pickle.load(inp)
+            multi_output=regCacheStack[4]
+            finish=multi_output['Timeslots']['Discharge_end_time_slot_2']
+            payload['start']=message.payload.decode("utf-8")[:5]
+            payload['finish']=finish[:5]
+            result=GivQueue.q.enqueue(wr.setDischargeSlot2,payload)
+    elif command=="setDischargeEnd2":
+        if exists(GivLUT.regcache):
+            with open(GivLUT.regcache, 'rb') as inp:
+                regCacheStack= pickle.load(inp)
+            multi_output=regCacheStack[4]
+            start=multi_output['Timeslots']['Discharge_start_time_slot_2']
+            payload['finish']=message.payload.decode("utf-8")[:5]
+            payload['start']=start[:5]
+            result=GivQueue.q.enqueue(wr.setDischargeSlot2,payload)
+#            result=wr.setDischargeSlot2(payload)
+    elif command=="tempPauseDischarge":
+        writecommand=float(message.payload.decode("utf-8"))
+        result=GivQueue.q.enqueue(wr.tempPauseDischarge,writecommand)
+    elif command=="tempPauseCharge":
+        writecommand=float(message.payload.decode("utf-8"))
+        result=GivQueue.q.enqueue(wr.tempPauseCharge,writecommand)
+    elif command=="forceCharge":
+        writecommand=float(message.payload.decode("utf-8"))
+        result=GivQueue.q.enqueue(wr.forceCharge,writecommand)
+    elif command=="forceExport":
+        writecommand=float(message.payload.decode("utf-8"))
+        result=GivQueue.q.enqueue(wr.forceExport,writecommand)
+#        result=wr.forceExport(writecommand)
     #Do something with the result??
 
 def on_connect(client, userdata, flags, rc):

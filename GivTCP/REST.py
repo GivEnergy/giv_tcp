@@ -87,6 +87,26 @@ def setDischrgSlot2():
     payload = request.get_json(silent=True, force=True)
     return wr.setDischargeSlot2(payload)
 
+@giv_api.route('/tempPauseDischarge', methods=['POST'])
+def tmpPauseDischrg():
+    payload = request.get_json(silent=True, force=True)
+    return wr.tempPauseDischarge(payload)
+
+@giv_api.route('/tempPauseCharge', methods=['POST'])
+def tmpPauseChrg():
+    payload = request.get_json(silent=True, force=True)
+    return wr.tempPauseCharge(payload)
+
+@giv_api.route('/forceCharge', methods=['POST'])
+def frceChrg():
+    payload = request.get_json(silent=True, force=True)
+    return wr.forceCharge(payload)
+
+@giv_api.route('/forceExport', methods=['POST'])
+def frceExprt():
+    payload = request.get_json(silent=True, force=True)
+    return wr.forceExport(payload)
+
 @giv_api.route('/setBatteryMode', methods=['POST'])
 def setBattMode():
     payload = request.get_json(silent=True, force=True)

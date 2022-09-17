@@ -4,24 +4,25 @@ import logging
 from logging.handlers import TimedRotatingFileHandler
 from settings import GiV_Settings
 
-if GiV_Settings.Log_Level.lower()=="debug":
-    if GiV_Settings.Debug_File_Location=="":
-        logging.basicConfig(level=logging.DEBUG, format="%(asctime)s [%(levelname)s] %(message)s", handlers=[logging.StreamHandler()])
-    else:
-        logging.basicConfig(level=logging.DEBUG, format="%(asctime)s [%(levelname)s] %(message)s", handlers=[logging.StreamHandler(),TimedRotatingFileHandler(GiV_Settings.Debug_File_Location, when='D', interval=1, backupCount=7)])
-elif GiV_Settings.Log_Level.lower()=="info":
-    if GiV_Settings.Debug_File_Location=="":
-        logging.basicConfig(level=logging.INFO, format="%(asctime)s [%(levelname)s] %(message)s", handlers=[logging.StreamHandler()])
-    else:
-        logging.basicConfig(level=logging.DEBUG, format="%(asctime)s [%(levelname)s] %(message)s", handlers=[logging.StreamHandler(),TimedRotatingFileHandler(GiV_Settings.Debug_File_Location, when='D', interval=1, backupCount=7)])
-else:
-    if GiV_Settings.Debug_File_Location=="":
-        logging.basicConfig(level=logging.ERROR, format="%(asctime)s [%(levelname)s] %(message)s", handlers=[logging.StreamHandler()])
-    else:
-        logging.basicConfig(level=logging.ERROR, format="%(asctime)s [%(levelname)s] %(message)s", handlers=[logging.StreamHandler(),TimedRotatingFileHandler(GiV_Settings.Debug_File_Location, when='D', interval=1, backupCount=7)])
-
-
 logger = logging.getLogger("GivTCP_Influx_"+str(GiV_Settings.givtcp_instance))
+logging.basicConfig(format='%(asctime)s - %(name)s - [%(levelname)s] - %(message)s')
+formatter = logging.Formatter(
+    '%(asctime)s - %(name)s - [%(levelname)s] - %(message)s')
+if GiV_Settings.Debug_File_Location!="":
+    fh = TimedRotatingFileHandler(GiV_Settings.Debug_File_Location, when='D', interval=1, backupCount=7)
+    fh.setFormatter(formatter)
+    logger.addHandler(fh)
+if GiV_Settings.Log_Level.lower()=="debug":
+    logger.setLevel(logging.DEBUG)
+elif GiV_Settings.Log_Level.lower()=="info":
+    logger.setLevel(logging.INFO)
+elif GiV_Settings.Log_Level.lower()=="critical":
+    logger.setLevel(logging.CRITICAL)
+elif GiV_Settings.Log_Level.lower()=="warning":
+    logger.setLevel(logging.WARNING)
+else:
+    logger.setLevel(logging.ERROR)
+
 
 class GivInflux():
 

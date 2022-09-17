@@ -1,44 +1,52 @@
 version: "3.9"
 services:
   GivTCP:
-    image: britkat/giv_tcp-ma:1.1.7
+    image: britkat/giv_tcp-dev:2022.09.09
     ports:
-      - "1883:1883"
-      - "6345:6345"
-      - "3000:3000"                     # This should match the WEB_DASH_PORT ENV below
+      - "1883:1883"                   # MQTT
+      - "6345:6345"                   # REST (add increments for each invertor)
+      - "3000:3000"                   # This should match the WEB_DASH_PORT ENV below
+      - "6379:6379"                   # Redis for job queueing
+      - "9181:9181"                   # RQ Dashboard to view job scheduling
     environment:
-      - NUMINVERTORS="1"                # Set this to the number of Invertors in your setup, then replicate the next two lines for each invertor (changing the last number of the ENV)
-      - INVERTOR_IP_1=""                # Set this to the IP address of your Invertor on you rlocal network
-      - NUMBATTERIES_1="1"              # Number of battery modules installed and connected to the above invertor
-      - MQTT_OUTPUT=True                # "True" if you want to publish your data to MQTT, "False" otherwise
-      - MQTT_ADDRESS="127.0.0.1"        # IP address of an existing MQTT broker, or leave as "127.0.0.1" to use the internal broker
-      - MQTT_USERNAME=""                # Username of your existing broker, if needed. Not required for internal broker
-      - MQTT_PASSWORD=""                # Password of your existing broker, if needed. Not required for internal broker
-      - MQTT_TOPIC=""                   # Root topic to publish data to. If left blank it will default to GivEnergy/<invertor_serial_number>
-      - MQTT_PORT="1883"                # Port of your existing broker, leave as "1883" for internal broker
-      - LOG_LEVEL="Error"               # Level of logs to be reported: "Error", "Info" or "Debug"
-      - DEBUG_FILE_LOCATION="/config/GivTCP/log.log"          # Location of log file stored inside the container, defalt location is /app/GivTCP
-      - PRINT_RAW="True"                # If True this will publish all inverotr data unprocessed as well as standard data
-      - SELF_RUN="True"                 # If True the container will self-run and connect and publish data. If "False" the you will need to trigger externally via REST
-      - SELF_RUN_LOOP_TIMER="5"         # Wait time between every read command to the invertor
-      - INFLUX_OUTPUT="False"           # "True" if you want to publish your data to InfluxDB, "False" otherwise
-      - INFLUX_URL=""                   # URL of an external Influx instance
-      - INFLUX_TOKEN=""                 # Access Token for your Influx instance
-      - INFLUX_BUCKET=""                # Data Bucket of your Influx instance you want data sent to
-      - INFLUX_ORG=""                   # Influx instance Organisation
-      - HA_AUTO_D="True"                # If True (and if MQTT_OUTPUT is True) this will publish Home Assistant Auto Discovery messages to the broker
-      - HADEVICEPREFIX="GivTCP"         # Defines the preficfor all entities in Home Assistant
-      - PYTHONPATH="/app"
-      - DAYRATE=0.155                   # Price in £/$ for your daytime electricity per kWh
-      - NIGHTRATE=0.055                 # Price in £/$ for your night time electricity per kWh
-      - EXPORTRATE=0.04                 # Price in £/$ for your export electricity per kWh
-      - HOSTIP=""                       # External IP address of the docker host (needed for web dashboard)
-      - DAYRATESTART="04:30"            # Time in HH:MM when your day time tariff kicks in
-      - NIGHTRATESTART="00:30"          # Time in HH:MM when your night time tariff kicks in
-      - TZ="Europe/London"              # Set to your Timezone
-      - WEB_DASH="False"                # Enable the wed dashboard
-      - WEB_DASH_PORT="3000"            # Port to serve the web dashboard on
-      - 
+## Critical to update
+      - NUMINVERTORS=1                # Set this to the number of Invertors in your setup, then replicate the next two lines for each invertor (changing the last number of the ENV)
+      - INVERTOR_IP_1=                # Set this to the IP address of your Invertor on you rlocal network
+      - NUMBATTERIES_1=1              # Number of battery modules installed and connected to the above invertor
+      - MQTT_OUTPUT=True              # "True" if you want to publish your data to MQTT, "False" otherwise
+      - MQTT_ADDRESS=                 # IP address of an existing MQTT broker, or leave as "127.0.0.1" to use the internal broker
+      - MQTT_USERNAME=                # Username of your existing broker, if needed. Not required for internal broker
+      - MQTT_PASSWORD=                # Password of your existing broker, if needed. Not required for internal broker
+      - HOSTIP=                       # External IP address of the docker host (needed for web dashboard)
+      - CACHELOCATION=/config/GivTCP  # Location of cache data, this folder can be mapped to a persistence storage outside the container
+      - TZ=Europe/London              # Set to your Timezone
+## Optional
+      - MQTT_TOPIC=                   # Root topic to publish data to. If left blank it will default to GivEnergy/<invertor_serial_number>
+      - MQTT_PORT=1883                # Port of your existing broker, leave as "1883" for internal broker
+      - LOG_LEVEL=Error               # Level of logs to be reported: "Error", "Info" or "Debug"
+      - PRINT_RAW=True                # If True this will publish all inverotr data unprocessed as well as standard data
+      - SELF_RUN=True                 # If True the container will self-run and connect and publish data. If "False" the you will need to trigger externally via REST
+      - SELF_RUN_LOOP_TIMER=5         # Wait time between every read command to the invertor
+      - INFLUX_OUTPUT=False           # "True" if you want to publish your data to InfluxDB, "False" otherwise
+      - INFLUX_URL=                   # URL of an external Influx instance
+      - INFLUX_TOKEN=                 # Access Token for your Influx instance
+      - INFLUX_BUCKET=                # Data Bucket of your Influx instance you want data sent to
+      - INFLUX_ORG=                   # Influx instance Organisation
+      - HA_AUTO_D=True                # If True (and if MQTT_OUTPUT is True) this will publish Home Assistant Auto Discovery messages to the broker
+      - HADEVICEPREFIX=GivTCP         # Defines the preficfor all entities in Home Assistant
+      - PYTHONPATH=/app
+      - DAYRATE=0.155                 # Price in £/$ for your daytime electricity per kWh
+      - NIGHTRATE=0.055               # Price in £/$ for your night time electricity per kWh
+      - EXPORTRATE=0.04               # Price in £/$ for your export electricity per kWh
+      - DAYRATESTART=04:30            # Time in HH:MM when your day time tariff kicks in
+      - NIGHTRATESTART=00:30          # Time in HH:MM when your night time tariff kicks in
+      - WEB_DASH=False                # Enable the wed dashboard
+      - WEB_DASH_PORT=3000            # Port to serve the web dashboard on
+      - SMARTTARGET=False             # Enables the PALM capability, requires the three ENV below to be set
+      - GEAPI=                        # API Key for the GivEnergy Cloud
+      - SOLCASTAPI=                   # API key for Solcast
+      - SOLCASTSITEID=                # SiteID for Solcast site (single array)
+      - DATASMOOTHER=High             # Set the data smoothing to most agressive setting (High, medium, low)
 
     restart: always
     privileged: true

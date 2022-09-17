@@ -8,3 +8,6 @@ requests
 flask
 pickle-mixin
 flask-cors
+rq
+redis
+git+https://github.com/jace/rq-dashboard.git@master

@@ -1,31 +1,13 @@
 # version 2022.01.21
 import paho.mqtt.client as mqtt
 import time
-import datetime
-import logging
-from logging.handlers import TimedRotatingFileHandler
+from GivLUT import GivLUT
 from settings import GiV_Settings
+import sys
 #from HA_Discovery import HAMQTT
 from givenergy_modbus.model.inverter import Model
 
-if GiV_Settings.Log_Level.lower()=="debug":
-    if GiV_Settings.Debug_File_Location=="":
-        logging.basicConfig(level=logging.DEBUG, format="%(asctime)s - %(name)s [%(levelname)s] %(message)s", handlers=[logging.StreamHandler()])
-    else:
-        logging.basicConfig(level=logging.DEBUG, format="%(asctime)s - %(name)s [%(levelname)s] %(message)s", handlers=[logging.StreamHandler(),TimedRotatingFileHandler(GiV_Settings.Debug_File_Location, when='D', interval=1, backupCount=7)])
-elif GiV_Settings.Log_Level.lower()=="info":
-    if GiV_Settings.Debug_File_Location=="":
-        logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(name)s [%(levelname)s] %(message)s", handlers=[logging.StreamHandler()])
-    else:
-        logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(name)s [%(levelname)s] %(message)s", handlers=[logging.StreamHandler(),TimedRotatingFileHandler(GiV_Settings.Debug_File_Location, when='D', interval=1, backupCount=7)])
-else:
-    if GiV_Settings.Debug_File_Location=="":
-        logging.basicConfig(level=logging.ERROR, format="%(asctime)s - %(name)s [%(levelname)s] %(message)s", handlers=[logging.StreamHandler()])
-    else:
-        logging.basicConfig(level=logging.ERROR, format="%(asctime)s - %(name)s [%(levelname)s] %(message)s", handlers=[logging.StreamHandler(),TimedRotatingFileHandler(GiV_Settings.Debug_File_Location, when='D', interval=1, backupCount=7)])
-
-
-logger = logging.getLogger("GivTCP_MQTT_"+str(GiV_Settings.givtcp_instance))
+logger = GivLUT.logger
 
 class GivMQTT():
 
@@ -57,19 +39,23 @@ class GivMQTT():
         
         if GivMQTT.MQTTCredentials:
             client.username_pw_set(GivMQTT.MQTT_Username,GivMQTT.MQTT_Password)
-        client.on_connect=GivMQTT.on_connect     			#bind call back function
-        client.loop_start()
-        logger.info ("Connecting to broker: "+ GivMQTT.MQTT_Address)
-        client.connect(GivMQTT.MQTT_Address,port=GivMQTT.MQTT_Port)
-        while not client.connected_flag:        			#wait in loop
-            logger.info ("In wait loop")
-            time.sleep(0.2)
-        for p_load in array:
-            payload=array[p_load]
-            logger.info('Publishing: '+rootTopic+p_load)
-            output=GivMQTT.iterate_dict(payload,rootTopic+p_load)   #create LUT for MQTT publishing
-            for value in output:
-                client.publish(value,output[value])
+        try:
+            client.on_connect=GivMQTT.on_connect     			#bind call back function
+            client.loop_start()
+            logger.info ("Connecting to broker: "+ GivMQTT.MQTT_Address)
+            client.connect(GivMQTT.MQTT_Address,port=GivMQTT.MQTT_Port)
+            while not client.connected_flag:        			#wait in loop
+                logger.info ("In wait loop")
+                time.sleep(0.2)
+            for p_load in array:
+                payload=array[p_load]
+                logger.info('Publishing: '+rootTopic+p_load)
+                output=GivMQTT.iterate_dict(payload,rootTopic+p_load)   #create LUT for MQTT publishing
+                for value in output:
+                    client.publish(value,output[value])
+        except:
+            e = sys.exc_info()
+            logger.error("Error connecting to MQTT Broker: " + str(e))
         client.loop_stop()                      			#Stop loop
         client.disconnect()
         return client
