@@ -67,7 +67,7 @@ class GivLUT:
     # Standard values for devices
     maxInvPower=6000
     maxPower=20000
-    maxBatPower=3000
+    maxBatPower=4000
     maxTemp=100
     maxCellVoltage=4
     maxTotalEnergy=100000000
