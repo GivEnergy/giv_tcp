@@ -62,7 +62,7 @@ class GivLUT:
     oldDataCount=GiV_Settings.cache_location+"/oldDataCount_"+str(GiV_Settings.givtcp_instance)+".pkl"
 
 #    timezone=zoneinfo.ZoneInfo(key=os.getenv("TZ"))
-    timezone=zoneinfo.ZoneInfo(key="Europe/London")
+#    timezone=zoneinfo.ZoneInfo(key="Europe/London")
 
     # Standard values for devices
     maxInvPower=6000

@@ -12,6 +12,7 @@ class GE:
     # Modify url with system name in place of CExxxxxx and paste API key generated on GivEnergy web portal in place of xxxx
     url = "https://api.givenergy.cloud/v1/inverter/"+GiV_Settings.serial_number+"/"
     key = str(os.getenv('GEAPI'))
+    #key = "eyJ0eXAiOiJKV1QiLCJhbGciOiJSUzI1NiJ9.eyJhdWQiOiI5NTc3MDIxOS1jYWE2LTRmOTctOTE3Ni0zNDBlZGMzZDQxNTgiLCJqdGkiOiI2NmZiOGQyYjJhN2VlZGI5NjFjMTZjYzdhODI2YjNhYzE0OTExNDRhNjlkZmU2NGRkNjQ5ODNmZTZmZTg5ZWMwOTg0OWViMjgxMjliMmNlMSIsImlhdCI6MTY2MTI5MDg0OS44MDU2NDQsIm5iZiI6MTY2MTI5MDg0OS44MDU2NDcsImV4cCI6MTY5MjgyNjg0OS43OTkyMjcsInN1YiI6IjIyNDYiLCJzY29wZXMiOlsiYXBpIl19.o2HlAO1Xzlu0uNt_woiewRtcEaQRFdV0uAwrFVrToHdPVKFe9h2k_EtlmGgsV8BttDz5bJTMvHThyfDFa-KMWQ"
 
     # Most users will not need to touch that many of the pre-configured settings below
     
@@ -55,9 +56,11 @@ class GE:
 # SolCast PV forecast generator. Up to two arrays are supported with a forecast for each
 class Solcast:
     enable = True
-    key = str(os.getenv('SOLCASTAPI'))
-    url_se = "https://api.solcast.com.au/rooftop_sites/"+str(os.getenv('SOLCASTSITEID'))
-   
+    #key = str(os.getenv('SOLCASTAPI'))
+    key="D3d_8yREGmXWQW4CkNK00wpeM99BlNqb"
+    #url_se = "https://api.solcast.com.au/rooftop_sites/"+str(os.getenv('SOLCASTSITEID'))
+    url_se = "https://api.solcast.com.au/rooftop_sites/8760-a78f-c11e-ae49"
+
     # For single array installation uncomment the line below and comment out the subsequent line
     url_sw = ""
     #url_sw = "https://api.solcast.com.au/rooftop_sites/xxxx"
