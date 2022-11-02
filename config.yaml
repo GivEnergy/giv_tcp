@@ -1,6 +1,6 @@
 name:  "GivTCP"
 description:  "TCP Modbus connection to MQTT/JSON for Givenergy Battery/PV Invertors"
-version:  "2.0.1"
+version:  "2.0.2"
 image: britkat/giv_tcp-ma
 slug:  "givtcp"
 init:  true
@@ -79,9 +79,9 @@ schema:
   HA_AUTO_D: bool
   HADEVICEPREFIX: "str?"
   PYTHONPATH: str
-  DAYRATE: float
-  NIGHTRATE: float
-  EXPORTRATE: float
+#  DAYRATE: float
+#  NIGHTRATE: float
+#  EXPORTRATE: float
   HOSTIP: str
   DAYRATESTART: str
   NIGHTRATESTART: str

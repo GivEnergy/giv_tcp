@@ -12,8 +12,7 @@ class GE:
     # Modify url with system name in place of CExxxxxx and paste API key generated on GivEnergy web portal in place of xxxx
     url = "https://api.givenergy.cloud/v1/inverter/"+GiV_Settings.serial_number+"/"
     key = str(os.getenv('GEAPI'))
-    #key = "eyJ0eXAiOiJKV1QiLCJhbGciOiJSUzI1NiJ9.eyJhdWQiOiI5NTc3MDIxOS1jYWE2LTRmOTctOTE3Ni0zNDBlZGMzZDQxNTgiLCJqdGkiOiI2NmZiOGQyYjJhN2VlZGI5NjFjMTZjYzdhODI2YjNhYzE0OTExNDRhNjlkZmU2NGRkNjQ5ODNmZTZmZTg5ZWMwOTg0OWViMjgxMjliMmNlMSIsImlhdCI6MTY2MTI5MDg0OS44MDU2NDQsIm5iZiI6MTY2MTI5MDg0OS44MDU2NDcsImV4cCI6MTY5MjgyNjg0OS43OTkyMjcsInN1YiI6IjIyNDYiLCJzY29wZXMiOlsiYXBpIl19.o2HlAO1Xzlu0uNt_woiewRtcEaQRFdV0uAwrFVrToHdPVKFe9h2k_EtlmGgsV8BttDz5bJTMvHThyfDFa-KMWQ"
-
+    
     # Most users will not need to touch that many of the pre-configured settings below
     
     # Disable SoC calculation in the winter months as consumption >> generation
@@ -47,21 +46,19 @@ class GE:
         1.3, 1, 1.5, 0.5, 0.3, 1, 1.5, 1, 0.6, 0.5, 0.5, 0.3]
 
     # Start time for Overnight Charge
-    start_time = "00:30"
+    start_time = str(os.getenv('DAYRATESTART'))
 
     # End time for Overnight Charge
-    end_time = "04:30"
+    end_time = str(os.getenv('NIGHTRATESTART'))
 
 
 # SolCast PV forecast generator. Up to two arrays are supported with a forecast for each
 class Solcast:
     enable = True
-    #key = str(os.getenv('SOLCASTAPI'))
-    key="D3d_8yREGmXWQW4CkNK00wpeM99BlNqb"
-    #url_se = "https://api.solcast.com.au/rooftop_sites/"+str(os.getenv('SOLCASTSITEID'))
-    url_se = "https://api.solcast.com.au/rooftop_sites/8760-a78f-c11e-ae49"
-
+    key = str(os.getenv('SOLCASTAPI'))
+    url_se = "https://api.solcast.com.au/rooftop_sites/"+str(os.getenv('SOLCASTSITEID'))
+    
     # For single array installation uncomment the line below and comment out the subsequent line
-    url_sw = ""
-    #url_sw = "https://api.solcast.com.au/rooftop_sites/xxxx"
+    #url_sw = ""
+    url_sw = "https://api.solcast.com.au/rooftop_sites/"+str(os.getenv('SOLCASTSITEID2'))
     cmd = "/forecasts?format=json"
