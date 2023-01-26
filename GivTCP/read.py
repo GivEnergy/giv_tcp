@@ -799,9 +799,9 @@ def dataSmoother2(dataNew, dataOld, lastUpdate):
     lookup = givLUT[name]
     if GiV_Settings.data_smoother.lower() == "high":
         smoothRate = 0.25
-    elif GiV_Settings.data_smoother == "medium":
+    elif GiV_Settings.data_smoother.lower() == "medium":
         smoothRate = 0.35
-    elif GiV_Settings.data_smoother == "none":
+    elif GiV_Settings.data_smoother.lower() == "none":
         return(newData)
     else:
         smoothRate = 0.50

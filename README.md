@@ -74,7 +74,7 @@ From here your invertor data is available through either MQTT or REST as describ
 | DAYRATESTART | 04:30 | Optional - Start time of your daytime energy if using Economy 7 or Octopus Go |
 | NIGHTRATESTART | 00:00 | Optional - Start time of your night time energy if using Economy 7 or Octopus Go |
 | HOSTIP | 192.168.1.20 | Optional - The host IP address of your container. Required to access the web dashboard from any browser |
-
+| DATASMOOTHER | High | The amount of smoothing to apply to the data, to reduce the effect of sudden invalid jumps in values. Set to 'None' to disable. Values are not case-sensitive. Other values are 'High', 'Medium', 'Low' |
 
 
 
