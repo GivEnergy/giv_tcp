@@ -167,6 +167,6 @@ client.on_connect=on_connect     			        #bind call back function
 client.on_message=on_message                        #bind call back function
 #client.loop_start()
 
-logger.info ("Connecting to broker(sub): "+ MQTT_Address)
+logger.debug ("Connecting to broker(sub): "+ MQTT_Address)
 client.connect(MQTT_Address,port=MQTT_Port)
 client.loop_forever()

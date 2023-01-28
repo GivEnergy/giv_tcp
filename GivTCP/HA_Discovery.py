@@ -29,7 +29,7 @@ class HAMQTT():
             logger.info("connected OK Returned code="+str(rc))
             #client.subscribe(topic)
         else:
-            logger.info("Bad connection Returned code= "+str(rc))
+            logger.error("Bad connection Returned code= "+str(rc))
     
     def publish_discovery(array,SN):   #Recieve multiple payloads with Topics and publish in a single MQTT connection
         mqtt.Client.connected_flag=False        			#create flag in class
@@ -40,41 +40,48 @@ class HAMQTT():
         try:
             client.on_connect=HAMQTT.on_connect     			#bind call back function
             client.loop_start()
-            logger.info ("Connecting to broker: "+ HAMQTT.MQTT_Address)
+            logger.debug("Connecting to broker: "+ HAMQTT.MQTT_Address)
             client.connect(HAMQTT.MQTT_Address,port=HAMQTT.MQTT_Port)
             while not client.connected_flag:        			#wait in loop
-                logger.info ("In wait loop")
+                logger.debug("In wait loop")
                 time.sleep(0.2)
-                ##publish the status message
-                client.publish(GiV_Settings.MQTT_Topic+"/"+SN+"/status","online", retain=True)
+
+            logger.info("Publishing MQTT: " + HAMQTT.MQTT_Address)
+
+            ##publish the status message
+            client.publish(GiV_Settings.MQTT_Topic+"/"+SN+"/status","online", retain=True)
+
             ### For each topic create a discovery message
-                for p_load in array:
-                    if p_load != "raw":
-                        payload=array[p_load]
-                        logger.info('Publishing: '+rootTopic+p_load)
-                        output=GivMQTT.iterate_dict(payload,rootTopic+p_load)   #create LUT for MQTT publishing
-                        for topic in output:
-                            #Determine Entitiy type (switch/sensor/number) and publish the right message
-                            if GivLUT.entity_type[str(topic).split("/")[-1]].devType=="sensor":
-                                if "Battery_Details" in topic:
-                                    client.publish("homeassistant/sensor/GivEnergy/"+str(topic).split("/")[-2]+"_"+str(topic).split("/")[-1]+"/config",HAMQTT.create_device_payload(topic,SN),retain=True)
-                                else:
-                                    client.publish("homeassistant/sensor/GivEnergy/"+SN+"_"+str(topic).split("/")[-1]+"/config",HAMQTT.create_device_payload(topic,SN),retain=True)
-                            elif GivLUT.entity_type[str(topic).split("/")[-1]].devType=="switch":
-                                client.publish("homeassistant/switch/GivEnergy/"+SN+"_"+str(topic).split("/")[-1]+"/config",HAMQTT.create_device_payload(topic,SN),retain=True)
-                            elif GivLUT.entity_type[str(topic).split("/")[-1]].devType=="number":
-                                client.publish("homeassistant/number/GivEnergy/"+SN+"_"+str(topic).split("/")[-1]+"/config",HAMQTT.create_device_payload(topic,SN),retain=True)
-                        #    elif GivLUT.entity_type[str(topic).split("/")[-1]][0]=="binary_sensor":
-                        #        client.publish("homeassistant2/binary_sensor/GivEnergy/"+str(topic).split("/")[-1]+"/config",HAMQTT.create_binary_sensor_payload(topic,SN),retain=True)
-                            elif GivLUT.entity_type[str(topic).split("/")[-1]].devType=="select":
-                                client.publish("homeassistant/select/GivEnergy/"+SN+"_"+str(topic).split("/")[-1]+"/config",HAMQTT.create_device_payload(topic,SN),retain=True)
+            for p_load in array:
+                if p_load != "raw":
+                    payload=array[p_load]
+                    logger.debug('Publishing: '+rootTopic+p_load)
+                    output=GivMQTT.iterate_dict(payload,rootTopic+p_load)   #create LUT for MQTT publishing
+                    for topic in output:
+                        #Determine Entitiy type (switch/sensor/number) and publish the right message
+                        if GivLUT.entity_type[str(topic).split("/")[-1]].devType=="sensor":
+                            if "Battery_Details" in topic:
+                                client.publish("homeassistant/sensor/GivEnergy/"+str(topic).split("/")[-2]+"_"+str(topic).split("/")[-1]+"/config",HAMQTT.create_device_payload(topic,SN),retain=True)
+                            else:
+                                client.publish("homeassistant/sensor/GivEnergy/"+SN+"_"+str(topic).split("/")[-1]+"/config",HAMQTT.create_device_payload(topic,SN),retain=True)
+                        elif GivLUT.entity_type[str(topic).split("/")[-1]].devType=="switch":
+                            client.publish("homeassistant/switch/GivEnergy/"+SN+"_"+str(topic).split("/")[-1]+"/config",HAMQTT.create_device_payload(topic,SN),retain=True)
+                        elif GivLUT.entity_type[str(topic).split("/")[-1]].devType=="number":
+                            client.publish("homeassistant/number/GivEnergy/"+SN+"_"+str(topic).split("/")[-1]+"/config",HAMQTT.create_device_payload(topic,SN),retain=True)
+                    #    elif GivLUT.entity_type[str(topic).split("/")[-1]][0]=="binary_sensor":
+                    #        client.publish("homeassistant2/binary_sensor/GivEnergy/"+str(topic).split("/")[-1]+"/config",HAMQTT.create_binary_sensor_payload(topic,SN),retain=True)
+                        elif GivLUT.entity_type[str(topic).split("/")[-1]].devType=="select":
+                            client.publish("homeassistant/select/GivEnergy/"+SN+"_"+str(topic).split("/")[-1]+"/config",HAMQTT.create_device_payload(topic,SN),retain=True)
                 
             client.loop_stop()                      			#Stop loop
             client.disconnect()
+            
         except:
             e = sys.exc_info()
             logger.error("Error connecting to MQTT Broker: " + str(e))
-        return client
+    
+        return
+    
 
     def create_device_payload(topic,SN):
         tempObj={}

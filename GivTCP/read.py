@@ -29,6 +29,7 @@ logger = GivLUT.logger
 inverterLock = Lock()
 cacheLock = Lock()
 
+
 def getData(fullrefresh):  # Read from Invertor put in cache
     # plant=Plant(number_batteries=int(GiV_Settings.numBatteries))
     energy_total_output = {}
@@ -40,11 +41,11 @@ def getData(fullrefresh):  # Read from Invertor put in cache
     multi_output = {}
     result = {}
     temp = {}
-    logger.info("----------------------------Starting----------------------------")
-    logging.info("Getting All Registers")
+    logger.debug("----------------------------Starting----------------------------")
+    logging.debug("Getting All Registers")
 
     # Connect to Invertor and load data
-########### Use a queue for the giv read and join for the output #############
+    ########### Use a queue for the giv read and join for the output #############
     try:
         logger.info("Connecting to: " + GiV_Settings.invertorIP)
 
@@ -56,17 +57,18 @@ def getData(fullrefresh):  # Read from Invertor put in cache
 
         multi_output['Last_Updated_Time'] = datetime.datetime.utcnow().replace(tzinfo=datetime.timezone.utc).isoformat()
         multi_output['status'] = "online"
+        multi_output['Time_Since_Last_Update'] = 0
 
-        logger.info("Invertor connection successful, registers retrieved")
+        logger.debug("Invertor connection successful, registers retrieved")
     except:
-        GivLUT.consecFails()
+        consecFails()
         e = sys.exc_info()
         logger.error("Error collecting registers: " + str(e))
         temp['result'] = "Error collecting registers: " + str(e)
         return json.dumps(temp)
 
     try:
-        logger.info("Beginning parsing of Inverter data")
+        logger.debug("Beginning parsing of Inverter data")
 
         # Total Energy Figures
         logger.debug("Getting Total Energy Data")
@@ -109,7 +111,7 @@ def getData(fullrefresh):  # Read from Invertor put in cache
             with cacheLock:
                 if exists(GivLUT.regcache):
                     # remove regcache at midnight
-                    logger.info("Energy Today is Zero and its midnight so resetting regCache")
+                    logger.debug("Energy Today is Zero and its midnight so resetting regCache")
                     os.remove(GivLUT.regcache)
 
 
@@ -327,7 +329,7 @@ def getData(fullrefresh):  # Read from Invertor put in cache
         else:
             mode = "Unknown"
 
-        logger.info("Mode is: " + str(mode))
+        logger.debug("Mode is: " + str(mode))
 
         controlmode['Mode'] = mode
         controlmode['Battery_Power_Reserve'] = battery_reserve
@@ -347,22 +349,22 @@ def getData(fullrefresh):  # Read from Invertor put in cache
             controlmode['Temp_Pause_Discharge'] = "Normal"
 
         if exists(".FCRunning"):
-            logger.info("Force Charge is Running")
+            logger.debug("Force Charge is Running")
             controlmode['Force_Charge'] = "Running"
         else:
             controlmode['Force_Charge'] = "Normal"
         if exists(".FERunning"):
-            logger.info("Force_Export is Running")
+            logger.debug("Force_Export is Running")
             controlmode['Force_Export'] = "Running"
         else:
             controlmode['Force_Export'] = "Normal"
         if exists(".tpcRunning"):
-            logger.info("Temp Pause Charge is Running")
+            logger.debug("Temp Pause Charge is Running")
             controlmode['Temp_Pause_Charge'] = "Running"
         else:
             controlmode['Temp_Pause_Charge'] = "Normal"
         if exists(".tpdRunning"):
-            logger.info("Temp_Pause_Discharge is Running")
+            logger.debug("Temp_Pause_Discharge is Running")
             controlmode['Temp_Pause_Discharge'] = "Running"
         else:
             controlmode['Temp_Pause_Discharge'] = "Normal"
@@ -381,7 +383,7 @@ def getData(fullrefresh):  # Read from Invertor put in cache
 
         ######## Get Invertor Details ########
         invertor = {}
-        logger.info("Getting Invertor Details")
+        logger.debug("Getting Invertor Details")
         if GEInv.battery_type == 1:
             batterytype = "Lithium"
         if GEInv.battery_type == 0:
@@ -401,9 +403,9 @@ def getData(fullrefresh):  # Read from Invertor put in cache
         ######## Get Battery Details ########
         battery = {}
         batteries2 = {}
-        logger.info("Getting Battery Details")
+        logger.debug("Getting Battery Details")
         for b in GEBat:
-            logger.info("Building battery output: ")
+            logger.debug("Building battery output: ")
             battery = {}
             battery['Battery_Serial_Number'] = b.battery_serial_number
             if b.battery_soc != 0:
@@ -443,7 +445,7 @@ def getData(fullrefresh):  # Read from Invertor put in cache
             battery['Battery_Cell_3_Temperature'] = b.temp_battery_cells_3
             battery['Battery_Cell_4_Temperature'] = b.temp_battery_cells_4
             batteries2[b.battery_serial_number] = battery
-            logger.info("Battery "+str(b.battery_serial_number)+" added")
+            logger.debug("Battery "+str(b.battery_serial_number)+" added")
 
         ######## Create multioutput and publish #########
         energy = {}
@@ -506,6 +508,8 @@ def getData(fullrefresh):  # Read from Invertor put in cache
             with open(GivLUT.regcache, 'wb') as outp:
                 pickle.dump(regCacheStack, outp, pickle.HIGHEST_PROTOCOL)
                 
+            logger.info("Successfully retrieved from: " + GiV_Settings.invertorIP)
+
             result['result'] = "Success retrieving data"
 
             # Success, so delete oldDataCount
@@ -513,26 +517,7 @@ def getData(fullrefresh):  # Read from Invertor put in cache
                 os.remove(GivLUT.oldDataCount)
 
     except:
-        with cacheLock:
-            if exists(GivLUT.oldDataCount):
-                with open(GivLUT.oldDataCount, 'rb') as inp:
-                    oldDataCount= pickle.load(inp)
-                oldDataCount=oldDataCount+1
-            else:
-                oldDataCount=1
-            logger.critical("Consecutive failure count= "+str(oldDataCount))
-            if oldDataCount>10:
-                #10 error in a row so delete regCache data
-                logger.critical("10 failed invertor reads in a row so removing regCache to force update...")
-                if exists(GivLUT.regcache):
-                    os.remove(GivLUT.regcache)
-                if exists(GivLUT.batterypkl):
-                    os.remove(GivLUT.batterypkl)
-                if exists(GivLUT.oldDataCount):
-                    os.remove(GivLUT.oldDataCount)
-            else:
-                with open(GivLUT.oldDataCount, 'wb') as outp:
-                    pickle.dump(oldDataCount, outp, pickle.HIGHEST_PROTOCOL)
+        consecFails()
 
         e = sys.exc_info()
         logger.error("Error processing registers: " + str(e))
@@ -540,6 +525,30 @@ def getData(fullrefresh):  # Read from Invertor put in cache
         result['result'] = "Error processing registers: " + str(e)
         return json.dumps(result)
     return json.dumps(result, indent=4, sort_keys=True, default=str)
+
+
+def consecFails():
+    with cacheLock:
+        if exists(GivLUT.oldDataCount):
+            with open(GivLUT.oldDataCount, 'rb') as inp:
+                oldDataCount= pickle.load(inp)
+            oldDataCount=oldDataCount+1
+        else:
+            oldDataCount=1
+        logger.error("Consecutive failure count= "+str(oldDataCount))
+        if oldDataCount>10:
+            #10 error in a row so delete regCache data
+            logger.critical("10 failed invertor reads in a row so removing regCache to force update...")
+            if exists(GivLUT.regcache):
+                os.remove(GivLUT.regcache)
+            if exists(GivLUT.batterypkl):
+                os.remove(GivLUT.batterypkl)
+            if exists(GivLUT.oldDataCount):
+                os.remove(GivLUT.oldDataCount)
+        else:
+            with open(GivLUT.oldDataCount, 'wb') as outp:
+                pickle.dump(oldDataCount, outp, pickle.HIGHEST_PROTOCOL)
+
 
 
 def runAll(full_refresh):  # Read from Invertor put in cache and publish
@@ -610,13 +619,13 @@ def publishOutput(array, SN):
             GiV_Settings.first_run = False
             updateFirstRun(SN)
         from mqtt import GivMQTT
-        logger.info("Publish all to MQTT")
+        logger.debug("Publish all to MQTT")
         if GiV_Settings.MQTT_Topic == "":
             GiV_Settings.MQTT_Topic = "GivEnergy"
         GivMQTT.multi_MQTT_publish(str(GiV_Settings.MQTT_Topic+"/"+SN+"/"), tempoutput)
     if GiV_Settings.Influx_Output:
         from influx import GivInflux
-        logger.info("Pushing output to Influx")
+        logger.debug("Pushing output to Influx")
         GivInflux.publish(SN, tempoutput)
 
 
@@ -647,25 +656,25 @@ def iterate_dict(array):        # Create a publish safe version of the output (c
         if isinstance(output, dict):
             temp = iterate_dict(output)
             safeoutput[p_load] = temp
-            logger.info('Dealt with '+p_load)
+            logger.debug('Dealt with '+p_load)
         elif isinstance(output, tuple):
             if "slot" in str(p_load):
-                logger.info('Converting Timeslots to publish safe string')
+                logger.debug('Converting Timeslots to publish safe string')
                 safeoutput[p_load+"_start"] = output[0].strftime("%H:%M")
                 safeoutput[p_load+"_end"] = output[1].strftime("%H:%M")
             else:
                 # Deal with other tuples _ Print each value
                 for index, key in enumerate(output):
-                    logger.info('Converting Tuple to multiple publish safe strings')
+                    logger.debug('Converting Tuple to multiple publish safe strings')
                     safeoutput[p_load+"_"+str(index)] = str(key)
         elif isinstance(output, datetime.datetime):
-            logger.info('Converting datetime to publish safe string')
+            logger.debug('Converting datetime to publish safe string')
             safeoutput[p_load] = output.strftime("%d-%m-%Y %H:%M:%S")
         elif isinstance(output, datetime.time):
-            logger.info('Converting time to publish safe string')
+            logger.debug('Converting time to publish safe string')
             safeoutput[p_load] = output.strftime("%H:%M")
         elif isinstance(output, Model):
-            logger.info('Converting time to publish safe string')
+            logger.debug('Converting time to publish safe string')
             safeoutput[p_load] = output.name
         elif isinstance(output, float):
             safeoutput[p_load] = round(output, 3)
@@ -700,19 +709,19 @@ def ratecalcs(multi_output, multi_output_old):
 
     if dayRateStart.hour == datetime.datetime.now(GivLUT.timezone).hour and dayRateStart.minute == datetime.datetime.now(GivLUT.timezone).minute:
         # Save current Total stats as baseline
-        logger.info("Saving current energy stats at start of day rate tariff")
+        logger.debug("Saving current energy stats at start of day rate tariff")
         rate_data['Day_Start_Energy_kWh'] = import_energy
     elif nightRateStart.hour == datetime.datetime.now(GivLUT.timezone).hour and nightRateStart.minute == datetime.datetime.now(GivLUT.timezone).minute:
         # Save current Total stats as baseline
-        logger.info("Saving current energy stats at start of night rate tariff")
+        logger.debug("Saving current energy stats at start of night rate tariff")
         rate_data['Night_Start_Energy_kWh'] = import_energy
 
     # If no data then just save current import as base data
     if not('Night_Start_Energy_kWh' in rate_data):
-        logger.info("No Night Start Energy so setting it to: "+str(import_energy))
+        logger.debug("No Night Start Energy so setting it to: "+str(import_energy))
         rate_data['Night_Start_Energy_kWh'] = import_energy
     if not('Day_Start_Energy_kWh' in rate_data):
-        logger.info("No Day Start Energy so setting it to: "+str(import_energy))
+        logger.debug("No Day Start Energy so setting it to: "+str(import_energy))
         rate_data['Day_Start_Energy_kWh'] = import_energy
     if not('Night_Energy_kWh' in rate_data):
         rate_data['Night_Energy_kWh'] = 0.00
@@ -732,26 +741,26 @@ def ratecalcs(multi_output, multi_output_old):
     # now calc the difference for each value between the correct start pickle and now
 
     if import_energy > import_energy_old:  # Only run if there has been more import
-        logger.info("Imported more energy so calculating current tariff costs: "+str(import_energy_old)+" -> "+str(import_energy))
+        logger.debug("Imported more energy so calculating current tariff costs: "+str(import_energy_old)+" -> "+str(import_energy))
 
         if night_start <= datetime.datetime.now(GivLUT.timezone) < day_start:
-            logger.info("Current Tariff is Night, calculating stats...")
+            logger.debug("Current Tariff is Night, calculating stats...")
             rate_data['Night_Energy_kWh'] = import_energy-rate_data['Night_Start_Energy_kWh']
-            logger.info("Night_Energy_kWh=" + str(import_energy)+" - "+str(rate_data['Night_Start_Energy_kWh']))
+            logger.debug("Night_Energy_kWh=" + str(import_energy)+" - "+str(rate_data['Night_Start_Energy_kWh']))
             rate_data['Night_Cost'] = float(rate_data['Night_Energy_kWh'])*float(GiV_Settings.night_rate)
-            logger.info("Night_Cost= "+str(rate_data['Night_Energy_kWh'])+"kWh x £"+str(float(GiV_Settings.night_rate))+"/kWh = £"+str(rate_data['Day_Cost']))
+            logger.debug("Night_Cost= "+str(rate_data['Night_Energy_kWh'])+"kWh x £"+str(float(GiV_Settings.night_rate))+"/kWh = £"+str(rate_data['Day_Cost']))
             rate_data['Current_Rate'] = GiV_Settings.night_rate
         else:
-            logger.info("Current Tariff is Day, calculating stats...")
+            logger.debug("Current Tariff is Day, calculating stats...")
             rate_data['Day_Energy_kWh'] = import_energy-rate_data['Day_Start_Energy_kWh']
-            logger.info("Day_Energy_kWh=" + str(import_energy)+" - "+str(rate_data['Day_Start_Energy_kWh']))
+            logger.debug("Day_Energy_kWh=" + str(import_energy)+" - "+str(rate_data['Day_Start_Energy_kWh']))
             rate_data['Day_Cost'] = float(rate_data['Day_Energy_kWh'])*float(GiV_Settings.day_rate)
-            logger.info("Day_Cost= "+str(rate_data['Day_Energy_kWh'])+"kWh x £"+str(float(GiV_Settings.day_rate))+"/kWh = £"+str(rate_data['Day_Cost']))
+            logger.debug("Day_Cost= "+str(rate_data['Day_Energy_kWh'])+"kWh x £"+str(float(GiV_Settings.day_rate))+"/kWh = £"+str(rate_data['Day_Cost']))
             rate_data['Current_Rate'] = GiV_Settings.day_rate
 
         if (multi_output['Energy']['Today']['Load_Energy_Today_kWh']) != 0:
             rate_data['Import_ppkwh_Today'] = round((rate_data['Day_Cost']+rate_data['Night_Cost'])/(multi_output['Energy']['Today']['Import_Energy_Today_kWh']), 3)
-            logger.info("Import_ppkwh_Today= (£"+str(rate_data['Day_Cost'])+" + £"+str(rate_data['Night_Cost'])+") \ "+str(multi_output['Energy']['Today']['Load_Energy_Today_kWh'])+"kWh = £"+str(rate_data['Import_ppkwh_Today'])+"/kWh")
+            logger.debug("Import_ppkwh_Today= (£"+str(rate_data['Day_Cost'])+" + £"+str(rate_data['Night_Cost'])+") \ "+str(multi_output['Energy']['Today']['Load_Energy_Today_kWh'])+"kWh = £"+str(rate_data['Import_ppkwh_Today'])+"/kWh")
 
     multi_output['Energy']['Rates'] = rate_data
 
@@ -763,7 +772,7 @@ def ratecalcs(multi_output, multi_output_old):
 
 
 def dataCleansing(data, regCacheStack):
-    logger.info("Running the data cleansing process")
+    logger.debug("Running the data cleansing process")
     # iterate multi_output to get each end result dict.
     # Loop that dict to validate against
     new_multi_output = loop_dict(data, regCacheStack, data["Last_Updated_Time"])
@@ -795,7 +804,7 @@ def loop_dict(array, regCacheStack, lastUpdate):
             if p_load in regCacheStack:
                 temp = loop_dict(output, regCacheStack[p_load], lastUpdate)
                 safeoutput[p_load] = temp
-                logger.info('Data cleansed for: '+str(p_load))
+                logger.debug('Data cleansed for: '+str(p_load))
             else:
                 logger.critical(str(p_load)+" has no data in the cache so using new value.")
                 safeoutput[p_load] = output
@@ -830,24 +839,24 @@ def dataSmoother2(dataNew, dataOld, lastUpdate):
             now = datetime.datetime.now(GivLUT.timezone)
     ### Run checks against the conditions in GivLUT ###
             if now.minute == 0 and now.hour == 0 and "Today" in name:  # Treat Today stats as a special case
-                logger.info("Midnight and "+str(name)+" so accepting value as is")
+                logger.debug("Midnight and "+str(name)+" so accepting value as is")
                 return (dataNew)
             if newData < float(lookup.min) or newData > float(lookup.max):  # If outside min and max ranges
-                logger.info(str(name)+" is outside of allowable bounds so using old value: "+str(newData))
+                logger.debug(str(name)+" is outside of allowable bounds so using old value: "+str(newData))
                 return(oldData)
             if newData == 0 and not lookup.allowZero:  # if zero and not allowed to be
-                logger.info(str(name)+" is Zero so using old value")
+                logger.debug(str(name)+" is Zero so using old value")
                 return(oldData)
             if lookup.smooth:     # apply smoothing if required
                 if newData != oldData:  # Only if its not the same
                     timeDelta = (now-then).total_seconds()
                     dataDelta = abs(newData-oldData)/oldData
                     if dataDelta > smoothRate and timeDelta < 60:
-                        logger.info(str(name)+" jumped too far in a single read: "+str(oldData)+"->"+str(newData)+" so using previous value")
+                        logger.debug(str(name)+" jumped too far in a single read: "+str(oldData)+"->"+str(newData)+" so using previous value")
                         return(oldData)
             if lookup.onlyIncrease:  # if data can only increase then check
                 if (oldData-newData) > 0.11:
-                    logger.info(str(name)+" has decreased so using old value")
+                    logger.debug(str(name)+" has decreased so using old value")
                     return oldData
     return(newData)
 
@@ -869,23 +878,23 @@ def calcBatteryValue(multi_output):
         if not exists(GivLUT.ppkwhtouch) and exists(GivLUT.batterypkl):      # only run this if there is no touchfile but there is a battery stat
             battery_kwh = multi_output['Power']['Power']['SOC_kWh']
             ac_charge = float(multi_output['Energy']['Total']['AC_Charge_Energy_Total_kWh'])-float(batterystats['AC Charge last'])
-            logger.info("Battery_kWh has gone from: "+str(batterystats['Battery_kWh_old'])+" -> "+str(battery_kwh))
+            logger.debug("Battery_kWh has gone from: "+str(batterystats['Battery_kWh_old'])+" -> "+str(battery_kwh))
             if float(battery_kwh) > float(batterystats['Battery_kWh_old']):
-                logger.info("Battery has been charged in the last 30mins so recalculating battery value and ppkwh: ")
+                logger.debug("Battery has been charged in the last 30mins so recalculating battery value and ppkwh: ")
                 batVal = batterystats['Battery_Value']
                 money_in = round(ac_charge*float(multi_output['Energy']['Rates']['Current_Rate']), 2)
-                logger.info("Money_in= "+str(round(ac_charge, 2))+"kWh * £"+str(float(multi_output['Energy']['Rates']['Current_Rate']))+"/kWh = £"+str(money_in))
+                logger.debug("Money_in= "+str(round(ac_charge, 2))+"kWh * £"+str(float(multi_output['Energy']['Rates']['Current_Rate']))+"/kWh = £"+str(money_in))
                 batterystats['Battery_Value'] = round(float(batterystats['Battery_Value']) + money_in, 3)
-                logger.info("Battery_Value= £"+str(float(batVal))+" + £"+str(money_in)+" = £"+str(batterystats['Battery_Value']))
+                logger.debug("Battery_Value= £"+str(float(batVal))+" + £"+str(money_in)+" = £"+str(batterystats['Battery_Value']))
                 batterystats['Battery_ppkwh'] = round(batterystats['Battery_Value']/battery_kwh, 3)
-                logger.info("Battery_ppkWh= £"+str(batterystats['Battery_Value'])+" / "+str(battery_kwh)+"kWh = £"+str(batterystats['Battery_ppkwh'])+"/kWh")
+                logger.debug("Battery_ppkWh= £"+str(batterystats['Battery_Value'])+" / "+str(battery_kwh)+"kWh = £"+str(batterystats['Battery_ppkwh'])+"/kWh")
             else:
-                logger.info("No battery charge in the last 30 mins so adjusting Battery Value")
+                logger.debug("No battery charge in the last 30 mins so adjusting Battery Value")
                 batterystats['Battery_Value'] = round(float(batterystats['Battery_ppkwh'])*battery_kwh, 3)
-                logger.info("Battery_Value= £"+str(round(float(batterystats['Battery_ppkwh']), 2))+"/kWh * "+str(round(battery_kwh, 2))+"kWh = £"+str(batterystats['Battery_Value']))
+                logger.debug("Battery_Value= £"+str(round(float(batterystats['Battery_ppkwh']), 2))+"/kWh * "+str(round(battery_kwh, 2))+"kWh = £"+str(batterystats['Battery_Value']))
             # set the new "old" AC Charge stat to current AC Charge kwh
             batterystats['AC Charge last'] = float(multi_output['Energy']['Total']['AC_Charge_Energy_Total_kWh'])
-            logger.info("Updating battery_kWh_old to: "+str(battery_kwh))
+            logger.debug("Updating battery_kWh_old to: "+str(battery_kwh))
             batterystats['Battery_kWh_old'] = battery_kwh
             open(GivLUT.ppkwhtouch, 'w').close()       # set touch file  to stop repeated triggers in the single minute
 

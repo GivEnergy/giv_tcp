@@ -38,28 +38,29 @@ class GivInflux():
         output_str=""
         power_output = data['Power']['Power']
         for key in power_output:
-            logging.info("Creating Power string for InfluxDB")
+            logging.debug("Creating Power string for InfluxDB")
             output_str=output_str+str(GivInflux.make_influx_string(key))+'='+str(power_output[key])+','
         flow_output = data['Power']['Flows']
         for key in flow_output:
-            logging.info("Creating Power Flow string for InfluxDB")
+            logging.debug("Creating Power Flow string for InfluxDB")
             output_str=output_str+str(GivInflux.make_influx_string(key))+'='+str(flow_output[key])+','
         energy_today = data['Energy']['Today']
         for key in energy_today:
-            logging.info("Creating Energy/Today string for InfluxDB")
+            logging.debug("Creating Energy/Today string for InfluxDB")
             output_str=output_str+str(GivInflux.make_influx_string(key))+'='+str(energy_today[key])+','
 
         energy_total = data['Energy']['Total']
         for key in energy_total:
-            logging.info("Creating Energy/Total string for InfluxDB")
+            logging.debug("Creating Energy/Total string for InfluxDB")
             output_str=output_str+str(GivInflux.make_influx_string(key))+'='+str(energy_total[key])+','
 
-        logging.info("Data sent to Influx is: "+ output_str[:-1])
+        logging.debug("Data sending to Influx is: "+ output_str[:-1])
         data1=GivInflux.line_protocol(SN,output_str[:-1])
         
         _db_client = InfluxDBClient(url=GiV_Settings.influxURL, token=GiV_Settings.influxToken, org=GiV_Settings.influxOrg, debug=True)
         _write_api = _db_client.write_api(write_options=WriteOptions(batch_size=1))
         _write_api.write(bucket=GiV_Settings.influxBucket, record=data1)
+        logging.info("Written to InfluxDB")
 
         _write_api.close()
         _db_client.close()
