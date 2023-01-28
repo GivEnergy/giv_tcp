@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 # version 2022.08.01
+from threading import Lock
 from givenergy_modbus.model.plant import Plant
 from givenergy_modbus.model.battery import Battery
 from givenergy_modbus.model.inverter import Model
@@ -25,6 +26,8 @@ sys.path.append(GiV_Settings.default_path)
 givLUT = GivLUT.entity_type
 logger = GivLUT.logger
 
+inverterLock = Lock()
+cacheLock = Lock()
 
 def getData(fullrefresh):  # Read from Invertor put in cache
     # plant=Plant(number_batteries=int(GiV_Settings.numBatteries))
@@ -40,41 +43,18 @@ def getData(fullrefresh):  # Read from Invertor put in cache
     logger.info("----------------------------Starting----------------------------")
     logging.info("Getting All Registers")
 
-    # Only run if no lockfile present
-    if exists(GivLUT.lockfile):
-        logger.error("Lockfile set so aborting getData")
-        result['result'] = "Error: Lockfile set so aborting getData"
-        return json.dumps(result)
-
     # Connect to Invertor and load data
 ########### Use a queue for the giv read and join for the output #############
     try:
-        # SET Lockfile to prevent clashes
-        logger.info(" setting lock file")
         logger.info("Connecting to: " + GiV_Settings.invertorIP)
-        open(GivLUT.lockfile, 'w').close()
-#        client=GivEnergyClient(host=GiV_Settings.invertorIP)
 
-        plant = GivClient.getData(fullrefresh)
+        with inverterLock:
+            plant = GivClient.getData(fullrefresh)
+            
         GEInv = plant.inverter
         GEBat = plant.batteries
-        # Close Lockfile to allow access
-        logger.info("Removing lock file")
-        os.remove(GivLUT.lockfile)
 
         multi_output['Last_Updated_Time'] = datetime.datetime.utcnow().replace(tzinfo=datetime.timezone.utc).isoformat()
-
-        # Get lastupdate from pickle if it exists
-        if exists(GivLUT.lastupdate):
-            with open(GivLUT.lastupdate, 'rb') as inp:
-                previousUpdate = pickle.load(inp)
-            timediff = datetime.datetime.fromisoformat(multi_output['Last_Updated_Time'])-datetime.datetime.fromisoformat(previousUpdate)
-            multi_output['Time_Since_Last_Update'] = (((timediff.seconds*1000000)+timediff.microseconds)/1000000)
-
-        # Save new time to pickle
-        with open(GivLUT.lastupdate, 'wb') as outp:
-            pickle.dump(multi_output['Last_Updated_Time'], outp, pickle.HIGHEST_PROTOCOL)
-
         multi_output['status'] = "online"
 
         logger.info("Invertor connection successful, registers retrieved")
@@ -83,14 +63,13 @@ def getData(fullrefresh):  # Read from Invertor put in cache
         e = sys.exc_info()
         logger.error("Error collecting registers: " + str(e))
         temp['result'] = "Error collecting registers: " + str(e)
-        # Close Lockfile to allow access in the event of an error
-        logger.info("Removing lock file due to read error")
-        os.remove(GivLUT.lockfile)
         return json.dumps(temp)
 
     try:
+        logger.info("Beginning parsing of Inverter data")
+
         # Total Energy Figures
-        logger.info("Getting Total Energy Data")
+        logger.debug("Getting Total Energy Data")
         energy_total_output['Export_Energy_Total_kWh'] = GEInv.e_grid_out_total
         energy_total_output['Import_Energy_Total_kWh'] = GEInv.e_grid_in_total
         energy_total_output['Invertor_Energy_Total_kWh'] = GEInv.e_inverter_out_total
@@ -107,8 +86,8 @@ def getData(fullrefresh):  # Read from Invertor put in cache
         energy_total_output['Self_Consumption_Energy_Total_kWh'] = round(energy_total_output['PV_Energy_Total_kWh'], 2)-round(energy_total_output['Export_Energy_Total_kWh'], 2)
 
 
-# Energy Today Figures
-        logger.info("Getting Today Energy Data")
+        # Energy Today Figures
+        logger.debug("Getting Today Energy Data")
         energy_today_output['PV_Energy_Today_kWh'] = GEInv.e_pv1_day+GEInv.e_pv2_day
         energy_today_output['Import_Energy_Today_kWh'] = GEInv.e_grid_in_day
         energy_today_output['Export_Energy_Today_kWh'] = GEInv.e_grid_out_day
@@ -126,16 +105,18 @@ def getData(fullrefresh):  # Read from Invertor put in cache
         checksum = 0
         for item in energy_today_output:
             checksum = checksum+energy_today_output[item]
-        if checksum == 0 and GEInv.system_time.hour == 0 and GEInv.system_time.minute == 0 and exists(GivLUT.regcache):
-            # remove regcache at midnight
-            logger.info("Energy Today is Zero and its midnight so resetting regCache")
-            os.remove(GivLUT.regcache)
+        if checksum == 0 and GEInv.system_time.hour == 0 and GEInv.system_time.minute == 0:
+            with cacheLock:
+                if exists(GivLUT.regcache):
+                    # remove regcache at midnight
+                    logger.info("Energy Today is Zero and its midnight so resetting regCache")
+                    os.remove(GivLUT.regcache)
 
 
-############  Core Power Stats    ############
+        ############  Core Power Stats    ############
 
-    # PV Power
-        logger.info("Getting PV Power")
+        # PV Power
+        logger.debug("Getting PV Power")
         PV_power_1 = GEInv.p_pv1
         PV_power_2 = GEInv.p_pv2
         PV_power = PV_power_1+PV_power_2
@@ -148,8 +129,8 @@ def getData(fullrefresh):  # Read from Invertor put in cache
         power_output['PV_Current_String_1'] = GEInv.i_pv1*10
         power_output['PV_Current_String_2'] = GEInv.i_pv2*10
 
-    # Grid Power
-        logger.info("Getting Grid Power")
+        # Grid Power
+        logger.debug("Getting Grid Power")
         grid_power = GEInv.p_grid_out
         if grid_power < 0:
             import_power = abs(grid_power)
@@ -164,12 +145,12 @@ def getData(fullrefresh):  # Read from Invertor put in cache
         power_output['Import_Power'] = import_power
         power_output['Export_Power'] = export_power
 
-    # EPS Power
-        logger.info("Getting EPS Power")
+        # EPS Power
+        logger.debug("Getting EPS Power")
         power_output['EPS_Power'] = GEInv.p_eps_backup
 
-    # Invertor Power
-        logger.info("Getting PInv Power")
+        # Invertor Power
+        logger.debug("Getting PInv Power")
         Invertor_power = GEInv.p_inverter_out
         if -6000 <= Invertor_power <= 6000:
             power_output['Invertor_Power'] = Invertor_power
@@ -177,21 +158,22 @@ def getData(fullrefresh):  # Read from Invertor put in cache
             power_output['AC_Charge_Power'] = abs(Invertor_power)
         else:
             power_output['AC_Charge_Power'] = 0
-    # Load Power
-        logger.info("Getting Load Power")
+
+        # Load Power
+        logger.debug("Getting Load Power")
         Load_power = GEInv.p_load_demand
         if Load_power < 15500:
             power_output['Load_Power'] = Load_power
 
-    # Self Consumption
-        logger.info("Getting Self Consumption Power")
+        # Self Consumption
+        logger.debug("Getting Self Consumption Power")
         power_output['Self_Consumption_Power'] = max(Load_power - import_power, 0)
 
 
-############  Power Flow Stats    ############
+        ############  Power Flow Stats    ############
 
-    # Solar to H/B/G
-        logger.info("Getting Solar to H/B/G Power Flows")
+        # Solar to H/B/G
+        logger.debug("Getting Solar to H/B/G Power Flows")
         if PV_power > 0:
             S2H = min(PV_power, Load_power)
             power_flow_output['Solar_to_House'] = S2H
@@ -201,26 +183,26 @@ def getData(fullrefresh):  # Read from Invertor put in cache
             power_flow_output['Solar_to_House'] = 0
             power_flow_output['Solar_to_Grid'] = 0
 
-    # Grid to Battery/House Power
-        logger.info("Getting Grid to Battery/House Power Flow")
+        # Grid to Battery/House Power
+        logger.debug("Getting Grid to Battery/House Power Flow")
         if import_power > 0:
             power_flow_output['Grid_to_House'] = import_power
         else:
             power_flow_output['Grid_to_House'] = 0
 
-######## Grab output history to allow data smoothing ########
+        ######## Grab output history to allow data smoothing ########
 
         # Grab previous data from Pickle and use it validate any outrageous changes
-        if exists(GivLUT.regcache):      # if there is a cache then grab it
-            with open(GivLUT.regcache, 'rb') as inp:
-                regCacheStack = pickle.load(inp)
-                multi_output_old = regCacheStack[4]
-        else:
-            regCacheStack = [0, 0, 0, 0, 0]
+        with cacheLock:
+            if exists(GivLUT.regcache):      # if there is a cache then grab it
+                with open(GivLUT.regcache, 'rb') as inp:
+                    regCacheStack = pickle.load(inp)
+                    multi_output_old = regCacheStack[4]
+            else:
+                regCacheStack = [0, 0, 0, 0, 0]
 
-######## Battery Stats only if there are batteries...  ########
-
-        logger.info("Getting SOC")
+        ######## Battery Stats only if there are batteries...  ########
+        logger.debug("Getting SOC")
         if int(GiV_Settings.numBatteries) > 0:  # only do this if there are batteries
             if GEInv.battery_percent != 0:
                 power_output['SOC'] = GEInv.battery_percent
@@ -232,7 +214,7 @@ def getData(fullrefresh):  # Read from Invertor put in cache
                 logger.error("\"Battery SOC\" reported as: "+str(GEInv.battery_percent)+"% and no previou value so setting to 1%")
             power_output['SOC_kWh'] = (int(power_output['SOC'])*((GEInv.battery_nominal_capacity*51.2)/1000))/100
 
-        # Energy Stats
+            # Energy Stats
             energy_today_output['Battery_Charge_Energy_Today_kWh'] = GEInv.e_battery_charge_day
             energy_today_output['Battery_Discharge_Energy_Today_kWh'] = GEInv.e_battery_discharge_day
             energy_today_output['Battery_Throughput_Today_kWh'] = GEInv.e_battery_charge_day+GEInv.e_battery_discharge_day
@@ -243,7 +225,8 @@ def getData(fullrefresh):  # Read from Invertor put in cache
             else:
                 energy_total_output['Battery_Charge_Energy_Total_kWh'] = GEInv.e_battery_charge_total
                 energy_total_output['Battery_Discharge_Energy_Total_kWh'] = GEInv.e_battery_discharge_total
-        # Battery Power
+
+            # Battery Power
             Battery_power = GEInv.p_battery
             if Battery_power >= 0:
                 discharge_power = abs(Battery_power)
@@ -255,8 +238,8 @@ def getData(fullrefresh):  # Read from Invertor put in cache
             power_output['Charge_Power'] = charge_power
             power_output['Discharge_Power'] = discharge_power
 
-        # Power flows
-            logger.info("Getting Solar to H/B/G Power Flows")
+            # Power flows
+            logger.debug("Getting Solar to H/B/G Power Flows")
             if PV_power > 0:
                 S2H = min(PV_power, Load_power)
                 power_flow_output['Solar_to_House'] = S2H
@@ -268,13 +251,14 @@ def getData(fullrefresh):  # Read from Invertor put in cache
                 power_flow_output['Solar_to_House'] = 0
                 power_flow_output['Solar_to_Battery'] = 0
                 power_flow_output['Solar_to_Grid'] = 0
-        # Battery to House
-            logger.info("Getting Battery to House Power Flow")
+
+            # Battery to House
+            logger.debug("Getting Battery to House Power Flow")
             B2H = max(discharge_power-export_power, 0)
             power_flow_output['Battery_to_House'] = B2H
 
-        # Grid to Battery/House Power
-            logger.info("Getting Grid to Battery/House Power Flow")
+            # Grid to Battery/House Power
+            logger.debug("Getting Grid to Battery/House Power Flow")
             if import_power > 0:
                 power_flow_output['Grid_to_Battery'] = charge_power-max(PV_power-Load_power, 0)
                 power_flow_output['Grid_to_House'] = max(import_power-charge_power, 0)
@@ -283,8 +267,8 @@ def getData(fullrefresh):  # Read from Invertor put in cache
                 power_flow_output['Grid_to_Battery'] = 0
                 power_flow_output['Grid_to_House'] = 0
 
-        # Battery to Grid Power
-            logger.info("Getting Battery to Grid Power Flow")
+            # Battery to Grid Power
+            logger.debug("Getting Battery to Grid Power Flow")
             if export_power > 0:
                 power_flow_output['Battery_to_Grid'] = max(discharge_power-B2H, 0)
             else:
@@ -298,8 +282,8 @@ def getData(fullrefresh):  # Read from Invertor put in cache
             raise ValueError("All zeros returned by Invertor, skipping update")
 
 
-######## Get Control Data ########
-        logger.info("Getting mode control figures")
+        ######## Get Control Data ########
+        logger.debug("Getting mode control figures")
         # Get Control Mode registers
         if GEInv.enable_charge == True:
             charge_schedule = "enable"
@@ -325,7 +309,7 @@ def getData(fullrefresh):  # Read from Invertor put in cache
         #if charge_rate>100: charge_rate=100
 
         # Calculate Mode
-        logger.info("Calculating Mode...")
+        logger.debug("Calculating Mode...")
         # Calc Mode
 
         if GEInv.battery_power_mode == 1 and GEInv.enable_discharge == False and GEInv.battery_soc_reserve == 4:
@@ -383,9 +367,9 @@ def getData(fullrefresh):  # Read from Invertor put in cache
         else:
             controlmode['Temp_Pause_Discharge'] = "Normal"
 
-######## Grab Timeslots ########
+        ######## Grab Timeslots ########
         timeslots = {}
-        logger.info("Getting TimeSlot data")
+        logger.debug("Getting TimeSlot data")
         timeslots['Discharge_start_time_slot_1'] = GEInv.discharge_slot_1[0].isoformat()
         timeslots['Discharge_end_time_slot_1'] = GEInv.discharge_slot_1[1].isoformat()
         timeslots['Discharge_start_time_slot_2'] = GEInv.discharge_slot_2[0].isoformat()
@@ -395,7 +379,7 @@ def getData(fullrefresh):  # Read from Invertor put in cache
         timeslots['Charge_start_time_slot_2'] = GEInv.charge_slot_2[0].isoformat()
         timeslots['Charge_end_time_slot_2'] = GEInv.charge_slot_2[1].isoformat()
 
-######## Get Invertor Details ########
+        ######## Get Invertor Details ########
         invertor = {}
         logger.info("Getting Invertor Details")
         if GEInv.battery_type == 1:
@@ -414,7 +398,7 @@ def getData(fullrefresh):  # Read from Invertor put in cache
         invertor['Invertor_Type'] = GEInv.inverter_model
         invertor['Invertor_Temperature'] = GEInv.temp_inverter_heatsink
 
-######## Get Battery Details ########
+        ######## Get Battery Details ########
         battery = {}
         batteries2 = {}
         logger.info("Getting Battery Details")
@@ -461,7 +445,7 @@ def getData(fullrefresh):  # Read from Invertor put in cache
             batteries2[b.battery_serial_number] = battery
             logger.info("Battery "+str(b.battery_serial_number)+" added")
 
-######## Create multioutput and publish #########
+        ######## Create multioutput and publish #########
         energy = {}
         energy["Today"] = energy_today_output
         energy["Total"] = energy_total_output
@@ -480,7 +464,7 @@ def getData(fullrefresh):  # Read from Invertor put in cache
             raw["invertor"] = GEInv.dict()
             multi_output['raw'] = raw
 
-######### Section where post processing of multi_ouput functions are called ###########
+        ######### Section where post processing of multi_ouput functions are called ###########
 
         # run ppkwh stats on firstrun and every half hour
         if 'multi_output_old' in locals():
@@ -505,17 +489,51 @@ def getData(fullrefresh):  # Read from Invertor put in cache
         # Add new data to the stack
         regCacheStack.pop(0)
         regCacheStack.append(multi_output)
-        # Save new data to Pickle
-        with open(GivLUT.regcache, 'wb') as outp:
-            pickle.dump(regCacheStack, outp, pickle.HIGHEST_PROTOCOL)
-        result['result'] = "Success retrieving data"
 
-        # Success, so delete oldDataCount
-        if exists(GivLUT.oldDataCount):
-            os.remove(GivLUT.oldDataCount)
+        # Get lastupdate from pickle if it exists
+        with cacheLock:
+            if exists(GivLUT.lastupdate):
+                with open(GivLUT.lastupdate, 'rb') as inp:
+                    previousUpdate = pickle.load(inp)
+                timediff = datetime.datetime.fromisoformat(multi_output['Last_Updated_Time'])-datetime.datetime.fromisoformat(previousUpdate)
+                multi_output['Time_Since_Last_Update'] = (((timediff.seconds*1000000)+timediff.microseconds)/1000000)
+
+            # Save new time to pickle
+            with open(GivLUT.lastupdate, 'wb') as outp:
+                pickle.dump(multi_output['Last_Updated_Time'], outp, pickle.HIGHEST_PROTOCOL)
+
+            # Save new data to Pickle
+            with open(GivLUT.regcache, 'wb') as outp:
+                pickle.dump(regCacheStack, outp, pickle.HIGHEST_PROTOCOL)
+                
+            result['result'] = "Success retrieving data"
+
+            # Success, so delete oldDataCount
+            if exists(GivLUT.oldDataCount):
+                os.remove(GivLUT.oldDataCount)
 
     except:
-        GivLUT.consecFails()
+        with cacheLock:
+            if exists(GivLUT.oldDataCount):
+                with open(GivLUT.oldDataCount, 'rb') as inp:
+                    oldDataCount= pickle.load(inp)
+                oldDataCount=oldDataCount+1
+            else:
+                oldDataCount=1
+            logger.critical("Consecutive failure count= "+str(oldDataCount))
+            if oldDataCount>10:
+                #10 error in a row so delete regCache data
+                logger.critical("10 failed invertor reads in a row so removing regCache to force update...")
+                if exists(GivLUT.regcache):
+                    os.remove(GivLUT.regcache)
+                if exists(GivLUT.batterypkl):
+                    os.remove(GivLUT.batterypkl)
+                if exists(GivLUT.oldDataCount):
+                    os.remove(GivLUT.oldDataCount)
+            else:
+                with open(GivLUT.oldDataCount, 'wb') as outp:
+                    pickle.dump(oldDataCount, outp, pickle.HIGHEST_PROTOCOL)
+
         e = sys.exc_info()
         logger.error("Error processing registers: " + str(e))
         logger.error("Invertor Update failed so using last known good data from cache ("+previousUpdate+")")
@@ -527,10 +545,10 @@ def getData(fullrefresh):  # Read from Invertor put in cache
 def runAll(full_refresh):  # Read from Invertor put in cache and publish
     # full_refresh=True
     from read import getData
-    result = GivQueue.q.enqueue(getData, full_refresh)
-#    getData(full_refresh)
-    while result.result is None and result.exc_info is None:
-        time.sleep(0.5)
+#    result = GivQueue.q.enqueue(getData, full_refresh)
+    getData(full_refresh)
+#    while result.result is None and result.exc_info is None:
+#        time.sleep(0.5)
     # Step here to validate data against previous pickle?
     multi_output = pubFromPickle()
     return multi_output
@@ -547,15 +565,16 @@ def pubFromPickle():  # Publish last cached Invertor Data
     multi_output = {}
     result = "Success"
     if not exists(GivLUT.regcache):  # if there is no cache, create it
-        result = getData(True)
+        result = "Please get data from Inverter first, either by calling runAll or waiting until the self-run has completed"
     if "Success" in result:
-        with open(GivLUT.regcache, 'rb') as inp:
-            regCacheStack = pickle.load(inp)
-            multi_output = regCacheStack[4]
+        with cacheLock:
+            with open(GivLUT.regcache, 'rb') as inp:
+                regCacheStack = pickle.load(inp)
+                multi_output = regCacheStack[4]
         SN = multi_output["Invertor_Details"]['Invertor_Serial_Number']
         publishOutput(multi_output, SN)
     else:
-        multi_output['result'] = "Failure to find data cache"
+        multi_output['result'] = result
     return json.dumps(multi_output, indent=4, sort_keys=True, default=str)
 
 
