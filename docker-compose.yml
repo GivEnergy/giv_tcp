@@ -47,8 +47,8 @@ services:
       - GEAPI=                        # API Key for the GivEnergy Cloud
       - SOLCASTAPI=                   # API key for Solcast
       - SOLCASTSITEID=                # SiteID for Solcast site (first array)
-      - SOLCASTSITEID2=                # SiteID for Solcast site (second array)
-      - DATASMOOTHER=medium             # Set the data smoothing to most agressive setting (High, medium, low)
+      - SOLCASTSITEID2=               # SiteID for Solcast site (second array)
+      - DATASMOOTHER=medium           # Set the data smoothing to most agressive setting (High, medium, low, none)
 
     restart: always
     privileged: true

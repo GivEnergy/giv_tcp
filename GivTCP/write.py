@@ -479,7 +479,7 @@ def setBatteryMode(payload):
             time.sleep(1)
             client.enable_discharge()
         else:
-            logger.info ("Invalid Mode requested: "+ payload['mode'])
+            logger.error ("Invalid Mode requested: "+ payload['mode'])
             temp['result']="Invalid Mode requested"
             return json.dumps(temp)
         temp['result']="Setting Battery Mode was a success"

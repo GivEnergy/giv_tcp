@@ -29,7 +29,7 @@ class GivMQTT():
             logger.info("connected OK Returned code="+str(rc))
             #client.subscribe(topic)
         else:
-            logger.info("Bad connection Returned code= "+str(rc))
+            logger.error("Bad connection Returned code= "+str(rc))
     
     def multi_MQTT_publish(rootTopic,array):   #Recieve multiple payloads with Topics and publish in a single MQTT connection
         mqtt.Client.connected_flag=False        			#create flag in class
@@ -45,11 +45,11 @@ class GivMQTT():
             logger.info ("Connecting to broker: "+ GivMQTT.MQTT_Address)
             client.connect(GivMQTT.MQTT_Address,port=GivMQTT.MQTT_Port)
             while not client.connected_flag:        			#wait in loop
-                logger.info ("In wait loop")
+                logger.debug ("In wait loop")
                 time.sleep(0.2)
             for p_load in array:
                 payload=array[p_load]
-                logger.info('Publishing: '+rootTopic+p_load)
+                logger.debug('Publishing: '+rootTopic+p_load)
                 output=GivMQTT.iterate_dict(payload,rootTopic+p_load)   #create LUT for MQTT publishing
                 for value in output:
                     client.publish(value,output[value])
@@ -68,7 +68,7 @@ class GivMQTT():
                 output=array[p_load]
                 if isinstance(output, dict):
                     MQTT_LUT.update(GivMQTT.iterate_dict(output,topic+"/"+p_load))
-                    logger.info('Prepping '+p_load+" for publishing")
+                    logger.debug('Prepping '+p_load+" for publishing")
                 else:
                     MQTT_LUT[topic+"/"+p_load]=output
         else:

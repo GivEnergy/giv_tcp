@@ -5,6 +5,13 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/)
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
+## [2.1.0] - 2023-01-28
+
+- Added "None" as a smoothing option
+- Worked on race conditions by using critical sections to replace file locks
+- Changed logging levels so that Info now just shows which operations are called and everything else is Debug
+- Prevented the readData call (pubFromPickle) from triggering another read (this is a change in behaviour)
+
 ## [2.0.1] - 2022-09-18
  
 Update to GivLUT to allow battery max power to go up to 4000w to account for Gen2 invertors

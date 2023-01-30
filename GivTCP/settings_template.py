@@ -11,7 +11,7 @@ class GiV_Settings:
     Log_Level="Error"               #Optional - Enables logging level. Default is "Error", but can be "Info", "Critical" or "Debug"
     Print_Raw_Registers=True        #Optional - Bool - True publishes all available registers.
     cache_location="/config/GivTCP" #Optional - default is "/config/GivTCP"
-    data_smoother="High"            #Required - sets the level of data smoothing applied to certain data. High, Medium or low
+    data_smoother="High"            #Required - sets the level of data smoothing applied to certain data. High, Medium, Low, or None to disable
 
 # MQTT Output Settings
     MQTT_Output= True               #Optional - Bool - True or False
