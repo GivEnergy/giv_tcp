@@ -549,7 +549,7 @@ def getData(fullrefresh):  # Read from Invertor put in cache
         consecFails()
         e = sys.exc_info()
         logger.error("Error processing registers: " + str(e))
-        logger.error("Invertor Update failed so using last known good data from cache ("+previousUpdate+")")
+        logger.error("Invertor Update failed so using last known good data from cache")
         result['result'] = "Error processing registers: " + str(e)
         return json.dumps(result)
     return json.dumps(result, indent=4, sort_keys=True, default=str)
