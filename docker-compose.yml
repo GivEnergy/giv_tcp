@@ -1,7 +1,7 @@
 version: "3.9"
 services:
   GivTCP:
-    image: britkat/giv_tcp-dev:2022.09.09
+    image: britkat/giv_tcp-ma:2.0.7
     ports:
       - "1883:1883"                   # MQTT
       - "6345:6345"                   # REST (add increments for each invertor)
@@ -35,6 +35,7 @@ services:
       - HA_AUTO_D=True                # If True (and if MQTT_OUTPUT is True) this will publish Home Assistant Auto Discovery messages to the broker
       - HADEVICEPREFIX=GivTCP         # Defines the preficfor all entities in Home Assistant
       - PYTHONPATH=/app
+      - DYNAMICTARIFF=False
       - DAYRATE=0.155                 # Price in £/$ for your daytime electricity per kWh
       - NIGHTRATE=0.055               # Price in £/$ for your night time electricity per kWh
       - EXPORTRATE=0.04               # Price in £/$ for your export electricity per kWh
@@ -45,8 +46,9 @@ services:
       - SMARTTARGET=False             # Enables the PALM capability, requires the three ENV below to be set
       - GEAPI=                        # API Key for the GivEnergy Cloud
       - SOLCASTAPI=                   # API key for Solcast
-      - SOLCASTSITEID=                # SiteID for Solcast site (single array)
-      - DATASMOOTHER=High             # Set the data smoothing to most agressive setting (High, medium, low, none)
+      - SOLCASTSITEID=                # SiteID for Solcast site (first array)
+      - SOLCASTSITEID2=               # SiteID for Solcast site (second array)
+      - DATASMOOTHER=medium           # Set the data smoothing to most agressive setting (High, medium, low, none)
 
     restart: always
     privileged: true

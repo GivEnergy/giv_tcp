@@ -25,7 +25,7 @@ elif os.getenv("LOG_LEVEL").lower()=="warning":
 else:
     logger.setLevel(logging.ERROR)
 
-# Check if config firectory exists and creates it if not
+# Check if config directory exists and creates it if not
 
 def palm_job():
     subprocess.Popen(["/usr/local/bin/python3","/app/GivTCP_1/palm_soc.py"])
@@ -65,34 +65,35 @@ for inv in range(1,int(os.getenv('NUMINVERTORS'))+1):
     logger.critical ("Recreating settings.py for invertor "+str(inv))
     with open(PATH+"/settings.py", 'w') as outp:
         outp.write("class GiV_Settings:\n")
-        outp.write("    invertorIP=\""+str(os.getenv("INVERTOR_IP_"+str(inv)))+"\"\n")
-        outp.write("    numBatteries=\""+str(os.getenv("NUMBATTERIES_"+str(inv))+"\"\n"))
-        outp.write("    Print_Raw_Registers="+str(os.getenv("PRINT_RAW"))+"\n")
-        outp.write("    MQTT_Output="+str(os.getenv("MQTT_OUTPUT")+"\n"))
-        outp.write("    MQTT_Address=\""+str(os.getenv("MQTT_ADDRESS")+"\"\n"))
-        outp.write("    MQTT_Username=\""+str(os.getenv("MQTT_USERNAME")+"\"\n"))
-        outp.write("    MQTT_Password=\""+str(os.getenv("MQTT_PASSWORD")+"\"\n"))
-        outp.write("    MQTT_Topic=\""+str(os.getenv("MQTT_TOPIC")+"\"\n"))
-        outp.write("    MQTT_Port="+str(os.getenv("MQTT_PORT")+"\n"))
-        outp.write("    Log_Level=\""+str(os.getenv("LOG_LEVEL")+"\"\n"))
+        outp.write("    invertorIP=\""+str(os.getenv("INVERTOR_IP_"+str(inv),""))+"\"\n")
+        outp.write("    numBatteries=\""+str(os.getenv("NUMBATTERIES_"+str(inv),"")+"\"\n"))
+        outp.write("    Print_Raw_Registers="+str(os.getenv("PRINT_RAW",""))+"\n")
+        outp.write("    MQTT_Output="+str(os.getenv("MQTT_OUTPUT","")+"\n"))
+        outp.write("    MQTT_Address=\""+str(os.getenv("MQTT_ADDRESS","")+"\"\n"))
+        outp.write("    MQTT_Username=\""+str(os.getenv("MQTT_USERNAME","")+"\"\n"))
+        outp.write("    MQTT_Password=\""+str(os.getenv("MQTT_PASSWORD","")+"\"\n"))
+        outp.write("    MQTT_Topic=\""+str(os.getenv("MQTT_TOPIC","")+"\"\n"))
+        outp.write("    MQTT_Port="+str(os.getenv("MQTT_PORT","")+"\n"))
+        outp.write("    Log_Level=\""+str(os.getenv("LOG_LEVEL","")+"\"\n"))
         #setup debug filename for each inv
-        outp.write("    Influx_Output="+str(os.getenv("INFLUX_OUTPUT"))+"\n")
-        outp.write("    influxURL=\""+str(os.getenv("INFLUX_URL")+"\"\n"))
-        outp.write("    influxToken=\""+str(os.getenv("INFLUX_TOKEN")+"\"\n"))
-        outp.write("    influxBucket=\""+str(os.getenv("INFLUX_BUCKET")+"\"\n"))
-        outp.write("    influxOrg=\""+str(os.getenv("INFLUX_ORG")+"\"\n"))
-        outp.write("    HA_Auto_D="+str(os.getenv("HA_AUTO_D"))+"\n")
+        outp.write("    Influx_Output="+str(os.getenv("INFLUX_OUTPUT",""))+"\n")
+        outp.write("    influxURL=\""+str(os.getenv("INFLUX_URL","")+"\"\n"))
+        outp.write("    influxToken=\""+str(os.getenv("INFLUX_TOKEN","")+"\"\n"))
+        outp.write("    influxBucket=\""+str(os.getenv("INFLUX_BUCKET","")+"\"\n"))
+        outp.write("    influxOrg=\""+str(os.getenv("INFLUX_ORG","")+"\"\n"))
+        outp.write("    HA_Auto_D="+str(os.getenv("HA_AUTO_D",""))+"\n")
         outp.write("    first_run= True\n")
-        outp.write("    self_run_timer="+str(os.getenv("SELF_RUN_LOOP_TIMER"))+"\n")
+        outp.write("    self_run_timer="+str(os.getenv("SELF_RUN_LOOP_TIMER",""))+"\n")
         outp.write("    givtcp_instance="+str(inv)+"\n")
-        outp.write("    default_path=\""+str(os.getenv("PATH")+"\"\n"))
-        outp.write("    day_rate="+str(os.getenv("DAYRATE")+"\n"))
-        outp.write("    night_rate="+str(os.getenv("NIGHTRATE")+"\n"))
-        outp.write("    export_rate="+str(os.getenv("EXPORTRATE")+"\n"))
-        outp.write("    day_rate_start=\""+str(os.getenv("DAYRATESTART")+"\"\n"))
-        outp.write("    night_rate_start=\""+str(os.getenv("NIGHTRATESTART")+"\"\n"))
-        outp.write("    ha_device_prefix=\""+str(os.getenv("HADEVICEPREFIX")+"\"\n"))
-        outp.write("    data_smoother=\""+str(os.getenv("DATASMOOTHER")+"\"\n"))
+        outp.write("    default_path=\""+str(os.getenv("PATH","")+"\"\n"))
+        outp.write("    dynamic_tariff="+str(os.getenv("DYNAMICTARIFF","")+"\n"))
+        outp.write("    day_rate="+str(os.getenv("DAYRATE","")+"\n"))
+        outp.write("    night_rate="+str(os.getenv("NIGHTRATE","")+"\n"))
+        outp.write("    export_rate="+str(os.getenv("EXPORTRATE","")+"\n"))
+        outp.write("    day_rate_start=\""+str(os.getenv("DAYRATESTART","")+"\"\n"))
+        outp.write("    night_rate_start=\""+str(os.getenv("NIGHTRATESTART","")+"\"\n"))
+        outp.write("    ha_device_prefix=\""+str(os.getenv("HADEVICEPREFIX","")+"\"\n"))
+        outp.write("    data_smoother=\""+str(os.getenv("DATASMOOTHER","")+"\"\n"))
         if str(os.getenv("CACHELOCATION"))=="":
             outp.write("    cache_location=\"/config/GivTCP\"\n")
             outp.write("    Debug_File_Location=\"/config/GivTCP/log_inv_"+str(inv)+".log\"\n")
@@ -117,6 +118,9 @@ for inv in range(1,int(os.getenv('NUMINVERTORS'))+1):
     if exists(os.getenv("CACHELOCATION")+"/battery_"+str(inv)+".pkl"):
         logger.critical("Removing old battery data cache")
         os.remove(str(os.getenv("CACHELOCATION"))+"/battery_"+str(inv)+".pkl")
+    if exists(os.getenv("CACHELOCATION")+"/rateData_"+str(inv)+".pkl"):
+        logger.critical("Removing old rate data cache")
+        os.remove(str(os.getenv("CACHELOCATION"))+"/rateData_"+str(inv)+".pkl")
     # delete battery and rate_data if too old (12 hours?)
     #if (datetime.time() - os.path.getmtime(batterypkl)): 
 
@@ -198,4 +202,8 @@ while True:
 
     #Run jobs for smart target
     schedule.run_pending()
+    if exists ("/app/.reboot"):
+        logger.critical("Reboot requested... rebooting now")
+        os.remove("/app/.reboot")
+        exit()
     sleep (60)

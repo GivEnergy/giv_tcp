@@ -38,6 +38,7 @@ options:
   HA_AUTO_D: True
   HADEVICEPREFIX: "GivTCP"
   PYTHONPATH: "/app"
+  DYNAMICTARIFF: False
   DAYRATE: "0.155"
   NIGHTRATE: "0.055"
   EXPORTRATE: "0.04"
@@ -52,11 +53,12 @@ options:
   INVERTOR_IP_3:  ""
   NUMBATTERIES_3:  1
   CACHELOCATION: "/config/GivTCP"
-  DATASMOOTHER: "High"
+  DATASMOOTHER: "medium"
   SMARTTARGET: True
   GEAPI: ""
   SOLCASTAPI: ""
   SOLCASTSITEID: ""
+  SOLCASTSITEID2: ""
 schema: 
   NUMINVERTORS: int
   INVERTOR_IP_1:  str
@@ -79,6 +81,7 @@ schema:
   HA_AUTO_D: bool
   HADEVICEPREFIX: "str?"
   PYTHONPATH: str
+  DYNAMICTARIFF: bool
   DAYRATE: "str?"
   NIGHTRATE: "str?"
   EXPORTRATE: "str?"
@@ -98,3 +101,4 @@ schema:
   GEAPI: "str?"
   SOLCASTAPI: "str?"
   SOLCASTSITEID: "str?"
+  SOLCASTSITEID2: "str?"

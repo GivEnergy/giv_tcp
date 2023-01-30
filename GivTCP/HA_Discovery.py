@@ -157,6 +157,8 @@ class HAMQTT():
                 options=GivLUT.delay_times
             elif "Force" in topic:
                 options=GivLUT.delay_times
+            elif "Rate" in topic:
+                options=GivLUT.rates
             tempObj['options']=options
         elif GivLUT.entity_type[str(topic).split("/")[-1]].devType=="number":
             tempObj['unit_of_meas']="%"

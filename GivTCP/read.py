@@ -4,8 +4,6 @@ from threading import Lock
 from givenergy_modbus.model.plant import Plant
 from givenergy_modbus.model.battery import Battery
 from givenergy_modbus.model.inverter import Model
-from audioop import mul
-from ntpath import join
 import sys
 from pickletools import read_uint1
 import json
@@ -28,7 +26,6 @@ logger = GivLUT.logger
 
 inverterLock = Lock()
 cacheLock = Lock()
-
 
 def getData(fullrefresh):  # Read from Invertor put in cache
     # plant=Plant(number_batteries=int(GiV_Settings.numBatteries))
@@ -130,6 +127,8 @@ def getData(fullrefresh):  # Read from Invertor put in cache
         power_output['PV_Voltage_String_2'] = GEInv.v_pv2
         power_output['PV_Current_String_1'] = GEInv.i_pv1*10
         power_output['PV_Current_String_2'] = GEInv.i_pv2*10
+        power_output['Grid_Voltage'] = GEInv.v_ac1
+        power_output['Grid_Current'] = GEInv.i_ac1 
 
         # Grid Power
         logger.debug("Getting Grid Power")
@@ -295,8 +294,38 @@ def getData(fullrefresh):  # Read from Invertor put in cache
             discharge_schedule = "enable"
         else:
             discharge_schedule = "disable"
-        # Get Battery Stat registers
-        battery_reserve = GEInv.battery_discharge_min_power_reserve
+        #Get Battery Stat registers
+        #battery_reserve = GEInv.battery_discharge_min_power_reserve
+
+        battery_reserve = GEInv.battery_soc_reserve
+
+        # Save a non-100 battery_reserve value for use later in restoring after resuming Eco/Dynamic mode
+        # Check to see if we have a saved value already...
+        saved_battery_reserve = 0
+        if exists(GivLUT.reservepkl):
+            with open(GivLUT.reservepkl, 'rb') as inp:
+                saved_battery_reserve = pickle.load(inp)
+
+        # Has the saved value changed from the current value? Only carry on if it is different
+        if saved_battery_reserve != battery_reserve:
+            if battery_reserve < 100:
+                try:
+                    # Pickle the value to use later...
+                    with open(GivLUT.reservepkl, 'wb') as outp:
+                        pickle.dump(battery_reserve, outp, pickle.HIGHEST_PROTOCOL)
+                    logger.critical ("Saving the battery reserve percentage for later: " + str(battery_reserve))
+                except:
+                    e = sys.exc_info()
+                    temp['result'] = "Saving the battery reserve for later failed: " + str(e)
+                    logger.error (temp['result'])
+            else:
+                # Value is 100, we don't want to save 100 because we need to restore to a value FROM 100...
+                logger.critical ("Saving the battery reserve percentage for later: no need, it's currently at 100 and we don't want to save that.")
+
+        battery_cutoff = GEInv.battery_discharge_min_power_reserve
+
+
+
         target_soc = GEInv.charge_target_soc
         if GEInv.battery_soc_reserve <= GEInv.battery_percent:
             discharge_enable = "enable"
@@ -314,7 +343,7 @@ def getData(fullrefresh):  # Read from Invertor put in cache
         logger.debug("Calculating Mode...")
         # Calc Mode
 
-        if GEInv.battery_power_mode == 1 and GEInv.enable_discharge == False and GEInv.battery_soc_reserve == 4:
+        if GEInv.battery_power_mode == 1 and GEInv.enable_discharge == False and GEInv.battery_soc_reserve != 4:
             # Dynamic r27=1 r110=4 r59=0
             mode = "Eco"
         elif GEInv.battery_power_mode == 1 and GEInv.enable_discharge == False and GEInv.battery_soc_reserve == 100:
@@ -518,7 +547,6 @@ def getData(fullrefresh):  # Read from Invertor put in cache
 
     except:
         consecFails()
-
         e = sys.exc_info()
         logger.error("Error processing registers: " + str(e))
         logger.error("Invertor Update failed so using last known good data from cache ("+previousUpdate+")")
@@ -554,10 +582,10 @@ def consecFails():
 def runAll(full_refresh):  # Read from Invertor put in cache and publish
     # full_refresh=True
     from read import getData
-#    result = GivQueue.q.enqueue(getData, full_refresh)
-    getData(full_refresh)
-#    while result.result is None and result.exc_info is None:
-#        time.sleep(0.5)
+    result=GivQueue.q.enqueue(getData,full_refresh)
+#    result=getData(full_refresh)
+    while result.result is None and result.exc_info is None:
+        time.sleep(0.5)
     # Step here to validate data against previous pickle?
     multi_output = pubFromPickle()
     return multi_output
@@ -687,9 +715,11 @@ def ratecalcs(multi_output, multi_output_old):
     rate_data = {}
     dayRateStart = datetime.datetime.strptime(GiV_Settings.day_rate_start, '%H:%M')
     nightRateStart = datetime.datetime.strptime(GiV_Settings.night_rate_start, '%H:%M')
-    night_start = datetime.datetime.combine(datetime.datetime.now(GivLUT.timezone).date(), nightRateStart.time()).replace(tzinfo=GivLUT.timezone)
-    day_start = datetime.datetime.combine(datetime.datetime.now(GivLUT.timezone).date(), dayRateStart.time()).replace(tzinfo=GivLUT.timezone)
-    # check if pickle data exists:
+    night_start = datetime.datetime.combine(datetime.datetime.now(GivLUT.timezone).date(),nightRateStart.time()).replace(tzinfo=GivLUT.timezone)
+    logger.info("Night Start= "+datetime.datetime.strftime(night_start, '%c'))
+    day_start = datetime.datetime.combine(datetime.datetime.now(GivLUT.timezone).date(),dayRateStart.time()).replace(tzinfo=GivLUT.timezone)
+    logger.info("Day Start= "+datetime.datetime.strftime(day_start, '%c'))
+    #check if pickle data exists:
     if exists(GivLUT.ratedata):
         with open(GivLUT.ratedata, 'rb') as inp:
             rate_data = pickle.load(inp)
@@ -707,16 +737,33 @@ def ratecalcs(multi_output, multi_output_old):
         rate_data['Day_Start_Energy_kWh'] = import_energy
         rate_data['Night_Start_Energy_kWh'] = import_energy
 
-    if dayRateStart.hour == datetime.datetime.now(GivLUT.timezone).hour and dayRateStart.minute == datetime.datetime.now(GivLUT.timezone).minute:
-        # Save current Total stats as baseline
-        logger.debug("Saving current energy stats at start of day rate tariff")
-        rate_data['Day_Start_Energy_kWh'] = import_energy
-    elif nightRateStart.hour == datetime.datetime.now(GivLUT.timezone).hour and nightRateStart.minute == datetime.datetime.now(GivLUT.timezone).minute:
-        # Save current Total stats as baseline
-        logger.debug("Saving current energy stats at start of night rate tariff")
-        rate_data['Night_Start_Energy_kWh'] = import_energy
+    if not GiV_Settings.dynamic_tariff:     ## If we use externally triggered rates then don't do the time check but assue the rate files are set elsewhere (default to Day if not set)
 
-    # If no data then just save current import as base data
+        if dayRateStart.hour == datetime.datetime.now(GivLUT.timezone).hour and dayRateStart.minute == datetime.datetime.now(GivLUT.timezone).minute:
+            #Save current Total stats as baseline
+            logger.critical("Saving current energy stats at start of day rate tariff")
+            rate_data['Day_Start_Energy_kWh'] = import_energy
+            open(".dayRate", 'w').close()
+            if exists(".nightRate"):
+                os.remove(".nightRate")
+
+        elif nightRateStart.hour == datetime.datetime.now(GivLUT.timezone).hour and nightRateStart.minute == datetime.datetime.now(GivLUT.timezone).minute:
+            #Save current Total stats as baseline
+            logger.critical("Saving current energy stats at start of night rate tariff")
+            rate_data['Night_Start_Energy_kWh'] = import_energy
+            open(".nightRate", 'w').close()
+            if exists(".dayRate"):
+                os.remove(".dayRate")  
+    
+    if not exists(".nightRate") and not exists(".dayRate"): #Default to Day if not previously set
+        open(".dayRate", 'w').close()
+
+    if exists(".dayRate"):
+        rate_data['Current_Rate_Type'] = "Day"
+    else:
+        rate_data['Current_Rate_Type'] = "Night"
+
+    #If no data then just save current import as base data
     if not('Night_Start_Energy_kWh' in rate_data):
         logger.debug("No Night Start Energy so setting it to: "+str(import_energy))
         rate_data['Night_Start_Energy_kWh'] = import_energy
@@ -739,16 +786,16 @@ def ratecalcs(multi_output, multi_output_old):
         rate_data['Export_Rate'] = GiV_Settings.export_rate
 
     # now calc the difference for each value between the correct start pickle and now
-
-    if import_energy > import_energy_old:  # Only run if there has been more import
-        logger.debug("Imported more energy so calculating current tariff costs: "+str(import_energy_old)+" -> "+str(import_energy))
-
-        if night_start <= datetime.datetime.now(GivLUT.timezone) < day_start:
-            logger.debug("Current Tariff is Night, calculating stats...")
+    if import_energy>import_energy_old: # Only run if there has been more import
+        logger.info("Imported more energy so calculating current tariff costs: "+str(import_energy_old)+" -> "+str(import_energy))
+    
+#        if night_start <= datetime.datetime.now(GivLUT.timezone) < day_start:
+        if exists(".nightRate"):
+            logger.info("Current Tariff is Night, calculating stats...")
             rate_data['Night_Energy_kWh'] = import_energy-rate_data['Night_Start_Energy_kWh']
-            logger.debug("Night_Energy_kWh=" + str(import_energy)+" - "+str(rate_data['Night_Start_Energy_kWh']))
+            logger.info("Night_Energy_kWh=" +str(import_energy)+" - "+str(rate_data['Night_Start_Energy_kWh']))
             rate_data['Night_Cost'] = float(rate_data['Night_Energy_kWh'])*float(GiV_Settings.night_rate)
-            logger.debug("Night_Cost= "+str(rate_data['Night_Energy_kWh'])+"kWh x £"+str(float(GiV_Settings.night_rate))+"/kWh = £"+str(rate_data['Day_Cost']))
+            logger.info("Night_Cost= "+str(rate_data['Night_Energy_kWh'])+"kWh x £"+str(float(GiV_Settings.night_rate))+"/kWh = £"+str(rate_data['Night_Cost']))
             rate_data['Current_Rate'] = GiV_Settings.night_rate
         else:
             logger.debug("Current Tariff is Day, calculating stats...")
@@ -817,7 +864,6 @@ def loop_dict(array, regCacheStack, lastUpdate):
                 logger.critical(p_load+" has no data in the cache so using new value.")
                 safeoutput[p_load] = output
     return(safeoutput)
-
 
 def dataSmoother2(dataNew, dataOld, lastUpdate):
     # perform test to validate data and smooth out spikes
