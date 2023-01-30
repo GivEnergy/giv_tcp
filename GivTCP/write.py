@@ -79,9 +79,11 @@ def setShallowCharge(payload):
 
 def enableDischarge(payload):
     temp={}
+    saved_battery_reserve = getSavedBatteryReservePercentage()
     try:
         if payload['state']=="enable":
-            client.set_shallow_charge(4)
+            #client.set_shallow_charge(4)
+            client.set_shallow_charge(saved_battery_reserve)
         elif payload['state']=="disable":
             client.set_shallow_charge(100)
         temp['result']="Setting Discharge Enable was a success"
@@ -110,12 +112,14 @@ def setChargeTarget(payload):
 def setBatteryReserve(payload):
     temp={}
     if type(payload) is not dict: payload=json.loads(payload)
-    target=int(payload['dischargeToPercent'])
+    #target=int(payload['dischargeToPercent'])
+    target=int(payload['reservePercent'])
     #Only allow minimum of 4%
     if target<4: target=4
     logger.info ("Setting battery reserve target to: " + str(target))
     try:
-        client.set_battery_power_reserve(target)
+        #client.set_battery_power_reserve(target)
+        client.set_shallow_charge(target)
         temp['result']="Setting Battery Reserve was a success"
 
     except:
@@ -123,6 +127,24 @@ def setBatteryReserve(payload):
         temp['result']="Setting Battery Reserve failed: " + str(e)
         logger.error (temp['result'])
     return json.dumps(temp)
+
+def setBatteryCutoff(payload):
+    temp={}
+    if type(payload) is not dict: payload=json.loads(payload)
+    target=int(payload['dischargeToPercent'])
+    #Only allow minimum of 4%
+    if target<4: target=4
+    logger.info ("Setting battery cutoff target to: " + str(target))
+    try:
+        client.set_battery_power_reserve(target)
+        temp['result']="Setting Battery Cutoff was a success"
+
+    except:
+        e = sys.exc_info()
+        temp['result']="Setting Battery Cutoff failed: " + str(e)
+        logger.error (temp['result'])
+    return json.dumps(temp)
+
 
 def setChargeRate(payload):
     temp={}
@@ -263,7 +285,6 @@ def forceExport(exportTime):
         exportTime=int(exportTime)
         result={}
         revert={}
-        open(".FERunning", 'w').close()
         if exists(GivLUT.regcache):      # if there is a cache then grab it
             with open(GivLUT.regcache, 'rb') as inp:
                 regCacheStack= pickle.load(inp)
@@ -288,8 +309,10 @@ def forceExport(exportTime):
         logger.info("DischargeRate result is:" + str(result))
         
         if "success" in result:
-            GivQueue.q.enqueue_in(timedelta(minutes=exportTime),FEResume,revert)
-            temp['result']="Export successfully forced "+str(exportTime)+" minutes"
+            fejob=GivQueue.q.enqueue_in(timedelta(minutes=exportTime),FEResume,revert)
+            open(".FERunning", 'w').close()
+            logger.critical("Force Export revert jobid is: "+fejob.id)
+            temp['result']="Export successfully forced for "+str(exportTime)+" minutes"
         else:
             temp['result']="Force Export failed"
     except:
@@ -330,7 +353,6 @@ def forceCharge(chargeTime):
         payload={}
         result={}
         revert={}
-        open(".FCRunning", 'w').close()
         if exists(GivLUT.regcache):      # if there is a cache then grab it
             with open(GivLUT.regcache, 'rb') as inp:
                 regCacheStack= pickle.load(inp)
@@ -354,7 +376,9 @@ def forceCharge(chargeTime):
         result=setChargeSlot1(payload)
         
         if "success" in result:
-            GivQueue.q.enqueue_in(timedelta(minutes=chargeTime),FCResume,revert)
+            open(".FCRunning", 'w').close()
+            fcjob=GivQueue.q.enqueue_in(timedelta(minutes=chargeTime),FCResume,revert)
+            logger.critical("Force Charge revert jobid is: "+fcjob.id)
             temp['result']="Charge successfully forced "+str(chargeTime)+" minutes"
         else:
             temp['result']="Force charge failed"
@@ -383,13 +407,13 @@ def tempPauseDischarge(pauseTime):
             with open(GivLUT.regcache, 'rb') as inp:
                 regCacheStack= pickle.load(inp)
             revertRate=regCacheStack[4]["Control"]["Battery_Discharge_Rate"]
-        open(".tpdRunning","w").close()
+        
         if "success" in result:
+            open(".tpdRunning","w").close()
             payload['dischargeRate']=revertRate
             delay=float(pauseTime*60)
-#            Th = threading.Timer(delay,tmpPDResume,args=[payload])        ########## Needs helper function to revert rate, log and update the device status
-#            Th.start()
-            GivQueue.q.enqueue_in(timedelta(delay),tmpPDResume,payload)
+            tpdjob=GivQueue.q.enqueue_in(timedelta(delay),tmpPDResume,payload)
+            logger.critical("Temp Pause Discharge revert jobid is: "+tpdjob.id)
             temp['result']="Discharge paused for "+str(delay)+" seconds"
         else:
             temp['result']="Pausing Discharge failed"
@@ -417,13 +441,13 @@ def tempPauseCharge(pauseTime):
             with open(GivLUT.regcache, 'rb') as inp:
                 regCacheStack= pickle.load(inp)
         revertRate=regCacheStack[4]["Control"]["Battery_Charge_Rate"]
-        open(".tpcRunning","w").close()
+        
         if "success" in result:
+            open(".tpcRunning","w").close()
             payload['chargeRate']=revertRate
             delay=float(pauseTime*60)
-#            Th = threading.Timer(delay,tmpPCResume,args=[payload])
-#            Th.start()
-            GivQueue.q.enqueue_in(timedelta(delay),tmpPCResume,payload)
+            tpcjob=GivQueue.q.enqueue_in(timedelta(delay),tmpPCResume,payload)
+            logger.critical("Temp Pause Charge revert jobid is: "+tpcjob.id)
             temp['result']="Charge paused for "+str(delay)+" seconds"
         else:
             temp['result']="Pausing Charge failed: "
@@ -440,6 +464,8 @@ def setBatteryMode(payload):
     try:
         if payload['mode']=="Eco":
             client.set_mode_dynamic()
+            time.sleep(1)
+            client.set_shallow_charge(getSavedBatteryReservePercentage())
         elif payload['mode']=="Eco (Paused)":
             client.set_mode_dynamic()
             time.sleep(1)
@@ -480,6 +506,32 @@ def setDateTime(payload):
         temp['result']="Setting Battery Mode failed: " + str(e) 
         logger.error (temp['result'])
     return json.dumps(temp)
+
+def switchRate(payload):
+    temp={}
+    try:
+        if payload.lower()=="day":
+            open(".dayRate", 'w').close()
+            logger.critical ("Setting .dayRate via external trigger")
+            if exists(".nightRate"):
+                os.remove(".nightRate")
+        else:
+            open(".nightRate", 'w').close()
+            logger.critical ("Setting .nightRate via external trigger")
+            if exists(".dayRate"):
+                os.remove(".dayRate")
+    except:
+        e = sys.exc_info()
+        temp['result']="Setting Battery Mode failed: " + str(e) 
+        logger.error (temp['result'])
+    return json.dumps(temp)
+
+def getSavedBatteryReservePercentage():
+    saved_battery_reserve=4
+    if exists(GivLUT.reservepkl):
+        with open(GivLUT.reservepkl, 'rb') as inp:
+            saved_battery_reserve= pickle.load(inp)
+    return saved_battery_reserve
 
 if __name__ == '__main__':
     if len(sys.argv)==2:

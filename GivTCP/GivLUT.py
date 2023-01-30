@@ -57,6 +57,7 @@ class GivLUT:
     lastupdate=GiV_Settings.cache_location+"/lastUpdate_"+str(GiV_Settings.givtcp_instance)+".pkl"
     forcefullrefresh=GiV_Settings.cache_location+"/.forceFullRefresh_"+str(GiV_Settings.givtcp_instance)
     batterypkl=GiV_Settings.cache_location+"/battery_"+str(GiV_Settings.givtcp_instance)+".pkl"
+    reservepkl=GiV_Settings.cache_location+"/reserve_"+str(GiV_Settings.givtcp_instance)+".pkl"
     ppkwhtouch=".ppkwhtouch"
     schedule=".schedule"
     oldDataCount=GiV_Settings.cache_location+"/oldDataCount_"+str(GiV_Settings.givtcp_instance)+".pkl"
@@ -108,6 +109,8 @@ class GivLUT:
         "PV_Current_String_1":GEType("sensor","current","",0,20,True,False,False),
         "PV_Current_String_2":GEType("sensor","current","",0,20,True,False,False),
         "Grid_Power":GEType("sensor","power","",-maxPower,maxPower,True,False,False),
+        "Grid_Current":GEType("sensor","current","",-120,120,False,True,False),
+        "Grid_Voltage":GEType("sensor","voltage","",150,300,False,True,False),
         "Import_Power":GEType("sensor","power","",0,maxPower,True,False,False),
         "Export_Power":GEType("sensor","power","",0,maxInvPower,True,False,False),
         "EPS_Power":GEType("sensor","power","",0,10000,True,False,False),
@@ -175,6 +178,7 @@ class GivLUT:
         "Battery_Cell_4_Temperature":GEType("sensor","temperature","",-maxTemp,maxTemp,True,True,False),
         "Mode":GEType("select","","setBatteryMode","","",False,False,False),
         "Battery_Power_Reserve":GEType("number","","setBatteryReserve",4,100,False,False,False),
+        "Battery_Power_Cutoff":GEType("number","","setBatteryCutoff",4,100,False,False,False),
         "Target_SOC":GEType("number","","setChargeTarget",4,100,False,False,False),
         "Enable_Charge_Schedule":GEType("switch","","enableChargeSchedule","","",False,False,False),
         "Enable_Discharge_Schedule":GEType("switch","","enableDishargeSchedule","","",False,False,False),
@@ -190,6 +194,7 @@ class GivLUT:
         "Day_Cost":GEType("sensor","money","",0,maxCost,True,False,False),
         "Day_Rate":GEType("sensor","money","",0,maxRate,True,False,False),
         "Current_Rate":GEType("sensor","money","",0,maxRate,True,False,False),
+        "Current_Rate_Type":GEType("select","","switchRate","","",True,False,False),
         "Export_Rate":GEType("sensor","money","",0,maxRate,True,False,False),
         "Import_ppkwh_Today":GEType("sensor","money","",0,maxRate,True,False,False),
         "Battery_Value":GEType("sensor","money","",0,maxCost,True,False,False),
@@ -226,14 +231,15 @@ class GivLUT:
 "23:00:00","23:01:00","23:02:00","23:03:00","23:04:00","23:05:00","23:06:00","23:07:00","23:08:00","23:09:00","23:10:00","23:11:00","23:12:00","23:13:00","23:14:00","23:15:00","23:16:00","23:17:00","23:18:00","23:19:00","23:20:00","23:21:00","23:22:00","23:23:00","23:24:00","23:25:00","23:26:00","23:27:00","23:28:00","23:29:00","23:30:00","23:31:00","23:32:00","23:33:00","23:34:00","23:35:00","23:36:00","23:37:00","23:38:00","23:39:00","23:40:00","23:41:00","23:42:00","23:43:00","23:44:00","23:45:00","23:46:00","23:47:00","23:48:00","23:49:00","23:50:00","23:51:00","23:52:00","23:53:00","23:54:00","23:55:00","23:56:00","23:57:00","23:58:00","23:59:00"
     ]
     
-    delay_times=["Normal","Running","2","15","30","45","60","90","120","150","180"]
+    delay_times=["Normal","Running","Cancel","2","15","30","45","60","90","120","150","180"]
     modes=["Eco","Timed Demand","Timed Export","Unknown", "Eco (Paused)"]
+    rates=["Day","Night"]
 
     def getTime(timestamp):
         timeslot=timestamp.strftime("%H:%M")
         return (timeslot)
 
-    def consecFails():
+    def consecFails(e):
         from os.path import exists
         import os
         import pickle
@@ -245,7 +251,11 @@ class GivLUT:
             oldDataCount=oldDataCount+1
         else:
             oldDataCount=1
-        logger.critical("Consecutive failure count= "+str(oldDataCount))
+
+        if oldDataCount>1:
+            logger.error("Error collecting registers: " + str(e))
+            logger.critical("Consecutive failure count= "+str(oldDataCount))
+
         if oldDataCount>10:
             #10 error in a row so delete regCache data
             logger.critical("10 failed invertor reads in a row so removing regCache to force update...")
@@ -255,6 +265,9 @@ class GivLUT:
                 os.remove(GivLUT.batterypkl)
             if exists(GivLUT.oldDataCount):
                 os.remove(GivLUT.oldDataCount)
+            if exists(GivLUT.reservepkl):
+                os.remove(GivLUT.reservepkl)
         else:
             with open(GivLUT.oldDataCount, 'wb') as outp:
                 pickle.dump(oldDataCount, outp, pickle.HIGHEST_PROTOCOL)
+        return "Error collecting registers: " + str(e)

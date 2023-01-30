@@ -67,8 +67,12 @@ def on_message(client, userdata, message):
         writecommand['chargeToPercent']=str(message.payload.decode("utf-8"))
         result=GivQueue.q.enqueue(wr.setChargeTarget,writecommand)
     elif command=="setBatteryReserve":
-        writecommand['dischargeToPercent']=str(message.payload.decode("utf-8"))
+        #writecommand['dischargeToPercent']=str(message.payload.decode("utf-8"))
+        writecommand['reservePercent']=str(message.payload.decode("utf-8"))
         result=GivQueue.q.enqueue(wr.setBatteryReserve,writecommand)
+    elif command=="setBatteryCutoff":
+        writecommand['dischargeToPercent']=str(message.payload.decode("utf-8"))
+        result=GivQueue.q.enqueue(wr.setBatteryCutoff,writecommand)
     elif command=="setBatteryMode":
         writecommand['mode']=str(message.payload.decode("utf-8"))
         result=GivQueue.q.enqueue(wr.setBatteryMode,writecommand)
@@ -141,11 +145,15 @@ def on_message(client, userdata, message):
         result=GivQueue.q.enqueue(wr.tempPauseCharge,writecommand)
     elif command=="forceCharge":
         writecommand=float(message.payload.decode("utf-8"))
+        #if "Cancel" then get revert jobid and force it to run
         result=GivQueue.q.enqueue(wr.forceCharge,writecommand)
     elif command=="forceExport":
         writecommand=float(message.payload.decode("utf-8"))
         result=GivQueue.q.enqueue(wr.forceExport,writecommand)
-#        result=wr.forceExport(writecommand)
+    elif command=="switchRate":
+        writecommand=message.payload.decode("utf-8")
+        result=GivQueue.q.enqueue(wr.switchRate,writecommand)
+    
     #Do something with the result??
 
 def on_connect(client, userdata, flags, rc):

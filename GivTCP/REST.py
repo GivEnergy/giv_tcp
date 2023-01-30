@@ -4,12 +4,19 @@ from flask import Flask, json, request
 from flask_cors import CORS
 import read as rd       #grab passthrough functions from main read file
 import write as wr      #grab passthrough functions from main write file
+import config_dash as cfdash
 
 #set-up Flask details
 giv_api = Flask(__name__)
 CORS(giv_api)
 
 #Proxy Read Functions
+@giv_api.route('/config', methods=['GET', 'POST'])
+def get_config_page():
+    if request.method=="GET":
+        return cfdash.get_config()
+    elif request.method=="POST":
+        return cfdash.set_config(request.form)
 
 #Read from Invertor put in cache and publish
 @giv_api.route('/runAll', methods=['GET'])
@@ -116,6 +123,11 @@ def setBattMode():
 def setDate():
     payload = request.get_json(silent=True, force=True)
     return wr.setDateTime(payload)
+
+@giv_api.route('/switchRate', methods=['POST'])
+def swRates():
+    payload = request.get_json(silent=True, force=True)
+    return wr.swtchRate(payload)
 
 if __name__ == "__main__":
     giv_api.run()

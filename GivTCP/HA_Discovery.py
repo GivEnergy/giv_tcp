@@ -62,6 +62,8 @@ class HAMQTT():
                                     client.publish("homeassistant/sensor/GivEnergy/"+SN+"_"+str(topic).split("/")[-1]+"/config",HAMQTT.create_device_payload(topic,SN),retain=True)
                             elif GivLUT.entity_type[str(topic).split("/")[-1]].devType=="switch":
                                 client.publish("homeassistant/switch/GivEnergy/"+SN+"_"+str(topic).split("/")[-1]+"/config",HAMQTT.create_device_payload(topic,SN),retain=True)
+                            elif GivLUT.entity_type[str(topic).split("/")[-1]].devType=="button":
+                                client.publish("homeassistant/button/GivEnergy/"+SN+"_"+str(topic).split("/")[-1]+"/config",HAMQTT.create_device_payload(topic,SN),retain=True)
                             elif GivLUT.entity_type[str(topic).split("/")[-1]].devType=="number":
                                 client.publish("homeassistant/number/GivEnergy/"+SN+"_"+str(topic).split("/")[-1]+"/config",HAMQTT.create_device_payload(topic,SN),retain=True)
                         #    elif GivLUT.entity_type[str(topic).split("/")[-1]][0]=="binary_sensor":
@@ -150,6 +152,8 @@ class HAMQTT():
                 options=GivLUT.delay_times
             elif "Force" in topic:
                 options=GivLUT.delay_times
+            elif "Rate" in topic:
+                options=GivLUT.rates
             tempObj['options']=options
         elif GivLUT.entity_type[str(topic).split("/")[-1]].devType=="number":
             tempObj['unit_of_meas']="%"
