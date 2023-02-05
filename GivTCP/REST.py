@@ -5,6 +5,10 @@ from flask_cors import CORS
 import read as rd       #grab passthrough functions from main read file
 import write as wr      #grab passthrough functions from main write file
 import config_dash as cfdash
+from GivLUT import GivQueue, GivLUT
+from os.path import exists
+
+logger = GivLUT.logger
 
 #set-up Flask details
 giv_api = Flask(__name__)
@@ -31,7 +35,7 @@ def rdData():
 #Read from Invertor put in cache 
 @giv_api.route('/getData', methods=['GET'])
 def gtData():
-    return rd.getData()
+    return GivQueue.q.enqueue(rd.getData,True)
 
 #Proxy Write Functions
 @giv_api.route('/enableChargeTarget', methods=['POST'])
@@ -97,22 +101,55 @@ def setDischrgSlot2():
 @giv_api.route('/tempPauseDischarge', methods=['POST'])
 def tmpPauseDischrg():
     payload = request.get_json(silent=True, force=True)
-    return wr.tempPauseDischarge(payload)
+    if payload == "Cancel":
+        if exists(".tpdRunning"):
+            jobid= str(open(".tpdRunning","r").readline())
+            logger.critical("Retrieved jobID to cancel Temp Pause Discharge: "+ str(jobid))
+            return wr.cancelJob(jobid)
+        else:
+            logger.error("Force Charge is not currently running")
+    else:
+        return wr.tempPauseCharge(payload)
 
 @giv_api.route('/tempPauseCharge', methods=['POST'])
 def tmpPauseChrg():
     payload = request.get_json(silent=True, force=True)
-    return wr.tempPauseCharge(payload)
+    if payload == "Cancel":
+        if exists(".tpcRunning"):
+            jobid= str(open(".tpcRunning","r").readline())
+            logger.critical("Retrieved jobID to cancel Temp Pause Charge: "+ str(jobid))
+            return wr.cancelJob(jobid)
+        else:
+            logger.error("Force Charge is not currently running")
+    else:
+        return wr.tempPauseCharge(payload)
 
 @giv_api.route('/forceCharge', methods=['POST'])
 def frceChrg():
     payload = request.get_json(silent=True, force=True)
-    return wr.forceCharge(payload)
+    #Check if Cancel then return the right function
+    if payload == "Cancel":
+        if exists(".FCRunning"):
+            jobid= str(open(".FCRunning","r").readline())
+            logger.critical("Retrieved jobID to cancel Force Charge: "+ str(jobid))
+            return wr.cancelJob(jobid)
+        else:
+            logger.error("Force Charge is not currently running")
+    else:
+        return wr.forceCharge(payload)
 
 @giv_api.route('/forceExport', methods=['POST'])
 def frceExprt():
     payload = request.get_json(silent=True, force=True)
-    return wr.forceExport(payload)
+    if payload == "Cancel":
+        if exists(".FERunning"):
+            jobid= str(open(".FERunning","r").readline())
+            logger.critical("Retrieved jobID to cancel Force Export: "+ str(jobid))
+            return wr.cancelJob(jobid)
+        else:
+            logger.error("Force Charge is not currently running")
+    else:
+        return wr.forceExport(payload)
 
 @giv_api.route('/setBatteryMode', methods=['POST'])
 def setBattMode():

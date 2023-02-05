@@ -38,11 +38,18 @@ while not hasattr(GiV_Settings,'serial_number'):
         logger.error("No serial_number found in MQTT queue. MQTT Control not available.")
         break
     
-logger.info("Serial Number retrieved: "+GiV_Settings.serial_number)
+logger.debug("Serial Number retrieved: "+GiV_Settings.serial_number)
+
+def isfloat(num):
+    try:
+        float(num)
+        return True
+    except ValueError:
+        return False
 
 def on_message(client, userdata, message):
     payload={}
-    logger.info("MQTT Message Recieved: "+str(message.topic)+"= "+str(message.payload.decode("utf-8")))
+    logger.debug("MQTT Message Recieved: "+str(message.topic)+"= "+str(message.payload.decode("utf-8")))
     writecommand={}
     command=str(message.topic).split("/")[-1]
     if command=="setDischargeRate":
@@ -136,20 +143,54 @@ def on_message(client, userdata, message):
             payload['finish']=message.payload.decode("utf-8")[:5]
             payload['start']=start[:5]
             result=GivQueue.q.enqueue(wr.setDischargeSlot2,payload)
-#            result=wr.setDischargeSlot2(payload)
     elif command=="tempPauseDischarge":
-        writecommand=float(message.payload.decode("utf-8"))
-        result=GivQueue.q.enqueue(wr.tempPauseDischarge,writecommand)
+        if isfloat(message.payload.decode("utf-8")):
+            writecommand=float(message.payload.decode("utf-8"))
+            result=GivQueue.q.enqueue(wr.tempPauseDischarge,writecommand)
+        elif message.payload.decode("utf-8") == "Cancel":
+            # Get the Job ID from the touchfile
+            if exists(".tpdRunning"):
+                jobid= str(open(".tpdRunning","r").readline())
+                logger.critical("Retrieved jobID to cancel Temp Pause Discharge: "+ str(jobid))
+                result=wr.cancelJob(jobid)
+            else:
+                logger.error("Temp Pause Charge is not currently running")
     elif command=="tempPauseCharge":
-        writecommand=float(message.payload.decode("utf-8"))
-        result=GivQueue.q.enqueue(wr.tempPauseCharge,writecommand)
+        if isfloat(message.payload.decode("utf-8")):
+            writecommand=float(message.payload.decode("utf-8"))
+            result=GivQueue.q.enqueue(wr.tempPauseCharge,writecommand)
+        elif message.payload.decode("utf-8") == "Cancel":
+            # Get the Job ID from the touchfile
+            if exists(".tpcRunning"):
+                jobid= str(open(".tpcRunning","r").readline())
+                logger.critical("Retrieved jobID to cancel Temp Pause Charge: "+ str(jobid))
+                result=wr.cancelJob(jobid)
+            else:
+                logger.error("Temp Pause Charge is not currently running")
     elif command=="forceCharge":
-        writecommand=float(message.payload.decode("utf-8"))
-        #if "Cancel" then get revert jobid and force it to run
-        result=GivQueue.q.enqueue(wr.forceCharge,writecommand)
+        if isfloat(message.payload.decode("utf-8")):
+            writecommand=float(message.payload.decode("utf-8"))
+            result=GivQueue.q.enqueue(wr.forceCharge,writecommand)
+        elif message.payload.decode("utf-8") == "Cancel":
+            # Get the Job ID from the touchfile
+            if exists(".FCRunning"):
+                jobid= str(open(".FCRunning","r").readline())
+                logger.critical("Retrieved jobID to cancel Force Charge: "+ str(jobid))
+                result=wr.cancelJob(jobid)
+            else:
+                logger.error("Force Charge is not currently running")
     elif command=="forceExport":
-        writecommand=float(message.payload.decode("utf-8"))
-        result=GivQueue.q.enqueue(wr.forceExport,writecommand)
+        if isfloat(message.payload.decode("utf-8")):
+            writecommand=float(message.payload.decode("utf-8"))
+            result=GivQueue.q.enqueue(wr.forceExport,writecommand)
+        elif message.payload.decode("utf-8") == "Cancel":
+            # Get the Job ID from the touchfile
+            if exists(".FERunning"):
+                jobid= str(open(".FERunning","r").readline())
+                logger.critical("Retrieved jobID to cancel Force Export: "+ str(jobid))
+                result=wr.cancelJob(jobid)
+            else:
+                logger.error("Force Export is not currently running")
     elif command=="switchRate":
         writecommand=message.payload.decode("utf-8")
         result=GivQueue.q.enqueue(wr.switchRate,writecommand)
@@ -159,10 +200,10 @@ def on_message(client, userdata, message):
 def on_connect(client, userdata, flags, rc):
     if rc==0:
         client.connected_flag=True #set flag
-        logger.info("connected OK Returned code="+str(rc))
+        logger.debug("connected OK Returned code="+str(rc))
         #Subscribe to the control topic for this invertor - relies on serial_number being present
         client.subscribe(MQTT_Topic+"/control/"+GiV_Settings.serial_number+"/#")
-        logger.info("Subscribing to "+MQTT_Topic+"/control/"+GiV_Settings.serial_number+"/#")
+        logger.debug("Subscribing to "+MQTT_Topic+"/control/"+GiV_Settings.serial_number+"/#")
     else:
         logger.error("Bad connection Returned code= "+str(rc))
 

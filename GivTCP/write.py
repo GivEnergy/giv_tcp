@@ -24,8 +24,10 @@ def enableChargeTarget(payload):
     temp={}
     try:
         if payload['state']=="enable":
+            logger.info("Enabling Charge Target")
             client.enable_charge_target()
         elif payload['state']=="disable":
+            logger.info("Disabling Charge Target")
             client.disable_charge_target()
         temp['result']="Setting Charge Target was a success"
 
@@ -39,8 +41,10 @@ def enableChargeSchedule(payload):
     temp={}
     try:
         if payload['state']=="enable":
+            logger.info("Enabling Charge Schedule")
             client.enable_charge()
         elif payload['state']=="disable":
+            logger.info("Disabling Charge Schedule")
             client.disable_charge()
         temp['result']="Setting Charge Enable was a success"
 
@@ -54,8 +58,10 @@ def enableDischargeSchedule(payload):
     temp={}
     try:
         if payload['state']=="enable":
+            logger.info("Enabling Disharge Schedule")
             client.enable_discharge()
         elif payload['state']=="disable":
+            logger.info("Disabling Discharge Schedule")
             client.disable_discharge()
         temp['result']="Setting Charge Enable was a success"
 
@@ -68,8 +74,9 @@ def enableDischargeSchedule(payload):
 def setShallowCharge(payload):
     temp={}
     try:
+        logger.info("Setting Shallow Charge to: "+ str(payload['val']))
         client.set_shallow_charge(int(payload['val']))
-        temp['result']="Setting Charge Enable was a success"
+        temp['result']="Setting Shallow Charge was a success"
 
     except:
         e = sys.exc_info()
@@ -82,9 +89,10 @@ def enableDischarge(payload):
     saved_battery_reserve = getSavedBatteryReservePercentage()
     try:
         if payload['state']=="enable":
-            #client.set_shallow_charge(4)
+            logger.info("Enabling Discharge")
             client.set_shallow_charge(saved_battery_reserve)
         elif payload['state']=="disable":
+            logger.info("Disabling Discharge")
             client.set_shallow_charge(100)
         temp['result']="Setting Discharge Enable was a success"
 
@@ -100,7 +108,8 @@ def setChargeTarget(payload):
     if type(payload) is not dict: payload=json.loads(payload)
     target=int(payload['chargeToPercent'])
     try:
-        result=client.enable_charge_target(target)
+        logger.info("Setting Charge Target to: "+str(target))
+        client.enable_charge_target(target)
         temp['result']="Setting Charge Target was a success"
 
     except:
@@ -119,6 +128,7 @@ def setBatteryReserve(payload):
     logger.info ("Setting battery reserve target to: " + str(target))
     try:
         #client.set_battery_power_reserve(target)
+        logger.info("Setting Battery Reserve to: "+str(target))
         client.set_shallow_charge(target)
         temp['result']="Setting Battery Reserve was a success"
 
@@ -136,6 +146,7 @@ def setBatteryCutoff(payload):
     if target<4: target=4
     logger.info ("Setting battery cutoff target to: " + str(target))
     try:
+        logger.info("Setting Battery Cutoff to: "+str(target))
         client.set_battery_power_reserve(target)
         temp['result']="Setting Battery Cutoff was a success"
 
@@ -154,7 +165,7 @@ def setChargeRate(payload):
         target=50
     else:
         target=int(int(payload['chargeRate'])/3)
-    logger.info ("Setting battery charge rate to: " + str(target))
+    logger.info ("Setting battery charge rate to: " + str(payload['chargeRate']))
     try:
         client.set_battery_charge_limit(target)
         temp['result']="Setting Charge Rate was a success"
@@ -174,8 +185,9 @@ def setDischargeRate(payload):
         target=50
     else:
         target=int(int(payload['dischargeRate'])/3)
-    logger.info ("Setting battery discharge rate to: " + str(target))
+    logger.info ("Setting battery discharge rate to: " + str(payload['dischargeRate']))
     try:
+        logger.info("Setting Discharge Rate to: "+str(payload['dischargeRate']))
         client.set_battery_discharge_limit(target)
         temp['result']="Setting Discharge Rate was a success"
 
@@ -192,6 +204,7 @@ def setChargeSlot1(payload):
     if 'chargeToPercent' in payload.keys():
         targetresult=setChargeTarget(payload)
     try:
+        logger.info("Setting Charge Slot 1 to: "+str(payload['start'])+" - "+str(payload['finish']))
         client.set_charge_slot_1((datetime.strptime(payload['start'],"%H:%M"),datetime.strptime(payload['finish'],"%H:%M")))
         temp['result']="Setting Charge Slot 1 was a success"
 
@@ -207,6 +220,7 @@ def setChargeSlot2(payload):
     if 'chargeToPercent' in payload.keys():
         targetresult=setChargeTarget(payload)
     try:
+        logger.info("Setting Charge Slot 2 to: "+str(payload['start'])+" - "+str(payload['finish']))
         client.set_charge_slot_2((datetime.strptime(payload['start'],"%H:%M"),datetime.strptime(payload['finish'],"%H:%M")))
         temp['result']="Setting Charge Slot 2 was a success"
 
@@ -225,6 +239,7 @@ def setDischargeSlot1(payload):
     try:
         strt=datetime.strptime(payload['start'],"%H:%M")
         fnsh=datetime.strptime(payload['finish'],"%H:%M")
+        logger.info("Setting Discharge Slot 1 to: "+str(payload['start'])+" - "+str(payload['finish']))
         client.set_discharge_slot_1((strt,fnsh))
         temp['result']="Setting Discharge Slot 1 was a success"
 
@@ -242,6 +257,7 @@ def setDischargeSlot2(payload):
         targetresult=setBatteryReserve(payload)
         time.sleep(1)
     try:
+        logger.info("Setting Discharge Slot 2 to: "+str(payload['start'])+" - "+str(payload['finish']))
         client.set_discharge_slot_2((datetime.strptime(payload['start'],"%H:%M"),datetime.strptime(payload['finish'],"%H:%M")))
         temp['result']="Setting Discharge Slot 2 was a success"
 
@@ -252,35 +268,29 @@ def setDischargeSlot2(payload):
     return json.dumps(temp)
 
 def FEResume(revert):
-    logger.critical("Reverting Force Export")
     payload={}
-    logger.info("Reverting Force Export")
-    logger.info("Reverting Discharge Rate")
+    logger.info("Reverting Force Export settings:")
     payload['dischargeRate']=revert["dischargeRate"]
     result=setDischargeRate(payload)
-    logger.info("DischargeRate result is:" + str(result))
+    logger.debug("DischargeRate result is:" + str(result))
     time.sleep(1)
     payload={}
     payload['start']=revert["start_time"]
     payload['finish']=revert["end_time"]
     payload['dischargeToPercent']=revert["dischargeToPercent"]
     result=setDischargeSlot1(payload)
-    logger.info("Timeslot result is:" + str(result))
+    logger.debug("Timeslot result is:" + str(result))
     time.sleep(1)
     payload={}
     payload["mode"]=revert["mode"]
-    logger.info("Reverting Mode")
+    logger.debug("Reverting Mode")
     result=setBatteryMode(payload)
-    logger.info("Mode result is:" + str(result))
-
-    logger.critical("Settings restored to:")
-    logger.critical("dischargeRate:"+str(revert["dischargeRate"]))
-    logger.critical("mode:"+str(revert["mode"]))
+    logger.debug("Mode result is:" + str(result))
     os.remove(".FERunning")
 
 def forceExport(exportTime):
     temp={}
-    logger.critical("Forcing Export for "+str(exportTime)+" minutes")
+    logger.info("Forcing Export for "+str(exportTime)+" minutes")
     try:
         exportTime=int(exportTime)
         result={}
@@ -297,21 +307,23 @@ def forceExport(exportTime):
         #set slot2 to calc times and keep slot 1 as is
         slot1=(datetime.strptime(regCacheStack[4]["Timeslots"]["Discharge_start_time_slot_1"][:5],"%H:%M"),datetime.strptime(regCacheStack[4]["Timeslots"]["Discharge_end_time_slot_1"][:5],"%H:%M")) 
         slot2=(datetime.now(),datetime.now()+timedelta(minutes=exportTime))
-        logger.info("Setting export slot to: "+ slot2[0].strftime("%H:%M")+" - "+slot2[1].strftime("%H:%M"))
+        logger.debug("Setting export slot to: "+ slot2[0].strftime("%H:%M")+" - "+slot2[1].strftime("%H:%M"))
         result=client.set_mode_storage(slot1,slot2,export=True)
-        logger.info("Mode result is:" + str(result))
+        logger.debug("Mode result is:" + str(result))
         
         time.sleep(1)
 
         payload={}
         payload['dischargeRate']=100
         result=setDischargeRate(payload)
-        logger.info("DischargeRate result is:" + str(result))
+        logger.debug("DischargeRate result is:" + str(result))
         
         if "success" in result:
             fejob=GivQueue.q.enqueue_in(timedelta(minutes=exportTime),FEResume,revert)
-            open(".FERunning", 'w').close()
-            logger.critical("Force Export revert jobid is: "+fejob.id)
+            f=open(".FCRunning", 'w')
+            f.write(str(fejob.id))
+            f.close()
+            logger.info("Force Export revert jobid is: "+fejob.id)
             temp['result']="Export successfully forced for "+str(exportTime)+" minutes"
         else:
             temp['result']="Force Export failed"
@@ -322,32 +334,33 @@ def forceExport(exportTime):
     return json.dumps(temp)
 
 def FCResume(revert):
-    logger.critical("Reverting Force charge")
     payload={}
+    logger.info("Reverting Force Charge Settings:")
     payload['chargeRate']=revert["chargeRate"]
     result=setChargeRate(payload)
     time.sleep(1)
     payload={}
     payload['state']=revert["chargeScheduleEnable"]
-    result=enableChargeSchedule(payload)
+    enableChargeSchedule(payload)
     time.sleep(1)
     payload={}
     payload['start']=revert["start_time"]
     payload['finish']=revert["end_time"]
     payload['chargeToPercent']=revert["targetSOC"]
-    result=setChargeSlot1(payload)
-
-    logger.critical("Charging Settings restored to:")
-    logger.critical("chargeRate:"+str(revert["chargeRate"]))
-    logger.critical("Discharge Schedule:"+str(revert["chargeScheduleEnable"]))
-    logger.critical("Start:"+str(payload["start"]))
-    logger.critical("finish:"+str(payload["finish"]))
-    logger.critical("Target SOC:"+str(payload["chargeToPercent"]))
+    setChargeSlot1(payload)
     os.remove(".FCRunning")
+
+def cancelJob(jobid):
+    if jobid in GivQueue.q.scheduled_job_registry:
+        GivQueue.q.scheduled_job_registry.requeue(jobid, at_front=True)
+        logger.info("Cancelling scheduled task as requested")
+    else:
+        logger.error("Job ID: " + str(jobid) + " not found in redis queue")
+
 
 def forceCharge(chargeTime):
     temp={}
-    logger.critical("Forcing Charge for "+str(chargeTime)+" minutes")
+    logger.info("Forcing Charge for "+str(chargeTime)+" minutes")
     try:
         chargeTime=int(chargeTime)
         payload={}
@@ -376,9 +389,11 @@ def forceCharge(chargeTime):
         result=setChargeSlot1(payload)
         
         if "success" in result:
-            open(".FCRunning", 'w').close()
             fcjob=GivQueue.q.enqueue_in(timedelta(minutes=chargeTime),FCResume,revert)
-            logger.critical("Force Charge revert jobid is: "+fcjob.id)
+            f=open(".FCRunning", 'w')
+            f.write(str(fcjob.id))
+            f.close()
+            logger.info("Force Charge revert jobid is: "+fcjob.id)
             temp['result']="Charge successfully forced "+str(chargeTime)+" minutes"
         else:
             temp['result']="Force charge failed"
@@ -401,7 +416,7 @@ def tempPauseDischarge(pauseTime):
         result={}
         payload['dischargeRate']=0
         result=setDischargeRate(payload)
-        logger.critical("Pausing Discharge for "+str(pauseTime)+" minutes")
+        logger.info("Pausing Discharge for "+str(pauseTime)+" minutes")
         #Update read data via pickle
         if exists(GivLUT.regcache):      # if there is a cache then grab it
             with open(GivLUT.regcache, 'rb') as inp:
@@ -409,11 +424,13 @@ def tempPauseDischarge(pauseTime):
             revertRate=regCacheStack[4]["Control"]["Battery_Discharge_Rate"]
         
         if "success" in result:
-            open(".tpdRunning","w").close()
             payload['dischargeRate']=revertRate
             delay=float(pauseTime*60)
             tpdjob=GivQueue.q.enqueue_in(timedelta(delay),tmpPDResume,payload)
-            logger.critical("Temp Pause Discharge revert jobid is: "+tpdjob.id)
+            f=open(".tpdRunning", 'w')
+            f.write(str(tpdjob.id))
+            f.close()
+            logger.info("Temp Pause Discharge revert jobid is: "+tpdjob.id)
             temp['result']="Discharge paused for "+str(delay)+" seconds"
         else:
             temp['result']="Pausing Discharge failed"
@@ -431,11 +448,12 @@ def tmpPCResume(payload):
 def tempPauseCharge(pauseTime):
     temp={}
     try:
+        logger.info("Pausing Charge for "+str(pauseTime)+" minutes")
         payload={}
         result={}
         payload['chargeRate']=0
         result=setChargeRate(payload)
-        logger.info(result)
+        logger.debug(result)
         #Update read data via pickle
         if exists(GivLUT.regcache):      # if there is a cache then grab it
             with open(GivLUT.regcache, 'rb') as inp:
@@ -443,15 +461,17 @@ def tempPauseCharge(pauseTime):
         revertRate=regCacheStack[4]["Control"]["Battery_Charge_Rate"]
         
         if "success" in result:
-            open(".tpcRunning","w").close()
             payload['chargeRate']=revertRate
             delay=float(pauseTime*60)
             tpcjob=GivQueue.q.enqueue_in(timedelta(delay),tmpPCResume,payload)
-            logger.critical("Temp Pause Charge revert jobid is: "+tpcjob.id)
+            f=open(".tpcRunning", 'w')
+            f.write(str(tpcjob.id))
+            f.close()
+            logger.info("Temp Pause Charge revert jobid is: "+tpcjob.id)
             temp['result']="Charge paused for "+str(delay)+" seconds"
         else:
             temp['result']="Pausing Charge failed: "
-        logger.info("Result is: "+temp['result'])
+        logger.debug("Result is: "+temp['result'])
     except:
         e = sys.exc_info()
         temp['result']="Pausing Charge failed: " + str(e)
@@ -461,6 +481,7 @@ def tempPauseCharge(pauseTime):
 def setBatteryMode(payload):
     temp={}
     if type(payload) is not dict: payload=json.loads(payload)
+    logger.info("Setting Battery Mode to: "+str(payload['mode']))
     try:
         if payload['mode']=="Eco":
             client.set_mode_dynamic()
@@ -497,6 +518,7 @@ def setDateTime(payload):
     #convert payload to dateTime components
     try:
         iDateTime=datetime.strptime(payload['dateTime'],"%d/%m/%Y %H:%M:%S")   #format '12/11/2021 09:15:32'
+        logger.info("Setting Invertor time to: "+iDateTime)
         #Set Date and Time on Invertor
         client.set_datetime(iDateTime)
         temp['result']="Invertor time setting was a success"
@@ -509,17 +531,18 @@ def setDateTime(payload):
 
 def switchRate(payload):
     temp={}
+    if GiV_Settings.dynamic_tariff == False:     # Only allow this control if Dyanmic control is enabled
+        temp['result']="External rate setting not allowed. Enale Dynamic Tariff in settings"
+        logger.error(temp['result'])
+        return json.dumps(temp)
     try:
+        logger.info("Switching rate to: "+payload)
         if payload.lower()=="day":
-            open(".dayRate", 'w').close()
-            logger.critical ("Setting .dayRate via external trigger")
-            if exists(".nightRate"):
-                os.remove(".nightRate")
+            open(".dayRateRequest", 'w').close()
+            logger.critical ("Setting dayRate via external trigger")
         else:
-            open(".nightRate", 'w').close()
-            logger.critical ("Setting .nightRate via external trigger")
-            if exists(".dayRate"):
-                os.remove(".dayRate")
+            open(".nightRateRequest", 'w').close()
+            logger.critical ("Setting nightRate via external trigger")
     except:
         e = sys.exc_info()
         temp['result']="Setting Battery Mode failed: " + str(e) 

@@ -71,11 +71,16 @@ From here your invertor data is available through either MQTT or REST as describ
 | HADEVICEPREFIX | GivTCP | Optional - Prefix to be placed in front of every Home Assistent entity created by the above |
 | DAYRATE | 0.155 | Optional - Cost of your daytime energy if using Economy 7 or Octopus Go |
 | NIGHTRATE | 0.155 | Optional - Cost of your night time energy if using Economy 7 or Octopus Go |
+| DYNAMICTARIFF | False | Optional - Allows an external automation to trigger switch to 'Day' or 'Night' tariff rates. If set to true it ignores the times set below|
 | DAYRATESTART | 04:30 | Optional - Start time of your daytime energy if using Economy 7 or Octopus Go |
 | NIGHTRATESTART | 00:00 | Optional - Start time of your night time energy if using Economy 7 or Octopus Go |
 | HOSTIP | 192.168.1.20 | Optional - The host IP address of your container. Required to access the web dashboard from any browser |
-| DATASMOOTHER | High | The amount of smoothing to apply to the data, to reduce the effect of sudden invalid jumps in values. Set to 'None' to disable. Values are not case-sensitive. Other values are 'High', 'Medium', 'Low' |
-
+| DATASMOOTHER | Medium | The amount of smoothing to apply to the data, to reduce the effect of sudden invalid jumps in values. Set to 'None' to disable. Values are not case-sensitive. Other values are 'High', 'Medium', 'Low, 'None' |
+| SMARTTARGET | False | Optional - If set to True will use Palm SOC to predict solar forecast and use historic usage to determine overnight charge target |
+| GEAPI | abcdefg12345 | Optional - API Key from the GivEnergy Cloud to allow historic usgae stats for SMARTTARGET |
+| SOLCASTAPI |  | Optional - API Key for Solcast to allow solar prediction for SMARTTARGET |
+| SOLCASTSITEID |  | Optional - Solcast ID for array 1, needed for SMARTTARGET |
+| SOLCASTSITEID2 |  | Optional - Solcast ID for array 2 (if it exists), needed for SMARTTARGET |
 
 
 ## GivTCP Read data

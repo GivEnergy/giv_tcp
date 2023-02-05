@@ -26,7 +26,7 @@ class HAMQTT():
     def on_connect(client, userdata, flags, rc):
         if rc==0:
             client.connected_flag=True #set flag
-            logger.info("connected OK Returned code="+str(rc))
+            logger.debug("connected OK Returned code="+str(rc))
             #client.subscribe(topic)
         else:
             logger.error("Bad connection Returned code= "+str(rc))
@@ -46,7 +46,7 @@ class HAMQTT():
                 logger.debug("In wait loop")
                 time.sleep(0.2)
 
-            logger.info("Publishing MQTT: " + HAMQTT.MQTT_Address)
+            logger.debug("Publishing MQTT: " + HAMQTT.MQTT_Address)
 
             ##publish the status message
             client.publish(GiV_Settings.MQTT_Topic+"/"+SN+"/status","online", retain=True)

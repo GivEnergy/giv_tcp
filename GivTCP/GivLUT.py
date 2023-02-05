@@ -15,7 +15,7 @@ class GivQueue:
     from settings import GiV_Settings
     redis_connection = Redis(host='127.0.0.1', port=6379, db=0)
     q = Queue("GivTCP_"+str(GiV_Settings.givtcp_instance),connection=redis_connection)
-
+    
 class GEType:
     def __init__(self,dT,sC,cF,mn,mx,aZ,sM,oI):
         self.devType = dT
@@ -62,8 +62,8 @@ class GivLUT:
     schedule=".schedule"
     oldDataCount=GiV_Settings.cache_location+"/oldDataCount_"+str(GiV_Settings.givtcp_instance)+".pkl"
 
-    timezone=zoneinfo.ZoneInfo(key=os.getenv("TZ"))
-#    timezone=zoneinfo.ZoneInfo(key="Europe/London")
+#    timezone=zoneinfo.ZoneInfo(key=os.getenv("TZ"))
+    timezone=zoneinfo.ZoneInfo(key="Europe/London")
 
     # Standard values for devices
     maxInvPower=6000
@@ -133,6 +133,7 @@ class GivLUT:
         "Battery_Type":GEType("sensor","","","","",False,False,False),
         "Battery_Capacity_kWh":GEType("sensor","","",0,maxBatPower,True,True,False),
         "Invertor_Serial_Number":GEType("sensor","","","","",False,False,False),
+        "Invertor_Firmware":GEType("sensor","","",0,10000,False,False,False),
         "Modbus_Version":GEType("sensor","","",1,10,False,True,False),
         "Meter_Type":GEType("sensor","","","","",False,False,False),
         "Invertor_Type":GEType("sensor","","","","",False,False,False),
