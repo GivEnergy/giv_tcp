@@ -13,7 +13,7 @@ class GivQueue:
     from redis import Redis
     from rq import Queue
     from settings import GiV_Settings
-    redis_connection = Redis(host='192.168.2.10', port=6379, db=0)
+    redis_connection = Redis(host='127.0.0.1', port=6379, db=0)
     q = Queue("GivTCP_"+str(GiV_Settings.givtcp_instance),connection=redis_connection)
     
 class GEType:
