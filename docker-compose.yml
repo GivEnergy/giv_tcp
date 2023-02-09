@@ -35,7 +35,7 @@ services:
       - HA_AUTO_D=True                # If True (and if MQTT_OUTPUT is True) this will publish Home Assistant Auto Discovery messages to the broker
       - HADEVICEPREFIX=GivTCP         # Defines the preficfor all entities in Home Assistant
       - PYTHONPATH=/app
-      - DYNAMICTARIFF=False
+      - DYNAMICTARIFF=False           # When set to true DAYRATESTART and NIGHTRATESTART times are ignored and tariff rates are changed by a dedicated entity/function
       - DAYRATE=0.155                 # Price in £/$ for your daytime electricity per kWh
       - NIGHTRATE=0.055               # Price in £/$ for your night time electricity per kWh
       - EXPORTRATE=0.04               # Price in £/$ for your export electricity per kWh
