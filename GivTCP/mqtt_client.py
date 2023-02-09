@@ -6,6 +6,7 @@ import write as wr
 import pickle, settings
 from GivLUT import GivQueue, GivLUT
 from pickletools import read_uint1
+from rq import Retry
 
 sys.path.append(GiV_Settings.default_path)
 
@@ -57,7 +58,7 @@ def on_message(client, userdata, message):
         result=GivQueue.q.enqueue(wr.setDischargeRate,writecommand)
     elif command=="setChargeRate":
         writecommand['chargeRate']=str(message.payload.decode("utf-8"))
-        result=GivQueue.q.enqueue(wr.setChargeRate,writecommand)
+        result=GivQueue.q.enqueue(wr.setChargeRate,writecommand)#, retry=Retry(max=3, interval=2))
     elif command=="enableChargeTarget":
         writecommand['state']=str(message.payload.decode("utf-8"))
         result=GivQueue.q.enqueue(wr.enableChargeTarget,writecommand)
@@ -74,7 +75,6 @@ def on_message(client, userdata, message):
         writecommand['chargeToPercent']=str(message.payload.decode("utf-8"))
         result=GivQueue.q.enqueue(wr.setChargeTarget,writecommand)
     elif command=="setBatteryReserve":
-        #writecommand['dischargeToPercent']=str(message.payload.decode("utf-8"))
         writecommand['reservePercent']=str(message.payload.decode("utf-8"))
         result=GivQueue.q.enqueue(wr.setBatteryReserve,writecommand)
     elif command=="setBatteryCutoff":

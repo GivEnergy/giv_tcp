@@ -156,23 +156,39 @@ def setBatteryCutoff(payload):
         logger.error (temp['result'])
     return json.dumps(temp)
 
+def testcharge():
+    payload={}
+    payload['chargeRate']=2200
+    setChargeRate(payload)
 
 def setChargeRate(payload):
     temp={}
     if type(payload) is not dict: payload=json.loads(payload)
-    #Only allow max of 100% and if not 100% the scale to a third to get register value
-    if int(payload['chargeRate'])>=100:
-        target=50
-    else:
-        target=int(int(payload['chargeRate'])/3)
-    logger.info ("Setting battery charge rate to: " + str(payload['chargeRate']))
-    try:
-        client.set_battery_charge_limit(target)
-        temp['result']="Setting Charge Rate was a success"
 
-    except:
-        e = sys.exc_info()
-        temp['result']="Setting Charge Rate failed: " + str(e)
+    # Get invertor max bat power
+    if exists(GivLUT.regcache):      # if there is a cache then grab it
+        with open(GivLUT.regcache, 'rb') as inp:
+            regCacheStack = pickle.load(inp)
+            multi_output_old = regCacheStack[4]
+        invmaxrate=multi_output_old['Invertor_Details']['Invertor_Max_Rate']
+        batcap=float(multi_output_old['Invertor_Details']['Battery_Capacity_kWh'])*1000
+
+        if int(payload['chargeRate']) < int(invmaxrate):
+            target=int(min((int(payload['chargeRate'])/(batcap/2))*50,50))
+        else:
+            target=50
+        logger.info ("Setting battery charge rate to: " + str(payload['chargeRate'])+" ("+str(target)+")")
+        try:
+            client.set_battery_charge_limit(target)
+            temp['result']="Setting Charge Rate was a success"
+
+        except:
+            e = sys.exc_info()
+            temp['result']="Setting Charge Rate failed: " + str(e)
+            logger.error (temp['result'])
+            #raise Exception
+    else:
+        temp['result']="Setting Charge Rate failed: No charge rate limit available"
         logger.error (temp['result'])
     return json.dumps(temp)
 
@@ -180,21 +196,29 @@ def setChargeRate(payload):
 def setDischargeRate(payload):
     temp={}
     if type(payload) is not dict: payload=json.loads(payload)
-    #Only allow max of 100% and if not 100% the scale to a third to get register value
-    if int(payload['dischargeRate'])>=100:
-        target=50
-    else:
-        target=int(int(payload['dischargeRate'])/3)
-    logger.info ("Setting battery discharge rate to: " + str(payload['dischargeRate']))
-    try:
-        logger.info("Setting Discharge Rate to: "+str(payload['dischargeRate']))
-        client.set_battery_discharge_limit(target)
-        temp['result']="Setting Discharge Rate was a success"
+    # Get invertor max bat power
+    if exists(GivLUT.regcache):      # if there is a cache then grab it
+        with open(GivLUT.regcache, 'rb') as inp:
+            regCacheStack = pickle.load(inp)
+            multi_output_old = regCacheStack[4]
+        invmaxrate=multi_output_old['Invertor_Details']['Invertor_Max_Rate']
+        batcap=float(multi_output_old['Invertor_Details']['Battery_Capacity_kWh'])*1000
 
-    except:
-        e = sys.exc_info()
-        temp['result']="Setting Discharge Rate failed: " + str(e)
-        logger.error (temp['result'])
+        if int(payload['dischargeRate']) < int(invmaxrate):
+            target=int(min((int(payload['dischargeRate'])/(batcap/2))*50,50))
+        else:
+            target=50
+        logger.info ("Setting battery discharge rate to: " + str(payload['dischargeRate'])+" ("+str(target)+")")
+        try:
+            client.set_battery_discharge_limit(target)
+            temp['result']="Setting Discharge Rate was a success"
+        except:
+            e = sys.exc_info()
+            temp['result']="Setting Discharge Rate failed: " + str(e)
+            logger.error (temp['result'])
+    else:
+        temp['result']="Setting Disharge Rate failed: No discharge rate limit available"
+        logger.error (temp['result'])        
     return json.dumps(temp)
 
 

@@ -5,6 +5,8 @@ from settings import GiV_Settings
 from givenergy_modbus.model.inverter import Model
 from mqtt import GivMQTT
 from GivLUT import GivLUT
+from os.path import exists
+import pickle
 
 logger=GivLUT.logger
 
@@ -22,6 +24,14 @@ class HAMQTT():
         MQTT_Password=GiV_Settings.MQTT_Password
     if GiV_Settings.MQTT_Topic=="":
         GiV_Settings.MQTT_Topic="GivEnergy"
+
+    def getinvbatmax():
+        if exists(GivLUT.regcache):      # if there is a cache then grab it
+            with open(GivLUT.regcache, 'rb') as inp:
+                regCacheStack = pickle.load(inp)
+                multi_output_old = regCacheStack[4]
+            return int(multi_output_old['Invertor_Details']['Invertor_Max_Rate'])
+        return 5000
 
     def on_connect(client, userdata, flags, rc):
         if rc==0:
@@ -161,7 +171,14 @@ class HAMQTT():
                 options=GivLUT.rates
             tempObj['options']=options
         elif GivLUT.entity_type[str(topic).split("/")[-1]].devType=="number":
-            tempObj['unit_of_meas']="%"
+            # If its a rate then change to Watts
+            if "charge" in str(topic).lower():
+                tempObj['unit_of_meas']="W"
+                tempObj['min']=0
+                tempObj['max']=HAMQTT.getinvbatmax()             # how to set as correct max??
+                tempObj['mode']="slider"
+            else:
+                tempObj['unit_of_meas']="%"
         ## Convert this object to json string
         jsonOut=json.dumps(tempObj)
         return(jsonOut)

@@ -7,7 +7,6 @@ listen = ['GivTCP_'+str(GiV_Settings.givtcp_instance)]
 redis_url = 'redis://127.0.0.1:6379'
 conn = redis.from_url(redis_url)
 
-#GivQueue= Queue("GivTCP_1")
 if __name__ == '__main__':
     with Connection(conn):
         worker = Worker(listen)

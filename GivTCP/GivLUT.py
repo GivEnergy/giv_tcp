@@ -13,7 +13,7 @@ class GivQueue:
     from redis import Redis
     from rq import Queue
     from settings import GiV_Settings
-    redis_connection = Redis(host='127.0.0.1', port=6379, db=0)
+    redis_connection = Redis(host='192.168.2.10', port=6379, db=0)
     q = Queue("GivTCP_"+str(GiV_Settings.givtcp_instance),connection=redis_connection)
     
 class GEType:
@@ -26,6 +26,14 @@ class GEType:
         self.allowZero=aZ
         self.smooth=sM
         self.onlyIncrease=oI
+
+class InvType:
+    def __init__(self,ph,md,pw,mr,gn):
+        self.phase=ph
+        self.model=md
+        self.power=pw
+        self.batmaxrate=mr
+        self.generation=gn
 
 class GivLUT:
     #Logging config
@@ -62,8 +70,10 @@ class GivLUT:
     schedule=".schedule"
     oldDataCount=GiV_Settings.cache_location+"/oldDataCount_"+str(GiV_Settings.givtcp_instance)+".pkl"
 
-#    timezone=zoneinfo.ZoneInfo(key=os.getenv("TZ"))
-    timezone=zoneinfo.ZoneInfo(key="Europe/London")
+    if "TZ" in os.environ:
+        timezone=zoneinfo.ZoneInfo(key=os.getenv("TZ"))
+    else:
+        timezone=zoneinfo.ZoneInfo(key="Europe/London")
 
     # Standard values for devices
     maxInvPower=6000
@@ -133,6 +143,8 @@ class GivLUT:
         "Battery_Type":GEType("sensor","","","","",False,False,False),
         "Battery_Capacity_kWh":GEType("sensor","","",0,maxBatPower,True,True,False),
         "Invertor_Serial_Number":GEType("sensor","","","","",False,False,False),
+        "Invertor_Time":GEType("sensor","","","","",False,False,False),
+        "Invertor_Max_Rate":GEType("sensor","","",0,maxBatPower,True,False,False),
         "Invertor_Firmware":GEType("sensor","","",0,10000,False,False,False),
         "Modbus_Version":GEType("sensor","","",1,10,False,True,False),
         "Meter_Type":GEType("sensor","","","","",False,False,False),
@@ -184,8 +196,8 @@ class GivLUT:
         "Enable_Charge_Schedule":GEType("switch","","enableChargeSchedule","","",False,False,False),
         "Enable_Discharge_Schedule":GEType("switch","","enableDishargeSchedule","","",False,False,False),
         "Enable_Discharge":GEType("switch","","enableDischarge","","",False,False,False),
-        "Battery_Charge_Rate":GEType("number","","setChargeRate",0,100,False,False,False),
-        "Battery_Discharge_Rate":GEType("number","","setDischargeRate",0,100,True,False,False),
+        "Battery_Charge_Rate":GEType("number","","setChargeRate",0,10000,True,False,False),
+        "Battery_Discharge_Rate":GEType("number","","setDischargeRate",0,10000,True,False,False),
         "Night_Start_Energy_kWh":GEType("sensor","energy","",0,maxTotalEnergy,False,False,False),
         "Night_Energy_kWh":GEType("sensor","energy","",0,maxTodayEnergy,False,False,False),
         "Night_Cost":GEType("sensor","money","",0,maxCost,True,False,False),

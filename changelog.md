@@ -5,19 +5,28 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/)
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
-## [2.1.0] - WIP
+## [2.1.0] - 2023-02-09
 
-- Added "None" as a smoothing option
-- Added invertor firmware to output
+BREAKING CHANGES:
+- Charge and Discharge rates now use absolute power values (2600W) not percentage (100%) to align with Cloud portal and to give correct operation
+- Prevented the REST readData call (pubFromPickle) from triggering another read 
+ 
+BUG FIXES:
 - Worked on race conditions by using critical sections to replace file locks
+- Fix select entities error when setting to a non-float value
+
+UPDATES:
 - Changed logging levels so that Info now just shows which operations are called and everything else is Debug
-- Prevented the readData call (pubFromPickle) from triggering another read (this is a change in behaviour)
 - Force Charge, Force Export and Temp Pause controls now allow you to Cancel, reverting to preious settings immediately
 - Updated Battery Reserve and Cut-off entities to correctly reflect invertor behaviour
-- Allow dynamic energy rates as well as fixed time (Go vs Intelligent) New select entity created to allow external automations to change rate
-- Fix select entities error when setting to a non-float value
 - Updated Redis scheduling for control lockout
+ 
+NEW FEATURES:
+- Added "None" as a smoothing option
+- Added invertor firmware to output
+- Allow dynamic Day/Night energy slots as well as fixed time (Go vs Intelligent) New "select" entity created to allow external automations to change rate (DYNAMICTARIFF ENV can be set to true to ignore day/night ENV and change rates based on the value of the Select entity)
 - Ability to accept dual array installations for Solcast Smart Target (new ENV) 
+
 
 ## [2.0.1] - 2022-09-18
  

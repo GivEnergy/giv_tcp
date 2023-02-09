@@ -26,7 +26,7 @@ options:
   MQTT_PASSWORD: ""
   MQTT_TOPIC: ""
   MQTT_PORT: 1883
-  LOG_LEVEL: "Error"
+  LOG_LEVEL: "Info"
   PRINT_RAW: True
   SELF_RUN: True
   SELF_RUN_LOOP_TIMER: 5
