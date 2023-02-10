@@ -3,8 +3,6 @@ FROM python:rc-alpine
 
 RUN apk --no-cache add mosquitto
 RUN apk add curl
-# Install nodejs for the dashboard
-#RUN curl -fsSL https://deb.nodesource.com/setup_18.x | bash -
 RUN apk add --update npm
 RUN npm install -g serve
 RUN apk add git
@@ -15,8 +13,6 @@ RUN apk add redis
 
 # set the working directory in the container
 WORKDIR /app
-
-#RUN git clone --branch givtcp https://github.com/DanielGallo/GivEnergy-Smart-Home-Display.git
 
 # copy the dependencies file to the working directory
 COPY requirements.txt .
@@ -65,7 +61,7 @@ ENV WEB_DASH_PORT=3000
 ENV CACHELOCATION="/config/GivTCP"
 ENV DATASMOOTHER="medium"
 
-ENV SMARTTARGET=True
+ENV SMARTTARGET=False
 ENV GEAPI=""
 ENV SOLCASTAPI=""
 ENV SOLCASTSITEID=""

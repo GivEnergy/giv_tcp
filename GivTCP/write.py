@@ -103,7 +103,6 @@ def enableDischarge(payload):
     return json.dumps(temp)
 
 def setChargeTarget(payload):
-    logger.critical("Setting target SOC to: "+str(payload['chargeToPercent']))
     temp={}
     if type(payload) is not dict: payload=json.loads(payload)
     target=int(payload['chargeToPercent'])
@@ -563,10 +562,10 @@ def switchRate(payload):
         logger.info("Switching rate to: "+payload)
         if payload.lower()=="day":
             open(".dayRateRequest", 'w').close()
-            logger.critical ("Setting dayRate via external trigger")
+            logger.info ("Setting dayRate via external trigger")
         else:
             open(".nightRateRequest", 'w').close()
-            logger.critical ("Setting nightRate via external trigger")
+            logger.info ("Setting nightRate via external trigger")
     except:
         e = sys.exc_info()
         temp['result']="Setting Battery Mode failed: " + str(e) 

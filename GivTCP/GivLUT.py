@@ -119,7 +119,7 @@ class GivLUT:
         "PV_Current_String_1":GEType("sensor","current","",0,20,True,False,False),
         "PV_Current_String_2":GEType("sensor","current","",0,20,True,False,False),
         "Grid_Power":GEType("sensor","power","",-maxPower,maxPower,True,False,False),
-        "Grid_Current":GEType("sensor","current","",-120,120,False,True,False),
+        "Grid_Current":GEType("sensor","current","",-120,120,False,False,False),
         "Grid_Voltage":GEType("sensor","voltage","",150,300,False,True,False),
         "Import_Power":GEType("sensor","power","",0,maxPower,True,False,False),
         "Export_Power":GEType("sensor","power","",0,maxInvPower,True,False,False),

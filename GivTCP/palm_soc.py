@@ -137,18 +137,17 @@ class GivEnergyObj:
         else:
             reg_str = "(Unknown)"
 
-        logger.critical("Setting "+ str(reg_str)+ " to "+ str(value)+ "%")
-        logger.info("")
+        logger.info("Setting "+ str(reg_str)+ " to "+ str(value)+ "%")
 
     def set_soc(self, tgt_soc):
         """ Sets start time and target SoC for overnight charge."""
 #        self.set_inverter_register("77", tgt_soc)
         result={}
-        logger.critical("Setting Charge Target to: "+ str(tgt_soc)+ "%")
+        logger.debug("Setting Charge Target to: "+ str(tgt_soc)+ "%")
         payload={}
         payload['chargeToPercent']= tgt_soc
         result=wr.setChargeTarget(payload)
-        logger.critical(result)
+        logger.debug(result)
         
     def restore_params(self):
         """Restore inverter parameters after overnight charge"""
@@ -407,16 +406,16 @@ if __name__ == '__main__':
     solcast.update()
 
     # Compute & set SoC target
-    logger.info("10% forecast...")
+    logger.debug("10% forecast...")
     ge.compute_tgt_soc(solcast, 1, 0, 0, MONTH_VAR, False)
-    logger.info("50% forecast...")
+    logger.debug("50% forecast...")
     ge.compute_tgt_soc(solcast, 0, 1, 0, MONTH_VAR, False)
-    logger.info("90% forecast...")
+    logger.debug("90% forecast...")
     ge.compute_tgt_soc(solcast, 0, 0, 1, MONTH_VAR, False)
     
     # Write final SoC target to GivEnergy register
     # Change weighting in command according to desired risk/reward profile
-    logger.info("1:2:0 weighted forecast...")
+    logger.debug("1:2:0 weighted forecast...")
     ge.compute_tgt_soc(solcast, 1, 2, 0, MONTH_VAR, True)
 
 # End

@@ -1,8 +1,8 @@
 # -*- coding: utf-8 -*-
 # version 2022.08.01
 from threading import Lock
-from givenergy_modbus.model.plant import Plant
-from givenergy_modbus.model.battery import Battery
+#from givenergy_modbus.model.plant import Plant, Inverter
+#from givenergy_modbus.model.battery import Battery
 from givenergy_modbus.model.inverter import Model
 import sys
 from pickletools import read_uint1
@@ -37,8 +37,7 @@ def invertorData(fullrefresh):
         Bat = plant.batteries
     except:
         e = sys.exc_info()
-        consecFails(e)
-        temp['result'] = "Error collecting registers: " + str(e)
+        temp['error'] = "Error collecting registers: " + str(e)
         return json.dumps(temp)
     return Inv,Bat
 
@@ -61,8 +60,14 @@ def getData(fullrefresh):  # Read from Invertor put in cache
         plant=GivQueue.q.enqueue(invertorData,fullrefresh,retry=Retry(max=2, interval=2))      
         while plant.result is None and plant.exc_info is None:
             time.sleep(0.5)
+
+        # Check the ojects are not empty...
+        if "error" in plant.result:
+            raise Exception (plant.result['error'])
+
         GEInv=plant.result[0]
         GEBat=plant.result[1]
+        
     except:
         e = sys.exc_info()
         consecFails(e)
@@ -79,7 +84,9 @@ def getData(fullrefresh):  # Read from Invertor put in cache
         logger.debug("Beginning parsing of Inverter data")
         invertorModel= InvType
         # Determine Invertor Model and max charge rate first...
+
         genint=math.floor(int(GEInv.arm_firmware_version)/100)
+    
         if genint == 8 or genint == 9:
             invertorModel.generation=2
         else:
@@ -141,10 +148,9 @@ def getData(fullrefresh):  # Read from Invertor put in cache
             else:
                 maxInvChargeRate=3600
 
-
-
         # Calc max charge rate
         invertorModel.batmaxrate=min(maxInvChargeRate, (GEInv.battery_nominal_capacity*51.2)/2)
+
 
         # Total Energy Figures
         logger.debug("Getting Total Energy Data")
@@ -594,7 +600,7 @@ def getData(fullrefresh):  # Read from Invertor put in cache
             dataDiff = set(MOOList) - set(MOList)
             if len(dataDiff) > 0:
                 for key in dataDiff:
-                    logger.critical(str(key)+" is missing from new data, publishing all other data")
+                    logger.error(str(key)+" is missing from new data, publishing all other data")
 
         # Add new data to the stack
         regCacheStack.pop(0)
@@ -639,13 +645,13 @@ def consecFails(e):
             with open(GivLUT.oldDataCount, 'rb') as inp:
                 oldDataCount= pickle.load(inp)
             oldDataCount = oldDataCount + 1
-            logger.error("Consecutive failure count= "+str(oldDataCount))
-            logger.error("Error processing registers: " + str(e))
+            if oldDataCount > 2:
+                logger.error("Consecutive failure count= "+str(oldDataCount) +" -- "+ str(e))
         else:
             oldDataCount = 1
         if oldDataCount>10:
             #10 error in a row so delete regCache data
-            logger.critical("10 failed invertor reads in a row so removing regCache to force update...")
+            logger.error("10 failed invertor reads in a row so removing regCache to force update...")
             if exists(GivLUT.regcache):
                 os.remove(GivLUT.regcache)
             if exists(GivLUT.batterypkl):
@@ -820,7 +826,7 @@ def ratecalcs(multi_output, multi_output_old):
     if GiV_Settings.dynamic_tariff == False:     ## If we use externally triggered rates then don't do the time check but assume the rate files are set elsewhere (default to Day if not set)
         if dayRateStart.hour == datetime.datetime.now(GivLUT.timezone).hour and dayRateStart.minute == datetime.datetime.now(GivLUT.timezone).minute:
             #Save current Total stats as baseline
-            logger.critical("Saving current energy stats at start of day rate tariff")
+            logger.info("Saving current energy stats at start of day rate tariff")
             rate_data['Day_Start_Energy_kWh'] = import_energy
             open(".dayRate", 'w').close()
             if exists(".nightRate"):
@@ -828,7 +834,7 @@ def ratecalcs(multi_output, multi_output_old):
 
         elif nightRateStart.hour == datetime.datetime.now(GivLUT.timezone).hour and nightRateStart.minute == datetime.datetime.now(GivLUT.timezone).minute:
             #Save current Total stats as baseline
-            logger.critical("Saving current energy stats at start of night rate tariff")
+            logger.info("Saving current energy stats at start of night rate tariff")
             rate_data['Night_Start_Energy_kWh'] = import_energy
             open(".nightRate", 'w').close()
             if exists(".dayRate"):
@@ -837,7 +843,7 @@ def ratecalcs(multi_output, multi_output_old):
         # Otherwise check to see if dynamic trigger has been recieved to change rate type
         if exists(".nightRateRequest"):
             os.remove(".nightRateRequest")
-            logger.critical("Saving current energy stats at start of night rate tariff")
+            logger.info("Saving current energy stats at start of night rate tariff")
             rate_data['Night_Start_Energy_kWh'] = import_energy
             open(".nightRate", 'w').close()
             if exists(".dayRate"):
@@ -845,7 +851,7 @@ def ratecalcs(multi_output, multi_output_old):
 
         elif exists(".dayRateRequest"):
             os.remove(".dayRateRequest")
-            logger.critical("Saving current energy stats at start of day rate tariff")
+            logger.info("Saving current energy stats at start of day rate tariff")
             rate_data['Day_Start_Energy_kWh'] = import_energy
             open(".dayRate", 'w').close()
             if exists(".nightRate"):
@@ -949,7 +955,7 @@ def loop_dict(array, regCacheStack, lastUpdate):
                 safeoutput[p_load] = temp
                 logger.debug('Data cleansed for: '+str(p_load))
             else:
-                logger.critical(str(p_load)+" has no data in the cache so using new value.")
+                logger.debug(str(p_load)+" has no data in the cache so using new value.")
                 safeoutput[p_load] = output
         else:
             # run datasmoother on the data item
@@ -957,7 +963,7 @@ def loop_dict(array, regCacheStack, lastUpdate):
             if p_load in regCacheStack:
                 safeoutput[p_load] = dataSmoother2([p_load, output], [p_load, regCacheStack[p_load]], lastUpdate)
             else:
-                logger.critical(p_load+" has no data in the cache so using new value.")
+                logger.debug(p_load+" has no data in the cache so using new value.")
                 safeoutput[p_load] = output
     return(safeoutput)
 
