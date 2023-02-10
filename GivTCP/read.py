@@ -36,9 +36,7 @@ def invertorData(fullrefresh):
         Inv = plant.inverter
         Bat = plant.batteries
     except:
-        e = sys.exc_info()
-        temp['error'] = "Error collecting registers: " + str(e)
-        return json.dumps(temp)
+        return ("ERROR")
     return Inv,Bat
 
 def getData(fullrefresh):  # Read from Invertor put in cache
@@ -62,8 +60,8 @@ def getData(fullrefresh):  # Read from Invertor put in cache
             time.sleep(0.5)
 
         # Check the ojects are not empty...
-        if "error" in plant.result:
-            raise Exception (plant.result['error'])
+        if plant.result=="ERROR":
+            raise Exception ("Garbage or failed Invertor Response")
 
         GEInv=plant.result[0]
         GEBat=plant.result[1]
@@ -667,11 +665,7 @@ def consecFails(e):
 def runAll(full_refresh):  # Read from Invertor put in cache and publish
     # full_refresh=True
     from read import getData
-    from rq import Retry
-#    result=GivQueue.q.enqueue(getData,full_refresh, retry=Retry(max=2, interval=2))
     result=getData(full_refresh)
-#    while result.result is None and result.exc_info is None:
-#        time.sleep(0.5)
     # Step here to validate data against previous pickle?
     multi_output = pubFromPickle()
     return multi_output

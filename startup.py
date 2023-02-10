@@ -121,8 +121,6 @@ for inv in range(1,int(os.getenv('NUMINVERTORS'))+1):
     if exists(os.getenv("CACHELOCATION")+"/rateData_"+str(inv)+".pkl"):
         logger.critical("Removing old rate data cache")
         os.remove(str(os.getenv("CACHELOCATION"))+"/rateData_"+str(inv)+".pkl")
-    # delete battery and rate_data if too old (12 hours?)
-    #if (datetime.time() - os.path.getmtime(batterypkl)): 
 
 ########### Run the various processes needed #############
     os.chdir(PATH)
@@ -173,12 +171,12 @@ while True:
         if os.getenv('SELF_RUN')==True and not selfRun[inv].poll()==None:
             logger.error("Self Run loop process died. restarting...")
             os.chdir(PATH)
-            logger.critical ("Running Invertor read loop every "+str(os.getenv('SELF_RUN_LOOP_TIMER'))+"s")
+            logger.critical ("Restarting Invertor read loop every "+str(os.getenv('SELF_RUN_LOOP_TIMER'))+"s")
             selfRun[inv]=subprocess.Popen(["/usr/local/bin/python3",PATH+"/read.py", "self_run2"])
         elif os.getenv('MQTT_OUTPUT')==True and not mqttClient[inv].poll()==None:
             logger.error("MQTT Client process died. Restarting...")
             os.chdir(PATH)
-            logger.critical ("Subscribing Mosquitto on port "+str(os.getenv('MQTT_PORT')))
+            logger.critical ("Resubscribing Mosquitto for control on port "+str(os.getenv('MQTT_PORT')))
             mqttClient[inv]=subprocess.Popen(["/usr/local/bin/python3",PATH+"/mqtt_client.py"])
         elif os.getenv('WEB_DASH')==True and not webDash[inv].poll()==None:
             logger.error("Web Dashboard process died. Restarting...")
