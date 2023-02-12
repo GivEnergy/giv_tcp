@@ -1,6 +1,6 @@
 name:  "GivTCP"
 description:  "TCP Modbus connection to MQTT/JSON for Givenergy Battery/PV Invertors"
-version:  "2.1.2"
+version:  "2.1.3"
 image: britkat/giv_tcp-ma
 slug:  "givtcp"
 init:  true
@@ -50,8 +50,10 @@ options:
   WEB_DASH_PORT: 3000
   INVERTOR_IP_2:  ""
   NUMBATTERIES_2:  1
+  MQTT_TOPIC_2: ""
   INVERTOR_IP_3:  ""
   NUMBATTERIES_3:  1
+  MQTT_TOPIC_3: ""
   CACHELOCATION: "/config/GivTCP"
   DATASMOOTHER: "medium"
   SMARTTARGET: True
@@ -93,8 +95,10 @@ schema:
   WEB_DASH_PORT: int
   INVERTOR_IP_2:  "str?"
   NUMBATTERIES_2:  "int?"
+  MQTT_TOPIC_2: "str?"
   INVERTOR_IP_3:  "str?"
   NUMBATTERIES_3:  "int?"
+  MQTT_TOPIC_3: "str?"
   CACHELOCATION: "str?"
   DATASMOOTHER: "str?"
   SMARTTARGET: bool

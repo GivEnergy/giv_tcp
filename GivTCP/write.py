@@ -11,6 +11,7 @@ from os.path import exists
 import pickle,os
 from GivLUT import GivLUT, GivQueue
 from givenergy_modbus.client import GivEnergyClient
+from rq import Retry
 
 #client= GivEnergyClient(host=GiV_Settings.invertorIP)
 
@@ -326,30 +327,28 @@ def forceExport(exportTime):
             revert["end_time"]=regCacheStack[4]["Timeslots"]["Discharge_end_time_slot_1"][:5]
             revert["dischargeToPercent"]=regCacheStack[4]["Control"]["Battery_Power_Reserve"]
             revert["mode"]=regCacheStack[4]["Control"]["Mode"]
+        maxDischargeRate=int(regCacheStack[4]["Invertor_Details"]["Invertor_Max_Rate"])
         
         #set slot2 to calc times and keep slot 1 as is
         slot1=(datetime.strptime(regCacheStack[4]["Timeslots"]["Discharge_start_time_slot_1"][:5],"%H:%M"),datetime.strptime(regCacheStack[4]["Timeslots"]["Discharge_end_time_slot_1"][:5],"%H:%M")) 
         slot2=(datetime.now(),datetime.now()+timedelta(minutes=exportTime))
         logger.debug("Setting export slot to: "+ slot2[0].strftime("%H:%M")+" - "+slot2[1].strftime("%H:%M"))
-        result=client.set_mode_storage(slot1,slot2,export=True)
-        logger.debug("Mode result is:" + str(result))
-        
-        time.sleep(1)
-
+#        result=GivQueue.q.enqueue(client.set_mode_storage,args=(slot1,slot2),kwargs={"export":True},retry=Retry(max=2, interval=2))
+        result= client.set_mode_storage(slot1,slot2,export=True)
         payload={}
-        payload['dischargeRate']=100
-        result=setDischargeRate(payload)
-        logger.debug("DischargeRate result is:" + str(result))
+        payload['dischargeRate']=maxDischargeRate
+        from write import setDischargeRate
+        result=GivQueue.q.enqueue(setDischargeRate,payload,retry=Retry(max=2, interval=2))
         
-        if "success" in result:
-            fejob=GivQueue.q.enqueue_in(timedelta(minutes=exportTime),FEResume,revert)
-            f=open(".FCRunning", 'w')
-            f.write(str(fejob.id))
-            f.close()
-            logger.info("Force Export revert jobid is: "+fejob.id)
-            temp['result']="Export successfully forced for "+str(exportTime)+" minutes"
-        else:
-            temp['result']="Force Export failed"
+        if exists(".FERunning"):    # If a forcecharge is already running, change time of revert job to new end time
+            logger.info("Force Export already running, changing end time")
+            revert=getFEArgs()[0]   # set new revert object and cancel old revert job
+        fejob=GivQueue.q.enqueue_in(timedelta(minutes=exportTime),FEResume,revert)
+        f=open(".FERunning", 'w')
+        f.write(str(fejob.id))
+        f.close()
+        logger.info("Force Export revert jobid is: "+fejob.id)
+        temp['result']="Export successfully forced for "+str(exportTime)+" minutes"
     except:
         e = sys.exc_info()
         temp['result']="Force Export failed: " + str(e)
@@ -360,17 +359,18 @@ def FCResume(revert):
     payload={}
     logger.info("Reverting Force Charge Settings:")
     payload['chargeRate']=revert["chargeRate"]
-    result=setChargeRate(payload)
-    time.sleep(1)
+    from write import setChargeRate
+    GivQueue.q.enqueue(setChargeRate,payload,retry=Retry(max=2, interval=2))
     payload={}
     payload['state']=revert["chargeScheduleEnable"]
-    enableChargeSchedule(payload)
-    time.sleep(1)
+    from write import enableChargeSchedule
+    GivQueue.q.enqueue(enableChargeSchedule,payload,retry=Retry(max=2, interval=2))
     payload={}
     payload['start']=revert["start_time"]
     payload['finish']=revert["end_time"]
     payload['chargeToPercent']=revert["targetSOC"]
-    setChargeSlot1(payload)
+    from write import setChargeSlot1
+    GivQueue.q.enqueue(setChargeSlot1,payload,retry=Retry(max=2, interval=2))
     os.remove(".FCRunning")
 
 def cancelJob(jobid):
@@ -380,6 +380,31 @@ def cancelJob(jobid):
     else:
         logger.error("Job ID: " + str(jobid) + " not found in redis queue")
 
+def getFCArgs():
+    from rq.job import Job
+    # getjobid
+    f=open(".FCRunning", 'r')
+    jobid=f.readline()
+    f.close()
+    # get the revert details from the old job
+    job=Job.fetch(jobid,GivQueue.redis_connection)
+    details=job.args
+    logger.debug("Previous args= "+str(details))
+    GivQueue.q.scheduled_job_registry.remove(jobid) # Remove the job from the schedule
+    return (details)
+
+def getFEArgs():
+    from rq.job import Job
+    # getjobid
+    f=open(".FERunning", 'r')
+    jobid=f.readline()
+    f.close()
+    # get the revert details from the old job
+    job=Job.fetch(jobid,GivQueue.redis_connection)
+    details=job.args
+    logger.debug("Previous args= "+str(details))
+    GivQueue.q.scheduled_job_registry.remove(jobid) # Remove the job from the schedule
+    return (details)
 
 def forceCharge(chargeTime):
     temp={}
@@ -397,29 +422,34 @@ def forceCharge(chargeTime):
             revert["chargeRate"]=regCacheStack[4]["Control"]["Battery_Charge_Rate"]
             revert["targetSOC"]=regCacheStack[4]["Control"]["Target_SOC"]
             revert["chargeScheduleEnable"]=regCacheStack[4]["Control"]["Enable_Charge_Schedule"]
-        
-        payload['chargeRate']=100
-        result=setChargeRate(payload)
+            maxChargeRate=int(regCacheStack[4]["Invertor_Details"]["Invertor_Max_Rate"])
+
+        payload['chargeRate']=maxChargeRate
+        from write import setChargeRate
+        result=GivQueue.q.enqueue(setChargeRate,payload,retry=Retry(max=2, interval=2))
 
         payload={}
         payload['state']="enable"
-        result=enableChargeSchedule(payload)
+        from write import enableChargeSchedule
+        result=GivQueue.q.enqueue(enableChargeSchedule,payload,retry=Retry(max=2, interval=2))
 
         payload={}
         payload['start']=GivLUT.getTime(datetime.now())
         payload['finish']=GivLUT.getTime(datetime.now()+timedelta(minutes=chargeTime))
         payload['chargeToPercent']=100
-        result=setChargeSlot1(payload)
+        from write import setChargeSlot1
+        result=GivQueue.q.enqueue(setChargeSlot1,payload,retry=Retry(max=2, interval=2))
         
-        if "success" in result:
-            fcjob=GivQueue.q.enqueue_in(timedelta(minutes=chargeTime),FCResume,revert)
-            f=open(".FCRunning", 'w')
-            f.write(str(fcjob.id))
-            f.close()
-            logger.info("Force Charge revert jobid is: "+fcjob.id)
-            temp['result']="Charge successfully forced "+str(chargeTime)+" minutes"
-        else:
-            temp['result']="Force charge failed"
+        if exists(".FCRunning"):    # If a forcecharge is already running, change time of revert job to new end time
+            logger.info("Force Charge already running, changing end time")
+            revert=getFCArgs()[0]   # set new revert object and cancel old revert job
+            logger.critical("new revert= "+ str(revert))
+        fcjob=GivQueue.q.enqueue_in(timedelta(minutes=chargeTime),FCResume,revert)
+        f=open(".FCRunning", 'w')
+        f.write(str(fcjob.id))
+        f.close()
+        logger.debug("Force Charge revert jobid is: "+fcjob.id)
+        temp['result']="Charge successfully forced "+str(chargeTime)+" minutes"
     except:
         e = sys.exc_info()
         temp['result']="Force charge failed: " + str(e)

@@ -33,7 +33,7 @@ class GiV_Settings:
     ha_device_prefix=""             #Required - This is the prefix used at the start of every Home Assistant device created
 
 # Rate Data
-    day_rate=0.155                  #Required - £ per kWh of your electricity day rate
+    day_rate=0.3934                  #Required - £ per kWh of your electricity day rate
     day_rate_start="00:30"          #Required - time your day rate starts "HH:MM"
     night_rate=0.055                #Required - £ per kWh of your electricity night rate
     night_rate_start="00:00"        #Required - time your night rate starts "HH:MM"

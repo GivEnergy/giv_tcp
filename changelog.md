@@ -5,6 +5,15 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/)
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
+## [2.1.3] - 2023-02-12
+
+BUG FIXES:
+- Fixed error on garbage invertor output
+
+NEW FEATURES:
+- Per Invertor MQTT Topic now available
+- Overlapping ForceCharge\Export now handled gracefully. You can extend a current Force action byt recalling it with a new duration and it will set a new Force end time
+
 ## [2.1.2] - 2023-02-09
 
 BREAKING CHANGES:

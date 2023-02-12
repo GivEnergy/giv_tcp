@@ -1,7 +1,7 @@
 version: "3.9"
 services:
   GivTCP:
-    image: britkat/giv_tcp-ma:2.1.2
+    image: britkat/giv_tcp-ma:2.1.3
     ports:
       - "1883:1883"                   # MQTT
       - "6345:6345"                   # REST (add increments for each invertor)
@@ -21,7 +21,9 @@ services:
       - CACHELOCATION=/config/GivTCP  # Location of cache data, this folder can be mapped to a persistence storage outside the container
       - TZ=Europe/London              # Set to your Timezone
 ## Optional
-      - MQTT_TOPIC=                   # Root topic to publish data to. If left blank it will default to GivEnergy/<invertor_serial_number>
+      - MQTT_TOPIC=                   # Root topic to publish data to for Invertor 1. If left blank it will default to GivEnergy/<invertor_serial_number>
+      - MQTT_TOPIC_2=                 # Root topic to publish data to for Invertor 2. If left blank it will default to GivEnergy/<invertor_serial_number>
+      - MQTT_TOPIC_3=                 # Root topic to publish data to for Invertor 3. If left blank it will default to GivEnergy/<invertor_serial_number>
       - MQTT_PORT=1883                # Port of your existing broker, leave as "1883" for internal broker
       - LOG_LEVEL=Info               # Level of logs to be reported: "Error", "Info" or "Debug"
       - PRINT_RAW=True                # If True this will publish all inverotr data unprocessed as well as standard data
@@ -36,12 +38,12 @@ services:
       - HADEVICEPREFIX=GivTCP         # Defines the preficfor all entities in Home Assistant
       - PYTHONPATH=/app
       - DYNAMICTARIFF=False           # When set to true DAYRATESTART and NIGHTRATESTART times are ignored and tariff rates are changed by a dedicated entity/function
-      - DAYRATE=0.155                 # Price in £/$ for your daytime electricity per kWh
-      - NIGHTRATE=0.055               # Price in £/$ for your night time electricity per kWh
+      - DAYRATE=0.395                 # Price in £/$ for your daytime electricity per kWh
+      - NIGHTRATE=0.155               # Price in £/$ for your night time electricity per kWh
       - EXPORTRATE=0.04               # Price in £/$ for your export electricity per kWh
-      - DAYRATESTART=04:30            # Time in HH:MM when your day time tariff kicks in
-      - NIGHTRATESTART=00:30          # Time in HH:MM when your night time tariff kicks in
-      - WEB_DASH=False                # Enable the wed dashboard
+      - DAYRATESTART=05:30            # Time in HH:MM when your day time\expensive tariff kicks in
+      - NIGHTRATESTART=23:30          # Time in HH:MM when your night time\cheap tariff kicks in
+      - WEB_DASH=False                # Enable the web dashboard
       - WEB_DASH_PORT=3000            # Port to serve the web dashboard on
       - SMARTTARGET=False             # Enables the PALM capability, requires the three ENV below to be set
       - GEAPI=                        # API Key for the GivEnergy Cloud
