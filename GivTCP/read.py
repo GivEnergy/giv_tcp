@@ -694,6 +694,12 @@ def pubFromPickle():  # Publish last cached Invertor Data
         multi_output['result'] = result
     return json.dumps(multi_output, indent=4, sort_keys=True, default=str)
 
+def getCache():     # Get latest cache data and return it (for use in REST)
+    multi_output={}
+    with open(GivLUT.regcache, 'rb') as inp:
+        regCacheStack = pickle.load(inp)
+        multi_output = regCacheStack[4]
+    return multi_output
 
 def self_run2():
     counter = 0

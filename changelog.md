@@ -9,6 +9,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 
 BUG FIXES:
 - Fixed error on garbage invertor output
+- Fixed Force Charge/Export power rate setting from 100(%) to maxInvertorRate
 
 NEW FEATURES:
 - Per Invertor MQTT Topic now available

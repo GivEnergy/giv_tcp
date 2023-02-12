@@ -151,7 +151,7 @@ def on_message(client, userdata, message):
             # Get the Job ID from the touchfile
             if exists(".tpdRunning"):
                 jobid= str(open(".tpdRunning","r").readline())
-                logger.critical("Retrieved jobID to cancel Temp Pause Discharge: "+ str(jobid))
+                logger.debug("Retrieved jobID to cancel Temp Pause Discharge: "+ str(jobid))
                 result=wr.cancelJob(jobid)
             else:
                 logger.error("Temp Pause Charge is not currently running")
@@ -163,7 +163,7 @@ def on_message(client, userdata, message):
             # Get the Job ID from the touchfile
             if exists(".tpcRunning"):
                 jobid= str(open(".tpcRunning","r").readline())
-                logger.critical("Retrieved jobID to cancel Temp Pause Charge: "+ str(jobid))
+                logger.debug("Retrieved jobID to cancel Temp Pause Charge: "+ str(jobid))
                 result=wr.cancelJob(jobid)
             else:
                 logger.error("Temp Pause Charge is not currently running")
@@ -175,7 +175,7 @@ def on_message(client, userdata, message):
             # Get the Job ID from the touchfile
             if exists(".FCRunning"):
                 jobid= str(open(".FCRunning","r").readline())
-                logger.critical("Retrieved jobID to cancel Force Charge: "+ str(jobid))
+                logger.debug("Retrieved jobID to cancel Force Charge: "+ str(jobid))
                 result=wr.cancelJob(jobid)
             else:
                 logger.error("Force Charge is not currently running")
@@ -187,7 +187,7 @@ def on_message(client, userdata, message):
             # Get the Job ID from the touchfile
             if exists(".FERunning"):
                 jobid= str(open(".FERunning","r").readline())
-                logger.critical("Retrieved jobID to cancel Force Export: "+ str(jobid))
+                logger.debug("Retrieved jobID to cancel Force Export: "+ str(jobid))
                 result=wr.cancelJob(jobid)
             else:
                 logger.error("Force Export is not currently running")

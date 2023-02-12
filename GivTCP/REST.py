@@ -32,6 +32,11 @@ def getAll():
 def rdData():
     return rd.pubFromPickle()
 
+#Publish last cached Invertor Data
+@giv_api.route('/getCache', methods=['GET'])
+def gtCache():
+    return rd.getCache()
+
 #Read from Invertor put in cache 
 @giv_api.route('/getData', methods=['GET'])
 def gtData():
@@ -117,7 +122,7 @@ def tmpPauseChrg():
     if payload == "Cancel":
         if exists(".tpcRunning"):
             jobid= str(open(".tpcRunning","r").readline())
-            logger.critical("Retrieved jobID to cancel Temp Pause Charge: "+ str(jobid))
+            logger.debug("Retrieved jobID to cancel Temp Pause Charge: "+ str(jobid))
             return wr.cancelJob(jobid)
         else:
             logger.error("Force Charge is not currently running")
@@ -131,7 +136,7 @@ def frceChrg():
     if payload == "Cancel":
         if exists(".FCRunning"):
             jobid= str(open(".FCRunning","r").readline())
-            logger.critical("Retrieved jobID to cancel Force Charge: "+ str(jobid))
+            logger.debug("Retrieved jobID to cancel Force Charge: "+ str(jobid))
             return wr.cancelJob(jobid)
         else:
             logger.error("Force Charge is not currently running")
@@ -144,7 +149,7 @@ def frceExprt():
     if payload == "Cancel":
         if exists(".FERunning"):
             jobid= str(open(".FERunning","r").readline())
-            logger.critical("Retrieved jobID to cancel Force Export: "+ str(jobid))
+            logger.debug("Retrieved jobID to cancel Force Export: "+ str(jobid))
             return wr.cancelJob(jobid)
         else:
             logger.error("Force Charge is not currently running")
@@ -164,7 +169,7 @@ def setDate():
 @giv_api.route('/switchRate', methods=['POST'])
 def swRates():
     payload = request.get_json(silent=True, force=True)
-    return wr.swtchRate(payload)
+    return wr.switchRate(payload)
 
 if __name__ == "__main__":
     giv_api.run()

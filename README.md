@@ -16,7 +16,9 @@ This will set up a self-running service which will publish data as required and 
 * Create a container with the relevant ENV variables below (mimicing the settings.py file)
 * Set the container to auto-restart to ensure reliability
 * Out of the box the default setup enables local MQTT broker and REST service (see below for details)
-* For Invertor autodiscovery to function your container must run on the "Host" network within docker (not Bridge). If it fails then you will need to manually add in INVERTOR_IP to the env variables
+* Configuration via ENV as outlined below
+
+Installation via the docker-compose.yml file is recommended if not running through the Home Assistant addon.
 
 ## Home Assistant Add-on
 This container can also be used as an add-on in Home Assistant.
@@ -26,38 +28,35 @@ The following configuration items are mandatory before the add-on can be started
 * Inverter IP address
 * MQTT username (can also be a Home Assistant user - used to authenticate againt your MQTT broker)
 * MQTT password
-All other configuration items can be left as-is unless you need to change them.
+All other configuration items can be left as-is unless you need to change them. See the ENV below for full details
 
-### Installation
-The simplist installation method for GivTCP is to use the built-in self-run option which will automatically connect to your invertor and grab the data.
+### Home Assistant Usage
+GivTCP will automatically create Home Assistant devices if "HA_AUTO_D" setting is True. This does require MQTT_OUTPUT to also be true and for GivTCP tp publish its data to the same MQTT broker as HA is listening to.
+This will populate HA with all devices and entities for control and monitoring. The key entities and their usage are outlined below:
 
-1. Install docker on a suitable machine which is "always on" in your network.
-2. Open up your docker interface (I prefer portainer https://www.portainer.io/)
-3. Navigate to "Stacks" and click "Add Stack"
-4. Copy the contents of the docker-compose.yml file in this repo into the web editor pane
-5. Scoll down to the "Advanced container settings" and select the Env tab
-6. Edit any settings you wish. Specifically the INVERTOR_IP
-   1. See the below table for other optional variables which you can also use.
-7. Deploy the container
+- One
+- Two
+- Three
 
-Alternatively you can run the container from the command line by downloading the docker-compose.yml file, modifying it and then run the following commmand in the same file location: "docker-compose up".
 
-Once this has been done the container should start-up and begin publishing data to its internal MQTT broker. You can test this by using an MQTT client, such as MQTT Explorer(http://mqtt-explorer.com/) and connect using the IP address of the machine you are running docker on.
-
-From here your invertor data is available through either MQTT or REST as described below. 
-
-### Docker Environment Variables
+## Settings - Environment Variables
 
 | ENV Name                | Example       |  Description                      |
 | ----------------------- | ------------- |  -------------------------------- |
-| NUMINVERTORS | 1 | Number of invertors on the network. Currently reserved for future development. Leave it at 1 |
-| INVERTOR_IP_1 |192.168.10.1 | Docker container can auto detect Invertors if running on your host network. If this fails then add the IP manually to this ENV |
-| NUMBATTERIES_1 | 1 | Number of battery units connected to the invertor |
+| NUMINVERTORS | 1 | Number of invertors on the network. Max invertors supprted is three |
+| INVERTOR_IP_1 |192.168.10.1 | IP Address of your first invertor  |
+| NUMBATTERIES_1 | 1 | Number of battery units connected to the first invertor |
+| INVERTOR_IP_2 |192.168.10.1 | Optional - IP Address of your second invertor |
+| NUMBATTERIES_2 | 1 | Optional - Number of battery units connected to the second invertor |
+| INVERTOR_IP_3 |192.168.10.1 | Optional - IP Address of your third invertor |
+| NUMBATTERIES_3 | 1 | Optional - Number of battery units connected to the third invertor |
 | MQTT_OUTPUT | True | Optional if set to True then MQTT_ADDRESS is required |
 | MQTT_ADDRESS | 127.0.0.1 | Optional (but required if OUTPUT is set to MQTT) |
 | MQTT_USERNAME | bob | Optional |
 | MQTT_PASSWORD | cat | Optional |
 | MQTT_TOPIC | GivEnergy/Data | Optional - default is Givenergy.<serial number>|
+| MQTT_TOPIC_2 | GivEnergy/Data | Optional - Setting for second Invertor if configured. default is Givenergy.<serial number>|
+| MQTT_TOPIC_2 | GivEnergy/Data | Optional - Setting for third Invertor if configured. default is Givenergy.<serial number>|
 | LOG_LEVEL | Error | Optional - you can choose Error, Info or Debug. Output will be sent to the debug file location if specified, otherwise it is sent to stdout|
 | DEBUG_FILE_LOCATION | /usr/pi/data | Optional  |
 | PRINT_RAW | False | Optional - If set to True the raw register values will be returned alongside the normal data |
@@ -104,8 +103,11 @@ Data Elements are:
 | Function      | Description                                                                        | REST URL  |
 |---------------|------------------------------------------------------------------------------------|-----------|
 | getData       | This connects to the invertor, collects all data and stores a cache for publishing | /getData  |
-| pubFromPickle | Retrieves data from the local cache and publishes data according to the settings   | /readData |
+| readData      | Retrieves data from the local cache and publishes data according to the settings   | /readData |
+| getCache      | Retrieves data from the local cache returns it without publishing to MQTT etc...   | /getCache |
 | RunAll        | Runs both getData and pubFromPickle to refresh data and then publish               | /runAll   |
+
+If you have enabled the "SELF_RUN" setting (recommended) then the container/addon will automatically call "RunALL" every "SELF_LOOPTIMER" seconds and you will not need to use the REST commands here. If you wish to take data from GivTCP and push to another system, then you should call "getCache" which will return the json data without pushing to MQTT or other defined publish settings.
 
 ## GivTCP Control
 | Function                | Description                                                                                                                                                                                               | REST URL                 | REST payload                                               | MQTT Topic              | MQTT Payload                                               |
@@ -126,6 +128,8 @@ Data Elements are:
 | setDateTime             | Sets   invertor time, format must be as define in payload                                                                                                                                                 | /setDateTime             | {"dateTime":"dd/mm/yyyy   hh:mm:ss"}                       | setDateTime             | "dd/mm/yyyy hh:mm:ss"                                      |
 
 ## Usage methods:
+GivTCP data and control is generally available through two core methods. If you are using the HA ADDON then these are generally transparent to th user, but are working and available in the background.
+
 ### MQTT
 By setting MQTT_OUTPUT = True The script will publish directly to the nominated MQTT broker (MQTT_ADDRESS) all the requested read data.
 
