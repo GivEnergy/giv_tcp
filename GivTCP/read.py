@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 # version 2022.08.01
 from threading import Lock
-#from givenergy_modbus.model.plant import Plant, Inverter
+from givenergy_modbus.model.plant import Plant, Inverter
 #from givenergy_modbus.model.battery import Battery
 from givenergy_modbus.model.inverter import Model
 import sys
@@ -36,7 +36,7 @@ def invertorData(fullrefresh):
         Inv = plant.inverter
         Bat = plant.batteries
     except:
-        return ("ERROR")
+        return ("ERROR:-"+str(sys.exc_info()))
     return Inv,Bat
 
 def getData(fullrefresh):  # Read from Invertor put in cache
@@ -60,8 +60,8 @@ def getData(fullrefresh):  # Read from Invertor put in cache
             time.sleep(0.5)
 
         # Check the ojects are not empty...
-        if plant.result=="ERROR":
-            raise Exception ("Garbage or failed Invertor Response")
+        if "ERROR" in plant.result:
+            raise Exception ("Garbage or failed Invertor Response: "+ str(plant.result))
 
         GEInv=plant.result[0]
         GEBat=plant.result[1]
@@ -84,16 +84,12 @@ def getData(fullrefresh):  # Read from Invertor put in cache
         # Determine Invertor Model and max charge rate first...
 
         genint=math.floor(int(GEInv.arm_firmware_version)/100)
-    
-        if genint == 8 or genint == 9:
-            invertorModel.generation=2
-        else:
-            invertorModel.generation=1
+
+        invertorModel.model=GEInv.inverter_model
+        invertorModel.generation=GEInv.inverter_generation
+        invertorModel.phase=GEInv.inverter_phases
 
         if GEInv.device_type_code[0] == "2":
-            invertorModel.model="Hybrid"
-            invertorModel.phase=1
-            test=GEInv.device_type_code[1:4]
             if GEInv.device_type_code[1:4] == "001":
                 invertorModel.power = 5000
             elif GEInv.device_type_code[1:4] == "002":
@@ -101,15 +97,11 @@ def getData(fullrefresh):  # Read from Invertor put in cache
             elif GEInv.device_type_code[1:4] == "003":
                 invertorModel.power = 3600
         elif GEInv.device_type_code[0] == "3":
-            invertorModel.model="AC"
-            invertorModel.phase=1
             if GEInv.device_type_code[1:4] == "001":
                 invertorModel.power = 3000
             elif GEInv.device_type_code[1:4] == "002":
                 invertorModel.power = 3600
         elif GEInv.device_type_code[0] == "4":
-            invertorModel.model="Hybrid"
-            invertorModel.phase=3
             if GEInv.device_type_code[1:4] == "001":
                 invertorModel.power = 6000
             elif GEInv.device_type_code[1:4] == "002":
@@ -119,20 +111,12 @@ def getData(fullrefresh):  # Read from Invertor put in cache
             elif GEInv.device_type_code[1:4] == "003":
                 invertorModel.power = 11000
         elif GEInv.device_type_code[0] == "5":
-            invertorModel.model="EMS"
-            invertorModel.phase=1
             invertorModel.power=0
         elif GEInv.device_type_code[0] == "6":
-            invertorModel.model="AC"
-            invertorModel.phase=3
             invertorModel.power=0
         elif GEInv.device_type_code[0] == "7":
-            invertorModel.model="Gateway"
-            invertorModel.phase=1
             invertorModel.power=0
         elif GEInv.device_type_code[0] == "8":
-            invertorModel.model="All in one"
-            invertorModel.phase=1
             invertorModel.power=0
 
         if invertorModel.generation == 1:
@@ -506,7 +490,7 @@ def getData(fullrefresh):  # Read from Invertor put in cache
         if GEInv.meter_type == 0:
             metertype = "EM418"
         invertor['Meter_Type'] = metertype
-        invertor['Invertor_Type'] = invertorModel.model + " Gen " + str(invertorModel.generation)
+        invertor['Invertor_Type'] = invertorModel.generation + " " + invertorModel.model
         invertor['Invertor_Max_Rate'] = invertorModel.batmaxrate
         invertor['Invertor_Temperature'] = GEInv.temp_inverter_heatsink
 
@@ -805,10 +789,12 @@ def ratecalcs(multi_output, multi_output_old):
     logger.debug("Night Start= "+datetime.datetime.strftime(night_start, '%c'))
     day_start = datetime.datetime.combine(datetime.datetime.now(GivLUT.timezone).date(),dayRateStart.time()).replace(tzinfo=GivLUT.timezone)
     logger.debug("Day Start= "+datetime.datetime.strftime(day_start, '%c'))
-    #check if pickle data exists:
+    # check if pickle data exists:
     if exists(GivLUT.ratedata):
         with open(GivLUT.ratedata, 'rb') as inp:
             rate_data = pickle.load(inp)
+    else:
+        logger.debug("No rate_data exists, so creating new baseline")
 
     import_energy = multi_output['Energy']['Total']['Import_Energy_Total_kWh']
     import_energy_old = multi_output_old['Energy']['Total']['Import_Energy_Total_kWh']
@@ -828,44 +814,53 @@ def ratecalcs(multi_output, multi_output_old):
             #Save current Total stats as baseline
             logger.info("Saving current energy stats at start of day rate tariff")
             rate_data['Day_Start_Energy_kWh'] = import_energy
-            open(".dayRate", 'w').close()
-            if exists(".nightRate"):
-                os.remove(".nightRate")
+            open(GivLUT.dayRate, 'w').close()
+            if exists(GivLUT.nightRate):
+                logger.debug(".nightRate exists so deleting it")
+                os.remove(GivLUT.nightRate)
 
         elif nightRateStart.hour == datetime.datetime.now(GivLUT.timezone).hour and nightRateStart.minute == datetime.datetime.now(GivLUT.timezone).minute:
             #Save current Total stats as baseline
             logger.info("Saving current energy stats at start of night rate tariff")
             rate_data['Night_Start_Energy_kWh'] = import_energy
-            open(".nightRate", 'w').close()
-            if exists(".dayRate"):
-                os.remove(".dayRate")  
+            open(GivLUT.nightRate, 'w').close()
+            if exists(GivLUT.dayRate):
+                logger.debug(".dayRate exists so deleting it")
+                os.remove(GivLUT.dayRate)  
     else:
         # Otherwise check to see if dynamic trigger has been recieved to change rate type
-        if exists(".nightRateRequest"):
-            os.remove(".nightRateRequest")
-            logger.info("Saving current energy stats at start of night rate tariff")
+        if exists(GivLUT.nightRateRequest) and not exists(GivLUT.nightRate):
+            os.remove(GivLUT.nightRateRequest)
+            logger.info("Saving current energy stats at start of night rate tariff (Dynamic)")
             rate_data['Night_Start_Energy_kWh'] = import_energy
-            open(".nightRate", 'w').close()
-            if exists(".dayRate"):
-                os.remove(".dayRate")
+            open(GivLUT.nightRate, 'w').close()
+            if exists(GivLUT.dayRate):
+                logger.debug(".dayRate exists so deleting it")
+                os.remove(GivLUT.dayRate)
 
-        elif exists(".dayRateRequest"):
-            os.remove(".dayRateRequest")
-            logger.info("Saving current energy stats at start of day rate tariff")
+        elif exists(GivLUT.dayRateRequest) and not exists(GivLUT.dayRate):
+            os.remove(GivLUT.dayRateRequest)
+            logger.info("Saving current energy stats at start of day rate tariff (Dynamic)")
             rate_data['Day_Start_Energy_kWh'] = import_energy
-            open(".dayRate", 'w').close()
-            if exists(".nightRate"):
-                os.remove(".nightRate")  
+            open(GivLUT.dayRate, 'w').close()
+            if exists(GivLUT.nightRate):
+                logger.debug(".nightRate exists so deleting it")
+                os.remove(GivLUT.nightRate)  
 
-    if not exists(".nightRate") and not exists(".dayRate"): #Default to Day if not previously set
-        open(".dayRate", 'w').close()
+    if not exists(GivLUT.nightRate) and not exists(GivLUT.dayRate): #Default to Day if not previously set
+        logger.info("No day/Night rate info so reverting to day")
+        open(GivLUT.dayRate, 'w').close()
 
-    if exists(".dayRate"):
+    if exists(GivLUT.dayRate):
         rate_data['Current_Rate_Type'] = "Day"
+        rate_data['Current_Rate'] = GiV_Settings.day_rate
+        logger.debug("Setting Rate to Day")
     else:
         rate_data['Current_Rate_Type'] = "Night"
+        rate_data['Current_Rate'] = GiV_Settings.night_rate
+        logger.debug("Setting Rate to Night")
 
-    #If no data then just save current import as base data
+#       If no data then just save current import as base data
     if not('Night_Start_Energy_kWh' in rate_data):
         logger.debug("No Night Start Energy so setting it to: "+str(import_energy))
         rate_data['Night_Start_Energy_kWh'] = import_energy
@@ -892,7 +887,7 @@ def ratecalcs(multi_output, multi_output_old):
         logger.debug("Imported more energy so calculating current tariff costs: "+str(import_energy_old)+" -> "+str(import_energy))
     
 #        if night_start <= datetime.datetime.now(GivLUT.timezone) < day_start:
-        if exists(".nightRate"):
+        if exists(GivLUT.nightRate):
             logger.debug("Current Tariff is Night, calculating stats...")
             rate_data['Night_Energy_kWh'] = import_energy-rate_data['Night_Start_Energy_kWh']
             logger.debug("Night_Energy_kWh=" +str(import_energy)+" - "+str(rate_data['Night_Start_Energy_kWh']))

@@ -545,13 +545,24 @@ def setBatteryMode(payload):
             time.sleep(1)
             client.set_shallow_charge(100)
         elif payload['mode']=="Timed Demand":
-            client.set_mode_storage()
-            time.sleep(1)
-            client.enable_discharge()
+            if exists(GivLUT.regcache):      # if there is a cache then grab it
+                with open(GivLUT.regcache, 'rb') as inp:
+                    regCacheStack= pickle.load(inp)
+                    slot1=(datetime.strptime(regCacheStack[4]["Timeslots"]["Discharge_start_time_slot_1"][:5],"%H:%M"),datetime.strptime(regCacheStack[4]["Timeslots"]["Discharge_end_time_slot_1"][:5],"%H:%M")) 
+                    client.set_mode_storage(slot1)
+                    # If the invertor is AC then turn Enable Discharge on
+                    if "AC" in str(regCacheStack[4]["Invertor_Details"]["Invertor_Type"]):
+                        client.enable_discharge()
+            else:
+                client.set_mode_storage()
         elif payload['mode']=="Timed Export":
-            client.set_mode_storage(export=True)
-            time.sleep(1)
-            client.enable_discharge()
+            if exists(GivLUT.regcache):      # if there is a cache then grab it
+                with open(GivLUT.regcache, 'rb') as inp:
+                    regCacheStack= pickle.load(inp)
+                    slot1=(datetime.strptime(regCacheStack[4]["Timeslots"]["Discharge_start_time_slot_1"][:5],"%H:%M"),datetime.strptime(regCacheStack[4]["Timeslots"]["Discharge_end_time_slot_1"][:5],"%H:%M")) 
+                    client.set_mode_storage(slot1,export=True)
+            else:
+                client.set_mode_storage(export=True)
         else:
             logger.error ("Invalid Mode requested: "+ payload['mode'])
             temp['result']="Invalid Mode requested"
@@ -578,7 +589,7 @@ def setDateTime(payload):
 
     except:
         e = sys.exc_info()
-        temp['result']="Setting Battery Mode failed: " + str(e) 
+        temp['result']="Setting Invertor DateTime failed: " + str(e) 
         logger.error (temp['result'])
     return json.dumps(temp)
 
@@ -589,16 +600,15 @@ def switchRate(payload):
         logger.error(temp['result'])
         return json.dumps(temp)
     try:
-        logger.info("Switching rate to: "+payload)
         if payload.lower()=="day":
-            open(".dayRateRequest", 'w').close()
+            open(GivLUT.dayRateRequest, 'w').close()
             logger.info ("Setting dayRate via external trigger")
         else:
-            open(".nightRateRequest", 'w').close()
+            open(GivLUT.nightRateRequest, 'w').close()
             logger.info ("Setting nightRate via external trigger")
     except:
         e = sys.exc_info()
-        temp['result']="Setting Battery Mode failed: " + str(e) 
+        temp['result']="Setting Rate failed: " + str(e) 
         logger.error (temp['result'])
     return json.dumps(temp)
 

@@ -3,6 +3,7 @@ class GiV_Settings:
 # Invertor Info
     invertorIP="1.2.3.4"        #Required - IP address of Invertor on local network
     numBatteries=1                  #Required - The number of batteries connected this invertor
+    self_run=True
     self_run_timer = 5              #Optional - Used to loop the "Self_run" function for regular reading
     default_path = "GivTCP"         #Required - Used to ensure python execution. Should be the base folder you run GivTCP from
     givtcp_instance=1               #Required - WHich instance of GivTCP is this? Usually 1 if you only have one invertor

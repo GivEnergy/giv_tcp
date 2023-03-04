@@ -11,7 +11,7 @@ class GE:
     enable = True
     # Modify url with system name in place of CExxxxxx and paste API key generated on GivEnergy web portal in place of xxxx
     url = "https://api.givenergy.cloud/v1/inverter/"+GiV_Settings.serial_number+"/"
-    key = str(os.getenv('GEAPI'))
+    key = str(GiV_Settings.GE_API)
     
     # Most users will not need to touch that many of the pre-configured settings below
     
@@ -46,19 +46,19 @@ class GE:
         1.3, 1, 1.5, 0.5, 0.3, 1, 1.5, 1, 0.6, 0.5, 0.5, 0.3]
 
     # Start time for Overnight Charge
-    start_time = os.getenv('NIGHTRATESTART')
+    start_time = GiV_Settings.day_rate_start
 
     # End time for Overnight Charge
-    end_time = os.getenv('DAYRATESTART')
+    end_time = GiV_Settings.night_rate_start
 
 
 # SolCast PV forecast generator. Up to two arrays are supported with a forecast for each
 class Solcast:
     enable = True
-    key = str(os.getenv('SOLCASTAPI'))
-    url_se = "https://api.solcast.com.au/rooftop_sites/"+str(os.getenv('SOLCASTSITEID'))
+    key = GiV_Settings.Solcast_API
+    url_se = "https://api.solcast.com.au/rooftop_sites/"+str(GiV_Settings.Solcast_SiteID)
     
     # For single array installation uncomment the line below and comment out the subsequent line
     #url_sw = ""
-    url_sw = "https://api.solcast.com.au/rooftop_sites/"+str(os.getenv('SOLCASTSITEID2'))
+    url_sw = "https://api.solcast.com.au/rooftop_sites/"+str(GiV_Settings.Solcast_SiteID2)
     cmd = "/forecasts?format=json"

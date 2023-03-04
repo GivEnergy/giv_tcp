@@ -139,7 +139,7 @@ class HAMQTT():
                 tempObj['device_class']="Power"
                 tempObj['state_class']="measurement"
             if GivLUT.entity_type[str(topic).split("/")[-1]].sensorClass=="temperature":
-                tempObj['unit_of_meas']="C"
+                tempObj['unit_of_meas']="°C"
                 tempObj['device_class']="Temperature"
             if GivLUT.entity_type[str(topic).split("/")[-1]].sensorClass=="voltage":
                 tempObj['unit_of_meas']="V"

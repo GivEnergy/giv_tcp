@@ -42,34 +42,49 @@ def set_config(formdata):
     
     inv=formdata["givtcp_instance"]
 #update the ENV
-    os.environ["INVERTOR_IP_"+str(inv)]= formdata["invertorIP"]
-    os.environ["NUMBATTERIES_"+str(inv)]= formdata["numBatteries"]
-    os.environ["PRINT_RAW"]= formdata["Print_Raw_Registers"]
-    os.environ["MQTT_OUTPUT"]= formdata["MQTT_Output"]
-    os.environ["MQTT_ADDRESS"]= formdata["MQTT_Address"]
-    os.environ["MQTT_USERNAME"]= formdata["MQTT_Username"]
-    os.environ["MQTT_PASSWORD"]= formdata["MQTT_Password"]
-    os.environ["MQTT_TOPIC"]= formdata["MQTT_Topic"]
-    os.environ["MQTT_PORT"]= formdata["MQTT_Port"]
-    os.environ["LOG_LEVEL"]= formdata["Log_Level"]
-    os.environ["INFLUX_OUTPUT"]= formdata["Influx_Output"]
-    os.environ["INFLUX_URL"]= formdata["influxURL"]
-    os.environ["INFLUX_TOKEN"]= formdata["influxToken"]
-    os.environ["INFLUX_BUCKET"]= formdata["influxBucket"]
-    os.environ["INFLUX_ORG"]= formdata["influxOrg"]
-    os.environ["HA_AUTO_D"]= formdata["HA_Auto_D"]
-    os.environ["SELF_RUN_LOOP_TIMER"]= formdata["self_run_timer"]
-    os.environ["PATH"]= formdata["default_path"]
-    os.environ["DAYRATE"]= formdata["day_rate"]
-    os.environ["NIGHTRATE"]= formdata["night_rate"]
-    os.environ["EXPORTRATE"]= formdata["export_rate"]
-    os.environ["DAYRATESTART"]= formdata["day_rate_start"]
-    os.environ["NIGHTRATESTART"]= formdata["night_rate_start"]
-    os.environ["HADEVICEPREFIX"]= formdata["ha_device_prefix"]
-    os.environ["DATASMOOTHER"]= formdata["data_smoother"]
-    os.environ["CACHELOCATION"]= formdata["cache_location"]
+    PATH= "/app/GivTCP_"+str(inv)
 
-#restart GivTCP (kill PID 1)
-    open('/app/.reboot', 'w').close()
+    with open(PATH+"/settings.py", 'w') as outp:
+        outp.write("class GiV_Settings:\n")
+        outp.write("    invertorIP=\""+formdata["invertorIP"]+"\"\n")
+        outp.write("    numBatteries=\""+formdata["numBatteries"]+"\"\n")
+        outp.write("    Print_Raw_Registers="+formdata["Print_Raw_Registers"]+"\n")
+        outp.write("    MQTT_Output="+formdata["MQTT_Output"]+"\n")
+        outp.write("    MQTT_Address=\""+formdata["MQTT_Address"]+"\"\n")
+        outp.write("    MQTT_Username=\""+formdata["MQTT_Username"]+"\"\n")
+        outp.write("    MQTT_Password=\""+formdata["MQTT_Password"]+"\"\n")
+        outp.write("    MQTT_Topic=\""+formdata["MQTT_Topic"]+"\"\n")
+        outp.write("    MQTT_Port="+formdata["MQTT_Port"]+"\n")
+        outp.write("    Log_Level=\""+formdata["Log_Level"]+"\"\n")
+        outp.write("    Influx_Output="+formdata["Influx_Output"]+"\n")
+        outp.write("    influxURL=\""+formdata["influxURL"]+"\"\n")
+        outp.write("    influxToken=\""+formdata["influxToken"]+"\"\n")
+        outp.write("    influxBucket=\""+formdata["influxBucket"]+"\"\n")
+        outp.write("    influxOrg=\""+formdata["influxOrg"]+"\"\n")
+        outp.write("    HA_Auto_D=\""+formdata["HA_Auto_D"]+"\"\n")
+        outp.write("    first_run= True\n")
+        outp.write("    self_run_timer="+formdata["self_run_timer"]+"\n")
+        outp.write("    givtcp_instance="+str(inv)+"\n")
+        outp.write("    default_path=\""+formdata["default_path"]+"\"\n")
+        outp.write("    dynamic_tariff="+formdata["Dynamic_Tariff"]+"\n")
+        outp.write("    day_rate="+formdata["day_rate"]+"\n")
+        outp.write("    night_rate="+formdata["night_rate"]+"\n")
+        outp.write("    export_rate="+formdata["export_rate"]+"\n")
+        outp.write("    day_rate_start=\""+formdata["day_rate_start"]+"\"\n")
+        outp.write("    night_rate_start=\""+formdata["night_rate_start"]+"\"\n")
+        outp.write("    ha_device_prefix=\""+formdata["ha_device_prefix"]+"\"\n")
+        outp.write("    data_smoother=\""+formdata["data_smoother"]+"\"\n")
+        if str(os.getenv("CACHELOCATION"))=="":
+            outp.write("    cache_location=\"/config/GivTCP\"\n")
+            outp.write("    Debug_File_Location=\"/config/GivTCP/log_inv_"+str(inv)+".log\"\n")
+        else:
+            outp.write("    cache_location=\""+formdata["cache_location"]+"\"\n")
+            outp.write("    Debug_File_Location=\""+formdata["cache_location"]+"/log_inv_"+str(inv)+".log\"\n")
+
+    import startup_2 as startup
+    # If its already running then stop current processes
+    startup.restart(inv)
+    # else startup
+    startup.startup(inv)
 #reload page (GET)
-    return "Settings Updated, rebooting GivTCP"
+    return "Settings Updated, reloading GivTCP"

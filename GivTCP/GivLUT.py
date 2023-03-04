@@ -69,6 +69,11 @@ class GivLUT:
     ppkwhtouch=".ppkwhtouch"
     schedule=".schedule"
     oldDataCount=GiV_Settings.cache_location+"/oldDataCount_"+str(GiV_Settings.givtcp_instance)+".pkl"
+    nightRate=GiV_Settings.cache_location+"/.nightRate"
+    dayRate=GiV_Settings.cache_location+"/.dayRate"
+    nightRateRequest=GiV_Settings.cache_location+"/.nightRateRequest"
+    dayRateRequest=GiV_Settings.cache_location+"/.dayRateRequest"
+
 
     if "TZ" in os.environ:
         timezone=zoneinfo.ZoneInfo(key=os.getenv("TZ"))
@@ -163,7 +168,7 @@ class GivLUT:
         "Battery_Capacity":GEType("sensor","","",0,250,False,True,False),
         "Battery_Design_Capacity":GEType("sensor","","",0,250,False,True,False),
         "Battery_Remaining_Capacity":GEType("sensor","","",0,250,True,True,False),
-        "Battery_Firmware_Version":GEType("sensor","","",500,5000,False,True,False),
+        "Battery_Firmware_Version":GEType("sensor","","",500,5000,False,False,False),
         "Battery_Cells":GEType("sensor","","",0,24,False,True,False),
         "Battery_Cycles":GEType("sensor","","",0,5000,False,True,False),
         "Battery_USB_present":GEType("binary_sensor","","",0,2,True,False,False),
