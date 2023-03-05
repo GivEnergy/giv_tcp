@@ -119,7 +119,7 @@ def getData(fullrefresh):  # Read from Invertor put in cache
         elif GEInv.device_type_code[0] == "8":
             invertorModel.power=0
 
-        if invertorModel.generation == 1:
+        if invertorModel.generation == 'Gen 1':
             if invertorModel.model == "AC":
                 maxInvChargeRate=3000
             else:
