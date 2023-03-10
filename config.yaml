@@ -1,6 +1,6 @@
 name:  "GivTCP"
 description:  "TCP Modbus connection to MQTT/JSON for Givenergy Battery/PV Invertors"
-version:  "2.1.6"
+version:  "2.1.7"
 image: britkat/giv_tcp-ma
 slug:  "givtcp"
 init:  true
@@ -56,7 +56,7 @@ options:
   MQTT_TOPIC_3: ""
   CACHELOCATION: "/config/GivTCP"
   DATASMOOTHER: "medium"
-  SMARTTARGET: True
+  SMARTTARGET: False
   GEAPI: ""
   SOLCASTAPI: ""
   SOLCASTSITEID: ""

@@ -26,7 +26,6 @@ sys.path.append(GiV_Settings.default_path)
 givLUT = GivLUT.entity_type
 logger = GivLUT.logger
 
-inverterLock = Lock()
 cacheLock = Lock()
 
 def invertorData(fullrefresh):
@@ -829,23 +828,25 @@ def ratecalcs(multi_output, multi_output_old):
                 os.remove(GivLUT.dayRate)  
     else:
         # Otherwise check to see if dynamic trigger has been recieved to change rate type
-        if exists(GivLUT.nightRateRequest) and not exists(GivLUT.nightRate):
+        if exists(GivLUT.nightRateRequest):
             os.remove(GivLUT.nightRateRequest)
-            logger.info("Saving current energy stats at start of night rate tariff (Dynamic)")
-            rate_data['Night_Start_Energy_kWh'] = import_energy
-            open(GivLUT.nightRate, 'w').close()
-            if exists(GivLUT.dayRate):
-                logger.debug(".dayRate exists so deleting it")
-                os.remove(GivLUT.dayRate)
+            if not exists(GivLUT.nightRate):
+                logger.info("Saving current energy stats at start of night rate tariff (Dynamic)")
+                rate_data['Night_Start_Energy_kWh'] = import_energy
+                open(GivLUT.nightRate, 'w').close()
+                if exists(GivLUT.dayRate):
+                    logger.debug(".dayRate exists so deleting it")
+                    os.remove(GivLUT.dayRate)
 
-        elif exists(GivLUT.dayRateRequest) and not exists(GivLUT.dayRate):
+        elif exists(GivLUT.dayRateRequest):
             os.remove(GivLUT.dayRateRequest)
-            logger.info("Saving current energy stats at start of day rate tariff (Dynamic)")
-            rate_data['Day_Start_Energy_kWh'] = import_energy
-            open(GivLUT.dayRate, 'w').close()
-            if exists(GivLUT.nightRate):
-                logger.debug(".nightRate exists so deleting it")
-                os.remove(GivLUT.nightRate)  
+            if not exists(GivLUT.dayRate):
+                logger.info("Saving current energy stats at start of day rate tariff (Dynamic)")
+                rate_data['Day_Start_Energy_kWh'] = import_energy
+                open(GivLUT.dayRate, 'w').close()
+                if exists(GivLUT.nightRate):
+                    logger.debug(".nightRate exists so deleting it")
+                    os.remove(GivLUT.nightRate)  
 
     if not exists(GivLUT.nightRate) and not exists(GivLUT.dayRate): #Default to Day if not previously set
         logger.info("No day/Night rate info so reverting to day")

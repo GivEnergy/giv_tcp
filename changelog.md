@@ -5,6 +5,10 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/)
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
+## [2.1.7] - 2023-03-10
+BUG FIXES:
+- Updated max mppt pv voltage to match datasheet (550v)
+
 ## [2.1.3] - 2023-03-04
 BUG FIXES:
 - modified givenergy-modbus library to calulate inverter type from registers, not from serial number
