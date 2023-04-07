@@ -60,5 +60,8 @@ class Solcast:
     
     # For single array installation uncomment the line below and comment out the subsequent line
     #url_sw = ""
-    url_sw = "https://api.solcast.com.au/rooftop_sites/"+str(GiV_Settings.Solcast_SiteID2)
+    if str(GiV_Settings.Solcast_SiteID2).strip() != "":
+        url_sw = "https://api.solcast.com.au/rooftop_sites/"+str(os.getenv('SOLCASTSITEID2'))
+    else:
+        url_sw = ""
     cmd = "/forecasts?format=json"
