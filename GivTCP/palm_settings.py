@@ -16,30 +16,37 @@ class GE:
     # Most users will not need to touch that many of the pre-configured settings below
     
     # Disable SoC calculation in the winter months as consumption >> generation
-    winter = ["01", "02", "03", "10", "11", "12"]
+    # winter = ["01", "02", "03", "10", "11", "12"]
+    winter = os.getenv('PALM_WINTER').split(',')
 
     # Throttle SoC calculation in shoulder months as consumption can vary with heating coming on, etc
-    shoulder = ["04", "05", "09"]
+    #shoulder = ["04", "05", "09"]
+    shoulder = os.getenv('PALM_SHOULDER').split(',')
 
     # Lower limit for state of charge (summertime)
-    min_soc_target = 25
+    #min_soc_target = 25
+    min_soc_target = int(os.getenv('PALM_MIN_SOC_TARGET'))
 
     # Lower limit for SoC limit in shoulder months
-    max_soc_target = 45
+    #max_soc_target = 45
+    max_soc_target = int(os.getenv('PALM_MAX_SOC_TARGET'))
 
     # Battery reserve for power cuts (minmum of 4%)
-    batt_reserve = 4
+    #batt_reserve = 4
+    batt_reserve = int(os.getenv('PALM_BATT_RESERVE'))
 
     # Nominal battery capacity
-    batt_capacity = 10.4
+    batt_capacity = 10.4 # NOT USED IN GivTCP
 
     # Usable proportion of battery (100% less reserve and any charge limit)
-    batt_utilisation = 0.85
+    #batt_utilisation = 0.85
+    batt_utilisation = float(os.getenv('PALM_BATT_UTILISATION'))
 
     batt_max_charge = batt_capacity * batt_utilisation
 
     # Inverter charge/discharge rate in kW
-    charge_rate = 2.5
+    #charge_rate = 2.5
+    charge_rate = float(os.getenv('PALM_CHARGE_RATE'))
 
     # Default data for base load. Overwritten by actual data if available
     base_load = [0.3, 2, 0.3, 0.3, 0.3, 0.5, 1.7, 1.8, 2.6, 1.5, 0.5, 2.5,\
@@ -64,4 +71,5 @@ class Solcast:
         url_sw = "https://api.solcast.com.au/rooftop_sites/"+str(os.getenv('SOLCASTSITEID2'))
     else:
         url_sw = ""
+
     cmd = "/forecasts?format=json"
