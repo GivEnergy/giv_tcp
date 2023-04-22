@@ -80,6 +80,14 @@ This will populate HA with all devices and entities for control and monitoring. 
 | SOLCASTAPI |  | Optional - API Key for Solcast to allow solar prediction for SMARTTARGET |
 | SOLCASTSITEID |  | Optional - Solcast ID for array 1, needed for SMARTTARGET |
 | SOLCASTSITEID2 |  | Optional - Solcast ID for array 2 (if it exists), needed for SMARTTARGET |
+| PALM_WINTER | 01,02,03,10,11,12 | Optional - (SMARTTARGET) Comma delimited list of the winter months (01=January, etc) |
+| PALM_SHOULDER | 04,05,09 | Comma delimited list of months in which consumption can vary so SOC calculation should be more cautious |
+| PALM_MIN_SOC_TARGET | 25 | Lower limit for state of charge (summertime) |
+| PALM_MAX_SOC_TARGET | 45 | Lower limit for SoC limit in shoulder months |
+| PALM_BATT_RESERVE | 4 | Battery reserve for power cuts (minmum of 4%) |
+| PALM_BATT_UTILISATION | 0.85 | Usable proportion of battery (100% less reserve and any charge limit) on a scale of 0-1 |
+| PALM_CHARGE_RATE | 2.5 | Inverter charge/discharge rate in kW |
+
 
 
 ## GivTCP Read data
