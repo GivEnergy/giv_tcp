@@ -36,7 +36,8 @@ class GE:
     batt_reserve = int(os.getenv('PALM_BATT_RESERVE'))
 
     # Nominal battery capacity
-    batt_capacity = 10.4 # NOT USED IN GivTCP
+    #batt_capacity = 10.4
+    batt_capacity = float(os.getenv('PALM_BATT_CAPACITY'))
 
     # Usable proportion of battery (100% less reserve and any charge limit)
     #batt_utilisation = 0.85
