@@ -87,6 +87,7 @@ This will populate HA with all devices and entities for control and monitoring. 
 | PALM_BATT_RESERVE | 4 | Optional - (SMARTTARGET) Battery reserve for power cuts (minmum of 4%) |
 | PALM_BATT_UTILISATION | 0.85 | Optional - (SMARTTARGET) Usable proportion of battery (100% less reserve and any charge limit) on a scale of 0-1 |
 | PALM_CHARGE_RATE | 2.5 | Optional - (SMARTTARGET) Inverter charge/discharge rate in kW |
+| PALM_BATT_CAPACITY | 10.4 | Optional - (SMARTTARGET) Nominal battery capacity in kWh |
 
 
 
