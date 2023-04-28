@@ -120,7 +120,7 @@ class HAMQTT():
             pass
 #set device specific elements here:
         if GivLUT.entity_type[str(topic).split("/")[-1]].devType=="sensor":
-            tempObj['unit_of_meas']=""
+            tempObj['unit_of_meas']="string"
             if GivLUT.entity_type[str(topic).split("/")[-1]].sensorClass=="energy":
                 tempObj['unit_of_meas']="kWh"
                 tempObj['device_class']="Energy"

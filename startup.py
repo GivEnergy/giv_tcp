@@ -95,7 +95,10 @@ for inv in range(1,int(os.getenv('NUMINVERTORS'))+1):
         outp.write("    export_rate="+str(os.getenv("EXPORTRATE","")+"\n"))
         outp.write("    day_rate_start=\""+str(os.getenv("DAYRATESTART","")+"\"\n"))
         outp.write("    night_rate_start=\""+str(os.getenv("NIGHTRATESTART","")+"\"\n"))
-        outp.write("    ha_device_prefix=\""+str(os.getenv("HADEVICEPREFIX","")+"\"\n"))
+        if inv==1:
+            outp.write("    ha_device_prefix=\""+str(os.getenv("HADEVICEPREFIX","")+"\"\n"))
+        else:
+            outp.write("    ha_device_prefix=\""+str(os.getenv("HADEVICEPREFIX_"+str(inv),"")+"\"\n"))
         outp.write("    data_smoother=\""+str(os.getenv("DATASMOOTHER","")+"\"\n"))
         if str(os.getenv("CACHELOCATION"))=="":
             outp.write("    cache_location=\"/config/GivTCP\"\n")
