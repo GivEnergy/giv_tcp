@@ -111,7 +111,8 @@ class HAMQTT():
             tempObj['uniq_id']=SN+"_"+GiVTCP_Device+"_"+str(topic).split("/")[-1]
             tempObj['device']['identifiers']=SN+"_"+GiVTCP_Device
             tempObj['device']['name']=GiV_Settings.ha_device_prefix+" "+SN+" "+str(GiVTCP_Device).replace("_"," ")
-            tempObj["name"]=GiV_Settings.ha_device_prefix+" "+SN+" "+str(topic).split("/")[-1].replace("_"," ") #Just final bit past the last "/"
+            #tempObj["name"]=GiV_Settings.ha_device_prefix+" "+SN+" "+str(topic).split("/")[-1].replace("_"," ") #Just final bit past the last "/"
+            tempObj["name"]=GiV_Settings.ha_device_prefix+" "+str(topic).split("/")[-1].replace("_"," ") #Just final bit past the last "/"
         tempObj['device']['manufacturer']="GivEnergy"
 
         try:
@@ -120,7 +121,7 @@ class HAMQTT():
             pass
 #set device specific elements here:
         if GivLUT.entity_type[str(topic).split("/")[-1]].devType=="sensor":
-            tempObj['unit_of_meas']="string"
+            tempObj['unit_of_meas']=""
             if GivLUT.entity_type[str(topic).split("/")[-1]].sensorClass=="energy":
                 tempObj['unit_of_meas']="kWh"
                 tempObj['device_class']="Energy"
@@ -129,11 +130,12 @@ class HAMQTT():
                 else:
                     tempObj['state_class']="total_increasing"
             if GivLUT.entity_type[str(topic).split("/")[-1]].sensorClass=="money":
-                if "ppkwh" in topic:
+                if "ppkwh" in str(topic).lower() or "rate" in str(topic).lower():
                    tempObj['unit_of_meas']="{GBP}/kWh"
                 else:
                     tempObj['unit_of_meas']="{GBP}"
                 tempObj['device_class']="Monetary"
+                tempObj['icon_template']= "mdi:currency-gbp"
             if GivLUT.entity_type[str(topic).split("/")[-1]].sensorClass=="power":
                 tempObj['unit_of_meas']="W"
                 tempObj['device_class']="Power"
@@ -175,10 +177,12 @@ class HAMQTT():
             if "charge" in str(topic).lower():
                 tempObj['unit_of_meas']="W"
                 tempObj['min']=0
-                tempObj['max']=HAMQTT.getinvbatmax()             # how to set as correct max??
+                tempObj['max']=HAMQTT.getinvbatmax()
                 tempObj['mode']="slider"
             else:
                 tempObj['unit_of_meas']="%"
+        elif GivLUT.entity_type[str(topic).split("/")[-1]].devType=="button":
+            tempObj['device_class']="restart"
         ## Convert this object to json string
         jsonOut=json.dumps(tempObj)
         return(jsonOut)

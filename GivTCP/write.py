@@ -161,6 +161,17 @@ def testcharge():
     payload['chargeRate']=2200
     setChargeRate(payload)
 
+def rebootinvertor():
+    temp={}
+    try:
+        logger.info("Rebooting Invertor...")
+        client.reboot_invertor()
+    except:
+        e = sys.exc_info()
+        temp['result']="Reboot Invertor failed: " + str(e)
+        logger.error (temp['result'])
+        #raise Exception
+
 def setChargeRate(payload):
     temp={}
     if type(payload) is not dict: payload=json.loads(payload)

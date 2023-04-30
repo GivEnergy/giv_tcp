@@ -3,6 +3,7 @@ from genericpath import exists
 import os, pickle, subprocess, logging,shutil, shlex, schedule
 from time import sleep
 import rq_dashboard
+import zoneinfo
 
 selfRun={}
 mqttClient={}
@@ -125,8 +126,16 @@ for inv in range(1,int(os.getenv('NUMINVERTORS'))+1):
         logger.critical("Removing old battery data cache")
         os.remove(str(os.getenv("CACHELOCATION"))+"/battery_"+str(inv)+".pkl")
     if exists(os.getenv("CACHELOCATION")+"/rateData_"+str(inv)+".pkl"):
-        logger.critical("Removing old rate data cache")
-        os.remove(str(os.getenv("CACHELOCATION"))+"/rateData_"+str(inv)+".pkl")
+        if "TZ" in os.environ:
+            timezone=zoneinfo.ZoneInfo(key=os.getenv("TZ"))
+        else:
+            timezone=zoneinfo.ZoneInfo(key="Europe/London")
+        modDay= datetime.fromtimestamp(os.path.getmtime(os.getenv("CACHELOCATION")+"/rateData_"+str(inv)+".pkl")).date()
+        if modDay<datetime.now(timezone).date():
+            logger.critical("Old rate data cache not updated today, so deleting")
+            os.remove(str(os.getenv("CACHELOCATION"))+"/rateData_"+str(inv)+".pkl")
+        else:
+            logger.critical("Rate Data exisits but is from today so keeping it")
 
 ########### Run the various processes needed #############
     os.chdir(PATH)

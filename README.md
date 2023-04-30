@@ -67,7 +67,9 @@ This will populate HA with all devices and entities for control and monitoring. 
 | INFLUX_BUCKET |giv_bucket| Optional - If using influx this is data bucket to use|
 | INFLUX_ORG |giv_tcp| Optional - If using influx this is the org that the token is assigned to | 
 | HA_AUTO_D | True | Optional - If set to true and MQTT is enabled, it will publish Home Assistant Auto Discovery messages, which will allow Home Assistant to automagically create all entitites and devices to allow read and control of your Invertor |
-| HADEVICEPREFIX | GivTCP | Optional - Prefix to be placed in front of every Home Assistent entity created by the above |
+| HADEVICEPREFIX | GivTCP | Optional - Prefix to be placed in front of every Home Assistent entity created by the above for invertor 1 |
+| HADEVICEPREFIX_2 | GivTCP | Optional - Prefix to be placed in front of every Home Assistent entity created by the above for invertor 2 |
+| HADEVICEPREFIX_3 | GivTCP | Optional - Prefix to be placed in front of every Home Assistent entity created by the above for invertor 3 |
 | DAYRATE | 0.155 | Optional - Cost of your daytime energy if using Economy 7 or Octopus Go |
 | NIGHTRATE | 0.155 | Optional - Cost of your night time energy if using Economy 7 or Octopus Go |
 | DYNAMICTARIFF | False | Optional - Allows an external automation to trigger switch to 'Day' or 'Night' tariff rates. If set to true it ignores the times set below|

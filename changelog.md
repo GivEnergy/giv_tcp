@@ -5,6 +5,19 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/)
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
+## [2.1.9] - 2023-04-30
+BUG FIXES:
+- Updated max mppt pv voltage to match datasheet (550v)
+- Remove Data Smoothing from SOC to prevent getting stuck on values below 4%
+- Set Rate data points to GBP/kWh
+- Dual site IDs now working for Solcast/PALM (Thanks to s0ckhamster)
+- 
+NEW Features:
+- HA Device Prefix per Invertor (use the "_X" suffix )
+- Retain rate Data across reboots/updates (if data is from today)
+- PALM settings now handled via ENV (Thanks to s0ckhamster)
+- Entity Friendly names no longer use Serial Number
+
 ## [2.1.7] - 2023-03-10
 BUG FIXES:
 - Updated max mppt pv voltage to match datasheet (550v)

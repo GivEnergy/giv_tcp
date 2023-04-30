@@ -429,6 +429,7 @@ def getData(fullrefresh):  # Read from Invertor put in cache
         controlmode['Enable_Discharge'] = discharge_enable
         controlmode['Battery_Charge_Rate'] = charge_rate
         controlmode['Battery_Discharge_Rate'] = discharge_rate
+        controlmode['Reboot_Invertor']=0
         if not isinstance(regCacheStack[4], int):
             if "Temp_Pause_Discharge" in regCacheStack[4]:
                 controlmode['Temp_Pause_Discharge'] = regCacheStack[4]["Control"]["Temp_Pause_Discharge"]

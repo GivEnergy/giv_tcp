@@ -27,6 +27,10 @@ def get_config_page():
 def getAll():
     return rd.runAll(True)
 
+@giv_api.route('/reboot', methods=['GET'])
+def reboot():
+    return wr.rebootinvertor()
+
 #Publish last cached Invertor Data
 @giv_api.route('/readData', methods=['GET'])
 def rdData():
