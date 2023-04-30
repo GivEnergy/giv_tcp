@@ -6,54 +6,51 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/)
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
 ## [2.1.9] - 2023-04-30
-BUG FIXES:
+### Fixed
 - Updated max mppt pv voltage to match datasheet (550v)
 - Remove Data Smoothing from SOC to prevent getting stuck on values below 4%
 - Set Rate data points to GBP/kWh
 - Dual site IDs now working for Solcast/PALM (Thanks to s0ckhamster)
-- 
-NEW Features:
+
+### Added
 - HA Device Prefix per Invertor (use the "_X" suffix )
 - Retain rate Data across reboots/updates (if data is from today)
 - PALM settings now handled via ENV (Thanks to s0ckhamster)
 - Entity Friendly names no longer use Serial Number
 
 ## [2.1.7] - 2023-03-10
-BUG FIXES:
+### Fixed
 - Updated max mppt pv voltage to match datasheet (550v)
 
 ## [2.1.3] - 2023-03-04
-BUG FIXES:
+### Fixed
 - modified givenergy-modbus library to calulate inverter type from registers, not from serial number
 - Fixed day/Night rate stability in dynamic mode
 
 ## [2.1.3] - 2023-02-12
-
-BUG FIXES:
+### Fixed
 - Fixed error on garbage invertor output
 - Fixed Force Charge/Export power rate setting from 100(%) to maxInvertorRate
 
-NEW FEATURES:
+### Added
 - Per Invertor MQTT Topic now available
 - Overlapping ForceCharge\Export now handled gracefully. You can extend a current Force action byt recalling it with a new duration and it will set a new Force end time
 
 ## [2.1.2] - 2023-02-09
 
-BREAKING CHANGES:
+### Added
 - Charge and Discharge rates now use absolute power values (2600W) not percentage (100%) to align with Cloud portal and to give correct operation
 - Prevented the REST readData call (pubFromPickle) from triggering another read 
  
-BUG FIXES:
+### Fixed
 - Worked on race conditions by using critical sections to replace file locks
 - Fix select entities error when setting to a non-float value
 
-UPDATES:
+### Added
 - Changed logging levels so that Info now just shows which operations are called and everything else is Debug
 - Force Charge, Force Export and Temp Pause controls now allow you to Cancel, reverting to preious settings immediately
 - Updated Battery Reserve and Cut-off entities to correctly reflect invertor behaviour
 - Updated Redis scheduling for control lockout
- 
-NEW FEATURES:
 - Added "None" as a smoothing option
 - Added invertor firmware to output
 - Allow dynamic Day/Night energy slots as well as fixed time (Go vs Intelligent) New "select" entity created to allow external automations to change rate (DYNAMICTARIFF ENV can be set to true to ignore day/night ENV and change rates based on the value of the Select entity)
