@@ -1,8 +1,9 @@
 name:  "GivTCP"
 description:  "TCP Modbus connection to MQTT/JSON for Givenergy Battery/PV Invertors"
-version:  "2.1.9"
+version:  "2.1.10"
 image: britkat/giv_tcp-ma
 slug:  "givtcp"
+homeassistant_api: true
 init:  true
 map:
   - config:rw
@@ -37,6 +38,8 @@ options:
   INFLUX_ORG: ""
   HA_AUTO_D: True
   HADEVICEPREFIX: "GivTCP"
+  HADEVICEPREFIX_2: "GivTCP2"
+  HADEVICEPREFIX_3: "GivTCP3"
   PYTHONPATH: "/app"
   DYNAMICTARIFF: False
   DAYRATE: "0.155"
@@ -90,6 +93,8 @@ schema:
   INFLUX_ORG: "str?"
   HA_AUTO_D: bool
   HADEVICEPREFIX: "str?"
+  HADEVICEPREFIX_2: "str?"
+  HADEVICEPREFIX_3: "str?"
   PYTHONPATH: str
   DYNAMICTARIFF: bool
   DAYRATE: "str?"

@@ -172,6 +172,18 @@ def rebootinvertor():
         logger.error (temp['result'])
         #raise Exception
 
+def setActivePowerRate(payload):
+    temp={}
+    if type(payload) is not dict: payload=json.loads(payload)
+    target=int(payload['activePowerRate'])
+    try:
+        logger.info("Setting Active Power Rate to "+str(target))
+        client.set_active_power_rate(target)
+    except:
+        e = sys.exc_info()
+        temp['result']="Setting Active Power Rate failed: " + str(e)
+        logger.error (temp['result'])
+
 def setChargeRate(payload):
     temp={}
     if type(payload) is not dict: payload=json.loads(payload)

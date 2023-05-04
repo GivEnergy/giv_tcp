@@ -150,6 +150,7 @@ class GivLUT:
         "Invertor_Serial_Number":GEType("sensor","","","","",False,False,False),
         "Invertor_Time":GEType("sensor","","","","",False,False,False),
         "Invertor_Max_Rate":GEType("sensor","","",0,maxBatPower,True,False,False),
+        "Active_Power_Rate":GEType("number","","setActivePowerRate",0,100,True,False,False),
         "Invertor_Firmware":GEType("sensor","","",0,10000,False,False,False),
         "Modbus_Version":GEType("sensor","","",1,10,False,True,False),
         "Meter_Type":GEType("sensor","","","","",False,False,False),

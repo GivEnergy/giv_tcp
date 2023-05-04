@@ -1,7 +1,7 @@
 version: "3.9"
 services:
   GivTCP:
-    image: britkat/giv_tcp-ma:2.1.9
+    image: britkat/giv_tcp-ma:2.1.10
     ports:
       - "1883:1883"                   # MQTT
       - "6345:6345"                   # REST (add increments for each invertor)
@@ -36,8 +36,8 @@ services:
       - INFLUX_ORG=                   # Influx instance Organisation
       - HA_AUTO_D=True                # If True (and if MQTT_OUTPUT is True) this will publish Home Assistant Auto Discovery messages to the broker
       - HADEVICEPREFIX=GivTCP         # Defines the preficfor all entities in Home Assistant for invertor 1
-      - HADEVICEPREFIX_2=GivTCP         # Defines the preficfor all entities in Home Assistant for invertor 2
-      - HADEVICEPREFIX_3=GivTCP         # Defines the preficfor all entities in Home Assistant for invertor 3
+      - HADEVICEPREFIX_2=GivTCP2      # Defines the preficfor all entities in Home Assistant for invertor 2
+      - HADEVICEPREFIX_3=GivTCP3      # Defines the preficfor all entities in Home Assistant for invertor 3
       - PYTHONPATH=/app
       - DYNAMICTARIFF=False           # When set to true DAYRATESTART and NIGHTRATESTART times are ignored and tariff rates are changed by a dedicated entity/function
       - DAYRATE=0.395                 # Price in £/$ for your daytime electricity per kWh

@@ -179,6 +179,11 @@ if str(os.getenv('SMARTTARGET'))=="True":
     logger.critical("Setting daily charge target forecast job to run at: "+starttime)
     schedule.every().day.at(starttime).do(palm_job)
 
+try:
+    logger.critical("SUPERVISOR_TOKEN is: "+ os.getenv("SUPERVISOR_TOKEN"))
+except:
+    logger.critical("SUPERVISOR TOKEN does not exist")
+
 # Loop round checking all processes are running
 while True:
     for inv in range(1,int(os.getenv('NUMINVERTORS'))+1):
