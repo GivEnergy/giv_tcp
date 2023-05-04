@@ -56,3 +56,28 @@ configuration:
     name: MQTT Broker Password
     description: >-
       The password associated with the user account used for authenticating against your MQTT Broker.
+  MQTT_TOPIC:
+    name: MQTT Topic (Inverter 1)
+    description: >-
+      (Optional) The MQTT topic used when publishing events for Inverter 1
+  MQTT_TOPIC_2:
+    name: MQTT Topic (Inverter 2)
+    description: >-
+      (Optional) The MQTT topic used when publishing events for Inverter 2
+  MQTT_TOPIC_3:
+    name: MQTT Topic (Inverter 3)
+    description: >-
+      (Optional) The MQTT topic used when publishing events for Inverter 3
+  MQTT_PORT:
+    name: MQTT Port
+    description: >-
+      The TCP port used to communicate with your MQTT Broker. Default is 1883, if you're using the default Home Assistant Mosquitto add-on settings then you won't need to change this. 
+  LOG_LEVEL:
+    name: Log Level
+    description: >-
+      How much detail do you want to be logged? Options are Error, Info or Debug, with Debug logging the most amount of data.
+      
+ 
+      
+      
+      
