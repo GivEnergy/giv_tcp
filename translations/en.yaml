@@ -15,7 +15,7 @@ configuration:
   HADEVICEPREFIX:
     name: Inverter 1 - Home Assistant Entity Prefix
     description: >-
-      A unique prefix applied to all of inverter 1's entities in Home Assistant.
+      A unique prefix applied to all of inverter 1`s entities in Home Assistant.
   INVERTOR_IP_2:
     name: Inverter 2 - IP Address
     description: >-
@@ -27,7 +27,7 @@ configuration:
   HADEVICEPREFIX_2:
     name: Inverter 2 - Home Assistant Entity Prefix
     description: >-
-      A unique prefix applied to all of inverter 2's entities in Home Assistant.
+      A unique prefix applied to all of inverter 2`s entities in Home Assistant.
   INVERTOR_IP_3:
     name: Inverter 3 - IP Address
     description: >-
@@ -39,19 +39,19 @@ configuration:
   HADEVICEPREFIX_3:
     name: Inverter 3 - Home Assistant Entity Prefix
     description: >-
-      A unique prefix applied to all of inverter 3's entities in Home Assistant.
+      A unique prefix applied to all of inverter 3`s entities in Home Assistant.
   MQTT_OUTPUT:
     name: Enable MQTT Output
     description: >-
-      Turn on to enable MQTT output. If you're not sure what this means, just turn it on.
+      Turn on to enable MQTT output. If you`re not sure what this means, just turn it on.
   MQTT_ADDRESS:
     name: MQTT Broker Hostname or IP Address
     description: >-
-      The hostname or IP address of your MQTT Broker. If you're using the Home Assistant Mosquitto Broker add-on, leave this as default.
+      The hostname or IP address of your MQTT Broker. If you`re using the Home Assistant Mosquitto Broker add-on, leave this as default.
   MQTT_USERNAME:
     name: MQTT Broker Username
     description: >-
-      The username for authenticating against your MQTT Broker. It's best practise to create a dedicated user for MQTT. If using Home Assistant, navigate to Settings, People, choose the Users tab at the top, and create a new user that is an Administrator, and can only log on from the local network.
+      The username for authenticating against your MQTT Broker. It`s best practise to create a dedicated user for MQTT. If using Home Assistant, navigate to Settings, People, choose the Users tab at the top, and create a new user that is an Administrator, and can only log on from the local network.
   MQTT_PASSWORD:
     name: MQTT Broker Password
     description: >-
@@ -71,7 +71,7 @@ configuration:
   MQTT_PORT:
     name: MQTT Port
     description: >-
-      The TCP port used to communicate with your MQTT Broker. Default is 1883, if you're using the default Home Assistant Mosquitto add-on settings then you won't need to change this.
+      The TCP port used to communicate with your MQTT Broker. Default is 1883, if you`re using the default Home Assistant Mosquitto add-on settings then you won`t need to change this.
   LOG_LEVEL:
     name: Log Level
     description: >-
@@ -91,11 +91,11 @@ configuration:
   HA_AUTO_D:
     name: Home Assistant Auto Discovery
     description: >-
-      If this option and MQTT are enabled, GivTCP will publish Home Assistant Auto Discovery messages, which will allow Home Assistant to automagically create all entitites and devices to allow read and control of your Invertor. Leave this option enabled if you're not sure what that means.
+      If this option and MQTT are enabled, GivTCP will publish Home Assistant Auto Discovery messages, which will allow Home Assistant to automagically create all entitites and devices to allow read and control of your Invertor. Leave this option enabled if you`re not sure what that means.
   DYNAMICTARIFF:
     name: Dynamic Tariff
     description: >-
-      Allows an external automation to trigger switch to 'Day' or 'Night' tariff rates. If enabled, GivTCP ignores the day and night rate start times set below
+      Allows an external automation to trigger switch to `Day` or `Night` tariff rates. If enabled, GivTCP ignores the day and night rate start times set below
   DAYRATE:
     name: Day Rate
     description: >-
@@ -103,7 +103,7 @@ configuration:
   NIGHTRATE:
     name: Night Rate
     description: >-
-      How much are you paying per kWh during the night (off-peak)? If you don't have an offpeak tariff (Octopus Go, Economy 7, etc) then just set this to the same as the day rate.
+      How much are you paying per kWh during the night (off-peak)? If you don`t have an offpeak tariff (Octopus Go, Economy 7, etc) then just set this to the same as the day rate.
   EXPORTRATE:
     name: Export Rate
     description: >-
@@ -143,7 +143,7 @@ configuration:
   HOSTIP:
     name: Home Assistant Local IP Address
     description: >-
-      The local IP address of your Home Assistant server. You might need to change this if you are using GivTCP's web dashboard and the automatic settings are not working.
+      The local IP address of your Home Assistant server. You might need to change this if you are using GivTCP`s web dashboard and the automatic settings are not working.
   TZ:
     name: Timezone
     description: >-
@@ -159,11 +159,11 @@ configuration:
   CACHELOCATION:
     name: Cache Location
     description: >-
-      Path within the add-on container for storing cached data. Default is /config/GivTCP which is mapped inside Home Assistant's config folder.
+      Path within the add-on container for storing cached data. Default is /config/GivTCP which is mapped inside Home Assistant`s config folder.
   DATASMOOTHER:
     name: Data Smoother
     description: >-
-      The amount of smoothing to apply to the data, to reduce the effect of sudden invalid jumps in values. Set to 'None' to disable. Values are not case-sensitive. Valid values are 'High', 'Medium', 'Low, 'None'
+      The amount of smoothing to apply to the data, to reduce the effect of sudden invalid jumps in values. Set to `None` to disable. Values are not case-sensitive. Valid values are `High`, `Medium`, `Low, `None`
   SMARTTARGET:
     name: Solar Forecast Automation
     description: >-
