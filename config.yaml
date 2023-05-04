@@ -75,14 +75,14 @@ options:
 schema: 
   NUMINVERTORS: int
   INVERTOR_IP_1:  str
-  HADEVICEPREFIX: "str?"
   NUMBATTERIES_1:  int
+  HADEVICEPREFIX: "str?"
   INVERTOR_IP_2:  "str?"
-  HADEVICEPREFIX_2: "str?"
   NUMBATTERIES_2:  "int?"
+  HADEVICEPREFIX_2: "str?"
   INVERTOR_IP_3:  "str?"
-  HADEVICEPREFIX_3: "str?"
   NUMBATTERIES_3:  "int?"
+  HADEVICEPREFIX_3: "str?"
   MQTT_OUTPUT: bool
   MQTT_ADDRESS: str
   MQTT_USERNAME: "str?"
