@@ -1,31 +1,30 @@
 ---
 configuration:
   NUMINVERTORS:
-    name: Number of Inverters
+    name: Quantity of Inverters
     description: >-
       How many GivEnergy inverters (max of 3) are you configuring?
   INVERTOR_IP_1:
     name: Inverter 1 - IP Address
     description: >-
-      IP Address of Inverter #1
+      IP Address of Inverter #1 on your local network
   NUMBATTERIES_1:
-    name: Inverter 1 - Number of connected batteries
+    name: Inverter 1 - How many connected batteries?
     description: >-
       How many batteries are directly connected to inverter 1?
   HADEVICEPREFIX:
     name: Inverter 1 - Home Assistant Entity Prefix
     description: >-
-      You can leave this as default. A unique prefix applied to all of inverter 1's entities in Home Assistant.
-  keyfile:
-    name: Private Key File
+      A unique prefix applied to all of inverter 1's entities in Home Assistant.
+  INVERTOR_IP_2:
+    name: Inverter 2 - IP Address
     description: >-
-      A file containing the private key. Place this file in the Home Assistant
-      `ssl` folder.
-  customize:
-    name: Customize
+      IP Address of Inverter #2 on your local network
+  NUMBATTERIES_2:
+    name: Inverter 2 - How many connected batteries
     description: >-
-      See the Documentation tab for more information about these options.
-  debug:
-    name: Debug
+      How many batteries are directly connected to inverter 2?
+  HADEVICEPREFIX_2:
+    name: Inverter 2 - Home Assistant Entity Prefix
     description: >-
-      If enabled will turn on debug logging for mosquitto and the auth plugin.
+      A unique prefix applied to all of inverter 2's entities in Home Assistant.
