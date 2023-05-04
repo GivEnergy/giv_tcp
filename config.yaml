@@ -53,10 +53,10 @@ options:
   INFLUX_BUCKET: ""
   INFLUX_ORG: ""
   PYTHONPATH: "/app"
-  HOSTIP: "homeassistant.local"
   TZ: "Europe/London"
   WEB_DASH: False
   WEB_DASH_PORT: 3000
+  HOSTIP: "homeassistant.local"
   CACHELOCATION: "/config/GivTCP"
   DATASMOOTHER: "medium"
   SMARTTARGET: False
@@ -108,10 +108,10 @@ schema:
   INFLUX_BUCKET: "str?"
   INFLUX_ORG: "str?"
   PYTHONPATH: str
-  HOSTIP: str
   TZ: str
   WEB_DASH: bool
   WEB_DASH_PORT: int
+  HOSTIP: str
   CACHELOCATION: "str?"
   DATASMOOTHER: "str?"
   SMARTTARGET: bool
