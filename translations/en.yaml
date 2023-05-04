@@ -28,3 +28,23 @@ configuration:
     name: Inverter 2 - Home Assistant Entity Prefix
     description: >-
       A unique prefix applied to all of inverter 2's entities in Home Assistant.
+  INVERTOR_IP_3:
+    name: Inverter 3 - IP Address
+    description: >-
+      IP Address of Inverter #3 on your local network
+  NUMBATTERIES_2:
+    name: Inverter 3 - How many connected batteries
+    description: >-
+      How many batteries are directly connected to inverter 3?
+  HADEVICEPREFIX_3:
+    name: Inverter 3 - Home Assistant Entity Prefix
+    description: >-
+      A unique prefix applied to all of inverter 3's entities in Home Assistant.
+  MQTT_OUTPUT:
+    name: Enable MQTT Output
+    description: >-
+      Turn on to enable MQTT output. If you're not sure what this means, just turn it on.
+  MQTT_ADDRESS:
+    name: MQTT Broker Hostname or IP Address
+    description: >-
+      The hostname or IP address of your MQTT Broker. If you're using the Home Assistant Mosquitto Broker add-on, leave this as default.
