@@ -76,8 +76,42 @@ configuration:
     name: Log Level
     description: >-
       How much detail do you want to be logged? Options are Error, Info or Debug, with Debug logging the most amount of data.
+  PRINT_RAW:
+    name: Output Raw Register Values
+    description: >-
+      (Optional) If enabled the raw register values will be returned alongside the normal data    
+  SELF_RUN:
+    name: Self Run
+    description: >-
+      When enabled, GivTCP will automatically connect to the inverter and obtain data in a continuous loop. You probably want to leave this enabled!
+  SELF_RUN_LOOP_TIMER:
+    name: Self Run Loop Timer
+    description: >-
+      How often should GivTCP connect to the inverter to check for data when self run is enabled? Default is 5, measured in seconds.
+  HA_AUTO_D:
+    name: Home Assistant Auto Discovery
+    description: >-
+      If this option and MQTT are enabled, GivTCP will publish Home Assistant Auto Discovery messages, which will allow Home Assistant to automagically create all entitites and devices to allow read and control of your Invertor. Leave this option enabled if you're not sure what that means.  
+  DYNAMICTARIFF:
+    name: Dynamic Tariff
+    description: >-
+      Allows an external automation to trigger switch to 'Day' or 'Night' tariff rates. If enabled, GivTCP ignores the day and night rate start times set below    
+  DAYRATE:
+    name: Day Rate
+    description: >-
+      How much are you paying per kWh during the day (peak)? 
+  NIGHTRATE:
+    name: Night Rate
+    description: >-
+      How much are you paying per kWh during the night (off-peak)? 
       
- 
+      
+      
+      
+      
+      
+      
+      
       
       
       
