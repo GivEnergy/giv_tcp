@@ -48,3 +48,11 @@ configuration:
     name: MQTT Broker Hostname or IP Address
     description: >-
       The hostname or IP address of your MQTT Broker. If you're using the Home Assistant Mosquitto Broker add-on, leave this as default.
+  MQTT_USERNAME:
+    name: MQTT Broker Username
+    description: >-
+      The username for authenticating against your MQTT Broker. It's best practise to create a dedicated user for MQTT. If using Home Assistant, navigate to Settings, People, choose the Users tab at the top, and create a new user that is an Administrator, and can only log on from the local network.
+  MQTT_PASSWORD:
+    name: MQTT Broker Password
+    description: >-
+      The password associated with the user account used for authenticating against your MQTT Broker.
