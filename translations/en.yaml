@@ -21,7 +21,7 @@ configuration:
     description: >-
       IP Address of Inverter #2 on your local network
   NUMBATTERIES_2:
-    name: Inverter 2 - How many connected batteries
+    name: Inverter 2 - How many connected batteries?
     description: >-
       How many batteries are directly connected to inverter 2?
   HADEVICEPREFIX_2:
@@ -33,7 +33,7 @@ configuration:
     description: >-
       IP Address of Inverter #3 on your local network
   NUMBATTERIES_2:
-    name: Inverter 3 - How many connected batteries
+    name: Inverter 3 - How many connected batteries?
     description: >-
       How many batteries are directly connected to inverter 3?
   HADEVICEPREFIX_3:
