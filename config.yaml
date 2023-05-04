@@ -75,43 +75,43 @@ options:
 schema: 
   NUMINVERTORS: int
   INVERTOR_IP_1:  str
+  HADEVICEPREFIX: "str?"
   NUMBATTERIES_1:  int
+  INVERTOR_IP_2:  "str?"
+  HADEVICEPREFIX_2: "str?"
+  NUMBATTERIES_2:  "int?"
+  INVERTOR_IP_3:  "str?"
+  HADEVICEPREFIX_3: "str?"
+  NUMBATTERIES_3:  "int?"
   MQTT_OUTPUT: bool
   MQTT_ADDRESS: str
   MQTT_USERNAME: "str?"
   MQTT_PASSWORD: "str?"
   MQTT_TOPIC: "str?"
+  MQTT_TOPIC_2: "str?"
+  MQTT_TOPIC_3: "str?"
   MQTT_PORT: int
   LOG_LEVEL: str
   PRINT_RAW: bool
   SELF_RUN: bool
   SELF_RUN_LOOP_TIMER: int
+  HA_AUTO_D: bool
+  DYNAMICTARIFF: bool
+  DAYRATE: "str?"
+  NIGHTRATE: "str?"
+  EXPORTRATE: "str?"
+  DAYRATESTART: "str?"
+  NIGHTRATESTART: "str?"
   INFLUX_OUTPUT: bool
   INFLUX_URL: "str?"
   INFLUX_TOKEN: "str?"
   INFLUX_BUCKET: "str?"
   INFLUX_ORG: "str?"
-  HA_AUTO_D: bool
-  HADEVICEPREFIX: "str?"
-  HADEVICEPREFIX_2: "str?"
-  HADEVICEPREFIX_3: "str?"
   PYTHONPATH: str
-  DYNAMICTARIFF: bool
-  DAYRATE: "str?"
-  NIGHTRATE: "str?"
-  EXPORTRATE: "str?"
   HOSTIP: str
-  DAYRATESTART: "str?"
-  NIGHTRATESTART: "str?"
   TZ: str
   WEB_DASH: bool
   WEB_DASH_PORT: int
-  INVERTOR_IP_2:  "str?"
-  NUMBATTERIES_2:  "int?"
-  MQTT_TOPIC_2: "str?"
-  INVERTOR_IP_3:  "str?"
-  NUMBATTERIES_3:  "int?"
-  MQTT_TOPIC_3: "str?"
   CACHELOCATION: "str?"
   DATASMOOTHER: "str?"
   SMARTTARGET: bool
