@@ -1,25 +1,21 @@
 ---
 configuration:
-  logins:
-    name: Logins
+  NUMINVERTORS:
+    name: Number of Inverters
     description: >-
-      A list of local users that will be created with username and password. You
-      don't need to do this because you can use Home Assistant users too,
-      without any configuration.
-  require_certificate:
-    name: Require Certificate
+      How many GivEnergy inverters (max of 3) are you configuring?
+  INVERTOR_IP_1:
+    name: Inverter 1 - IP Address
     description: >-
-      If enabled encryption will be enabled using the cert- and keyfile options.
-  certfile:
-    name: Certificate File
+      IP Address of Inverter #1
+  NUMBATTERIES_1:
+    name: Inverter 1 - Number of connected batteries
     description: >-
-      A file containing a certificate, including its chain. Place this file in
-      the Home Assistant `ssl` folder.
-  cafile:
-    name: CA File
+      How many batteries are directly connected to inverter 1?
+  HADEVICEPREFIX:
+    name: Inverter 1 - Home Assistant Entity Prefix
     description: >-
-      A file containing a root certificate. Place this file in the Home
-      Assistant `ssl` folder.
+      You can leave this as default. A unique prefix applied to all of inverter 1's entities in Home Assistant.
   keyfile:
     name: Private Key File
     description: >-
