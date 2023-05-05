@@ -412,8 +412,10 @@ def getData(fullrefresh):  # Read from Invertor put in cache
         elif GEInv.battery_power_mode == 1 and GEInv.enable_discharge == True and GEInv.battery_soc_reserve == 100:
             # Storage (demand) r27=1 r110=100 r59=1
             mode = "Timed Demand"
-        elif GEInv.battery_power_mode == 0 and GEInv.enable_discharge == True and GEInv.battery_soc_reserve == 100:
+        elif GEInv.battery_power_mode == 0 and GEInv.enable_discharge == True:
             # Storage (export) r27=0 r110=100 r59=1
+            # battery_soc_charge gets set to 100% intially but this stops discharge.  Users have to reduce it down
+            # so that it starts discharging
             mode = "Timed Export"
         else:
             mode = "Unknown"
