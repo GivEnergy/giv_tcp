@@ -95,7 +95,7 @@ class GivLUT:
     entity_type={
         "Last_Updated_Time":GEType("sensor","timestamp","","","",False,False,False),
         "Time_Since_Last_Update":GEType("sensor","","",0,10000,True,False,False),
-        "status":GEType("sensor","","","","",False,False,False),
+        "status":GEType("sensor","string","","","",False,False,False),
         "Export_Energy_Total_kWh":GEType("sensor","energy","",0,maxTotalEnergy,False,True,True),
         "Battery_Throughput_Total_kWh":GEType("sensor","energy","",0,maxTotalEnergy,False,True,True),
         "AC_Charge_Energy_Total_kWh":GEType("sensor","energy","",0,maxTotalEnergy,False,True,True),
