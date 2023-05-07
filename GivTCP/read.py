@@ -413,7 +413,7 @@ def getData(fullrefresh):  # Read from Invertor put in cache
             # Storage (demand) r27=1 r110=100 r59=1
             mode = "Timed Demand"
         elif GEInv.battery_power_mode == 0 and GEInv.enable_discharge == True:
-            # Storage (export) r27=0 r110=100 r59=1
+            # Storage (export) r27=0 r59=1
             mode = "Timed Export"
         else:
             mode = "Unknown"
