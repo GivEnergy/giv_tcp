@@ -11,6 +11,10 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 - Restructure config variables for ease of use (thanks @S0ckhamster)
 - Improved handling of Timed Demand mode handing (Thanks @Ed-M72)
 
+## [2.1.10] - 2023-04-30
+### Fixed
+- HADEVICEPREFIX config variables added for second and third invertors for HA Addon deployment
+
 ## [2.1.9] - 2023-04-30
 ### Fixed
 - Updated max mppt pv voltage to match datasheet (550v)
