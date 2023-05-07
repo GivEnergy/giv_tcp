@@ -130,8 +130,8 @@ def setBatteryReserve(payload):
         #client.set_battery_power_reserve(target)
         logger.info("Setting Battery Reserve to: "+str(target))
         client.set_shallow_charge(target)
+        logger.info("Setting Battery Reserve to: "+str(target)+" was a success")        
         temp['result']="Setting Battery Reserve was a success"
-
     except:
         e = sys.exc_info()
         temp['result']="Setting Battery Reserve failed: " + str(e)
@@ -317,23 +317,42 @@ def setDischargeSlot2(payload):
 def FEResume(revert):
     payload={}
     logger.info("Reverting Force Export settings:")
-    payload['dischargeRate']=revert["dischargeRate"]
-    result=setDischargeRate(payload)
-    logger.debug("DischargeRate result is:" + str(result))
-    time.sleep(1)
-    payload={}
-    payload['start']=revert["start_time"]
-    payload['finish']=revert["end_time"]
-    payload['dischargeToPercent']=revert["dischargeToPercent"]
-    result=setDischargeSlot1(payload)
-    logger.debug("Timeslot result is:" + str(result))
-    time.sleep(1)
-    payload={}
-    payload["mode"]=revert["mode"]
-    logger.debug("Reverting Mode")
-    result=setBatteryMode(payload)
-    logger.debug("Mode result is:" + str(result))
-    os.remove(".FERunning")
+    #Since this is triggered in the background put everying in separate try statements so that during an error at
+    #least some of the settings will revert sucesfully.
+    try:
+        payload['dischargeRate']=revert["dischargeRate"]
+        result=setDischargeRate(payload)
+        logger.debug("DischargeRate result is:" + str(result))
+        time.sleep(1)
+    except:
+       logger.debug("Error Reverting Discharge Rate")
+    try: 
+        payload={}
+        payload['start']=revert["start_time"]
+        payload['finish']=revert["end_time"]
+        result=setDischargeSlot1(payload)
+        logger.debug("Timeslot result is:" + str(result))
+        time.sleep(1)
+    except:
+        logger.debug("Error Reverting times")
+    try:
+        payload={}
+        payload['reservePercent']=revert["reservePercent"]
+        result=setBatteryReserve(payload)      
+    except:
+        logger.debug("Error Reverting Reserve Percent")             
+    try:     
+        payload={}
+        payload["mode"]=revert["mode"]
+        result=setBatteryMode(payload)
+        logger.debug("Mode result is:" + str(result))
+    except:
+        logger.debug("Error Reverting Mode")  
+    try:  
+        os.remove(".FERunning")
+    except:
+        logger.debug("Error removing file .FERunning")
+
 
 def forceExport(exportTime):
     temp={}
@@ -348,10 +367,18 @@ def forceExport(exportTime):
             revert["dischargeRate"]=regCacheStack[4]["Control"]["Battery_Discharge_Rate"]
             revert["start_time"]=regCacheStack[4]["Timeslots"]["Discharge_start_time_slot_1"][:5]
             revert["end_time"]=regCacheStack[4]["Timeslots"]["Discharge_end_time_slot_1"][:5]
-            revert["dischargeToPercent"]=regCacheStack[4]["Control"]["Battery_Power_Reserve"]
+            revert["reservePercent"]=regCacheStack[4]["Control"]["Battery_Power_Reserve"]
             revert["mode"]=regCacheStack[4]["Control"]["Mode"]
         maxDischargeRate=int(regCacheStack[4]["Invertor_Details"]["Invertor_Max_Rate"])
         
+        #In case somebody has set a high reserve value set the reserve rate to the default value to allow the battery to discharge
+        try:
+            payload={}
+            payload['reservePercent']=4
+            result=setBatteryReserve(payload)      
+        except:
+            logger.debug("Error Setting Reserve to 4%")
+
         #set slot2 to calc times and keep slot 1 as is
         slot1=(datetime.strptime(regCacheStack[4]["Timeslots"]["Discharge_start_time_slot_1"][:5],"%H:%M"),datetime.strptime(regCacheStack[4]["Timeslots"]["Discharge_end_time_slot_1"][:5],"%H:%M")) 
         slot2=(datetime.now(),datetime.now()+timedelta(minutes=exportTime))
