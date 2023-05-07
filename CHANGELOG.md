@@ -9,6 +9,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 ### Fixed
 - HA discovery message error fixed for string variables (Thanks @metalblue)
 - Restructure config variables for ease of use (thanks @S0ckhamster)
+- Improved handling of Timed Demand mode handing (Thanks @Ed-M72)
 
 ## [2.1.9] - 2023-04-30
 ### Fixed
