@@ -32,7 +32,7 @@ configuration:
     name: Inverter 3 - IP Address
     description: >-
       IP Address of Inverter #3 on your local network
-  NUMBATTERIES_2:
+  NUMBATTERIES_3:
     name: Inverter 3 - How many connected batteries?
     description: >-
       How many batteries are directly connected to inverter 3?
