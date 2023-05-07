@@ -195,7 +195,7 @@ configuration:
   PALM_CHARGE_RATE:
     name: Solar Forecast Automation - Battery Charge Rate
     description: >-
-      What is the maximum charge speed (in watts) of the inverter? Default is 2500W
+      What is the maximum charge speed (in kW) of the inverter? Default is 2.5kW
   PALM_BATT_CAPACITY:
     name: Solar Forecast Automation - Battery Capacity
     description: >-
