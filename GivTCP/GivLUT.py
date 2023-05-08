@@ -148,7 +148,7 @@ class GivLUT:
         "Battery_Type":GEType("sensor","string","","","",False,False,False),
         "Battery_Capacity_kWh":GEType("sensor","","",0,maxBatPower,True,True,False),
         "Invertor_Serial_Number":GEType("sensor","string","","","",False,False,False),
-        "Invertor_Time":GEType("sensor","","","","",False,False,False),
+        "Invertor_Time":GEType("sensor","datetime","","","",False,False,False),
         "Invertor_Max_Rate":GEType("sensor","","",0,maxBatPower,True,False,False),
         "Active_Power_Rate":GEType("number","","setActivePowerRate",0,100,True,False,False),
         "Invertor_Firmware":GEType("sensor","string","",0,10000,False,False,False),
