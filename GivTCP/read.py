@@ -449,6 +449,7 @@ def getData(fullrefresh):  # Read from Invertor put in cache
             logger.debug("Force_Export is Running")
             controlmode['Force_Export'] = "Running"
         else:
+            logger.debug("Force Export is not Running")
             controlmode['Force_Export'] = "Normal"
         if exists(".tpcRunning"):
             logger.debug("Temp Pause Charge is Running")
