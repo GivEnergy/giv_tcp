@@ -4,6 +4,7 @@ import os, pickle, subprocess, logging,shutil, shlex, schedule
 from time import sleep
 import rq_dashboard
 import zoneinfo
+import requests
 
 selfRun={}
 mqttClient={}
@@ -31,6 +32,18 @@ else:
 def palm_job():
     subprocess.Popen(["/usr/local/bin/python3","/app/GivTCP_1/palm_soc.py"])
     #subprocess.run('/app/GivTCP/palm_soc.py')
+
+    # test getting mqtt details direct from supervisor
+try:
+    logger.critical("SUPERVISOR_TOKEN is: "+ os.getenv("SUPERVISOR_TOKEN"))
+    access_token = os.getenv("SUPERVISOR_TOKEN")
+    url="http://supervisor/services/mqtt"
+    result = requests.get(url,
+          headers={'Content-Type':'application/json',
+                   'Authorization': 'Bearer {}'.format(access_token)})
+    logger.critical ("MQTT Details are: "+str(result))
+except:
+    logger.critical("SUPERVISOR TOKEN does not exist")
 
 if not os.path.exists(str(os.getenv("CACHELOCATION"))):
     os.makedirs(str(os.getenv("CACHELOCATION")))
@@ -178,11 +191,6 @@ if str(os.getenv('SMARTTARGET'))=="True":
     starttime= datetime.strftime(datetime.strptime(os.getenv('NIGHTRATESTART'),'%H:%M') - timedelta(hours=0, minutes=10),'%H:%M')
     logger.critical("Setting daily charge target forecast job to run at: "+starttime)
     schedule.every().day.at(starttime).do(palm_job)
-
-try:
-    logger.critical("SUPERVISOR_TOKEN is: "+ os.getenv("SUPERVISOR_TOKEN"))
-except:
-    logger.critical("SUPERVISOR TOKEN does not exist")
 
 # Loop round checking all processes are running
 while True:

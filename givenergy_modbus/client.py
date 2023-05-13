@@ -76,6 +76,7 @@ class GivEnergyClient:
 
     def reboot_invertor(self):
         """Reboot Invertor"""
+        ### WARNING - MODIFYING THIS FUNCTION TO USE ANY OTHER VALUE THAN 100 WILL BRICK YOUR INVERTOR... DON'T DO IT!
         self.modbus_client.write_holding_register(HoldingRegister.REBOOT_INVERTOR, 100)
 
     def disable_charge_target(self):

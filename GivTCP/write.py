@@ -183,6 +183,7 @@ def setActivePowerRate(payload):
         e = sys.exc_info()
         temp['result']="Setting Active Power Rate failed: " + str(e)
         logger.error (temp['result'])
+    return json.dumps(temp)
 
 def setChargeRate(payload):
     temp={}

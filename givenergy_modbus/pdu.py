@@ -350,6 +350,7 @@ class WriteHoldingRegisterRequest(WriteHoldingRegisterMeta, ModbusRequest, ABC):
         40,  # SYSTEM_TIME_SECOND
         44,  # DISCHARGE_SLOT_2_START
         45,  # DISCHARGE_SLOT_2_END
+        50,  # ACTIVE_POWER_RATE
         56,  # DISCHARGE_SLOT_1_START
         57,  # DISCHARGE_SLOT_1_END
         59,  # ENABLE_DISCHARGE
@@ -361,6 +362,7 @@ class WriteHoldingRegisterRequest(WriteHoldingRegisterMeta, ModbusRequest, ABC):
         112,  # BATTERY_DISCHARGE_LIMIT
         114,  # BATTERY_DISCHARGE_MIN_POWER_RESERVE
         116,  # TARGET_SOC
+        163,  # REBOOT_INVERTOR
     }
 
     def __init__(self, **kwargs):

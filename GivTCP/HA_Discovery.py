@@ -104,14 +104,15 @@ class HAMQTT():
         GiVTCP_Device=str(topic).split("/")[2]
         if "Battery_Details" in topic:
             tempObj["name"]=GiV_Settings.ha_device_prefix+" "+str(topic).split("/")[3].replace("_"," ")+" "+str(topic).split("/")[-1].replace("_"," ") #Just final bit past the last "/"
-            tempObj['uniq_id']=str(topic).split("/")[3]+"_"+GiVTCP_Device+"_"+str(topic).split("/")[-1]
+            tempObj['uniq_id']=GiV_Settings.ha_device_prefix+"_"+str(topic).split("/")[3]+"_"+str(topic).split("/")[-1]
+            tempObj['object_id']=GiV_Settings.ha_device_prefix+"_"+str(topic).split("/")[3]+"_"+str(topic).split("/")[-1]
             tempObj['device']['identifiers']=str(topic).split("/")[3]+"_"+GiVTCP_Device
             tempObj['device']['name']=GiV_Settings.ha_device_prefix+" "+str(topic).split("/")[3].replace("_"," ")+" "+GiVTCP_Device.replace("_"," ")
         else:
-            tempObj['uniq_id']=SN+"_"+GiVTCP_Device+"_"+str(topic).split("/")[-1]
+            tempObj['uniq_id']=GiV_Settings.ha_device_prefix+"_"+SN+"_"+str(topic).split("/")[-1]
+            tempObj['object_id']=GiV_Settings.ha_device_prefix+"_"+SN+"_"+str(topic).split("/")[-1]
             tempObj['device']['identifiers']=SN+"_"+GiVTCP_Device
             tempObj['device']['name']=GiV_Settings.ha_device_prefix+" "+SN+" "+str(GiVTCP_Device).replace("_"," ")
-            #tempObj["name"]=GiV_Settings.ha_device_prefix+" "+SN+" "+str(topic).split("/")[-1].replace("_"," ") #Just final bit past the last "/"
             tempObj["name"]=GiV_Settings.ha_device_prefix+" "+str(topic).split("/")[-1].replace("_"," ") #Just final bit past the last "/"
         tempObj['device']['manufacturer']="GivEnergy"
 
@@ -187,6 +188,7 @@ class HAMQTT():
                 tempObj['unit_of_meas']="%"
         elif GivLUT.entity_type[str(topic).split("/")[-1]].devType=="button":
             tempObj['device_class']="restart"
+            tempObj['payload_press']="restart"
         ## Convert this object to json string
         jsonOut=json.dumps(tempObj)
         return(jsonOut)
