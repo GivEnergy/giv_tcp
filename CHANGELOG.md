@@ -5,6 +5,12 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/)
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
+## [2.1.12] - 2023-05-13
+### Fixed
+- HA Invertor time device_class error removed
+- Fixed Timed Export & Revert Export Settings (Thanks @Ed-M72)
+- Timed Discharge and Force Export no longer set soc_reserve to 100 (which stopped discharge)
+
 ## [2.1.11] - 2023-05-07
 ### Fixed
 - HA discovery message error fixed for string variables (Thanks @metalblue)
@@ -24,7 +30,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 
 ### Added
 - HA Device Prefix per Invertor (use the "_X" suffix )
-- Retain rate Data across reboots/updates (if data is from today)
+- Retain Rate Data across reboots/updates (if data is from today)
 - PALM settings now handled via ENV (Thanks to s0ckhamster)
 - Entity Friendly names no longer use Serial Number
 

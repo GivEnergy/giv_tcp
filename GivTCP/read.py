@@ -409,7 +409,7 @@ def getData(fullrefresh):  # Read from Invertor put in cache
         elif GEInv.battery_power_mode == 1 and GEInv.enable_discharge == False and GEInv.battery_soc_reserve == 100:
             # Dynamic r27=1 r110=4 r59=0
             mode = "Eco (Paused)"
-        elif GEInv.battery_power_mode == 1 and GEInv.enable_discharge == True and GEInv.battery_soc_reserve == 100:
+        elif GEInv.battery_power_mode == 1 and GEInv.enable_discharge == True:
             # Storage (demand) r27=1 r110=100 r59=1
             mode = "Timed Demand"
         elif GEInv.battery_power_mode == 0 and GEInv.enable_discharge == True:
