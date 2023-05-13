@@ -155,6 +155,8 @@ class HAMQTT():
             if GivLUT.entity_type[str(topic).split("/")[-1]].sensorClass=="timestamp":
                 del(tempObj['unit_of_meas'])
                 tempObj['device_class']="timestamp"
+            if GivLUT.entity_type[str(topic).split("/")[-1]].sensorClass=="datetime":
+                del(tempObj['unit_of_meas'])
             if GivLUT.entity_type[str(topic).split("/")[-1]].sensorClass=="string":
                 del(tempObj['unit_of_meas'])
                 tempObj['device_class']="enum"
