@@ -4,10 +4,10 @@ version:  "2.1.13"
 image: britkat/giv_tcp-ma
 slug:  "givtcp"
 homeassistant_api: true
-#hassio_api: true
+hassio_api: true
 init:  true
-#services:
-#- mqtt: need
+services:
+  mqtt: need
 map:
   - config:rw
 boot:  auto
