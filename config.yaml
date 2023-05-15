@@ -6,8 +6,8 @@ slug:  "givtcp"
 homeassistant_api: true
 hassio_api: true
 init:  true
-#services:
-#  - mqtt: need
+services:
+  - mqtt:need
 map:
   - config:rw
 boot:  auto
