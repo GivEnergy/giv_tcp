@@ -1,2 +1,5 @@
 # Stop Mac Filesystem Filesystem
 .DS_Store
+
+# Stop Nova files from getting published
+.nova
