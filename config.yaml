@@ -7,7 +7,7 @@ homeassistant_api: true
 hassio_api: true
 init:  true
 services:
-  - mqtt:need
+  - "mqtt:want"
 map:
   - config:rw
 boot:  auto

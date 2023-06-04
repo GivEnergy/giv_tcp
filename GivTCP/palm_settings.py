@@ -1,4 +1,4 @@
-# version 2022.08.05
+# version 2023.05.30
 # palm_settings.py file for use with palm.py and palm_soc.py
 #
 # IMPORTANT
@@ -16,11 +16,11 @@ class GE:
     # Most users will not need to touch that many of the pre-configured settings below
     
     # Disable SoC calculation in the winter months as consumption >> generation
-    # winter = ["01", "02", "03", "10", "11", "12"]
+    # winter = ["01", "02", "11", "12"]
     winter = os.getenv('PALM_WINTER').split(',')
 
     # Throttle SoC calculation in shoulder months as consumption can vary with heating coming on, etc
-    #shoulder = ["04", "05", "09"]
+    # shoulder = ["03", "04", "09", "10"]
     shoulder = os.getenv('PALM_SHOULDER').split(',')
 
     # Lower limit for state of charge (summertime)
@@ -72,5 +72,7 @@ class Solcast:
         url_sw = "https://api.solcast.com.au/rooftop_sites/"+str(os.getenv('SOLCASTSITEID2'))
     else:
         url_sw = ""
+
+    weight = 35  # Confidence factor for forecast (range 10 to 90)
 
     cmd = "/forecasts?format=json"
