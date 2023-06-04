@@ -116,10 +116,9 @@ class HAMQTT():
             tempObj["name"]=GiV_Settings.ha_device_prefix+" "+str(topic).split("/")[-1].replace("_"," ") #Just final bit past the last "/"
         tempObj['device']['manufacturer']="GivEnergy"
 
-        try:
+        if not GivLUT.entity_type[str(topic).split("/")[-1]].controlFunc == "":
             tempObj['command_topic']=GiV_Settings.MQTT_Topic+"/control/"+SN+"/"+GivLUT.entity_type[str(topic).split("/")[-1]].controlFunc
-        except:
-            pass
+
 #set device specific elements here:
         if GivLUT.entity_type[str(topic).split("/")[-1]].devType=="sensor":
             tempObj['unit_of_meas']=""

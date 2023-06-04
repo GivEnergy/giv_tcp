@@ -71,10 +71,6 @@ def getData(fullrefresh):  # Read from Invertor put in cache
         temp['result'] = "Error collecting registers: " + str(e)
         return json.dumps(temp)
 
-    multi_output['Last_Updated_Time'] = datetime.datetime.utcnow().replace(tzinfo=datetime.timezone.utc).isoformat()
-    multi_output['status'] = "online"
-    multi_output['Time_Since_Last_Update'] = 0
-
     logger.debug("Invertor connection successful, registers retrieved")
 
     try:
@@ -589,6 +585,10 @@ def getData(fullrefresh):  # Read from Invertor put in cache
         # Add new data to the stack
         regCacheStack.pop(0)
         regCacheStack.append(multi_output)
+
+        multi_output['Last_Updated_Time'] = datetime.datetime.utcnow().replace(tzinfo=datetime.timezone.utc).isoformat()
+        multi_output['status'] = "online"
+        multi_output['Time_Since_Last_Update'] = 0  
 
         # Get lastupdate from pickle if it exists
         with cacheLock:

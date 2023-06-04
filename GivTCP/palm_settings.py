@@ -37,7 +37,7 @@ class GE:
 
     # Nominal battery capacity
     #batt_capacity = 10.4
-    batt_capacity = float(os.getenv('PALM_BATT_CAPACITY'))
+    batt_capacity = float(os.getenv('PALM_BATT_CAPACITY')) 
 
     # Usable proportion of battery (100% less reserve and any charge limit)
     #batt_utilisation = 0.85
