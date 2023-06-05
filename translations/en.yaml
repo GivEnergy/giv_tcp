@@ -192,14 +192,10 @@ configuration:
     name: Solar Forecast Automation - Battery Maximum Utilisation
     description: >-
       How much of the battery (on a scale of 0.0-1.0) is available to use?
-  PALM_CHARGE_RATE:
-    name: Solar Forecast Automation - Battery Charge Rate
+  PALM_WEIGHT:
+    name: Solar Forecast Automation - Solcate weighting factor
     description: >-
-      What is the maximum charge speed (in kW) of the inverter? Default is 2.5kW
-  PALM_BATT_CAPACITY:
-    name: Solar Forecast Automation - Battery Capacity
-    description: >-
-      What is the total capacity of the batteries in kWh?
+      What weighting should be applied to the Solcast forecast. Range 10-90. Default is 35
   GEAPI:
     name: Solar Forecast Automation - GivEnergy API Key
     description: >-

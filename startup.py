@@ -41,7 +41,7 @@ try:
     result = requests.get(url,
           headers={'Content-Type':'application/json',
                    'Authorization': 'Bearer {}'.format(access_token)})
-    logger.critical ("MQTT Details are: "+str(result))
+    logger.critical ("MQTT Details are: "+str(result.text))
 except:
     logger.critical("SUPERVISOR TOKEN does not exist")
 
