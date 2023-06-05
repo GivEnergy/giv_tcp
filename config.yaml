@@ -1,7 +1,7 @@
-name:  "GivTCP"
+name:  "GivTCP Dev Branch"
 description:  "TCP Modbus connection to MQTT/JSON for Givenergy Battery/PV Invertors"
 version:  "2.1.14"
-image: britkat/giv_tcp-ma
+image: britkat/giv_tcp-dev
 slug:  "givtcp"
 homeassistant_api: true
 hassio_api: true
