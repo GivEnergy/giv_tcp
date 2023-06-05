@@ -91,7 +91,7 @@ class GivLUT:
     maxCost=100
     maxRate=2
     Last_Updated_Time=GEType("sensor","timestamp","","","",False,False,False)
-    
+
     entity_type={
         "Last_Updated_Time":GEType("sensor","timestamp","","","",False,False,False),
         "Time_Since_Last_Update":GEType("sensor","","",0,10000,True,False,False),
@@ -258,3 +258,20 @@ class GivLUT:
     def getTime(timestamp):
         timeslot=timestamp.strftime("%H:%M")
         return (timeslot)
+    
+    def invPower(device_type_code):
+        invpowerrate={
+        2001:5000,
+        2002:4600,
+        2003:3600,
+        3001:3000,
+        3002:3600,
+        4001:6000,
+        4002:8000,
+        4003:10000,
+        4004:11000}
+        if device_type_code in invpowerrate:
+            power=invpowerrate[device_type_code]
+        else:
+            power=0
+        return power

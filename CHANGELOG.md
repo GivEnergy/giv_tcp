@@ -7,6 +7,14 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 
 ## [2.1.13] - 2023-05-13
 ### Fixed
+- REST /getCache endpoint fixed (incorrect json format)
+- Minor updates to README.md documentation
+- Refactored Force Export to use queing for more reliable revert
+### Added
+- Updated SmartTarget to PALM 0.8.5 (Thanks Stephen Lewis)
+
+## [2.1.13] - 2023-05-13
+### Fixed
 - Reverting entity naming to include serial number for compatability
 ### Added
 - Reboot Invertor function

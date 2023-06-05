@@ -7,7 +7,12 @@ import json
 from datetime import datetime, timedelta
 from typing import Tuple, List
 import requests
-import settings as stgs
+import palm_settings as stgs
+import write as wr
+from GivLUT import GivLUT, GivQueue
+from os.path import exists
+import pickle
+logger = GivLUT.logger
 
 # This software in any form is covered by the following Open Source BSD license:
 #
@@ -81,6 +86,14 @@ class GivEnergyObj:
         self.consumption: int = 0
         self.soc: int = 0
         self.base_load = stgs.GE.base_load
+
+        #Grab most recent data from invertor and store useful attributes
+        if exists(GivLUT.regcache):      # if there is a cache then grab it
+            with open(GivLUT.regcache, 'rb') as inp:
+                regCacheStack = pickle.load(inp)
+                multi_output_old = regCacheStack[4]
+            self.invmaxrate=float(multi_output_old['Invertor_Details']['Invertor_Max_Rate']) / 1000
+            self.batcap=float(multi_output_old['Invertor_Details']['Battery_Capacity_kWh'])
 
         #  Download commands which are alid for inverter
         url = stgs.GE.url + "settings"
@@ -262,15 +275,28 @@ class GivEnergyObj:
             else:
                 print("Error: write to invalid inverter register: ", register)
 
+
         if cmd == "set_soc":  # Sets target SoC to value
-            set_inverter_register("77", arg[0])
-            set_inverter_register("64", stgs.GE.start_time)
-            set_inverter_register("65", stgs.GE.end_time)
+            #set_inverter_register("77", arg[0])
+            #set_inverter_register("64", stgs.GE.start_time)
+            #set_inverter_register("65", stgs.GE.end_time)
+            result={}
+            logger.debug("Setting Charge Target to: "+ str(arg[0])+ "%")
+            payload={}
+            payload['chargeToPercent']= arg[0]
+            result=GivQueue.q.enqueue(wr.setChargeTarget,payload)
+            logger.debug(result)
 
         elif cmd == "set_soc_winter":  # Restore default overnight charge params
-            set_inverter_register("77", "100")
-            set_inverter_register("64", stgs.GE.start_time)
-            set_inverter_register("65", stgs.GE.end_time_winter)
+            #set_inverter_register("77", "100")
+            #set_inverter_register("64", stgs.GE.start_time)
+            #set_inverter_register("65", stgs.GE.end_time_winter)
+            result={}
+            logger.debug("Setting Charge Target to: "+ str(100)+ "%")
+            payload={}
+            payload['chargeToPercent']= 100
+            result=GivQueue.q.enqueue(wr.setChargeTarget,payload)
+            logger.debug(result)
 
         elif cmd == "charge_now":
             set_inverter_register("77", "100")
@@ -278,12 +304,34 @@ class GivEnergyObj:
             set_inverter_register("65", "23:59")
 
         elif cmd == "pause":
-            set_inverter_register("72", "0")
-            set_inverter_register("73", "0")
+            #set_inverter_register("72", "0")
+            #set_inverter_register("73", "0")
+            result={}
+            logger.debug("Setting Charge rate to: 0W")
+            payload={}
+            payload['chargeRate']= 0
+            result=GivQueue.q.enqueue(wr.setChargeRate,payload)
+            logger.debug(result)
+            result={}
+            logger.debug("Setting Discharge rate to: 0W")
+            payload={}
+            payload['dischargeRate']= 0
+            result=GivQueue.q.enqueue(wr.setDischargeRate,payload)
+            logger.debug(result)
 
         elif cmd == "resume":
-            set_inverter_register("72", "3000")
-            set_inverter_register("73", "3000")
+            result={}
+            logger.debug("Setting Charge rate to: "+str(self.invmaxrate)+"W")
+            payload={}
+            payload['chargeRate']= self.invmaxrate
+            result=GivQueue.q.enqueue(wr.setChargeRate,payload)
+            logger.debug(result)
+            result={}
+            logger.debug("Setting Discharge rate to: "+str(self.invmaxrate)+"W")
+            payload={}
+            payload['dischargeRate']= self.invmaxrate
+            result=GivQueue.q.enqueue(wr.setDischargeRate,payload)
+            logger.debug(result)
 
         else:
             print("error: unknown inverter command:", cmd)
@@ -291,7 +339,9 @@ class GivEnergyObj:
     def compute_tgt_soc(self, gen_fcast, weight: int, commit: bool):
         """Compute tomorrow's overnight SoC target"""
 
-        batt_max_charge: float = stgs.GE.batt_max_charge
+        #batt_max_charge: float = stgs.GE.batt_max_charge
+            
+        batt_max_charge: float = self.batcap * stgs.GE.batt_utilisation
 
         weight = min(max(weight,10),90)  # Range check
         wgt_10 = max(0, 50 - weight)  # Triangular approximation to Solcast normal distrbution
@@ -332,8 +382,8 @@ class GivEnergyObj:
                     gen_fcast.pv_est90_hrly[index] * wgt_90) / (wgt_10 + wgt_50 + wgt_90)
                 if index > 0:
                     batt_charge[index] = (batt_charge[index - 1] +
-                        max(-1 * stgs.GE.charge_rate,
-                            min(stgs.GE.charge_rate, est_gen - total_load)))
+                        max(-1 * self.invmaxrate,
+                            min(self.invmaxrate, est_gen - total_load)))
                     # Capture min charge on lowest down-slope before charge exceeds 100%
                     if (batt_charge[index] <= batt_charge[index - 1] and
                         max_charge < batt_max_charge):
@@ -423,11 +473,14 @@ class SolcastObj:
             print("Error; Problem reading Solcast data, using previous values (if any)")
             return
 
-        if stgs.Solcast.url_sw != "":  # Two arrays are specified
+        if stgs.Solcast.url_sw:  # Two arrays are specified
+            logger.info("url_sw = '"+str(stgs.Solcast.url_sw)+"'")
             result, solcast_data_2 = get_solcast(stgs.Solcast.url_sw)
             if not result:
                 print("Error; Problem reading Solcast data, using previous values (if any)")
                 return
+        else:
+            logger.info("No second array")
 
         print("Successful Solcast download.")
 
@@ -436,7 +489,7 @@ class SolcastObj:
         pv_est50 = [0] * 10080
         pv_est90 = [0] * 10080
 
-        if stgs.Solcast.url_sw != "":  # Two arrays are specified
+        if stgs.Solcast.url_sw:  # Two arrays are specified
             forecast_lines = min(len(solcast_data_1['forecasts']), len(solcast_data_2['forecasts']))
         else:
             forecast_lines = len(solcast_data_1['forecasts'])
@@ -448,7 +501,7 @@ class SolcastObj:
         index = solcast_offset
         cntr = 0
         while index < forecast_lines * interval:
-            if stgs.Solcast.url_sw != "":  # Two arrays are specified
+            if stgs.Solcast.url_sw:  # Two arrays are specified
                 pv_est10[index] = (int(solcast_data_1['forecasts'][cntr]['pv_estimate10'] * 1000) +
                     int(solcast_data_2['forecasts'][cntr]['pv_estimate10'] * 1000))
                 pv_est50[index] = (int(solcast_data_1['forecasts'][cntr]['pv_estimate'] * 1000) +
@@ -517,99 +570,36 @@ def time_to_hrs(time_in: int) -> str:
 
 if __name__ == '__main__':
 
-    LOOP_COUNTER_VAR: int = 0
-
-    print("PALM... PV Automated Load Manager Version:", PALM_VERSION)
-    print("Command line options (only one can be used):")
-    print("-t | --test  | test mode (12x speed, no external server writes)")
-    print("-d | --debug | debug mode, extra verbose")
-
-    # Parse any command-line arguments
+    LOOP_COUNTER_VAR = 0
     TEST_MODE: bool = False
     DEBUG_MODE: bool = False
-    if len(sys.argv) > 1:
-        if str(sys.argv[1]) in ["-t", "--test"]:
-            TEST_MODE = True
-            DEBUG_MODE = True
-            print("Info; Running in test mode... 12x speed, no external server writes")
-        elif str(sys.argv[1]) in ["-d", "--debug"]:
-            DEBUG_MODE = True
-            print("Info; Running in debug mode, extra verbose")
+    LONG_TIME_NOW_VAR: str = time.strftime("%d-%m-%Y %H:%M:%S", time.localtime())
+    MONTH_VAR: str = LONG_TIME_NOW_VAR[3:5]
+    TIME_NOW_VAR: str = LONG_TIME_NOW_VAR[11:]
+    TIME_NOW_MINS_VAR: int = time_to_mins(TIME_NOW_VAR)
 
-    print("Info; Entering main loop...")
-    sys.stdout.flush()
+    logger.info("PALM... PV Automated Load Manager Version:"+ str(PALM_VERSION))
+    # GivEnergy power object initialisation
+    ge: GivEnergyObj = GivEnergyObj()
+    ge.get_load_hist()
+    # Solcast PV prediction object initialisation
+    solcast: SolcastObj = SolcastObj()
+    solcast.update()
+    try:
+        ge.get_load_hist()
+        logger.debug("Info; 10% forecast...")
+        ge.compute_tgt_soc(solcast, 10, False)
+        logger.debug("Info; 50% forecast...")
+        ge.compute_tgt_soc(solcast, 50, False)
+        logger.debug("Info; 90% forecast...")
+        ge.compute_tgt_soc(solcast, 90, False)
 
-    while True:  # Main Loop
-        # Current time definitions
-        LONG_TIME_NOW_VAR: str = time.strftime("%d-%m-%Y %H:%M:%S", time.localtime())
-        MONTH_VAR: str = LONG_TIME_NOW_VAR[3:5]
-        TIME_NOW_VAR: str = LONG_TIME_NOW_VAR[11:]
-        TIME_NOW_MINS_VAR: int = time_to_mins(TIME_NOW_VAR)
+    except Exception:
+        print("Warning; unable to set SoC")
 
-        if LOOP_COUNTER_VAR == 0:  # Initialise
-            # GivEnergy power object initialisation
-            ge: GivEnergyObj = GivEnergyObj()
-            ge.get_load_hist()
-            # Solcast PV prediction object initialisation
-            solcast: SolcastObj = SolcastObj()
-            solcast.update()
+    # Write final SoC target to GivEnergy register
+    # Change weighting in command according to desired risk/reward profile
+    logger.info("PALM: 35% weighted forecast...")
+    ge.compute_tgt_soc(solcast, stgs.Solcast.weight, True)
 
-        else:
-            start_time_mins = time_to_mins(stgs.GE.start_time)
-            if start_time_mins < 6:  # Correct for off-peak start = 00:00
-                start_time_mins = start_time_mins + 1440
-
-            # 5 minutes before off-peak start for next day's forecast
-            if (TEST_MODE and LOOP_COUNTER_VAR == 0) or \
-                TIME_NOW_MINS_VAR == start_time - 5:
-                try:
-                    solcast.update()
-                except Exception:
-                    print("Warning; Solcast download failure")
-
-            # 2 minutes before off-peak start for setting overnight battery charging target
-            if (TEST_MODE and LOOP_COUNTER_VAR == 2) or \
-                TIME_NOW_MINS_VAR == start_time - 2:
-                # compute & set SoC target
-                try:
-                    ge.get_load_hist()
-                    print("Info; 10% forecast...")
-                    ge.compute_tgt_soc(solcast, 10, False)
-                    print("Info; 50% forecast...")
-                    ge.compute_tgt_soc(solcast, 50, False)
-                    print("Info; 90% forecast...")
-                    ge.compute_tgt_soc(solcast, 90, False)
-
-                except Exception:
-                    print("Warning; unable to set SoC")
-
-                # Write final SoC target to GivEnergy register
-                # Change weighting in command according to desired risk/reward profile
-                print("Info; 35% weighted forecast...")
-                ge.compute_tgt_soc(solcast, 35, True)
-
-            # Afternoon battery boost in winter months to load shift from peak period
-            if MONTH_VAR in stgs.GE.winter and \
-                time_to_mins(stgs.GE.boost_start) < time_to_mins(stgs.GE.boost_finish):
-                if TIME_NOW_MINS_VAR == time_to_mins(stgs.GE.boost_start):
-                    print("info; Enabling afternoon battery boost")
-                    ge.set_mode("charge_now", "")
-                if TIME_NOW_MINS_VAR == time_to_mins(stgs.GE.boost_finish):
-                    ge.set_mode("set_winter_charge", "")
-
-        LOOP_COUNTER_VAR += 1
-
-        if TIME_NOW_MINS_VAR == 0:  # Reset frame counter every 24 hours
-            ge.pv_energy = 0  # Avoids carry-over issues with PVOutput
-            ge.grid_energy = 0
-            LOOP_COUNTER_VAR = 1
-
-        if TEST_MODE:  # Wait 5 seconds
-            time.sleep(5)
-        else:  # Sync to minute rollover on system clock
-            CURRENT_MINUTE = int(time.strftime("%M", time.localtime()))
-            while int(time.strftime("%M", time.localtime())) == CURRENT_MINUTE:
-                time.sleep(10)
-
-        sys.stdout.flush()
 # End of main

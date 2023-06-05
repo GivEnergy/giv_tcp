@@ -37,17 +37,17 @@ class GE:
 
     # Nominal battery capacity
     #batt_capacity = 10.4
-    batt_capacity = float(os.getenv('PALM_BATT_CAPACITY')) 
+    #batt_capacity = float(os.getenv('PALM_BATT_CAPACITY')) 
 
     # Usable proportion of battery (100% less reserve and any charge limit)
     #batt_utilisation = 0.85
     batt_utilisation = float(os.getenv('PALM_BATT_UTILISATION'))
 
-    batt_max_charge = batt_capacity * batt_utilisation
+    #batt_max_charge = batt_capacity * batt_utilisation
 
     # Inverter charge/discharge rate in kW
     #charge_rate = 2.5
-    charge_rate = float(os.getenv('PALM_CHARGE_RATE'))
+    #charge_rate = float(os.getenv('PALM_CHARGE_RATE'))
 
     # Default data for base load. Overwritten by actual data if available
     base_load = [0.3, 2, 0.3, 0.3, 0.3, 0.5, 1.7, 1.8, 2.6, 1.5, 0.5, 2.5,\
@@ -68,11 +68,11 @@ class Solcast:
     
     # For single array installation uncomment the line below and comment out the subsequent line
     #url_sw = ""
-    if str(os.getenv('SOLCASTSITEID2')).strip() != "":
+    if not str(os.getenv('SOLCASTSITEID2')).strip():
         url_sw = "https://api.solcast.com.au/rooftop_sites/"+str(os.getenv('SOLCASTSITEID2'))
     else:
         url_sw = ""
 
-    weight = 35  # Confidence factor for forecast (range 10 to 90)
+    weight = int(os.getenv('PALM_WEIGHT'))  # Confidence factor for forecast (range 10 to 90)
 
     cmd = "/forecasts?format=json"
