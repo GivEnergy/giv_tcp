@@ -5,11 +5,11 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/)
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
-## [2.1.13] - 2023-05-13
+## [2.1.14] - 2023-06-05
 ### Fixed
 - REST /getCache endpoint fixed (incorrect json format)
 - Minor updates to README.md documentation
-- Refactored Force Export to use queing for more reliable revert
+- Refactored Force Export to use queuing for more reliable revert
 ### Added
 - Updated SmartTarget to PALM 0.8.5 (Thanks Stephen Lewis)
 
