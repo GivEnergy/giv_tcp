@@ -1,6 +1,6 @@
 name:  "GivTCP"
 description:  "TCP Modbus connection to MQTT/JSON for Givenergy Battery/PV Invertors"
-version:  "2.1.13"
+version:  "2.1.14"
 image: britkat/giv_tcp-ma
 slug:  "givtcp"
 homeassistant_api: true
@@ -41,9 +41,9 @@ options:
   MQTT_PORT: 1883
   LOG_LEVEL: "Info"
   PRINT_RAW: True
-  SELF_RUN: True  #remove?
+  SELF_RUN: True
   SELF_RUN_LOOP_TIMER: 5
-  HA_AUTO_D: True #remove?
+  HA_AUTO_D: True
   DYNAMICTARIFF: False
   DAYRATE: "0.155"
   NIGHTRATE: "0.055"
@@ -60,7 +60,7 @@ options:
   WEB_DASH: False
   WEB_DASH_PORT: 3000
   HOSTIP: "homeassistant.local"
-  CACHELOCATION: "/config/GivTCP" #remove?
+  CACHELOCATION: "/config/GivTCP"
   DATASMOOTHER: "medium"
   SMARTTARGET: False
   PALM_WINTER: "01,02,11,12"
@@ -119,11 +119,11 @@ schema:
   SMARTTARGET: bool
   PALM_WINTER: "str"
   PALM_SHOULDER: "str"
-  PALM_MIN_SOC_TARGET: int
-  PALM_MAX_SOC_TARGET: int
-  PALM_BATT_RESERVE: int
-  PALM_BATT_UTILISATION: float
-  PALM_WEIGHT: float
+  PALM_MIN_SOC_TARGET: "int?"
+  PALM_MAX_SOC_TARGET: "int?"
+  PALM_BATT_RESERVE: "int?"
+  PALM_BATT_UTILISATION: "float?"
+  PALM_WEIGHT: "float?"
   GEAPI: "str?"
   SOLCASTAPI: "str?"
   SOLCASTSITEID: "str?"
