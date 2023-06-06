@@ -18,243 +18,244 @@ client=GivEnergyClient(host=GiV_Settings.invertorIP)
 
 logger = GivLUT.logger
 
-class writeHelpers:
-    def sct(target):
-        temp={}
-        try:
-            client.enable_charge_target(target)
-            temp['result']="Setting Charge Enable was a success"
-        except:
-            e = sys.exc_info()
-            temp['result']="Setting Charge Enable failed: " + str(e)
-            logger.error (temp['result'])
-        return json.dumps(temp)
 
-    def ect():
-        temp={}
-        try:
-            client.enable_charge_target()
-            temp['result']="Setting Charge Enable was a success"
-        except:
-            e = sys.exc_info()
-            temp['result']="Setting Charge Enable failed: " + str(e)
-            logger.error (temp['result'])
-        return json.dumps(temp)
-    def dct():
-        temp={}
-        try:
-            client.disable_charge_target()
-            temp['result']="Setting Charge Enable was a success"
-        except:
-            e = sys.exc_info()
-            temp['result']="Setting Charge Enable failed: " + str(e)
-            logger.error (temp['result'])
-        return json.dumps(temp)
-    def ed():
-        temp={}
-        try:
-            client.enable_discharge()
-            temp['result']="Setting Charge Enable was a success"
-        except:
-            e = sys.exc_info()
-            temp['result']="Setting Charge Enable failed: " + str(e)
-            logger.error (temp['result'])
-        return json.dumps(temp)
-    def dd():
-        temp={}
-        try:
-            client.disable_discharge()
-            temp['result']="Setting Charge Enable was a success"
-        except:
-            e = sys.exc_info()
-            temp['result']="Setting Charge Enable failed: " + str(e)
-            logger.error (temp['result'])
-        return json.dumps(temp)
-    def ec():
-        temp={}
-        try:
-            client.enable_charge()
-            temp['result']="Setting Charge Enable was a success"
-        except:
-            e = sys.exc_info()
-            temp['result']="Setting Charge Enable failed: " + str(e)
-            logger.error (temp['result'])
-        return json.dumps(temp)
-    def dc():
-        temp={}
-        try:
-            client.disable_charge()
-            temp['result']="Setting Charge Enable was a success"
-        except:
-            e = sys.exc_info()
-            temp['result']="Setting Charge Enable failed: " + str(e)
-            logger.error (temp['result'])
-        return json.dumps(temp)
-    def ssc(target):
-        temp={}
-        try:
-            client.set_shallow_charge(target)
-            temp['result']="Setting Charge Enable was a success"
-        except:
-            e = sys.exc_info()
-            temp['result']="Setting Charge Enable failed: " + str(e)
-            logger.error (temp['result'])
-        return json.dumps(temp)
-    def sbpr(target):
-        temp={}
-        try:
-            client.set_battery_power_reserve(target)
-            temp['result']="Setting Charge Enable was a success"
-        except:
-            e = sys.exc_info()
-            temp['result']="Setting Charge Enable failed: " + str(e)
-            logger.error (temp['result'])
-        return json.dumps(temp)
-    def ri():
-        temp={}
-        try:
-            client.reboot_invertor()
-            temp['result']="Setting Charge Enable was a success"
-        except:
-            e = sys.exc_info()
-            temp['result']="Setting Charge Enable failed: " + str(e)
-            logger.error (temp['result'])
-        return json.dumps(temp)
-    def sapr(target):
-        temp={}
-        try:
-            client.set_active_power_rate(target)
-            temp['result']="Setting Charge Enable was a success"
-        except:
-            e = sys.exc_info()
-            temp['result']="Setting Charge Enable failed: " + str(e)
-            logger.error (temp['result'])
-        return json.dumps(temp)
-    def sbcl(target):
-        temp={}
-        try:
-            client.set_battery_charge_limit(target)
-            temp['result']="Setting Charge Enable was a success"
-        except:
-            e = sys.exc_info()
-            temp['result']="Setting Charge Enable failed: " + str(e)
-            logger.error (temp['result'])
-        return json.dumps(temp)
-    def sbdl(target):
-        temp={}
-        try:
-            client.set_battery_discharge_limit(target)
-            temp['result']="Setting Charge Enable was a success"
-        except:
-            e = sys.exc_info()
-            temp['result']="Setting Charge Enable failed: " + str(e)
-            logger.error (temp['result'])
-        return json.dumps(temp)
-    def smd(target):
-        temp={}
-        try:
-            client.set_mode_dynamic(target)
-            temp['result']="Setting Charge Enable was a success"
-        except:
-            e = sys.exc_info()
-            temp['result']="Setting Charge Enable failed: " + str(e)
-            logger.error (temp['result'])
-        return json.dumps(temp)
-    def sms(target):
-        temp={}
-        try:
-            client.set_mode_storage(target)
-            temp['result']="Setting Charge Enable was a success"
-        except:
-            e = sys.exc_info()
-            temp['result']="Setting Charge Enable failed: " + str(e)
-            logger.error (temp['result'])
-        return json.dumps(temp)
-    def sbdmd():
-        temp={}
-        try:
-            client.set_battery_discharge_mode_demand()
-            temp['result']="Setting Charge Enable was a success"
-        except:
-            e = sys.exc_info()
-            temp['result']="Setting Charge Enable failed: " + str(e)
-            logger.error (temp['result'])
-        return json.dumps(temp)
-    def sbdmmp():
-        temp={}
-        try:
-            client.set_battery_discharge_mode_max_power()
-            temp['result']="Setting Charge Enable was a success"
-        except:
-            e = sys.exc_info()
-            temp['result']="Setting Charge Enable failed: " + str(e)
-            logger.error (temp['result'])
-        return json.dumps(temp)
-    def sdt(idateTime):
-        temp={}
-        try:
-            client.set_datetime(idateTime)
-            temp['result']="Setting Charge Enable was a success"
-        except:
-            e = sys.exc_info()
-            temp['result']="Setting Charge Enable failed: " + str(e)
-            logger.error (temp['result'])
-        return json.dumps(temp)
-    def sds1(payload):
-        temp={}
-        try:
-            client.set_discharge_slot_1((datetime.strptime(payload['start'],"%H:%M"),datetime.strptime(payload['finish'],"%H:%M")))
-            temp['result']="Setting Discharge Slot 2 was a success"
+def sct(target):
+    temp={}
+    try:
+        client.enable_charge_target(target)
+        temp['result']="Setting Charge Enable was a success"
+    except:
+        e = sys.exc_info()
+        temp['result']="Setting Charge Enable failed: " + str(e)
+        logger.error (temp['result'])
+    return json.dumps(temp)
 
-        except:
-            e = sys.exc_info()
-            temp['result']="Setting Discharge Slot 2 failed: " + str(e)
-            logger.error (temp['result'])
-        return json.dumps(temp)
-    def sds2(payload):
-        temp={}
-        try:
-            client.set_discharge_slot_2((datetime.strptime(payload['start'],"%H:%M"),datetime.strptime(payload['finish'],"%H:%M")))
-            temp['result']="Setting Discharge Slot 2 was a success"
+def ect():
+    temp={}
+    try:
+        client.enable_charge_target()
+        temp['result']="Setting Charge Enable was a success"
+    except:
+        e = sys.exc_info()
+        temp['result']="Setting Charge Enable failed: " + str(e)
+        logger.error (temp['result'])
+    return json.dumps(temp)
+def dct():
+    temp={}
+    try:
+        client.disable_charge_target()
+        temp['result']="Setting Charge Enable was a success"
+    except:
+        e = sys.exc_info()
+        temp['result']="Setting Charge Enable failed: " + str(e)
+        logger.error (temp['result'])
+    return json.dumps(temp)
+def ed():
+    temp={}
+    try:
+        client.enable_discharge()
+        temp['result']="Setting Charge Enable was a success"
+    except:
+        e = sys.exc_info()
+        temp['result']="Setting Charge Enable failed: " + str(e)
+        logger.error (temp['result'])
+    return json.dumps(temp)
+def dd():
+    temp={}
+    try:
+        client.disable_discharge()
+        temp['result']="Setting Charge Enable was a success"
+    except:
+        e = sys.exc_info()
+        temp['result']="Setting Charge Enable failed: " + str(e)
+        logger.error (temp['result'])
+    return json.dumps(temp)
+def ec():
+    temp={}
+    try:
+        client.enable_charge()
+        temp['result']="Setting Charge Enable was a success"
+    except:
+        e = sys.exc_info()
+        temp['result']="Setting Charge Enable failed: " + str(e)
+        logger.error (temp['result'])
+    return json.dumps(temp)
+def dc():
+    temp={}
+    try:
+        client.disable_charge()
+        temp['result']="Setting Charge Enable was a success"
+    except:
+        e = sys.exc_info()
+        temp['result']="Setting Charge Enable failed: " + str(e)
+        logger.error (temp['result'])
+    return json.dumps(temp)
+def ssc(target):
+    temp={}
+    try:
+        client.set_shallow_charge(target)
+        temp['result']="Setting Charge Enable was a success"
+    except:
+        e = sys.exc_info()
+        temp['result']="Setting Charge Enable failed: " + str(e)
+        logger.error (temp['result'])
+    return json.dumps(temp)
+def sbpr(target):
+    temp={}
+    try:
+        client.set_battery_power_reserve(target)
+        temp['result']="Setting Charge Enable was a success"
+    except:
+        e = sys.exc_info()
+        temp['result']="Setting Charge Enable failed: " + str(e)
+        logger.error (temp['result'])
+    return json.dumps(temp)
+def ri():
+    temp={}
+    try:
+        client.reboot_invertor()
+        temp['result']="Setting Charge Enable was a success"
+    except:
+        e = sys.exc_info()
+        temp['result']="Setting Charge Enable failed: " + str(e)
+        logger.error (temp['result'])
+    return json.dumps(temp)
+def sapr(target):
+    temp={}
+    try:
+        client.set_active_power_rate(target)
+        temp['result']="Setting Charge Enable was a success"
+    except:
+        e = sys.exc_info()
+        temp['result']="Setting Charge Enable failed: " + str(e)
+        logger.error (temp['result'])
+    return json.dumps(temp)
+def sbcl(target):
+    temp={}
+    try:
+        client.set_battery_charge_limit(target)
+        temp['result']="Setting Charge Enable was a success"
+    except:
+        e = sys.exc_info()
+        temp['result']="Setting Charge Enable failed: " + str(e)
+        logger.error (temp['result'])
+    return json.dumps(temp)
+def sbdl(target):
+    temp={}
+    try:
+        client.set_battery_discharge_limit(target)
+        temp['result']="Setting Charge Enable was a success"
+    except:
+        e = sys.exc_info()
+        temp['result']="Setting Charge Enable failed: " + str(e)
+        logger.error (temp['result'])
+    return json.dumps(temp)
+def smd(target):
+    temp={}
+    try:
+        client.set_mode_dynamic(target)
+        temp['result']="Setting Charge Enable was a success"
+    except:
+        e = sys.exc_info()
+        temp['result']="Setting Charge Enable failed: " + str(e)
+        logger.error (temp['result'])
+    return json.dumps(temp)
+def sms(target):
+    temp={}
+    try:
+        client.set_mode_storage(target)
+        temp['result']="Setting Charge Enable was a success"
+    except:
+        e = sys.exc_info()
+        temp['result']="Setting Charge Enable failed: " + str(e)
+        logger.error (temp['result'])
+    return json.dumps(temp)
+def sbdmd():
+    temp={}
+    try:
+        client.set_battery_discharge_mode_demand()
+        temp['result']="Setting Charge Enable was a success"
+    except:
+        e = sys.exc_info()
+        temp['result']="Setting Charge Enable failed: " + str(e)
+        logger.error (temp['result'])
+    return json.dumps(temp)
+def sbdmmp():
+    temp={}
+    try:
+        client.set_battery_discharge_mode_max_power()
+        temp['result']="Setting Charge Enable was a success"
+    except:
+        e = sys.exc_info()
+        temp['result']="Setting Charge Enable failed: " + str(e)
+        logger.error (temp['result'])
+    return json.dumps(temp)
+def sdt(idateTime):
+    temp={}
+    try:
+        client.set_datetime(idateTime)
+        temp['result']="Setting Charge Enable was a success"
+    except:
+        e = sys.exc_info()
+        temp['result']="Setting Charge Enable failed: " + str(e)
+        logger.error (temp['result'])
+    return json.dumps(temp)
+def sds1(payload):
+    temp={}
+    try:
+        client.set_discharge_slot_1((datetime.strptime(payload['start'],"%H:%M"),datetime.strptime(payload['finish'],"%H:%M")))
+        temp['result']="Setting Discharge Slot 2 was a success"
 
-        except:
-            e = sys.exc_info()
-            temp['result']="Setting Discharge Slot 2 failed: " + str(e)
-            logger.error (temp['result'])
-        return json.dumps(temp)
-    def scs1(payload):
-        temp={}
-        try:
-            client.set_charge_slot_1((datetime.strptime(payload['start'],"%H:%M"),datetime.strptime(payload['finish'],"%H:%M")))
-            temp['result']="Setting Discharge Slot 2 was a success"
-        except:
-            e = sys.exc_info()
-            temp['result']="Setting Discharge Slot 2 failed: " + str(e)
-            logger.error (temp['result'])
-        return json.dumps(temp)
-    def scs2(payload):
-        temp={}
-        try:
-            client.set_charge_slot_2((datetime.strptime(payload['start'],"%H:%M"),datetime.strptime(payload['finish'],"%H:%M")))
-            temp['result']="Setting Discharge Slot 2 was a success"
+    except:
+        e = sys.exc_info()
+        temp['result']="Setting Discharge Slot 2 failed: " + str(e)
+        logger.error (temp['result'])
+    return json.dumps(temp)
+def sds2(payload):
+    temp={}
+    try:
+        client.set_discharge_slot_2((datetime.strptime(payload['start'],"%H:%M"),datetime.strptime(payload['finish'],"%H:%M")))
+        temp['result']="Setting Discharge Slot 2 was a success"
 
-        except:
-            e = sys.exc_info()
-            temp['result']="Setting Discharge Slot 2 failed: " + str(e)
-            logger.error (temp['result'])
-        return json.dumps(temp)
+    except:
+        e = sys.exc_info()
+        temp['result']="Setting Discharge Slot 2 failed: " + str(e)
+        logger.error (temp['result'])
+    return json.dumps(temp)
+def scs1(payload):
+    temp={}
+    try:
+        client.set_charge_slot_1((datetime.strptime(payload['start'],"%H:%M"),datetime.strptime(payload['finish'],"%H:%M")))
+        temp['result']="Setting Discharge Slot 2 was a success"
+    except:
+        e = sys.exc_info()
+        temp['result']="Setting Discharge Slot 2 failed: " + str(e)
+        logger.error (temp['result'])
+    return json.dumps(temp)
+def scs2(payload):
+    temp={}
+    try:
+        client.set_charge_slot_2((datetime.strptime(payload['start'],"%H:%M"),datetime.strptime(payload['finish'],"%H:%M")))
+        temp['result']="Setting Discharge Slot 2 was a success"
+
+    except:
+        e = sys.exc_info()
+        temp['result']="Setting Discharge Slot 2 failed: " + str(e)
+        logger.error (temp['result'])
+    return json.dumps(temp)
     
 def enableChargeSchedule(payload):
     temp={}
     try:
         if payload['state']=="enable":
             logger.info("Enabling Charge Schedule")
-            from write import writeHelpers
-            result=GivQueue.q.enqueue(writeHelpers.ec,retry=Retry(max=2, interval=2))
+            from write import ec
+            result=GivQueue.q.enqueue(ec,retry=Retry(max=2, interval=2))
             #client.enable_charge()
         elif payload['state']=="disable":
             logger.info("Disabling Charge Schedule")
-            result=GivQueue.q.enqueue(writeHelpers.dc,retry=Retry(max=2, interval=2))
+            from write import dc
+            result=GivQueue.q.enqueue(dc,retry=Retry(max=2, interval=2))
             #client.disable_charge()
         temp['result']="Setting Charge Enable was a success"
 
@@ -269,13 +270,13 @@ def enableChargeTarget(payload):
     try:
         if payload['state']=="enable":
             logger.info("Enabling Charge Target")
-            from write import writeHelpers
-            result=GivQueue.q.enqueue(writeHelpers.ect,retry=Retry(max=2, interval=2))
+            from write import ect
+            result=GivQueue.q.enqueue(ect,retry=Retry(max=2, interval=2))
             #client.enable_charge_target()
         elif payload['state']=="disable":
             logger.info("Disabling Charge Target")
-            from write import writeHelpers
-            result=GivQueue.q.enqueue(writeHelpers.dct,retry=Retry(max=2, interval=2))
+            from write import dct
+            result=GivQueue.q.enqueue(dct,retry=Retry(max=2, interval=2))
             #client.disable_charge_target()
         temp['result']="Setting Charge Target was a success"
 
@@ -291,13 +292,13 @@ def enableDischarge(payload):
     try:
         if payload['state']=="enable":
             logger.info("Enabling Discharge")
-            from write import writeHelpers
-            result=GivQueue.q.enqueue(writeHelpers.ssc,saved_battery_reserve,retry=Retry(max=2, interval=2))
+            from write import ssc
+            result=GivQueue.q.enqueue(ssc,saved_battery_reserve,retry=Retry(max=2, interval=2))
             #client.set_shallow_charge(saved_battery_reserve)
         elif payload['state']=="disable":
             logger.info("Disabling Discharge")
-            from write import writeHelpers
-            result=GivQueue.q.enqueue(writeHelpers.ssc,100,retry=Retry(max=2, interval=2))
+            from write import ssc
+            result=GivQueue.q.enqueue(ssc,100,retry=Retry(max=2, interval=2))
         temp['result']="Setting Discharge Enable was a success"
 
     except:
@@ -311,13 +312,13 @@ def enableDischargeSchedule(payload):
     try:
         if payload['state']=="enable":
             logger.info("Enabling Disharge Schedule")
-            from write import writeHelpers
-            result=GivQueue.q.enqueue(writeHelpers.ed,retry=Retry(max=2, interval=2))
+            from write import ed
+            result=GivQueue.q.enqueue(ed,retry=Retry(max=2, interval=2))
             #client.enable_discharge()
         elif payload['state']=="disable":
             logger.info("Disabling Discharge Schedule")
-            from write import writeHelpers
-            result=GivQueue.q.enqueue(writeHelpers.dd,retry=Retry(max=2, interval=2))
+            from write import dd
+            result=GivQueue.q.enqueue(dd,retry=Retry(max=2, interval=2))
             #client.disable_discharge()
         temp['result']="Setting Charge Enable was a success"
     except:
@@ -330,8 +331,8 @@ def setShallowCharge(payload):
     temp={}
     try:
         logger.info("Setting Shallow Charge to: "+ str(payload['val']))
-        from write import writeHelpers
-        result=GivQueue.q.enqueue(writeHelpers.ssc,int(payload['val']),retry=Retry(max=2, interval=2))
+        from write import ssc
+        result=GivQueue.q.enqueue(ssc,int(payload['val']),retry=Retry(max=2, interval=2))
         #client.set_shallow_charge(int(payload['val']))
         temp['result']="Setting Shallow Charge was a success"
     except:
@@ -346,8 +347,8 @@ def setChargeTarget(payload):
     target=int(payload['chargeToPercent'])
     try:
         logger.info("Setting Charge Target to: "+str(target))
-        from write import writeHelpers
-        result=GivQueue.q.enqueue(writeHelpers.sct,target,retry=Retry(max=2, interval=2))
+        from write import sct
+        result=GivQueue.q.enqueue(sct,target,retry=Retry(max=2, interval=2))
         #client.enable_charge_target(target)
         temp['result']="Setting Charge Target was a success"
     except:
@@ -365,8 +366,8 @@ def setBatteryReserve(payload):
     if target<4: target=4
     logger.info ("Setting battery reserve target to: " + str(target))
     try:
-        from write import writeHelpers
-        result=GivQueue.q.enqueue(writeHelpers.ssc,target,retry=Retry(max=2, interval=2))
+        from write import ssc
+        result=GivQueue.q.enqueue(ssc,target,retry=Retry(max=2, interval=2))
         #client.set_shallow_charge(target)
         logger.debug("Setting Battery Reserve to: "+str(target)+" was a success")        
         temp['result']="Setting Battery Reserve was a success"
@@ -385,8 +386,8 @@ def setBatteryCutoff(payload):
     logger.info ("Setting battery cutoff target to: " + str(target))
     try:
         logger.info("Setting Battery Cutoff to: "+str(target))
-        from write import writeHelpers
-        result=GivQueue.q.enqueue(writeHelpers.sbpr,target,retry=Retry(max=2, interval=2))
+        from write import sbpr
+        result=GivQueue.q.enqueue(sbpr,target,retry=Retry(max=2, interval=2))
         #client.set_battery_power_reserve(target)
         temp['result']="Setting Battery Cutoff was a success"
     except:
@@ -399,8 +400,8 @@ def rebootinvertor():
     temp={}
     try:
         logger.info("Rebooting Invertor...")
-        from write import writeHelpers
-        result=GivQueue.q.enqueue(writeHelpers.ri,retry=Retry(max=2, interval=2))
+        from write import ri
+        result=GivQueue.q.enqueue(ri,retry=Retry(max=2, interval=2))
         #client.reboot_invertor()
         temp['result']="Rebooting invertor was a success"
     except:
@@ -416,8 +417,8 @@ def setActivePowerRate(payload):
     target=int(payload['activePowerRate'])
     try:
         logger.info("Setting Active Power Rate to "+str(target))
-        from write import writeHelpers
-        result=GivQueue.q.enqueue(writeHelpers.sapr,target,retry=Retry(max=2, interval=2))
+        from write import sapr
+        result=GivQueue.q.enqueue(sapr,target,retry=Retry(max=2, interval=2))
         #client.set_active_power_rate(target)
         temp['result']="Setting Active Power Rate was a success"
     except:
@@ -444,8 +445,8 @@ def setChargeRate(payload):
             target=50
         logger.info ("Setting battery charge rate to: " + str(payload['chargeRate'])+" ("+str(target)+")")
         try:
-            from write import writeHelpers
-            result=GivQueue.q.enqueue(writeHelpers.sbcl,target,retry=Retry(max=2, interval=2))
+            from write import sbcl
+            result=GivQueue.q.enqueue(sbcl,target,retry=Retry(max=2, interval=2))
             #client.set_battery_charge_limit(target)
             temp['result']="Setting Charge Rate was a success"
 
@@ -476,8 +477,8 @@ def setDischargeRate(payload):
             target=50
         logger.info ("Setting battery discharge rate to: " + str(payload['dischargeRate'])+" ("+str(target)+")")
         try:
-            from write import writeHelpers
-            result=GivQueue.q.enqueue(writeHelpers.sbdl,target,retry=Retry(max=2, interval=2))
+            from write import sbdl
+            result=GivQueue.q.enqueue(sbdl,target,retry=Retry(max=2, interval=2))
             #client.set_battery_discharge_limit(target)
             temp['result']="Setting Discharge Rate was a success"
         except:
@@ -493,12 +494,13 @@ def setChargeSlot1(payload):
     temp={}
     if type(payload) is not dict: payload=json.loads(payload)
     if 'chargeToPercent' in payload.keys():
-        from write import writeHelpers
-        result=GivQueue.q.enqueue(writeHelpers.sct,payload,retry=Retry(max=2, interval=2))
+        target=int(payload['chargeToPercent'])
+        from write import sct
+        result=GivQueue.q.enqueue(sct,target,retry=Retry(max=2, interval=2))
     try:
         logger.info("Setting Charge Slot 1 to: "+str(payload['start'])+" - "+str(payload['finish']))
-        from write import writeHelpers
-        result=GivQueue.q.enqueue(writeHelpers.scs1,payload,retry=Retry(max=2, interval=2))
+        from write import scs1
+        result=GivQueue.q.enqueue(scs1,payload,retry=Retry(max=2, interval=2))
         temp['result']="Setting Charge Slot 1 was a success"
 
     except:
@@ -511,12 +513,13 @@ def setChargeSlot2(payload):
     temp={}
     if type(payload) is not dict: payload=json.loads(payload)
     if 'chargeToPercent' in payload.keys():
-        from write import writeHelpers
-        result=GivQueue.q.enqueue(writeHelpers.sct,payload,retry=Retry(max=2, interval=2))
+        target=int(payload['chargeToPercent'])
+        from write import sct
+        result=GivQueue.q.enqueue(sct,payload,retry=Retry(max=2, interval=2))
     try:
         logger.info("Setting Charge Slot 2 to: "+str(payload['start'])+" - "+str(payload['finish']))
-        from write import writeHelpers
-        result=GivQueue.q.enqueue(writeHelpers.scs2,payload,retry=Retry(max=2, interval=2))
+        from write import scs2
+        result=GivQueue.q.enqueue(scs2,payload,retry=Retry(max=2, interval=2))
         temp['result']="Setting Charge Slot 2 was a success"
     except:
         e = sys.exc_info()
@@ -535,8 +538,8 @@ def setDischargeSlot1(payload):
         strt=datetime.strptime(payload['start'],"%H:%M")
         fnsh=datetime.strptime(payload['finish'],"%H:%M")
         logger.info("Setting Discharge Slot 1 to: "+str(payload['start'])+" - "+str(payload['finish']))
-        from write import writeHelpers
-        result=GivQueue.q.enqueue(writeHelpers.sds1,payload,retry=Retry(max=2, interval=2))
+        from write import sds1
+        result=GivQueue.q.enqueue(sds1,payload,retry=Retry(max=2, interval=2))
         temp['result']="Setting Discharge Slot 1 was a success"
 
     except:
@@ -555,8 +558,8 @@ def setDischargeSlot2(payload):
         result=setBatteryReserve(payload)
     try:
         logger.info("Setting Discharge Slot 2 to: "+str(payload['start'])+" - "+str(payload['finish']))
-        from write import writeHelpers
-        result=GivQueue.q.enqueue(writeHelpers.sds2,payload,retry=Retry(max=2, interval=2))
+        from write import sds2
+        result=GivQueue.q.enqueue(sds2,payload,retry=Retry(max=2, interval=2))
         temp['result']="Setting Discharge Slot 2 was a success"
 
     except:
@@ -619,7 +622,7 @@ def forceExport(exportTime):
             payload['reservePercent']=4
             #from write import setBatteryReserve
             #result=GivQueue.q.enqueue(setBatteryReserve,payload,retry=Retry(max=2, interval=2))    
-            setBatteryReserve(payload) 
+            result=setBatteryReserve(payload) 
         except:
             logger.debug("Error Setting Reserve to 4%")
 
@@ -639,7 +642,7 @@ def forceExport(exportTime):
         payload['mode']="Timed Export"
         #from write import setBatteryMode
         #result=GivQueue.q.enqueue(setBatteryMode,payload,retry=Retry(max=2, interval=2))
-        result=setBatteryMode|(payload)
+        result=setBatteryMode(payload)
         payload={}
         payload['dischargeRate']=maxDischargeRate
         #from write import setDischargeRate
@@ -861,23 +864,26 @@ def setBatteryMode(payload):
     logger.info("Setting Battery Mode to: "+str(payload['mode']))
     try:
         if payload['mode']=="Eco":
-            from write import writeHelpers
-            result=GivQueue.q.enqueue(writeHelpers.smd,retry=Retry(max=2, interval=2))
+            from write import smd
+            result=GivQueue.q.enqueue(smd,retry=Retry(max=2, interval=2))
             #client.set_mode_dynamic()
             #time.sleep(1)
-            result=GivQueue.q.enqueue(writeHelpers.ssc,getSavedBatteryReservePercentage,retry=Retry(max=2, interval=2))
+            from write import ssc
+            saved_battery_reserve = getSavedBatteryReservePercentage()
+            result=GivQueue.q.enqueue(ssc,saved_battery_reserve,retry=Retry(max=2, interval=2))
             #client.set_shallow_charge(getSavedBatteryReservePercentage())
         elif payload['mode']=="Eco (Paused)":
-            from write import writeHelpers
-            result=GivQueue.q.enqueue(writeHelpers.smd,retry=Retry(max=2, interval=2))
+            from write import smd
+            result=GivQueue.q.enqueue(smd,retry=Retry(max=2, interval=2))
             #client.set_mode_dynamic()
             #time.sleep(1)
-            result=GivQueue.q.enqueue(writeHelpers.ssc,100,retry=Retry(max=2, interval=2))
+            from write import ssc
+            result=GivQueue.q.enqueue(ssc,100,retry=Retry(max=2, interval=2))
             #client.set_shallow_charge(100)
         elif payload['mode']=="Timed Demand":
-            from write import writeHelpers
-            result=GivQueue.q.enqueue(writeHelpers.sbdmd,retry=Retry(max=2, interval=2))
-            result=GivQueue.q.enqueue(writeHelpers.ed,retry=Retry(max=2, interval=2))
+            from write import sbdmd, ed
+            result=GivQueue.q.enqueue(sbdmd,retry=Retry(max=2, interval=2))
+            result=GivQueue.q.enqueue(ed,retry=Retry(max=2, interval=2))
             
             #client.set_battery_discharge_mode_demand()
             #client.enable_discharge()
@@ -892,9 +898,9 @@ def setBatteryMode(payload):
 #            else:
 #                client.set_mode_storage()
         elif payload['mode']=="Timed Export":
-            from write import writeHelpers
-            result=GivQueue.q.enqueue(writeHelpers.sbdmmp,retry=Retry(max=2, interval=2))
-            result=GivQueue.q.enqueue(writeHelpers.ed,retry=Retry(max=2, interval=2))
+            from write import sbdmmp,ed
+            result=GivQueue.q.enqueue(sbdmmp,retry=Retry(max=2, interval=2))
+            result=GivQueue.q.enqueue(ed,retry=Retry(max=2, interval=2))
 #            client.set_battery_discharge_mode_max_power()
 #            client.enable_discharge()
 #            if exists(GivLUT.regcache):      # if there is a cache then grab it
@@ -925,8 +931,8 @@ def setDateTime(payload):
         iDateTime=datetime.strptime(payload['dateTime'],"%d/%m/%Y %H:%M:%S")   #format '12/11/2021 09:15:32'
         logger.info("Setting Invertor time to: "+iDateTime)
         #Set Date and Time on Invertor
-        from write import writeHelpers
-        result=GivQueue.q.enqueue(writeHelpers.sdt,iDateTime,retry=Retry(max=2, interval=2))
+        from write import sdt
+        result=GivQueue.q.enqueue(sdt,iDateTime,retry=Retry(max=2, interval=2))
         #client.set_datetime(iDateTime)
         temp['result']="Invertor time setting was a success"
 
