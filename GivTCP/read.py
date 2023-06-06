@@ -403,6 +403,7 @@ def getData(fullrefresh):  # Read from Invertor put in cache
         controlmode['Battery_Discharge_Rate'] = discharge_rate
 #        controlmode['Active_Power_Rate']= GEInv.active_power_rate
         controlmode['Reboot_Invertor']="disable"
+        controlmode['Reboot_Addon']="disable"
         if not isinstance(regCacheStack[4], int):
             if "Temp_Pause_Discharge" in regCacheStack[4]:
                 controlmode['Temp_Pause_Discharge'] = regCacheStack[4]["Control"]["Temp_Pause_Discharge"]

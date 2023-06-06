@@ -58,8 +58,10 @@ def on_message(client, userdata, message):
     elif command=="setChargeRate":
         writecommand['chargeRate']=str(message.payload.decode("utf-8"))
         wr.setChargeRate(writecommand)
-    elif command=="reboot":
+    elif command=="rebootInvertor":
         wr.rebootinvertor()
+    elif command=="rebootAddon":
+        wr.rebootAddon()
     elif command=="setActivePowerRate":
         writecommand['activePowerRate']=str(message.payload.decode("utf-8"))
         wr.setActivePowerRate(writecommand)

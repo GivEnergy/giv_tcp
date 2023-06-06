@@ -12,6 +12,7 @@ import pickle,os
 from GivLUT import GivLUT, GivQueue
 from givenergy_modbus.client import GivEnergyClient
 from rq import Retry
+import requests
 
 logging.getLogger("givenergy_modbus").setLevel(logging.CRITICAL)
 client=GivEnergyClient(host=GiV_Settings.invertorIP)
@@ -29,7 +30,6 @@ def sct(target):
         temp['result']="Setting Charge Enable failed: " + str(e)
         logger.error (temp['result'])
     return json.dumps(temp)
-
 def ect():
     temp={}
     try:
@@ -960,6 +960,15 @@ def switchRate(payload):
         temp['result']="Setting Rate failed: " + str(e) 
         logger.error (temp['result'])
     return json.dumps(temp)
+
+def rebootAddon():
+    logger.critical("Restarting the GivTCP Addon in 5s...")
+    time.sleep(5)
+    access_token = os.getenv("SUPERVISOR_TOKEN")
+    url="http://supervisor/addons/self/restart"
+    result = requests.post(url,
+          headers={'Content-Type':'application/json',
+                   'Authorization': 'Bearer {}'.format(access_token)})
 
 def getSavedBatteryReservePercentage():
     saved_battery_reserve=4
