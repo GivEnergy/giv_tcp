@@ -91,10 +91,10 @@ for inv in range(1,int(os.getenv('NUMINVERTORS'))+1):
         outp.write("    Print_Raw_Registers="+str(os.getenv("PRINT_RAW",""))+"\n")
         outp.write("    MQTT_Output="+str(os.getenv("MQTT_OUTPUT","")+"\n"))
         if isAddon:
-            outp.write("    MQTT_Address=\""+str(mqtt_host)+"\"\n"))
-            outp.write("    MQTT_Username=\""+str(mqtt_username)+"\"\n"))
-            outp.write("    MQTT_Password=\""+str(mqtt_password)+"\"\n"))
-            outp.write("    MQTT_Port="+str(mqtt_port)+"\n"))
+            outp.write("    MQTT_Address=\""+str(mqtt_host)+"\"\n")
+            outp.write("    MQTT_Username=\""+str(mqtt_username)+"\"\n")
+            outp.write("    MQTT_Password=\""+str(mqtt_password)+"\"\n")
+            outp.write("    MQTT_Port="+str(mqtt_port)+"\n")
         else:
             outp.write("    MQTT_Output="+str(os.getenv("MQTT_OUTPUT","")+"\n"))
             outp.write("    MQTT_Address=\""+str(os.getenv("MQTT_ADDRESS","")+"\"\n"))
