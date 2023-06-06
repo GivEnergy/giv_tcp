@@ -42,8 +42,15 @@ try:
           headers={'Content-Type':'application/json',
                    'Authorization': 'Bearer {}'.format(access_token)})
     logger.critical ("MQTT Details are: "+str(result))
+    mqttDetails=result.json()
+    mqtt_host=mqttDetails['data']['host']
+    mqtt_username=mqttDetails['data']['username']
+    mqtt_password=mqttDetails['data']['password']
+    mqtt_port=mqttDetails['data']['port']
+    isAddon=True
 except:
     logger.critical("SUPERVISOR TOKEN does not exist")
+    isAddon=False
 
 if not os.path.exists(str(os.getenv("CACHELOCATION"))):
     os.makedirs(str(os.getenv("CACHELOCATION")))
@@ -83,14 +90,22 @@ for inv in range(1,int(os.getenv('NUMINVERTORS'))+1):
         outp.write("    numBatteries=\""+str(os.getenv("NUMBATTERIES_"+str(inv),"")+"\"\n"))
         outp.write("    Print_Raw_Registers="+str(os.getenv("PRINT_RAW",""))+"\n")
         outp.write("    MQTT_Output="+str(os.getenv("MQTT_OUTPUT","")+"\n"))
-        outp.write("    MQTT_Address=\""+str(os.getenv("MQTT_ADDRESS","")+"\"\n"))
-        outp.write("    MQTT_Username=\""+str(os.getenv("MQTT_USERNAME","")+"\"\n"))
-        outp.write("    MQTT_Password=\""+str(os.getenv("MQTT_PASSWORD","")+"\"\n"))
+        if isAddon:
+            outp.write("    MQTT_Address=\""+str(mqtt_host)+"\"\n"))
+            outp.write("    MQTT_Username=\""+str(mqtt_username)+"\"\n"))
+            outp.write("    MQTT_Password=\""+str(mqtt_password)+"\"\n"))
+            outp.write("    MQTT_Port="+str(mqtt_port)+"\n"))
+        else:
+            outp.write("    MQTT_Output="+str(os.getenv("MQTT_OUTPUT","")+"\n"))
+            outp.write("    MQTT_Address=\""+str(os.getenv("MQTT_ADDRESS","")+"\"\n"))
+            outp.write("    MQTT_Username=\""+str(os.getenv("MQTT_USERNAME","")+"\"\n"))
+            outp.write("    MQTT_Password=\""+str(os.getenv("MQTT_PASSWORD","")+"\"\n"))
+            outp.write("    MQTT_Port="+str(os.getenv("MQTT_PORT","")+"\n"))
         if inv==1:
             outp.write("    MQTT_Topic=\""+str(os.getenv("MQTT_TOPIC","")+"\"\n"))
         else:
             outp.write("    MQTT_Topic=\""+str(os.getenv("MQTT_TOPIC_"+str(inv),"")+"\"\n"))
-        outp.write("    MQTT_Port="+str(os.getenv("MQTT_PORT","")+"\n"))
+
         outp.write("    Log_Level=\""+str(os.getenv("LOG_LEVEL","")+"\"\n"))
         #setup debug filename for each inv
         outp.write("    Influx_Output="+str(os.getenv("INFLUX_OUTPUT",""))+"\n")
