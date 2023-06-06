@@ -35,16 +35,16 @@ def palm_job():
 
 # test getting mqtt details direct from supervisor
 try:
-    logger.critical("SUPERVISOR_TOKEN is: "+ os.getenv("SUPERVISOR_TOKEN"))
+    logger.debug("SUPERVISOR_TOKEN is: "+ os.getenv("SUPERVISOR_TOKEN"))
     isAddon=True
     access_token = os.getenv("SUPERVISOR_TOKEN")
     url="http://supervisor/services/mqtt"
     result = requests.get(url,
           headers={'Content-Type':'application/json',
                    'Authorization': 'Bearer {}'.format(access_token)})
-    logger.critical ("MQTT Details are: "+str(result))
     mqttDetails=result.json()
     if mqttDetails['result']=="ok":
+        logger.critical ("HA MQTT Service has been found at "+str(mqttDetails['data']['host']))
         mqtt_host=mqttDetails['data']['host']
         mqtt_username=mqttDetails['data']['username']
         mqtt_password=mqttDetails['data']['password']
@@ -52,6 +52,7 @@ try:
         hasMQTT=True
     else:
         hasMQTT=False
+        logger.critical("No HA MQTT service has been found")
 except:
     logger.critical("SUPERVISOR TOKEN does not exist")
     isAddon=False
