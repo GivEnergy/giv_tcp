@@ -3,6 +3,3 @@
 
 # Stop the Nova Project files from getting published
 .nova
-
-# Stop any build files from getting published
-.sh
