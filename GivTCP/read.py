@@ -64,16 +64,16 @@ def getData(fullrefresh):  # Read from Invertor put in cache
 
         GEInv=plant.result[0]
         GEBat=plant.result[1]
+
+        multi_output['Last_Updated_Time'] = datetime.datetime.utcnow().replace(tzinfo=datetime.timezone.utc).isoformat()
+        multi_output['status'] = "online"
+        multi_output['Time_Since_Last_Update'] = 0  
         
     except:
         e = sys.exc_info()
         consecFails(e)
         temp['result'] = "Error collecting registers: " + str(e)
         return json.dumps(temp)
-
-    multi_output['Last_Updated_Time'] = datetime.datetime.utcnow().replace(tzinfo=datetime.timezone.utc).isoformat()
-    multi_output['status'] = "online"
-    multi_output['Time_Since_Last_Update'] = 0
 
     logger.debug("Invertor connection successful, registers retrieved")
 
@@ -88,35 +88,7 @@ def getData(fullrefresh):  # Read from Invertor put in cache
         invertorModel.generation=GEInv.inverter_generation
         invertorModel.phase=GEInv.inverter_phases
 
-        if GEInv.device_type_code[0] == "2":
-            if GEInv.device_type_code[1:4] == "001":
-                invertorModel.power = 5000
-            elif GEInv.device_type_code[1:4] == "002":
-                invertorModel.power = 4600
-            elif GEInv.device_type_code[1:4] == "003":
-                invertorModel.power = 3600
-        elif GEInv.device_type_code[0] == "3":
-            if GEInv.device_type_code[1:4] == "001":
-                invertorModel.power = 3000
-            elif GEInv.device_type_code[1:4] == "002":
-                invertorModel.power = 3600
-        elif GEInv.device_type_code[0] == "4":
-            if GEInv.device_type_code[1:4] == "001":
-                invertorModel.power = 6000
-            elif GEInv.device_type_code[1:4] == "002":
-                invertorModel.power = 8000
-            elif GEInv.device_type_code[1:4] == "003":
-                invertorModel.power = 10000
-            elif GEInv.device_type_code[1:4] == "003":
-                invertorModel.power = 11000
-        elif GEInv.device_type_code[0] == "5":
-            invertorModel.power=0
-        elif GEInv.device_type_code[0] == "6":
-            invertorModel.power=0
-        elif GEInv.device_type_code[0] == "7":
-            invertorModel.power=0
-        elif GEInv.device_type_code[0] == "8":
-            invertorModel.power=0
+        invertorModel.power=GivLUT.invPower(GEInv.device_type_code[0:4])
 
         if invertorModel.generation == 'Gen 1':
             if invertorModel.model == "AC":
@@ -685,7 +657,7 @@ def getCache():     # Get latest cache data and return it (for use in REST)
     with open(GivLUT.regcache, 'rb') as inp:
         regCacheStack = pickle.load(inp)
         multi_output = regCacheStack[4]
-    return multi_output
+    return json.dumps(multi_output, indent=4, sort_keys=True, default=str)
 
 def self_run2():
     counter = 0

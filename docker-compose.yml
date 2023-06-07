@@ -59,8 +59,7 @@ services:
       - PALM_MAX_SOC_TARGET=45        # Lower limit for SoC limit in shoulder months
       - PALM_BATT_RESERVE=4           # Battery reserve for power cuts (minmum of 4%)
       - PALM_BATT_UTILISATION=0.85    # Usable proportion of battery (100% less reserve and any charge limit) on a scale of 0-1
-      - PALM_CHARGE_RATE=2.5          # Inverter charge/discharge rate in kW
-      - PALM_BATT_CAPACITY=10.4       # Nominal battery capacity in kWh
+      - PALM_WEIGHT=35                # Weighting used for final target soc
 
     restart: always
     privileged: true

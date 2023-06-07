@@ -33,7 +33,7 @@ def palm_job():
     subprocess.Popen(["/usr/local/bin/python3","/app/GivTCP_1/palm_soc.py"])
     #subprocess.run('/app/GivTCP/palm_soc.py')
 
-    # test getting mqtt details direct from supervisor
+# test getting mqtt details direct from supervisor
 try:
     logger.critical("SUPERVISOR_TOKEN is: "+ os.getenv("SUPERVISOR_TOKEN"))
     access_token = os.getenv("SUPERVISOR_TOKEN")
@@ -41,7 +41,7 @@ try:
     result = requests.get(url,
           headers={'Content-Type':'application/json',
                    'Authorization': 'Bearer {}'.format(access_token)})
-    logger.critical ("MQTT Details are: "+str(result))
+    logger.critical ("MQTT Details are: "+str(result.text))
 except:
     logger.critical("SUPERVISOR TOKEN does not exist")
 

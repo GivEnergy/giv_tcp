@@ -1,6 +1,6 @@
 name:  "GivTCP"
 description:  "TCP Modbus connection to MQTT/JSON for Givenergy Battery/PV Invertors"
-version:  "2.1.13"
+version:  "2.1.14"
 image: britkat/giv_tcp-ma
 slug:  "givtcp"
 homeassistant_api: true
@@ -41,9 +41,9 @@ options:
   MQTT_PORT: 1883
   LOG_LEVEL: "Info"
   PRINT_RAW: True
-  SELF_RUN: True
+  SELF_RUN: True  #remove?
   SELF_RUN_LOOP_TIMER: 5
-  HA_AUTO_D: True
+  HA_AUTO_D: True #remove?
   DYNAMICTARIFF: False
   DAYRATE: "0.155"
   NIGHTRATE: "0.055"
@@ -55,22 +55,21 @@ options:
   INFLUX_TOKEN: ""
   INFLUX_BUCKET: ""
   INFLUX_ORG: ""
-  PYTHONPATH: "/app"
+  PYTHONPATH: "/app"  
   TZ: "Europe/London"
   WEB_DASH: False
   WEB_DASH_PORT: 3000
   HOSTIP: "homeassistant.local"
-  CACHELOCATION: "/config/GivTCP"
+  CACHELOCATION: "/config/GivTCP" #remove?
   DATASMOOTHER: "medium"
   SMARTTARGET: False
-  PALM_WINTER: "01,02,03,10,11,12"
-  PALM_SHOULDER: "04,05,09"
+  PALM_WINTER: "01,02,11,12"
+  PALM_SHOULDER: "03,04,09,10"
   PALM_MIN_SOC_TARGET: 25
   PALM_MAX_SOC_TARGET: 45
   PALM_BATT_RESERVE: 4
   PALM_BATT_UTILISATION: 0.85
-  PALM_CHARGE_RATE: 2.5
-  PALM_BATT_CAPACITY: 10.4
+  PALM_WEIGHT: 35
   GEAPI: ""
   SOLCASTAPI: ""
   SOLCASTSITEID: ""
@@ -124,8 +123,7 @@ schema:
   PALM_MAX_SOC_TARGET: int
   PALM_BATT_RESERVE: int
   PALM_BATT_UTILISATION: float
-  PALM_CHARGE_RATE: float
-  PALM_BATT_CAPACITY: float
+  PALM_WEIGHT: float
   GEAPI: "str?"
   SOLCASTAPI: "str?"
   SOLCASTSITEID: "str?"
