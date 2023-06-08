@@ -9,16 +9,16 @@ In basis of this project is a connection to a Modbus TCP server which runs on th
 
 
 ## Docker
-Reccomended usage is through the Docker container found here: https://hub.docker.com/repository/docker/britkat/giv_tcp-ma
-This will set up a self-running service which will publish data as required and provide a REST interface for control. An internal MQTT broker can be activiated to make data avalable on the network.
+Recommended usage is through the Docker container found here: https://hub.docker.com/repository/docker/britkat/giv_tcp-ma
+This will set up a self-running service which will publish data as required and provide a REST interface for control. An internal MQTT broker can be activated to make data available on the network.
   
-* Docker image is multi-architecture so docker should grab the correct version for your system (tested on x86 and rpi3)
-* Create a container with the relevant ENV variables below (mimicing the settings.py file)
+* Docker image is multi-architecture so Docker should grab the correct version for your system (tested on x86 and rpi3)
+* Create a container with the relevant ENV variables below (mimicking the settings.py file)
 * Set the container to auto-restart to ensure reliability
 * Out of the box the default setup enables local MQTT broker and REST service (see below for details)
 * Configuration via ENV as outlined below
 
-Installation via the docker-compose.yml file is recommended if not running through the Home Assistant addon.
+Installation via the docker-compose.yml file is recommended if not running through the Home Assistant add-on.
 
 ## Home Assistant Add-on
 This container can also be used as an add-on in Home Assistant.
@@ -31,7 +31,7 @@ The following configuration items are mandatory before the add-on can be started
 All other configuration items can be left as-is unless you need to change them. See the ENV below for full details
 
 ### Home Assistant Usage
-GivTCP will automatically create Home Assistant devices if "HA_AUTO_D" setting is True. This does require MQTT_OUTPUT to also be true and for GivTCP tp publish its data to the same MQTT broker as HA is listening to.
+GivTCP will automatically create Home Assistant devices if "HA_AUTO_D" setting is True. This does require MQTT_OUTPUT to also be true and for GivTCP to publish its data to the same MQTT broker as HA is listening to.
 This will populate HA with all devices and entities for control and monitoring. The key entities and their usage are outlined below:
 
 ## Settings - Environment Variables
@@ -113,7 +113,7 @@ Data Elements are:
 | getCache      | Retrieves data from the local cache returns it without publishing to MQTT etc...   | /getCache |
 | RunAll        | Runs both getData and pubFromPickle to refresh data and then publish               | /runAll   |
 
-If you have enabled the "SELF_RUN" setting (recommended) then the container/addon will automatically call "RunALL" every "SELF_LOOPTIMER" seconds and you will not need to use the REST commands here. If you wish to take data from GivTCP and push to another system, then you should call "getCache" which will return the json data without pushing to MQTT or other defined publish settings.
+If you have enabled the "SELF_RUN" setting (recommended) then the container/add-on will automatically call "RunALL" every "SELF_LOOPTIMER" seconds and you will not need to use the REST commands here. If you wish to take data from GivTCP and push to another system, then you should call "getCache" which will return the json data without pushing to MQTT or other defined publish settings.
 
 ## GivTCP Control
 | Function                | Description                                                                                                                                                                                               | REST URL                 | REST payload                                               | MQTT Topic              | MQTT Payload                                               |
@@ -134,16 +134,16 @@ If you have enabled the "SELF_RUN" setting (recommended) then the container/addo
 | setDateTime             | Sets   inverter time, format must be as define in payload                                                                                                                                                 | /setDateTime             | {"dateTime":"dd/mm/yyyy   hh:mm:ss"}                       | setDateTime             | "dd/mm/yyyy hh:mm:ss"                                      |
 
 ## Usage methods:
-GivTCP data and control is generally available through two core methods. If you are using the HA ADDON then these are generally transparent to th user, but are working and available in the background.
+GivTCP data and control is generally available through two core methods. If you are using the Home Assistant Add-On then these are generally transparent to the user, but are working and available in the background.
 
 ### MQTT
-By setting MQTT_OUTPUT = True The script will publish directly to the nominated MQTT broker (MQTT_ADDRESS) all the requested read data.
+By setting MQTT_OUTPUT = True, the script will publish directly to the nominated MQTT broker (MQTT_ADDRESS) all the requested read data.
 
 Data is published to "GivEnergy/<serial_number>/" by default or you can nominate a specific root topic by setting "MQTT_TOPIC" in the settings.
 
 <img width="245" alt="image" src="https://user-images.githubusercontent.com/69121158/149670766-0d9a6c92-8ee2-44d6-9045-2d21b6db7ebf.png">
 
-Control is available using MQTT. By publishing data to the smae MQTT broker as above you can trigger the control methods as per the above table.
+Control is available using MQTT. By publishing data to the same MQTT broker as above you can trigger the control methods as per the above table.
 Root topic for control is:
 "GivEnergy/<serial_number>/control/"    - Default
 "<MQTT_TOPIC>/<serial_number>/control/" - If MQTT_TOPIC is set
