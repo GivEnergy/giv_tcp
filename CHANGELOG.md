@@ -5,6 +5,10 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/)
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
+## [2.1.15] - 2023-06-08
+### Fixed
+- Fixed SmartTarget error for solcast calls with a single array
+
 ## [2.1.14] - 2023-06-05
 ### Fixed
 - REST /getCache endpoint fixed (incorrect json format)

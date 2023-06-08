@@ -62,13 +62,16 @@ class GE:
 
 # SolCast PV forecast generator. Up to two arrays are supported with a forecast for each
 class Solcast:
+    def isBlank (myString):
+        return not (myString and myString.strip())
+    
     enable = True
     key = str(os.getenv('SOLCASTAPI'))
     url_se = "https://api.solcast.com.au/rooftop_sites/"+str(os.getenv('SOLCASTSITEID'))
     
     # For single array installation uncomment the line below and comment out the subsequent line
     #url_sw = ""
-    if not str(os.getenv('SOLCASTSITEID2')).strip():
+    if not isBlank(str(os.getenv('SOLCASTSITEID2'))):
         url_sw = "https://api.solcast.com.au/rooftop_sites/"+str(os.getenv('SOLCASTSITEID2'))
     else:
         url_sw = ""
