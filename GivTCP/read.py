@@ -557,7 +557,7 @@ def getData(fullrefresh):  # Read from Invertor put in cache
             dataDiff = set(MOOList) - set(MOList)
             if len(dataDiff) > 0:
                 for key in dataDiff:
-                    logger.error(str(key)+" is missing from new data, publishing all other data")
+                    logger.debug(str(key)+" is missing from new data, publishing all other data")
 
         # Add new data to the stack
         regCacheStack.pop(0)
@@ -602,7 +602,7 @@ def consecFails(e):
             with open(GivLUT.oldDataCount, 'rb') as inp:
                 oldDataCount= pickle.load(inp)
             oldDataCount = oldDataCount + 1
-            if oldDataCount > 2:
+            if oldDataCount > 3:
                 logger.error("Consecutive failure count= "+str(oldDataCount) +" -- "+ str(e))
         else:
             oldDataCount = 1
