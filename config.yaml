@@ -43,6 +43,7 @@ options:
   PRINT_RAW: True
   SELF_RUN: True
   SELF_RUN_LOOP_TIMER: 5
+  QUEUE_RETRIES: 2
   HA_AUTO_D: True
   DYNAMICTARIFF: False
   DAYRATE: "0.155"
@@ -97,6 +98,7 @@ schema:
   PRINT_RAW: bool
   SELF_RUN: bool
   SELF_RUN_LOOP_TIMER: int
+  QUEUE_RETRIES: int
   HA_AUTO_D: bool
   DYNAMICTARIFF: bool
   DAYRATE: "str?"

@@ -95,7 +95,7 @@ def watchdog():
 # Loop round checking all processes are running
 # Do we need to get PIDs from earlier?
     while True:
-    # Check to see if anythign is due to be running, if not then just wait
+    # Check to see if anything is due to be running, if not then just wait
         for inv in range(1,int(os.getenv('NUMINVERTORS'))+1):
             GS = importlib.import_module('.settings.GiV_Settings', package='GivTCP_'+str(inv))
             PATH= "/app/GivTCP_"+str(inv)
@@ -186,6 +186,7 @@ for inv in range(1,int(os.getenv('NUMINVERTORS'))+1):
             outp.write("    first_run= True\n\n")
             outp.write("    self_run=True\n")
             outp.write("    self_run_timer=\"\"\n")
+            outp.write("    queue_retries=\n")   
             outp.write("    givtcp_instance=\""+str(inv)+"\"\n")
             outp.write("    default_path=\"\"\n")
             outp.write("    dynamic_tariff=True\n")

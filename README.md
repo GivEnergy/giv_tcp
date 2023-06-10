@@ -1,19 +1,19 @@
 # GivTCP
 ## TCP Modbus connection to MQTT/JSON for Givenergy Battery/PV Invertors
 
-This project allows connection to the GivEnergy invertors via TCP Modbus. Access is through the native Wifi/Ethernet dongle and can be connected to through either the local LAN network or directly through the inbuilt SSID AP.
+This project allows connection to the GivEnergy inverters via TCP Modbus. Access is through the native Wifi/Ethernet dongle and can be connected to through either the local LAN network or directly through the inbuilt SSID AP.
 
 In basis of this project is a connection to a Modbus TCP server which runs on the wifi dongle, so all you need is somewhere to run the script on the same network. You will need the following to make it work:
-* GivEnergy Invertor properly commissioned and working
-* IP address of the invertor
+* GivEnergy Inverter properly commissioned and working
+* IP address of the inverter
 
 
 ## Docker
-Reccomended usage is through the Docker container found here: https://hub.docker.com/repository/docker/britkat/giv_tcp-ma
-This will set up a self-running service which will publish data as required and provide a REST interface for control. An internal MQTT broker can be activiated to make data avalable on the network.
+Recommended usage is through the Docker container found here: https://hub.docker.com/repository/docker/britkat/giv_tcp-ma
+This will set up a self-running service which will publish data as required and provide a REST interface for control. An internal MQTT broker can be activated to make data available on the network.
   
 * Docker image is multi-architecture so docker should grab the correct version for your system (tested on x86 and rpi3)
-* Create a container with the relevant ENV variables below (mimicing the settings.py file)
+* Create a container with the relevant ENV variables below (mimicking the settings.py file)
 * Set the container to auto-restart to ensure reliability
 * Out of the box the default setup enables local MQTT broker and REST service (see below for details)
 * Configuration via ENV as outlined below
@@ -22,11 +22,11 @@ Installation via the docker-compose.yml file is recommended if not running throu
 
 ## Home Assistant Add-on
 This container can also be used as an add-on in Home Assistant.
-The add-on requires an existing MQTT broker such as Mosquitto, also available to install from the Add-on store.
+The add-on requires an existing MQTT broker such as Mosquito, also available to install from the Add-on store.
 To install GivTCP as an add-on, add this repository (https://github.com/britkat1980/giv_tcp) to the Add-on Store repository list.
 The following configuration items are mandatory before the add-on can be started:
 * Inverter IP address
-* MQTT username (can also be a Home Assistant user - used to authenticate againt your MQTT broker)
+* MQTT username (can also be a Home Assistant user - used to authenticate against your MQTT broker)
 * MQTT password
 All other configuration items can be left as-is unless you need to change them. See the ENV below for full details
 
@@ -62,6 +62,7 @@ This will populate HA with all devices and entities for control and monitoring. 
 | PRINT_RAW | False | Optional - If set to True the raw register values will be returned alongside the normal data |
 | SELF_RUN | True | Optional - If set to True the system will loop round connecting to invertor and publishing its data |
 | SELF_RUN_LOOP_TIMER | 5 | Optional - The wait time bewtween invertor calls when using SELF_RUN |
+| QUEUE_RETRIES | 2 | Required - The number of times GivTCP will attempt to push a value to the inverter |
 | INFLUX_OUTPUT | False | Optional - Used to enable publishing of energy and power data to influx |
 | INFLUX_TOKEN |abcdefg123456789| Optional - If using influx this is the token generated from within influxdb itself |
 | INFLUX_BUCKET |giv_bucket| Optional - If using influx this is data bucket to use|
@@ -95,7 +96,7 @@ This will populate HA with all devices and entities for control and monitoring. 
 
 ## GivTCP Read data
 
-GivTCP collects all invertor and battery data through the "runAll" function. It creates a nested data structure with all data available in a structured format.
+GivTCP collects all inverter and battery data through the "runAll" function. It creates a nested data structure with all data available in a structured format.
 Data Elements are:
 * Energy - Today and all-time Total
     * Today
@@ -103,7 +104,7 @@ Data Elements are:
 * Power - Real-time stats and power flow data
     * Power stats (eg. Import)
     * Power Flow (eg. Grid to House)
-* Invertor Details - Status details such as Serial Number
+* Inverter Details - Status details such as Serial Number
 * Timeslots - Charge and Discharge
 * Control - Charge/Discharge rates, Battery SOC
 * Battery Details - Status and real-time cell voltages
@@ -139,7 +140,7 @@ If you have enabled the "SELF_RUN" setting (recommended) then the container/addo
 | setDateTime             | Sets   invertor time, format must be as define in payload                                                                                                                                                 | /setDateTime             | {"dateTime":"dd/mm/yyyy   hh:mm:ss"}                       | setDateTime             | "dd/mm/yyyy hh:mm:ss"                                      |
 
 ## Usage methods:
-GivTCP data and control is generally available through two core methods. If you are using the HA ADDON then these are generally transparent to th user, but are working and available in the background.
+GivTCP data and control is generally available through two core methods. If you are using the HA ADDON then these are generally transparent to the user, but are working and available in the background.
 
 ### MQTT
 By setting MQTT_OUTPUT = True The script will publish directly to the nominated MQTT broker (MQTT_ADDRESS) all the requested read data.
@@ -148,16 +149,16 @@ Data is published to "GivEnergy/<serial_number>/" by default or you can nominate
 
 <img width="245" alt="image" src="https://user-images.githubusercontent.com/69121158/149670766-0d9a6c92-8ee2-44d6-9045-2d21b6db7ebf.png">
 
-Control is available using MQTT. By publishing data to the smae MQTT broker as above you can trigger the control methods as per the above table.
+Control is available using MQTT. By publishing data to the same MQTT broker as above you can trigger the control methods as per the above table.
 Root topic for control is:
 "GivEnergy/<serial_number>/control/"    - Default
 "<MQTT_TOPIC>/<serial_number>/control/" - If MQTT_TOPIC is set
 
 
 ### RESTful Service
-GivTCP provides a wrapper function REST.py which uses Flask to expose the read and control functions as RESTful http calls. To utilise this service you will need to either use a WSGI serivce such as gunicorn or use the pre-built Docker container.
+GivTCP provides a wrapper function REST.py which uses Flask to expose the read and control functions as RESTful http calls. To utilise this service you will need to either use a WSGI service such as gunicorn or use the pre-built Docker container.
 
 If Docker is running in Host mode then the REST service is available on port 6345
 
-This can be used within a Node-Red flow to integrate into your automation or using Home Assistany REST sensors unsing the Home Assistant yaml package provided.
+This can be used within a Node-Red flow to integrate into your automation or using Home Assistant REST sensors using the Home Assistant yaml package provided.
 NB.This does require the Docker container running on your network.
