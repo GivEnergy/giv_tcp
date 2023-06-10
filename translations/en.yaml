@@ -87,7 +87,7 @@ configuration:
   SELF_RUN_LOOP_TIMER:
     name: Self Run Loop Timer
     description: >-
-      often should GivTCP connect to the inverter to check for data when self run is enabled? Default is 5, measured in seconds.
+      How often should GivTCP connect to the inverter to check for data when self run is enabled? Default is 5, measured in seconds.
   QUEUE_RETRIES:
       name: Queue Retries
       description: >-
