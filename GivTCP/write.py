@@ -313,24 +313,24 @@ def FEResume(revert):
     logger.info("Reverting Force Export settings:")   
     payload['dischargeRate']=revert["dischargeRate"]
     from write import setDischargeRate
-    GivQueue.q.enqueue(setDischargeRate,payload,retry=Retry(max=2, interval=2))
+    GivQueue.q.enqueue(setDischargeRate,payload,retry=Retry(max=GiV_Settings.queue_retries, interval=2))
     payload={}
     payload['start']=revert["start_time"]
     payload['finish']=revert["end_time"]
     from write import setDischargeSlot2
-    GivQueue.q.enqueue(setDischargeSlot2,payload,retry=Retry(max=2, interval=2))
+    GivQueue.q.enqueue(setDischargeSlot2,payload,retry=Retry(max=GiV_Settings.queue_retries, interval=2))
     payoad={}
     payload['state']=revert['discharge_schedule']
     from write import enableDischargeSchedule
-    GivQueue.q.enqueue(enableDischargeSchedule,payload,retry=Retry(max=2, interval=2))
+    GivQueue.q.enqueue(enableDischargeSchedule,payload,retry=Retry(max=GiV_Settings.queue_retries, interval=2))
     payload={}
     payload['reservePercent']=revert["reservePercent"]
     from write import setBatteryReserve
-    GivQueue.q.enqueue(setBatteryReserve,payload,retry=Retry(max=2, interval=2))
+    GivQueue.q.enqueue(setBatteryReserve,payload,retry=Retry(max=GiV_Settings.queue_retries, interval=2))
     payload={}
     payload["mode"]=revert["mode"]
     from write import setBatteryMode
-    GivQueue.q.enqueue(setBatteryMode,payload,retry=Retry(max=2, interval=2))
+    GivQueue.q.enqueue(setBatteryMode,payload,retry=Retry(max=GiV_Settings.queue_retries, interval=2))
     os.remove(".FERunning")
 
 def forceExport(exportTime):
@@ -356,7 +356,7 @@ def forceExport(exportTime):
             payload={}
             payload['reservePercent']=4
             from write import setBatteryReserve
-            result=GivQueue.q.enqueue(setBatteryReserve,payload,retry=Retry(max=2, interval=2))     
+            result=GivQueue.q.enqueue(setBatteryReserve,payload,retry=Retry(max=GiV_Settings.queue_retries, interval=2))     
         except:
             logger.debug("Error Setting Reserve to 4%")
 
@@ -370,24 +370,24 @@ def forceExport(exportTime):
         payload['start']=slot2[0].strftime("%H:%M")
         payload['finish']=slot2[1].strftime("%H:%M")
         from write import setDischargeSlot2
-        result=GivQueue.q.enqueue(setDischargeSlot2,payload,retry=Retry(max=2, interval=2))  
+        result=GivQueue.q.enqueue(setDischargeSlot2,payload,retry=Retry(max=GiV_Settings.queue_retries, interval=2))  
 
         payload={}
         payload['mode']="Timed Export"
         from write import setBatteryMode
-        result=GivQueue.q.enqueue(setBatteryMode,payload,retry=Retry(max=2, interval=2))
+        result=GivQueue.q.enqueue(setBatteryMode,payload,retry=Retry(max=GiV_Settings.queue_retries, interval=2))
 
         payload={}
         payload['dischargeRate']=maxDischargeRate
         from write import setDischargeRate
-        result=GivQueue.q.enqueue(setDischargeRate,payload,retry=Retry(max=2, interval=2))
+        result=GivQueue.q.enqueue(setDischargeRate,payload,retry=Retry(max=GiV_Settings.queue_retries, interval=2))
         
         payload={}
         payload['state']="enable"
         from write import enableDischargeSchedule
-        result=GivQueue.q.enqueue(enableDischargeSchedule,payload,retry=Retry(max=2, interval=2))
+        result=GivQueue.q.enqueue(enableDischargeSchedule,payload,retry=Retry(max=GiV_Settings.queue_retries, interval=2))
 
-        if exists(".FERunning"):    # If a forcecharge is already running, change time of revert job to new end time
+        if exists(".FERunning"):    # If a force export is already running, change time of revert job to new end time
             logger.info("Force Export already running, changing end time")
             revert=getFEArgs()[0]   # set new revert object and cancel old revert job
         fejob=GivQueue.q.enqueue_in(timedelta(minutes=exportTime),FEResume,revert)
@@ -407,17 +407,17 @@ def FCResume(revert):
     logger.info("Reverting Force Charge Settings:")
     payload['chargeRate']=revert["chargeRate"]
     from write import setChargeRate
-    GivQueue.q.enqueue(setChargeRate,payload,retry=Retry(max=2, interval=2))
+    GivQueue.q.enqueue(setChargeRate,payload,retry=Retry(max=GiV_Settings.queue_retries, interval=2))
     payload={}
     payload['state']=revert["chargeScheduleEnable"]
     from write import enableChargeSchedule
-    GivQueue.q.enqueue(enableChargeSchedule,payload,retry=Retry(max=2, interval=2))
+    GivQueue.q.enqueue(enableChargeSchedule,payload,retry=Retry(max=GiV_Settings.queue_retries, interval=2))
     payload={}
     payload['start']=revert["start_time"]
     payload['finish']=revert["end_time"]
     payload['chargeToPercent']=revert["targetSOC"]
     from write import setChargeSlot1
-    GivQueue.q.enqueue(setChargeSlot1,payload,retry=Retry(max=2, interval=2))
+    GivQueue.q.enqueue(setChargeSlot1,payload,retry=Retry(max=GiV_Settings.queue_retries, interval=2))
     os.remove(".FCRunning")
 
 def cancelJob(jobid):
@@ -473,21 +473,21 @@ def forceCharge(chargeTime):
 
         payload['chargeRate']=maxChargeRate
         from write import setChargeRate
-        result=GivQueue.q.enqueue(setChargeRate,payload,retry=Retry(max=2, interval=2))
+        result=GivQueue.q.enqueue(setChargeRate,payload,retry=Retry(max=GiV_Settings.queue_retries, interval=2))
 
         payload={}
         payload['state']="enable"
         from write import enableChargeSchedule
-        result=GivQueue.q.enqueue(enableChargeSchedule,payload,retry=Retry(max=2, interval=2))
+        result=GivQueue.q.enqueue(enableChargeSchedule,payload,retry=Retry(max=GiV_Settings.queue_retries, interval=2))
 
         payload={}
         payload['start']=GivLUT.getTime(datetime.now())
         payload['finish']=GivLUT.getTime(datetime.now()+timedelta(minutes=chargeTime))
         payload['chargeToPercent']=100
         from write import setChargeSlot1
-        result=GivQueue.q.enqueue(setChargeSlot1,payload,retry=Retry(max=2, interval=2))
+        result=GivQueue.q.enqueue(setChargeSlot1,payload,retry=Retry(max=GiV_Settings.queue_retries, interval=2))
         
-        if exists(".FCRunning"):    # If a forcecharge is already running, change time of revert job to new end time
+        if exists(".FCRunning"):    # If a force charge is already running, change time of revert job to new end time
             logger.info("Force Charge already running, changing end time")
             revert=getFCArgs()[0]   # set new revert object and cancel old revert job
             logger.critical("new revert= "+ str(revert))
@@ -634,7 +634,7 @@ def setDateTime(payload):
     try:
         iDateTime=datetime.strptime(payload['dateTime'],"%d/%m/%Y %H:%M:%S")   #format '12/11/2021 09:15:32'
         logger.info("Setting Invertor time to: "+iDateTime)
-        #Set Date and Time on Invertor
+        #Set Date and Time on Inverter
         client.set_datetime(iDateTime)
         temp['result']="Invertor time setting was a success"
 
@@ -646,7 +646,7 @@ def setDateTime(payload):
 
 def switchRate(payload):
     temp={}
-    if GiV_Settings.dynamic_tariff == False:     # Only allow this control if Dyanmic control is enabled
+    if GiV_Settings.dynamic_tariff == False:     # Only allow this control if Dynamic control is enabled
         temp['result']="External rate setting not allowed. Enale Dynamic Tariff in settings"
         logger.error(temp['result'])
         return json.dumps(temp)
