@@ -62,7 +62,7 @@ This will populate HA with all devices and entities for control and monitoring. 
 | PRINT_RAW | False | Optional - If set to True the raw register values will be returned alongside the normal data |
 | SELF_RUN | True | Optional - If set to True the system will loop round connecting to invertor and publishing its data |
 | SELF_RUN_LOOP_TIMER | 5 | Optional - The wait time bewtween invertor calls when using SELF_RUN |
-| QUEUE_RETRIES | 2 | Required - The number of times GivTCP will attempt to push a value to the inverter |
+| QUEUE_RETRIES | 2 | Optional - The number of times GivTCP will attempt to push a value to the inverter |
 | INFLUX_OUTPUT | False | Optional - Used to enable publishing of energy and power data to influx |
 | INFLUX_TOKEN |abcdefg123456789| Optional - If using influx this is the token generated from within influxdb itself |
 | INFLUX_BUCKET |giv_bucket| Optional - If using influx this is data bucket to use|
