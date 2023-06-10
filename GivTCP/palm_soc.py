@@ -428,7 +428,7 @@ class GivEnergyObj:
                         min(stgs.GE.charge_rate, (est_gen - total_load))))
 
                 # Capture min charge on lowest down-slope before charge exceeds 100% append
-                # max xharge if on an up slope after overnight charge
+                # max charge if on an up slope after overnight charge
                 if (batt_charge[i] <= batt_charge[i - 1] and
                     max_charge < batt_max_charge):
                     min_charge = min(min_charge, batt_charge[i])
