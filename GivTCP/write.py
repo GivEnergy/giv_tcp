@@ -214,7 +214,7 @@ def setChargeRate(payload):
 def setDischargeRate(payload):
     temp={}
     if type(payload) is not dict: payload=json.loads(payload)
-    # Get invertor max bat power
+    # Get inverter max bat power
     if exists(GivLUT.regcache):      # if there is a cache then grab it
         with open(GivLUT.regcache, 'rb') as inp:
             regCacheStack = pickle.load(inp)
@@ -230,12 +230,13 @@ def setDischargeRate(payload):
         try:
             client.set_battery_discharge_limit(target)
             temp['result']="Setting Discharge Rate was a success"
+            logger.info (temp['result']) 
         except:
             e = sys.exc_info()
             temp['result']="Setting Discharge Rate failed: " + str(e)
             logger.error (temp['result'])
     else:
-        temp['result']="Setting Disharge Rate failed: No discharge rate limit available"
+        temp['result']="Setting Discharge Rate failed: No discharge rate limit available"
         logger.error (temp['result'])        
     return json.dumps(temp)
 
@@ -283,7 +284,7 @@ def setDischargeSlot1(payload):
         logger.info("Setting Discharge Slot 1 to: "+str(payload['start'])+" - "+str(payload['finish']))
         client.set_discharge_slot_1((strt,fnsh))
         temp['result']="Setting Discharge Slot 1 was a success"
-
+        logger.info(temp['result'])
     except:
         e = sys.exc_info()
         temp['result']="Setting Discharge Slot 1 failed: " + str(e)
@@ -301,7 +302,7 @@ def setDischargeSlot2(payload):
         logger.info("Setting Discharge Slot 2 to: "+str(payload['start'])+" - "+str(payload['finish']))
         client.set_discharge_slot_2((datetime.strptime(payload['start'],"%H:%M"),datetime.strptime(payload['finish'],"%H:%M")))
         temp['result']="Setting Discharge Slot 2 was a success"
-
+        logger.info(temp['result'])
     except:
         e = sys.exc_info()
         temp['result']="Setting Discharge Slot 2 failed: " + str(e)
@@ -323,12 +324,13 @@ def FEResume(revert):
     payload['state']=revert['discharge_schedule']
     from write import enableDischargeSchedule
     GivQueue.q.enqueue(enableDischargeSchedule,payload,retry=Retry(max=GiV_Settings.queue_retries, interval=2))
-    payload={}
-    payload['reservePercent']=revert["reservePercent"]
-    from write import setBatteryReserve
-    GivQueue.q.enqueue(setBatteryReserve,payload,retry=Retry(max=GiV_Settings.queue_retries, interval=2))
+    #   payload={}
+    #   payload['reservePercent']=revert["reservePercent"]
+    #   from write import setBatteryReserve
+    #   GivQueue.q.enqueue(setBatteryReserve,payload,retry=Retry(max=GiV_Settings.queue_retries, interval=2))     
     payload={}
     payload["mode"]=revert["mode"]
+    payload['reservePercent']=revert["reservePercent"]    
     from write import setBatteryMode
     GivQueue.q.enqueue(setBatteryMode,payload,retry=Retry(max=GiV_Settings.queue_retries, interval=2))
     os.remove(".FERunning")
@@ -356,7 +358,7 @@ def forceExport(exportTime):
             payload={}
             payload['reservePercent']=4
             from write import setBatteryReserve
-            result=GivQueue.q.enqueue(setBatteryReserve,payload,retry=Retry(max=GiV_Settings.queue_retries, interval=2))     
+            result=GivQueue.q.enqueue(setBatteryReserve,payload,retry=Retry(max=GiV_Settings.queue_retries, interval=2))   
         except:
             logger.debug("Error Setting Reserve to 4%")
 
@@ -373,11 +375,13 @@ def forceExport(exportTime):
         result=GivQueue.q.enqueue(setDischargeSlot2,payload,retry=Retry(max=GiV_Settings.queue_retries, interval=2))  
 
         payload={}
+        logger.debug("Calling setBatteryMode with parameter Timed Export")
         payload['mode']="Timed Export"
         from write import setBatteryMode
         result=GivQueue.q.enqueue(setBatteryMode,payload,retry=Retry(max=GiV_Settings.queue_retries, interval=2))
 
         payload={}
+        logger.debug("Max discharge rate for inverter is: " + str(maxDischargeRate))
         payload['dischargeRate']=maxDischargeRate
         from write import setDischargeRate
         result=GivQueue.q.enqueue(setDischargeRate,payload,retry=Retry(max=GiV_Settings.queue_retries, interval=2))
@@ -584,15 +588,21 @@ def setBatteryMode(payload):
     logger.info("Setting Battery Mode to: "+str(payload['mode']))
     try:
         if payload['mode']=="Eco":
+            logger.info("Setting system to Dynamic / Eco mode")
             client.set_mode_dynamic()
             time.sleep(1)
-            client.set_shallow_charge(getSavedBatteryReservePercentage())
+            logger.info("Setting the batteries shallow reserve percentage to " + str(payload['reservePercent']))
+            client.set_shallow_charge(payload['reservePercent'])
         elif payload['mode']=="Eco (Paused)":
+            logger.info("Setting system to Dynamic / Eco mode")
             client.set_mode_dynamic()
             time.sleep(1)
+            logger.info("Setting the batteries shallow charge/reserve percentage to 100%")
             client.set_shallow_charge(100)
         elif payload['mode']=="Timed Demand":
+            logger.info("Set the battery to discharge to match demand (no export) when discharging")
             client.set_battery_discharge_mode_demand()
+            logger.info("Enabling discharge mode")
             client.enable_discharge()
 #            if exists(GivLUT.regcache):      # if there is a cache then grab it
 #                with open(GivLUT.regcache, 'rb') as inp:
@@ -605,7 +615,9 @@ def setBatteryMode(payload):
 #            else:
 #                client.set_mode_storage()
         elif payload['mode']=="Timed Export":
+            logger.info("Set the battery to discharge at maximum power (export) when discharging")
             client.set_battery_discharge_mode_max_power()
+            logger.info("Enabling discharge mode")
             client.enable_discharge()
 #            if exists(GivLUT.regcache):      # if there is a cache then grab it
 #                with open(GivLUT.regcache, 'rb') as inp:

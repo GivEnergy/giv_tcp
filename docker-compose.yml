@@ -47,7 +47,7 @@ services:
       - DAYRATESTART=05:30            # Time in HH:MM when your day time\expensive tariff kicks in
       - NIGHTRATESTART=23:30          # Time in HH:MM when your night time\cheap tariff kicks in
       - WEB_DASH=False                # Enable the web dashboard
-      - WEB_DASH_PORT=3000            # Port to serve the web dashboard on
+      - WEB_DASH_PORT=3000            # Port to serve the web dashboard on. Should be the same as the private port (above), not the container port
       - SMARTTARGET=False             # Enables the PALM capability, requires the three ENV below to be set
       - GEAPI=                        # API Key for the GivEnergy Cloud
       - SOLCASTAPI=                   # API key for Solcast
