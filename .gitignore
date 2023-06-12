@@ -8,4 +8,4 @@
 .gitignore
 
 # Stop the build file being published
-.sh
+buildx.sh
