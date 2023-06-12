@@ -1,24 +1,24 @@
 # GivTCP
-## TCP Modbus connection to MQTT/JSON for Givenergy Battery/PV Invertors
+## TCP Modbus connection to MQTT/JSON for Givenergy Battery/PV Inverters
 
-This project allows connection to the GivEnergy invertors via TCP Modbus. Access is through the native Wifi/Ethernet dongle and can be connected to through either the local LAN network or directly through the inbuilt SSID AP.
+This project allows connection to the GivEnergy inverters via TCP Modbus. Access is through the native Wifi/Ethernet dongle and can be connected to through either the local LAN network or directly through the inbuilt SSID AP.
 
 In basis of this project is a connection to a Modbus TCP server which runs on the wifi dongle, so all you need is somewhere to run the script on the same network. You will need the following to make it work:
-* GivEnergy Invertor properly commissioned and working
-* IP address of the invertor
+* GivEnergy Inverter properly commissioned and working
+* IP address of the inverter
 
 
 ## Docker
-Reccomended usage is through the Docker container found here: https://hub.docker.com/repository/docker/britkat/giv_tcp-ma
-This will set up a self-running service which will publish data as required and provide a REST interface for control. An internal MQTT broker can be activiated to make data avalable on the network.
+Recommended usage is through the Docker container found here: https://hub.docker.com/repository/docker/britkat/giv_tcp-ma
+This will set up a self-running service which will publish data as required and provide a REST interface for control. An internal MQTT broker can be activated to make data available on the network.
   
-* Docker image is multi-architecture so docker should grab the correct version for your system (tested on x86 and rpi3)
-* Create a container with the relevant ENV variables below (mimicing the settings.py file)
+* Docker image is multi-architecture so Docker should grab the correct version for your system (tested on x86 and rpi3)
+* Create a container with the relevant ENV variables below (mimicking the settings.py file)
 * Set the container to auto-restart to ensure reliability
 * Out of the box the default setup enables local MQTT broker and REST service (see below for details)
 * Configuration via ENV as outlined below
 
-Installation via the docker-compose.yml file is recommended if not running through the Home Assistant addon.
+Installation via the docker-compose.yml file is recommended if not running through the Home Assistant add-on.
 
 ## Home Assistant Add-on
 This container can also be used as an add-on in Home Assistant.
@@ -31,45 +31,40 @@ The following configuration items are mandatory before the add-on can be started
 All other configuration items can be left as-is unless you need to change them. See the ENV below for full details
 
 ### Home Assistant Usage
-GivTCP will automatically create Home Assistant devices if "HA_AUTO_D" setting is True. This does require MQTT_OUTPUT to also be true and for GivTCP tp publish its data to the same MQTT broker as HA is listening to.
+GivTCP will automatically create Home Assistant devices if "HA_AUTO_D" setting is True. This does require MQTT_OUTPUT to also be true and for GivTCP to publish its data to the same MQTT broker as HA is listening to.
 This will populate HA with all devices and entities for control and monitoring. The key entities and their usage are outlined below:
-
-- One
-- Two
-- Three
-
 
 ## Settings - Environment Variables
 
 | ENV Name                | Example       |  Description                      |
 | ----------------------- | ------------- |  -------------------------------- |
-| NUMINVERTORS | 1 | Number of invertors on the network. Max invertors supprted is three |
-| INVERTOR_IP_1 |192.168.10.1 | IP Address of your first invertor  |
-| NUMBATTERIES_1 | 1 | Number of battery units connected to the first invertor |
-| INVERTOR_IP_2 |192.168.10.1 | Optional - IP Address of your second invertor |
-| NUMBATTERIES_2 | 1 | Optional - Number of battery units connected to the second invertor |
-| INVERTOR_IP_3 |192.168.10.1 | Optional - IP Address of your third invertor |
-| NUMBATTERIES_3 | 1 | Optional - Number of battery units connected to the third invertor |
+| NUMINVERTORS | 1 | Number of inverters on the network. Max inverters supprted is three |
+| INVERTOR_IP_1 |192.168.10.1 | IP Address of your first inverter  |
+| NUMBATTERIES_1 | 1 | Number of battery units connected to the first inverter |
+| INVERTOR_IP_2 |192.168.10.1 | Optional - IP Address of your second inverter |
+| NUMBATTERIES_2 | 1 | Optional - Number of battery units connected to the second inverter |
+| INVERTOR_IP_3 |192.168.10.1 | Optional - IP Address of your third inverter |
+| NUMBATTERIES_3 | 1 | Optional - Number of battery units connected to the third inverter |
 | MQTT_OUTPUT | True | Optional if set to True then MQTT_ADDRESS is required |
 | MQTT_ADDRESS | 127.0.0.1 | Optional (but required if OUTPUT is set to MQTT) |
 | MQTT_USERNAME | bob | Optional |
 | MQTT_PASSWORD | cat | Optional |
 | MQTT_TOPIC | GivEnergy/Data | Optional - default is Givenergy.<serial number>|
-| MQTT_TOPIC_2 | GivEnergy/Data | Optional - Setting for second Invertor if configured. default is Givenergy.<serial number>|
-| MQTT_TOPIC_2 | GivEnergy/Data | Optional - Setting for third Invertor if configured. default is Givenergy.<serial number>|
+| MQTT_TOPIC_2 | GivEnergy/Data | Optional - Setting for second Inverter if configured. default is Givenergy.<serial number>|
+| MQTT_TOPIC_2 | GivEnergy/Data | Optional - Setting for third Inverter if configured. default is Givenergy.<serial number>|
 | LOG_LEVEL | Error | Optional - you can choose Error, Info or Debug. Output will be sent to the debug file location if specified, otherwise it is sent to stdout|
 | DEBUG_FILE_LOCATION | /usr/pi/data | Optional  |
 | PRINT_RAW | False | Optional - If set to True the raw register values will be returned alongside the normal data |
-| SELF_RUN | True | Optional - If set to True the system will loop round connecting to invertor and publishing its data |
-| SELF_RUN_LOOP_TIMER | 5 | Optional - The wait time bewtween invertor calls when using SELF_RUN |
+| SELF_RUN | True | Optional - If set to True the system will loop round connecting to inverter and publishing its data |
+| SELF_RUN_LOOP_TIMER | 5 | Optional - The wait time bewtween inverter calls when using SELF_RUN |
 | INFLUX_OUTPUT | False | Optional - Used to enable publishing of energy and power data to influx |
 | INFLUX_TOKEN |abcdefg123456789| Optional - If using influx this is the token generated from within influxdb itself |
 | INFLUX_BUCKET |giv_bucket| Optional - If using influx this is data bucket to use|
 | INFLUX_ORG |giv_tcp| Optional - If using influx this is the org that the token is assigned to | 
-| HA_AUTO_D | True | Optional - If set to true and MQTT is enabled, it will publish Home Assistant Auto Discovery messages, which will allow Home Assistant to automagically create all entitites and devices to allow read and control of your Invertor |
-| HADEVICEPREFIX | GivTCP | Optional - Prefix to be placed in front of every Home Assistent entity created by the above for invertor 1 |
-| HADEVICEPREFIX_2 | GivTCP | Optional - Prefix to be placed in front of every Home Assistent entity created by the above for invertor 2 |
-| HADEVICEPREFIX_3 | GivTCP | Optional - Prefix to be placed in front of every Home Assistent entity created by the above for invertor 3 |
+| HA_AUTO_D | True | Optional - If set to true and MQTT is enabled, it will publish Home Assistant Auto Discovery messages, which will allow Home Assistant to automagically create all entitites and devices to allow read and control of your Inverter |
+| HADEVICEPREFIX | GivTCP | Optional - Prefix to be placed in front of every Home Assistent entity created by the above for inverter 1 |
+| HADEVICEPREFIX_2 | GivTCP | Optional - Prefix to be placed in front of every Home Assistent entity created by the above for inverter 2 |
+| HADEVICEPREFIX_3 | GivTCP | Optional - Prefix to be placed in front of every Home Assistent entity created by the above for inverter 3 |
 | DAYRATE | 0.155 | Optional - Cost of your daytime energy if using Economy 7 or Octopus Go |
 | NIGHTRATE | 0.155 | Optional - Cost of your night time energy if using Economy 7 or Octopus Go |
 | DYNAMICTARIFF | False | Optional - Allows an external automation to trigger switch to 'Day' or 'Night' tariff rates. If set to true it ignores the times set below|
@@ -95,7 +90,7 @@ This will populate HA with all devices and entities for control and monitoring. 
 
 ## GivTCP Read data
 
-GivTCP collects all invertor and battery data through the "runAll" function. It creates a nested data structure with all data available in a structured format.
+GivTCP collects all inverter and battery data through the "runAll" function. It creates a nested data structure with all data available in a structured format.
 Data Elements are:
 * Energy - Today and all-time Total
     * Today
@@ -103,7 +98,7 @@ Data Elements are:
 * Power - Real-time stats and power flow data
     * Power stats (eg. Import)
     * Power Flow (eg. Grid to House)
-* Invertor Details - Status details such as Serial Number
+* Inverter Details - Status details such as Serial Number
 * Timeslots - Charge and Discharge
 * Control - Charge/Discharge rates, Battery SOC
 * Battery Details - Status and real-time cell voltages
@@ -113,18 +108,18 @@ Data Elements are:
 
 | Function      | Description                                                                        | REST URL  |
 |---------------|------------------------------------------------------------------------------------|-----------|
-| getData       | This connects to the invertor, collects all data and stores a cache for publishing | /getData  |
+| getData       | This connects to the inverter, collects all data and stores a cache for publishing | /getData  |
 | readData      | Retrieves data from the local cache and publishes data according to the settings   | /readData |
 | getCache      | Retrieves data from the local cache returns it without publishing to MQTT etc...   | /getCache |
 | RunAll        | Runs both getData and pubFromPickle to refresh data and then publish               | /runAll   |
 
-If you have enabled the "SELF_RUN" setting (recommended) then the container/addon will automatically call "RunALL" every "SELF_LOOPTIMER" seconds and you will not need to use the REST commands here. If you wish to take data from GivTCP and push to another system, then you should call "getCache" which will return the json data without pushing to MQTT or other defined publish settings.
+If you have enabled the "SELF_RUN" setting (recommended) then the container/add-on will automatically call "RunALL" every "SELF_LOOPTIMER" seconds and you will not need to use the REST commands here. If you wish to take data from GivTCP and push to another system, then you should call "getCache" which will return the json data without pushing to MQTT or other defined publish settings.
 
 ## GivTCP Control
 | Function                | Description                                                                                                                                                                                               | REST URL                 | REST payload                                               | MQTT Topic              | MQTT Payload                                               |
 |-------------------------|-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|--------------------------|------------------------------------------------------------|-------------------------|------------------------------------------------------------|
-| enableChargeTarget      | Sets   invertor to follow setChargeTarget value when charging from grid (will stop   charging when battery SOC= ChargeTarget)                                                                             | /enableChargeTarget      | {"state","enable"}                                         | enableChargeTarget      | enable                                                     |
-| disableChargeTarget     | Sets   invertor to ignore setChargeTarget value when charging from grid (will   continue to charge to 100% during ChargeSlot)                                                                             | /disableChargeTarget     | {"state","enable"}                                         | disableChargeTarget     | enable                                                     |
+| enableChargeTarget      | Sets   inverter to follow setChargeTarget value when charging from grid (will stop   charging when battery SOC= ChargeTarget)                                                                             | /enableChargeTarget      | {"state","enable"}                                         | enableChargeTarget      | enable                                                     |
+| disableChargeTarget     | Sets   inverter to ignore setChargeTarget value when charging from grid (will   continue to charge to 100% during ChargeSlot)                                                                             | /disableChargeTarget     | {"state","enable"}                                         | disableChargeTarget     | enable                                                     |
 | enableChargeSchedule    | Sets   the Charging schedule state, if disabled the battery will not charge as per   the schedule                                                                                                         | /enableChargeSchedule    | {"state","enable"}                                         | enableChargeSchedule    | enable                                                     |
 | enableDischargeSchedule | Sets   the Discharging schedule state, if disabled the battery will will ignore rhe   discharge schedule and discharge as per demand (similar to eco mode)                                                | /enableDischargeSchedule | {"state","enable"}                                         | enableDischargeSchedule | enable                                                     |
 | enableDischarge         | Enable/Disables Discharging to instantly pause discharging,   use 'enable' or 'disable'                                                                                                                   | /enableDischarge         | {"state","enable"}                                         | enableDischarge         | enable                                                     |
@@ -136,19 +131,19 @@ If you have enabled the "SELF_RUN" setting (recommended) then the container/addo
 | setDischargeSlot1       | Sets   the time and target SOC of the first dischargeslot. Times must be expressed   in hhmm format. Enable flag show in the battery.api documentation is not   needed and dischargeToPercent is optional | /setDischargeSlot1       | {"start":"0100","finish":"0400","dischargeToPercent":"55") | setDischargeSlot1       | {"start":"0100","finish":"0400","dischargeToPercent":"55") |
 | setDischargeSlot2       | Sets   the time and target SOC of the first dischargeslot. Times must be expressed   in hhmm format. Enable flag show in the battery.api documentation is not   needed and dischargeToPercent is optional | /setDischargeSlot2       | {"start":"0100","finish":"0400","dischargeToPercent":"55") | setDischargeSlot2       | {"start":"0100","finish":"0400","dischargeToPercent":"55") |
 | setBatteryMode          | Sets   battery operation mode. Mode value must be one of Eco, Timed Demand or Timed Export                                                                                                                                        | /setBatteryMode          | {"mode":"Eco"}                                               | setBatteryMode          | 1                                                          |
-| setDateTime             | Sets   invertor time, format must be as define in payload                                                                                                                                                 | /setDateTime             | {"dateTime":"dd/mm/yyyy   hh:mm:ss"}                       | setDateTime             | "dd/mm/yyyy hh:mm:ss"                                      |
+| setDateTime             | Sets   inverter time, format must be as define in payload                                                                                                                                                 | /setDateTime             | {"dateTime":"dd/mm/yyyy   hh:mm:ss"}                       | setDateTime             | "dd/mm/yyyy hh:mm:ss"                                      |
 
 ## Usage methods:
-GivTCP data and control is generally available through two core methods. If you are using the HA ADDON then these are generally transparent to th user, but are working and available in the background.
+GivTCP data and control is generally available through two core methods. If you are using the Home Assistant Add-On then these are generally transparent to the user, but are working and available in the background.
 
 ### MQTT
-By setting MQTT_OUTPUT = True The script will publish directly to the nominated MQTT broker (MQTT_ADDRESS) all the requested read data.
+By setting MQTT_OUTPUT = True, the script will publish directly to the nominated MQTT broker (MQTT_ADDRESS) all the requested read data.
 
 Data is published to "GivEnergy/<serial_number>/" by default or you can nominate a specific root topic by setting "MQTT_TOPIC" in the settings.
 
 <img width="245" alt="image" src="https://user-images.githubusercontent.com/69121158/149670766-0d9a6c92-8ee2-44d6-9045-2d21b6db7ebf.png">
 
-Control is available using MQTT. By publishing data to the smae MQTT broker as above you can trigger the control methods as per the above table.
+Control is available using MQTT. By publishing data to the same MQTT broker as above you can trigger the control methods as per the above table.
 Root topic for control is:
 "GivEnergy/<serial_number>/control/"    - Default
 "<MQTT_TOPIC>/<serial_number>/control/" - If MQTT_TOPIC is set
