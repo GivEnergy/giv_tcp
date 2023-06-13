@@ -388,7 +388,7 @@ class GivEnergyObj:
         tgt_soc = 100
         if gen_fcast.pv_est50_day[0] > 0:
             if MNTH_VAR in stgs.GE.winter and commit:  # No need for sums...
-                print("info; winter month, SoC set to 100%")
+                logger.debug("info; winter month, SoC set to 100%")
                 self.set_mode("set_soc_winter")
                 return
 
@@ -459,12 +459,12 @@ class GivEnergyObj:
             tgt_soc = max(200 - max_charge_pcnt, 100 - min_charge_pcnt, low_soc)
             tgt_soc = int(min(tgt_soc, 100))  # Limit range to 100%
 
-            logger.info("{:<25} {:>10} {:>10} {:>10} {:>10} {:>10}".format("SoC Calc Summary;",
+            logger.debug("{:<25} {:>10} {:>10} {:>10} {:>10} {:>10}".format("SoC Calc Summary;",
                 "Max Charge", "Min Charge", "Max %", "Min %", "Target SoC"))
-            logger.info("{:<25} {:>10} {:>10} {:>10} {:>10} {:>10}".format("SoC Calc Summary;",
+            logger.debug("{:<25} {:>10} {:>10} {:>10} {:>10} {:>10}".format("SoC Calc Summary;",
                 round(max_charge, 2), round(min_charge, 2),
                 max_charge_pcnt, min_charge_pcnt, tgt_soc))
-            logger.info("{:<25} {:>10} {:>10} {:>10} {:>10} {:>10}".format("SoC (Adjusted);",
+            logger.debug("{:<25} {:>10} {:>10} {:>10} {:>10} {:>10}".format("SoC (Adjusted);",
                 round(max_charge, 2), round(min_charge, 2),
                 max_charge_pcnt - 100 + tgt_soc, min_charge_pcnt - 100 + tgt_soc, "\n"))
 
