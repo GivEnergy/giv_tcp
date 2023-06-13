@@ -375,7 +375,6 @@ def forceExport(exportTime):
         result=GivQueue.q.enqueue(setDischargeSlot2,payload,retry=Retry(max=GiV_Settings.queue_retries, interval=2))  
 
         payload={}
-        logger.debug("Calling setBatteryMode with parameter Timed Export")
         payload['mode']="Timed Export"
         from write import setBatteryMode
         result=GivQueue.q.enqueue(setBatteryMode,payload,retry=Retry(max=GiV_Settings.queue_retries, interval=2))
