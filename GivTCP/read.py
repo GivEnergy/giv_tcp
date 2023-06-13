@@ -49,6 +49,7 @@ def getData(fullrefresh):  # Read from Inverter put in cache
     multi_output = {}
     result = {}
     temp = {}
+    
     logger.debug("----------------------------Starting----------------------------")
     logger.debug("Getting All Registers")
 
@@ -962,7 +963,8 @@ def dataSmoother2(dataNew, dataOld, lastUpdate):
                 logger.debug("Midnight and "+str(name)+" so accepting value as is")
                 return (dataNew)
             if newData < float(lookup.min) or newData > float(lookup.max):  # If outside min and max ranges
-                logger.debug(str(name)+" is outside of allowable bounds so using old value: "+str(newData))
+                logger.debug(str(name)+" is outside of allowable bounds so using old value. Out of bounds value is: "+str(newData) +
+                   ". Min limit: " + str(lookup.min) + ". Max limit: " + str(lookup.max))
                 return(oldData)
             if newData == 0 and not lookup.allowZero:  # if zero and not allowed to be
                 logger.debug(str(name)+" is Zero so using old value")
