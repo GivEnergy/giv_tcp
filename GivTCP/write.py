@@ -324,13 +324,12 @@ def FEResume(revert):
     payload['state']=revert['discharge_schedule']
     from write import enableDischargeSchedule
     GivQueue.q.enqueue(enableDischargeSchedule,payload,retry=Retry(max=GiV_Settings.queue_retries, interval=2))
-    #   payload={}
-    #   payload['reservePercent']=revert["reservePercent"]
-    #   from write import setBatteryReserve
-    #   GivQueue.q.enqueue(setBatteryReserve,payload,retry=Retry(max=GiV_Settings.queue_retries, interval=2))     
+    payload={}
+    payload['reservePercent']=revert["reservePercent"]
+    from write import setBatteryReserve
+    GivQueue.q.enqueue(setBatteryReserve,payload,retry=Retry(max=GiV_Settings.queue_retries, interval=2))     
     payload={}
     payload["mode"]=revert["mode"]
-    payload['reservePercent']=revert["reservePercent"]    
     from write import setBatteryMode
     GivQueue.q.enqueue(setBatteryMode,payload,retry=Retry(max=GiV_Settings.queue_retries, interval=2))
     os.remove(".FERunning")
@@ -590,8 +589,6 @@ def setBatteryMode(payload):
             logger.info("Setting system to Dynamic / Eco mode")
             client.set_mode_dynamic()
             time.sleep(1)
-            logger.info("Setting the batteries shallow reserve percentage to " + str(payload['reservePercent']))
-            client.set_shallow_charge(payload['reservePercent'])
         elif payload['mode']=="Eco (Paused)":
             logger.info("Setting system to Dynamic / Eco mode")
             client.set_mode_dynamic()
