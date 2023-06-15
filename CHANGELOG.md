@@ -5,6 +5,14 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/)
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
+## [2.1.16] - 2023-06-12
+### Fixed
+- Type error in MQTT publishing handled gracefully
+- Grid Current scaling factor corrected (x10)
+### Added
+- Updated SmartTarget to PALM 0.9.2 (Thanks Steve Lewis)
+- Charge and Discharge time remaining entities (mins till full charge/discharge at current power rate)
+  
 ## [2.1.15] - 2023-06-08
 ### Fixed
 - Fixed SmartTarget error for solcast calls with a single array
