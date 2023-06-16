@@ -11,7 +11,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 - Grid Current scaling factor corrected (x10)
 ### Added
 - Updated SmartTarget to PALM 0.9.2 (Thanks Steve Lewis)
-- Charge and Discharge time remaining entities (mins till full charge/discharge at current power rate)
+- Charge and Discharge time remaining entities (mins till full charge/discharge at current power rate) and absolute time to hit Target SOC/Battery Reserve
 - Gen 3 invertors now recognised
 - MQTT Auto recognition. If using the Mosquitto addon in HA it will now auto connect, removing need for MQTT configuration
   

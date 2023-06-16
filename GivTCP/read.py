@@ -17,6 +17,7 @@ from os.path import exists
 import os
 import math
 from rq import Retry
+from datetime import timedelta
 
 logging.getLogger("givenergy_modbus").setLevel(logging.CRITICAL)
 logging.getLogger("rq.worker").setLevel(logging.CRITICAL)
@@ -103,6 +104,7 @@ def getData(fullrefresh):  # Read from Invertor put in cache
         # Calc max charge rate
         invertorModel.batmaxrate=min(maxInvChargeRate, (GEInv.battery_nominal_capacity*51.2)/2)
 
+############  Energy Stats    ############
 
         # Total Energy Figures
         logger.debug("Getting Total Energy Data")
@@ -149,7 +151,7 @@ def getData(fullrefresh):  # Read from Invertor put in cache
                     os.remove(GivLUT.regcache)
 
 
-        ############  Core Power Stats    ############
+############  Core Power Stats    ############
 
         # PV Power
         logger.debug("Getting PV Power")
@@ -208,7 +210,7 @@ def getData(fullrefresh):  # Read from Invertor put in cache
         power_output['Self_Consumption_Power'] = max(Load_power - import_power, 0)
 
 
-        ############  Power Flow Stats    ############
+############  Power Flow Stats    ############
 
         # Solar to H/B/G
         logger.debug("Getting Solar to H/B/G Power Flows")
@@ -264,73 +266,9 @@ def getData(fullrefresh):  # Read from Invertor put in cache
                 energy_total_output['Battery_Charge_Energy_Total_kWh'] = GEInv.e_battery_charge_total
                 energy_total_output['Battery_Discharge_Energy_Total_kWh'] = GEInv.e_battery_discharge_total
 
-            # Battery Power
-            Battery_power = GEInv.p_battery
-            if Battery_power >= 0:
-                discharge_power = abs(Battery_power)
-                charge_power = 0
-                if discharge_power!=0:
-                    power_output['Discharge_Time_Remaining'] = float(power_output['SOC_kWh'] / (discharge_power/1000)) * 60
-                else:
-                    power_output['Discharge_Time_Remaining'] = 0
-                power_output['Charge_Time_Remaining'] = 0
-            elif Battery_power <= 0:
-                discharge_power = 0
-                charge_power = abs(Battery_power)
-                power_output['Discharge_Time_Remaining'] = 0
-                if charge_power!=0:
-                    power_output['Charge_Time_Remaining'] = ((((GEInv.battery_nominal_capacity*51.2)/1000) - power_output['SOC_kWh']) / (charge_power/1000)) * 60
-                else:
-                    power_output['Charge_Time_Remaining'] = 0
-            power_output['Battery_Power'] = Battery_power
-            power_output['Charge_Power'] = charge_power
-            power_output['Discharge_Power'] = discharge_power
 
-            # Power flows
-            logger.debug("Getting Solar to H/B/G Power Flows")
-            if PV_power > 0:
-                S2H = min(PV_power, Load_power)
-                power_flow_output['Solar_to_House'] = S2H
-                S2B = max((PV_power-S2H)-export_power, 0)
-                power_flow_output['Solar_to_Battery'] = S2B
-                power_flow_output['Solar_to_Grid'] = max(PV_power - S2H - S2B, 0)
+######## Get Control Data ########
 
-            else:
-                power_flow_output['Solar_to_House'] = 0
-                power_flow_output['Solar_to_Battery'] = 0
-                power_flow_output['Solar_to_Grid'] = 0
-
-            # Battery to House
-            logger.debug("Getting Battery to House Power Flow")
-            B2H = max(discharge_power-export_power, 0)
-            power_flow_output['Battery_to_House'] = B2H
-
-            # Grid to Battery/House Power
-            logger.debug("Getting Grid to Battery/House Power Flow")
-            if import_power > 0:
-                power_flow_output['Grid_to_Battery'] = charge_power-max(PV_power-Load_power, 0)
-                power_flow_output['Grid_to_House'] = max(import_power-charge_power, 0)
-
-            else:
-                power_flow_output['Grid_to_Battery'] = 0
-                power_flow_output['Grid_to_House'] = 0
-
-            # Battery to Grid Power
-            logger.debug("Getting Battery to Grid Power Flow")
-            if export_power > 0:
-                power_flow_output['Battery_to_Grid'] = max(discharge_power-B2H, 0)
-            else:
-                power_flow_output['Battery_to_Grid'] = 0
-
-        # Check for all zeros
-        checksum = 0
-        for item in energy_total_output:
-            checksum = checksum+energy_total_output[item]
-        if checksum == 0:
-            raise ValueError("All zeros returned by Invertor, skipping update")
-
-
-        ######## Get Control Data ########
         logger.debug("Getting mode control figures")
         # Get Control Mode registers
         if GEInv.enable_charge == True:
@@ -443,6 +381,85 @@ def getData(fullrefresh):  # Read from Invertor put in cache
             controlmode['Temp_Pause_Discharge'] = "Running"
         else:
             controlmode['Temp_Pause_Discharge'] = "Normal"
+
+
+############  Battery Power Stats    ############
+
+            # Battery Power
+            Battery_power = GEInv.p_battery
+            if Battery_power >= 0:
+                discharge_power = abs(Battery_power)
+                charge_power = 0
+                if discharge_power!=0:
+                    # Time to get from current SOC to battery Reserve at the current rate
+                    power_output['Discharge_Time_Remaining'] = int((((GEInv.battery_nominal_capacity*51.2)/1000)*((power_output['SOC'] - controlmode['Battery_Power_Reserve'])/100) / (discharge_power/1000)) * 60)
+                    finaltime=datetime.datetime.utcnow() + timedelta(minutes=power_output['Discharge_Time_Remaining'])
+                    power_output['Discharge_Time_End'] = finaltime.replace(tzinfo=datetime.timezone.utc).isoformat()
+                else:
+                    power_output['Discharge_Time_Remaining'] = 0
+                    power_output['Discharge_Time_End'] = datetime.datetime.utcnow().replace(tzinfo=datetime.timezone.utc).isoformat()
+                power_output['Charge_Time_Remaining'] = 0
+                power_output['Charge_Time_End'] = finaltime.replace(tzinfo=datetime.timezone.utc).isoformat()
+            elif Battery_power <= 0:
+                discharge_power = 0
+                charge_power = abs(Battery_power)
+                power_output['Discharge_Time_Remaining'] = 0
+                power_output['Discharge_Time_End'] = datetime.datetime.utcnow().replace(tzinfo=datetime.timezone.utc).isoformat()
+                if charge_power!=0:
+                    # Time to get from current SOC to target SOC at the current rate (Target SOC-Current SOC)xBattery Capacity
+                    power_output['Charge_Time_Remaining'] = int((((GEInv.battery_nominal_capacity*51.2)/1000)*((controlmode['Target_SOC'] - power_output['SOC'])/100) / (charge_power/1000)) * 60)
+                    finaltime=datetime.datetime.utcnow() + timedelta(minutes=power_output['Charge_Time_Remaining'])
+                    power_output['Charge_Time_End'] = finaltime.replace(tzinfo=datetime.timezone.utc).isoformat()
+                else:
+                    power_output['Charge_Time_Remaining'] = 0
+                    power_output['Charge_Time_End'] = datetime.datetime.utcnow().replace(tzinfo=datetime.timezone.utc).isoformat()
+            power_output['Battery_Power'] = Battery_power
+            power_output['Charge_Power'] = charge_power
+            power_output['Discharge_Power'] = discharge_power
+
+            # Power flows
+            logger.debug("Getting Solar to H/B/G Power Flows")
+            if PV_power > 0:
+                S2H = min(PV_power, Load_power)
+                power_flow_output['Solar_to_House'] = S2H
+                S2B = max((PV_power-S2H)-export_power, 0)
+                power_flow_output['Solar_to_Battery'] = S2B
+                power_flow_output['Solar_to_Grid'] = max(PV_power - S2H - S2B, 0)
+
+            else:
+                power_flow_output['Solar_to_House'] = 0
+                power_flow_output['Solar_to_Battery'] = 0
+                power_flow_output['Solar_to_Grid'] = 0
+
+            # Battery to House
+            logger.debug("Getting Battery to House Power Flow")
+            B2H = max(discharge_power-export_power, 0)
+            power_flow_output['Battery_to_House'] = B2H
+
+            # Grid to Battery/House Power
+            logger.debug("Getting Grid to Battery/House Power Flow")
+            if import_power > 0:
+                power_flow_output['Grid_to_Battery'] = charge_power-max(PV_power-Load_power, 0)
+                power_flow_output['Grid_to_House'] = max(import_power-charge_power, 0)
+
+            else:
+                power_flow_output['Grid_to_Battery'] = 0
+                power_flow_output['Grid_to_House'] = 0
+
+            # Battery to Grid Power
+            logger.debug("Getting Battery to Grid Power Flow")
+            if export_power > 0:
+                power_flow_output['Battery_to_Grid'] = max(discharge_power-B2H, 0)
+            else:
+                power_flow_output['Battery_to_Grid'] = 0
+
+        # Check for all zeros
+        checksum = 0
+        for item in energy_total_output:
+            checksum = checksum+energy_total_output[item]
+        if checksum == 0:
+            raise ValueError("All zeros returned by Invertor, skipping update")
+
 
         ######## Grab Timeslots ########
         timeslots = {}
