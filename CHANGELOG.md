@@ -5,6 +5,28 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/)
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
+## [2.1.16] - 2023-06-12
+### Fixed
+- Type error in MQTT publishing handled gracefully
+- Grid Current scaling factor corrected (x10)
+### Added
+- Updated SmartTarget to PALM 0.9.2 (Thanks Steve Lewis)
+- Charge and Discharge time remaining entities (mins till full charge/discharge at current power rate)
+- Gen 3 invertors now recognised
+- MQTT Auto recognition. If using the Mosquitto addon in HA it will now auto connect, removing need for MQTT configuration
+  
+## [2.1.15] - 2023-06-08
+### Fixed
+- Fixed SmartTarget error for solcast calls with a single array
+
+## [2.1.14] - 2023-06-05
+### Fixed
+- REST /getCache endpoint fixed (incorrect json format)
+- Minor updates to README.md documentation
+- Refactored Force Export to use queuing for more reliable revert
+### Added
+- Updated SmartTarget to PALM 0.8.5 (Thanks Stephen Lewis)
+
 ## [2.1.13] - 2023-05-13
 ### Fixed
 - REST /getCache endpoint fixed (incorrect json format)
