@@ -12,6 +12,8 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 ### Added
 - Updated SmartTarget to PALM 0.9.2 (Thanks Steve Lewis)
 - Charge and Discharge time remaining entities (mins till full charge/discharge at current power rate)
+- Gen 3 invertors now recognised
+- MQTT Auto recognition. If using the Mosquitto addon in HA it will now auto connect, removing need for MQTT configuration
   
 ## [2.1.15] - 2023-06-08
 ### Fixed
