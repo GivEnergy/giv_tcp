@@ -87,8 +87,7 @@ def getData(fullrefresh):  # Read from Invertor put in cache
         invertorModel.model=GEInv.inverter_model
         invertorModel.generation=GEInv.inverter_generation
         invertorModel.phase=GEInv.inverter_phases
-
-        invertorModel.power=GivLUT.invPower(GEInv.device_type_code[0:4])
+        invertorModel.power=GEInv.inverter_maxpower
 
         if invertorModel.generation == 'Gen 1':
             if invertorModel.model == "AC":
