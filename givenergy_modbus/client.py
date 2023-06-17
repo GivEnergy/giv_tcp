@@ -113,6 +113,14 @@ class GivEnergyClient:
         self.modbus_client.write_holding_register(HoldingRegister.CHARGE_SLOT_1_START, int(times[0].strftime('%H%M')))
         self.modbus_client.write_holding_register(HoldingRegister.CHARGE_SLOT_1_END, int(times[1].strftime('%H%M')))
 
+    def set_charge_slot_start_1(self, timeslot: time):
+        """Set first charge slot start time."""
+        self.modbus_client.write_holding_register(HoldingRegister.CHARGE_SLOT_1_START, int(timeslot.strftime('%H%M')))
+
+    def set_charge_slot_end_1(self, timeslot: time):
+        """Set first charge slot end time."""
+        self.modbus_client.write_holding_register(HoldingRegister.CHARGE_SLOT_1_END, int(timeslot.strftime('%H%M')))
+
     def reset_charge_slot_1(self):
         """Reset first charge slot times to zero/disabled."""
         self.modbus_client.write_holding_register(HoldingRegister.CHARGE_SLOT_1_START, 0)
@@ -122,6 +130,14 @@ class GivEnergyClient:
         """Set second charge slot times."""
         self.modbus_client.write_holding_register(HoldingRegister.CHARGE_SLOT_2_START, int(times[0].strftime('%H%M')))
         self.modbus_client.write_holding_register(HoldingRegister.CHARGE_SLOT_2_END, int(times[1].strftime('%H%M')))
+
+    def set_charge_slot_start_2(self, timeslot: time):
+        """Set first charge slot start time."""
+        self.modbus_client.write_holding_register(HoldingRegister.CHARGE_SLOT_2_START, int(timeslot.strftime('%H%M')))
+
+    def set_charge_slot_end_2(self, timeslot: time):
+        """Set first charge slot end time."""
+        self.modbus_client.write_holding_register(HoldingRegister.CHARGE_SLOT_2_END, int(timeslot.strftime('%H%M')))
 
     def reset_charge_slot_2(self):
         """Reset second charge slot times to zero/disabled."""
@@ -135,6 +151,14 @@ class GivEnergyClient:
         )
         self.modbus_client.write_holding_register(HoldingRegister.DISCHARGE_SLOT_1_END, int(times[1].strftime('%H%M')))
 
+    def set_discharge_slot_start_1(self, timeslot: time):
+        """Set first charge slot start time."""
+        self.modbus_client.write_holding_register(HoldingRegister.DISCHARGE_SLOT_1_START, int(timeslot.strftime('%H%M')))
+
+    def set_discharge_slot_end_1(self, timeslot: time):
+        """Set first charge slot end time."""
+        self.modbus_client.write_holding_register(HoldingRegister.DISCHARGE_SLOT_1_END, int(timeslot.strftime('%H%M')))   
+
     def reset_discharge_slot_1(self):
         """Reset first discharge slot times to zero/disabled."""
         self.modbus_client.write_holding_register(HoldingRegister.DISCHARGE_SLOT_1_START, 0)
@@ -146,6 +170,14 @@ class GivEnergyClient:
             HoldingRegister.DISCHARGE_SLOT_2_START, int(times[0].strftime('%H%M'))
         )
         self.modbus_client.write_holding_register(HoldingRegister.DISCHARGE_SLOT_2_END, int(times[1].strftime('%H%M')))
+
+    def set_discharge_slot_start_2(self, timeslot: time):
+        """Set first charge slot start time."""
+        self.modbus_client.write_holding_register(HoldingRegister.DISCHARGE_SLOT_2_START, int(timeslot.strftime('%H%M')))
+
+    def set_discharge_slot_end_2(self, timeslot: time):
+        """Set first charge slot end time."""
+        self.modbus_client.write_holding_register(HoldingRegister.DISCHARGE_SLOT_2_END, int(timeslot.strftime('%H%M')))  
 
     def reset_discharge_slot_2(self):
         """Reset first discharge slot times to zero/disabled."""

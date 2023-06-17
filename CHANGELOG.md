@@ -13,7 +13,11 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 - Updated SmartTarget to PALM 0.9.2 (Thanks Steve Lewis)
 - Charge and Discharge time remaining entities (mins till full charge/discharge at current power rate) and absolute time to hit Target SOC/Battery Reserve
 - Gen 3 invertors now recognised
-- MQTT Auto recognition. If using the Mosquitto addon in HA it will now auto connect, removing need for MQTT configuration
+- MQTT Auto recognition. If using the Mosquitto addon in HA it will now auto connect, removing need for MQTT configuration before running
+- Refactored Write.py to always use the Redis Queue, to remove contention on modbus comms and create more reliable control signals
+- Configurable retries on write commands to allow for installations with less reliable comms (Thanks @Ed-M72)
+- Modified givenergy-modbus library to allow single timeslot control, to allow better integration with select controls in HA
+- Individual timeslot start/end control, to remove race condition for setting start and end together
   
 ## [2.1.15] - 2023-06-08
 ### Fixed

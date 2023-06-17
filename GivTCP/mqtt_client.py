@@ -96,59 +96,59 @@ def on_message(client, userdata, message):
         writecommand['val']=str(message.payload.decode("utf-8"))
         wr.setShallowCharge(writecommand)
     elif command=="setChargeStart1":
-        if exists(GivLUT.regcache):
-            with open(GivLUT.regcache, 'rb') as inp:
-                regCacheStack= pickle.load(inp)
-            multi_output=regCacheStack[4]
-            finish=multi_output['Timeslots']['Charge_end_time_slot_1']
-            payload['start']=message.payload.decode("utf-8")[:5]
-            payload['finish']=finish[:5]
-            wr.setChargeSlot1(payload)
+        #if exists(GivLUT.regcache):
+            #with open(GivLUT.regcache, 'rb') as inp:
+            #    regCacheStack= pickle.load(inp)
+            #multi_output=regCacheStack[4]
+            #finish=multi_output['Timeslots']['Charge_end_time_slot_1']
+        payload['start']=message.payload.decode("utf-8")[:5]
+            #payload['finish']=finish[:5]
+        wr.setChargeSlotStart1(payload)
     elif command=="setChargeEnd1":
-        if exists(GivLUT.regcache):
-            with open(GivLUT.regcache, 'rb') as inp:
-                regCacheStack= pickle.load(inp)
-            multi_output=regCacheStack[4]
-            start=multi_output['Timeslots']['Charge_start_time_slot_1']
-            payload['finish']=message.payload.decode("utf-8")[:5]
-            payload['start']=start[:5]
-            wr.setChargeSlot1(payload)
+        #if exists(GivLUT.regcache):
+        #    with open(GivLUT.regcache, 'rb') as inp:
+        #        regCacheStack= pickle.load(inp)
+        #    multi_output=regCacheStack[4]
+        #    start=multi_output['Timeslots']['Charge_start_time_slot_1']
+        payload['finish']=message.payload.decode("utf-8")[:5]
+        #    payload['start']=start[:5]
+        wr.setChargeSlotEnd1(payload)
     elif command=="setDischargeStart1":
-        if exists(GivLUT.regcache):
-            with open(GivLUT.regcache, 'rb') as inp:
-                regCacheStack= pickle.load(inp)
-            multi_output=regCacheStack[4]
-            finish=multi_output['Timeslots']['Discharge_end_time_slot_1']
-            payload['start']=message.payload.decode("utf-8")[:5]
-            payload['finish']=finish[:5]
-            wr.setDischargeSlot1(payload)
+        #if exists(GivLUT.regcache):
+        #    with open(GivLUT.regcache, 'rb') as inp:
+        #        regCacheStack= pickle.load(inp)
+        #    multi_output=regCacheStack[4]
+        #    finish=multi_output['Timeslots']['Discharge_end_time_slot_1']
+        payload['start']=message.payload.decode("utf-8")[:5]
+        #    payload['finish']=finish[:5]
+        wr.setDischargeSlotStart1(payload)
     elif command=="setDischargeEnd1":
-        if exists(GivLUT.regcache):
-            with open(GivLUT.regcache, 'rb') as inp:
-                regCacheStack= pickle.load(inp)
-            multi_output=regCacheStack[4]
-            start=multi_output['Timeslots']['Discharge_start_time_slot_1']
-            payload['finish']=message.payload.decode("utf-8")[:5]
-            payload['start']=start[:5]
-            wr.setDischargeSlot1(payload)
+        #if exists(GivLUT.regcache):
+        #    with open(GivLUT.regcache, 'rb') as inp:
+        #        regCacheStack= pickle.load(inp)
+        #    multi_output=regCacheStack[4]
+        #    start=multi_output['Timeslots']['Discharge_start_time_slot_1']
+        payload['finish']=message.payload.decode("utf-8")[:5]
+        #    payload['start']=start[:5]
+        wr.setDischargeSlotEnd1(payload)
     elif command=="setDischargeStart2":
-        if exists(GivLUT.regcache):
-            with open(GivLUT.regcache, 'rb') as inp:
-                regCacheStack= pickle.load(inp)
-            multi_output=regCacheStack[4]
-            finish=multi_output['Timeslots']['Discharge_end_time_slot_2']
-            payload['start']=message.payload.decode("utf-8")[:5]
-            payload['finish']=finish[:5]
-            wr.setDischargeSlot2(payload)
+        #if exists(GivLUT.regcache):
+        #    with open(GivLUT.regcache, 'rb') as inp:
+        #        regCacheStack= pickle.load(inp)
+        #    multi_output=regCacheStack[4]
+        #    finish=multi_output['Timeslots']['Discharge_end_time_slot_2']
+        payload['start']=message.payload.decode("utf-8")[:5]
+        #    payload['finish']=finish[:5]
+        wr.setDischargeSlotStart2(payload)
     elif command=="setDischargeEnd2":
-        if exists(GivLUT.regcache):
-            with open(GivLUT.regcache, 'rb') as inp:
-                regCacheStack= pickle.load(inp)
-            multi_output=regCacheStack[4]
-            start=multi_output['Timeslots']['Discharge_start_time_slot_2']
-            payload['finish']=message.payload.decode("utf-8")[:5]
-            payload['start']=start[:5]
-            wr.setDischargeSlot2(payload)
+        #if exists(GivLUT.regcache):
+        #    with open(GivLUT.regcache, 'rb') as inp:
+        #        regCacheStack= pickle.load(inp)
+        #    multi_output=regCacheStack[4]
+        #    start=multi_output['Timeslots']['Discharge_start_time_slot_2']
+        payload['finish']=message.payload.decode("utf-8")[:5]
+        #    payload['start']=start[:5]
+        wr.setDischargeSlotEnd2(payload)
     elif command=="tempPauseDischarge":
         if isfloat(message.payload.decode("utf-8")):
             writecommand=float(message.payload.decode("utf-8"))

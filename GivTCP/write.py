@@ -211,6 +211,50 @@ def sds1(payload):
         temp['result']="Setting Discharge Slot 2 failed: " + str(e)
         logger.error (temp['result'])
     return json.dumps(temp)
+def sdss1(payload):
+    temp={}
+    try:
+        client.set_discharge_slot_start_1((datetime.strptime(payload['start'],"%H:%M")))
+        temp['result']="Setting Discharge Slot Start 1 was a success"
+    except:
+        e = sys.exc_info()
+        temp['result']="Setting Discharge Slot Start 1 failed: " + str(e)
+        logger.error (temp['result'])
+    return json.dumps(temp)
+
+def sdse1(payload):
+    temp={}
+    try:
+        client.set_discharge_slot_end_1((datetime.strptime(payload['finish'],"%H:%M")))
+        temp['result']="Setting Discharge Slot End 1 was a success"
+    except:
+        e = sys.exc_info()
+        temp['result']="Setting Discharge Slot End 1 failed: " + str(e)
+        logger.error (temp['result'])
+    return json.dumps(temp)
+
+def sdss2(payload):
+    temp={}
+    try:
+        client.set_discharge_slot_start_2((datetime.strptime(payload['start'],"%H:%M")))
+        temp['result']="Setting Discharge Slot Start 2 was a success"
+    except:
+        e = sys.exc_info()
+        temp['result']="Setting Discharge Slot Start 2 failed: " + str(e)
+        logger.error (temp['result'])
+    return json.dumps(temp)
+
+def sdse2(payload):
+    temp={}
+    try:
+        client.set_discharge_slot_end_2((datetime.strptime(payload['finish'],"%H:%M")))
+        temp['result']="Setting Discharge Slot End 2 was a success"
+    except:
+        e = sys.exc_info()
+        temp['result']="Setting Discharge Slot End 2 failed: " + str(e)
+        logger.error (temp['result'])
+    return json.dumps(temp)
+
 def sds2(payload):
     temp={}
     try:
@@ -226,12 +270,34 @@ def scs1(payload):
     temp={}
     try:
         client.set_charge_slot_1((datetime.strptime(payload['start'],"%H:%M"),datetime.strptime(payload['finish'],"%H:%M")))
-        temp['result']="Setting Discharge Slot 2 was a success"
+        temp['result']="Setting Charge Slot 1 was a success"
     except:
         e = sys.exc_info()
-        temp['result']="Setting Discharge Slot 2 failed: " + str(e)
+        temp['result']="Setting Charge Slot 1 failed: " + str(e)
         logger.error (temp['result'])
     return json.dumps(temp)
+def scss1(payload):
+    temp={}
+    try:
+        client.set_charge_slot_start_1((datetime.strptime(payload['start'],"%H:%M")))
+        temp['result']="Setting Charge Slot Start 1 was a success"
+    except:
+        e = sys.exc_info()
+        temp['result']="Setting Charge Slot Start 1 failed: " + str(e)
+        logger.error (temp['result'])
+    return json.dumps(temp)
+
+def scse1(payload):
+    temp={}
+    try:
+        client.set_charge_slot_end_1((datetime.strptime(payload['finish'],"%H:%M")))
+        temp['result']="Setting Charge Slot End 1 was a success"
+    except:
+        e = sys.exc_info()
+        temp['result']="Setting Charge Slot End 1 failed: " + str(e)
+        logger.error (temp['result'])
+    return json.dumps(temp)
+
 def scs2(payload):
     temp={}
     try:
@@ -241,6 +307,27 @@ def scs2(payload):
     except:
         e = sys.exc_info()
         temp['result']="Setting Discharge Slot 2 failed: " + str(e)
+        logger.error (temp['result'])
+    return json.dumps(temp)
+def scss2(payload):
+    temp={}
+    try:
+        client.set_charge_slot_start_2((datetime.strptime(payload['start'],"%H:%M")))
+        temp['result']="Setting Charge Slot Start 2 was a success"
+    except:
+        e = sys.exc_info()
+        temp['result']="Setting Charge Slot Start 2 failed: " + str(e)
+        logger.error (temp['result'])
+    return json.dumps(temp)
+
+def scse2(payload):
+    temp={}
+    try:
+        client.set_charge_slot_end_2((datetime.strptime(payload['finish'],"%H:%M")))
+        temp['result']="Setting Charge Slot End 2 was a success"
+    except:
+        e = sys.exc_info()
+        temp['result']="Setting Charge Slot End 2 failed: " + str(e)
         logger.error (temp['result'])
     return json.dumps(temp)
     
@@ -509,6 +596,34 @@ def setChargeSlot1(payload):
         logger.error (temp['result'])
     return json.dumps(temp)
 
+def setChargeSlotStart1(payload):
+    temp={}
+    if type(payload) is not dict: payload=json.loads(payload)
+    try:
+        logger.info("Setting Charge Slot 1 Start to: "+str(payload['start']))
+        from write import scss1
+        result=GivQueue.q.enqueue(scss1,payload,retry=Retry(max=2, interval=2))
+        temp['result']="Setting Charge Slot Start 1 was a success"
+    except:
+        e = sys.exc_info()
+        temp['result']="Setting Charge Slot 1 failed: " + str(e)
+        logger.error (temp['result'])
+    return json.dumps(temp)
+
+def setChargeSlotEnd1(payload):
+    temp={}
+    if type(payload) is not dict: payload=json.loads(payload)
+    try:
+        logger.info("Setting Charge Slot End 1 to: "+str(payload['finish']))
+        from write import scse1
+        result=GivQueue.q.enqueue(scse1,payload,retry=Retry(max=2, interval=2))
+        temp['result']="Setting Charge Slot End 1 was a success"
+    except:
+        e = sys.exc_info()
+        temp['result']="Setting Charge Slot 1 failed: " + str(e)
+        logger.error (temp['result'])
+    return json.dumps(temp)
+
 def setChargeSlot2(payload):
     temp={}
     if type(payload) is not dict: payload=json.loads(payload)
@@ -521,6 +636,34 @@ def setChargeSlot2(payload):
         from write import scs2
         result=GivQueue.q.enqueue(scs2,payload,retry=Retry(max=2, interval=2))
         temp['result']="Setting Charge Slot 2 was a success"
+    except:
+        e = sys.exc_info()
+        temp['result']="Setting Charge Slot 2 failed: " + str(e)
+        logger.error (temp['result'])
+    return json.dumps(temp)
+
+def setChargeSlotStart2(payload):
+    temp={}
+    if type(payload) is not dict: payload=json.loads(payload)
+    try:
+        logger.info("Setting Charge Slot 2 Start to: "+str(payload['start']))
+        from write import scss2
+        result=GivQueue.q.enqueue(scss2,payload,retry=Retry(max=2, interval=2))
+        temp['result']="Setting Charge Slot Start 2 was a success"
+    except:
+        e = sys.exc_info()
+        temp['result']="Setting Charge Slot 2 failed: " + str(e)
+        logger.error (temp['result'])
+    return json.dumps(temp)
+
+def setChargeSlotEnd2(payload):
+    temp={}
+    if type(payload) is not dict: payload=json.loads(payload)
+    try:
+        logger.info("Setting Charge Slot End 2 to: "+str(payload['finish']))
+        from write import scse2
+        result=GivQueue.q.enqueue(scse2,payload,retry=Retry(max=2, interval=2))
+        temp['result']="Setting Charge Slot End 2 was a success"
     except:
         e = sys.exc_info()
         temp['result']="Setting Charge Slot 2 failed: " + str(e)
@@ -548,6 +691,35 @@ def setDischargeSlot1(payload):
         logger.error (temp['result'])
     return json.dumps(temp)
 
+def setDischargeSlotStart1(payload):
+    temp={}
+    if type(payload) is not dict: payload=json.loads(payload)
+    try:
+        logger.info("Setting Discharge Slot 1 Start to: "+str(payload['start']))
+        from write import sdss1
+        result=GivQueue.q.enqueue(sdss1,payload,retry=Retry(max=2, interval=2))
+        temp['result']="Setting Discharge Slot Start 1 was a success"
+    except:
+        e = sys.exc_info()
+        temp['result']="Setting Discharge Slot 1 failed: " + str(e)
+        logger.error (temp['result'])
+    return json.dumps(temp)
+
+def setDischargeSlotEnd1(payload):
+    temp={}
+    if type(payload) is not dict: payload=json.loads(payload)
+    try:
+        logger.info("Setting Discharge Slot End 1 to: "+str(payload['finish']))
+        from write import sdse1
+        result=GivQueue.q.enqueue(sdse1,payload,retry=Retry(max=2, interval=2))
+        temp['result']="Setting Discharge Slot End 1 was a success"
+    except:
+        e = sys.exc_info()
+        temp['result']="Setting Discharge Slot 1 failed: " + str(e)
+        logger.error (temp['result'])
+    return json.dumps(temp)
+
+
 def setDischargeSlot2(payload):
     temp={}
     targetresult="Success"
@@ -562,6 +734,34 @@ def setDischargeSlot2(payload):
         result=GivQueue.q.enqueue(sds2,payload,retry=Retry(max=2, interval=2))
         temp['result']="Setting Discharge Slot 2 was a success"
 
+    except:
+        e = sys.exc_info()
+        temp['result']="Setting Discharge Slot 2 failed: " + str(e)
+        logger.error (temp['result'])
+    return json.dumps(temp)
+
+def setDischargeSlotStart2(payload):
+    temp={}
+    if type(payload) is not dict: payload=json.loads(payload)
+    try:
+        logger.info("Setting Discharge Slot 2 Start to: "+str(payload['start']))
+        from write import sdss2
+        result=GivQueue.q.enqueue(sdss2,payload,retry=Retry(max=2, interval=2))
+        temp['result']="Setting Discharge Slot Start 2 was a success"
+    except:
+        e = sys.exc_info()
+        temp['result']="Setting Discharge Slot 2 failed: " + str(e)
+        logger.error (temp['result'])
+    return json.dumps(temp)
+
+def setDischargeSlotEnd2(payload):
+    temp={}
+    if type(payload) is not dict: payload=json.loads(payload)
+    try:
+        logger.info("Setting Discharge Slot End 2 to: "+str(payload['finish']))
+        from write import sdse2
+        result=GivQueue.q.enqueue(sdse2,payload,retry=Retry(max=2, interval=2))
+        temp['result']="Setting Discharge Slot End 2 was a success"
     except:
         e = sys.exc_info()
         temp['result']="Setting Discharge Slot 2 failed: " + str(e)

@@ -390,29 +390,29 @@ def getData(fullrefresh):  # Read from Invertor put in cache
             if Battery_power >= 0:
                 discharge_power = abs(Battery_power)
                 charge_power = 0
+                power_output['Charge_Time_Remaining'] = 0
+                #power_output['Charge_Completion_Time'] = finaltime.replace(tzinfo=GivLUT.timezone).isoformat()
                 if discharge_power!=0:
                     # Time to get from current SOC to battery Reserve at the current rate
-                    power_output['Discharge_Time_Remaining'] = int((((GEInv.battery_nominal_capacity*51.2)/1000)*((power_output['SOC'] - controlmode['Battery_Power_Reserve'])/100) / (discharge_power/1000)) * 60)
-                    finaltime=datetime.datetime.utcnow() + timedelta(minutes=power_output['Discharge_Time_Remaining'])
-                    power_output['Discharge_Time_End'] = finaltime.replace(tzinfo=datetime.timezone.utc).isoformat()
+                    power_output['Discharge_Time_Remaining'] = max(int((((GEInv.battery_nominal_capacity*51.2)/1000)*((power_output['SOC'] - controlmode['Battery_Power_Reserve'])/100) / (discharge_power/1000)) * 60),0)
+                    finaltime=datetime.datetime.now() + timedelta(minutes=power_output['Discharge_Time_Remaining'])
+                    power_output['Discharge_Completion_Time'] = finaltime.replace(tzinfo=GivLUT.timezone).isoformat()
                 else:
                     power_output['Discharge_Time_Remaining'] = 0
-                    power_output['Discharge_Time_End'] = datetime.datetime.utcnow().replace(tzinfo=datetime.timezone.utc).isoformat()
-                power_output['Charge_Time_Remaining'] = 0
-                power_output['Charge_Time_End'] = finaltime.replace(tzinfo=datetime.timezone.utc).isoformat()
+                    #power_output['Discharge_Completion_Time'] = datetime.datetime.now().replace(tzinfo=GivLUT.timezone).isoformat()
             elif Battery_power <= 0:
                 discharge_power = 0
                 charge_power = abs(Battery_power)
                 power_output['Discharge_Time_Remaining'] = 0
-                power_output['Discharge_Time_End'] = datetime.datetime.utcnow().replace(tzinfo=datetime.timezone.utc).isoformat()
+                #power_output['Discharge_Completion_Time'] = datetime.datetime.now().replace(tzinfo=GivLUT.timezone).isoformat()
                 if charge_power!=0:
                     # Time to get from current SOC to target SOC at the current rate (Target SOC-Current SOC)xBattery Capacity
-                    power_output['Charge_Time_Remaining'] = int((((GEInv.battery_nominal_capacity*51.2)/1000)*((controlmode['Target_SOC'] - power_output['SOC'])/100) / (charge_power/1000)) * 60)
-                    finaltime=datetime.datetime.utcnow() + timedelta(minutes=power_output['Charge_Time_Remaining'])
-                    power_output['Charge_Time_End'] = finaltime.replace(tzinfo=datetime.timezone.utc).isoformat()
+                    power_output['Charge_Time_Remaining'] = max(int((((GEInv.battery_nominal_capacity*51.2)/1000)*((controlmode['Target_SOC'] - power_output['SOC'])/100) / (charge_power/1000)) * 60),0)
+                    finaltime=datetime.datetime.now() + timedelta(minutes=power_output['Charge_Time_Remaining'])
+                    power_output['Charge_Time_Remaining'] = finaltime.replace(tzinfo=GivLUT.timezone).isoformat()
                 else:
                     power_output['Charge_Time_Remaining'] = 0
-                    power_output['Charge_Time_End'] = datetime.datetime.utcnow().replace(tzinfo=datetime.timezone.utc).isoformat()
+                    #power_output['Charge_Time_Remaining'] = datetime.datetime.now().replace(tzinfo=GivLUT.timezone).isoformat()
             power_output['Battery_Power'] = Battery_power
             power_output['Charge_Power'] = charge_power
             power_output['Discharge_Power'] = discharge_power
