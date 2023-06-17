@@ -602,7 +602,7 @@ def setBatteryMode(payload):
                 #Reduce the reserve percent otherwise it will stay as 100% and therefore still be Eco (Paused).
                 #We don't know what the user would like as we don't store previous values, so best to set it to an arbitrary value of 10%
                 reservePayload={}
-                reservePayload['reservePercent']=10                 
+                reservePayload['reservePercent']= getSavedBatteryReservePercentage()                
                 setBatteryReserve(reservePayload)
         elif payload['mode']=="Eco (Paused)":
             logger.info("Setting system to Dynamic / Eco mode")
