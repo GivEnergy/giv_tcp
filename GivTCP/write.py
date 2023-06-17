@@ -584,11 +584,26 @@ def setBatteryMode(payload):
     temp={}
     if type(payload) is not dict: payload=json.loads(payload)
     logger.info("Setting Battery Mode to: "+str(payload['mode']))
+    #Update read data via pickle
+    if exists(GivLUT.regcache):      # if there is a cache then grab it
+        with open(GivLUT.regcache, 'rb') as inp:
+            regCacheStack= pickle.load(inp)
+    
+    logger.debug("Current battery mode from pickle is: " + str(regCacheStack[4]["Control"]["Mode"] ))     
+    
     try:
         if payload['mode']=="Eco":
             logger.info("Setting system to Dynamic / Eco mode")
             client.set_mode_dynamic()
             time.sleep(1)
+            
+            currentMode=regCacheStack[4]["Control"]["Mode"]
+            if currentMode == "Eco (Paused)":
+                #Reduce the reserve percent otherwise it will stay as 100% and therefore still be Eco (Paused).
+                #We don't know what the user would like as we don't store previous values, so best to set it to an arbitrary value of 10%
+                reservePayload={}
+                reservePayload['reservePercent']=10                 
+                setBatteryReserve(reservePayload)
         elif payload['mode']=="Eco (Paused)":
             logger.info("Setting system to Dynamic / Eco mode")
             client.set_mode_dynamic()
