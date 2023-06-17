@@ -1,0 +1,11 @@
+# Stop Mac Filesystem Filesystem
+.DS_Store
+
+# Stop the Nova Project files from getting published
+.nova
+
+# Stop the gitignore file from being published
+.gitignore
+
+# Stop the build file being published
+buildx.sh

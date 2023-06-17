@@ -12,7 +12,8 @@ In basis of this project is a connection to a Modbus TCP server which runs on th
 Recommended usage is through the Docker container found here: https://hub.docker.com/repository/docker/britkat/giv_tcp-ma
 This will set up a self-running service which will publish data as required and provide a REST interface for control. An internal MQTT broker can be activated to make data available on the network.
   
-* Docker image is multi-architecture so Docker should grab the correct version for your system (tested on x86 and rpi3)
+* Docker image is multi-architecture so docker should grab the correct version for your system (tested on x86 and rpi3)
+
 * Create a container with the relevant ENV variables below (mimicking the settings.py file)
 * Set the container to auto-restart to ensure reliability
 * Out of the box the default setup enables local MQTT broker and REST service (see below for details)
@@ -22,11 +23,11 @@ Installation via the docker-compose.yml file is recommended if not running throu
 
 ## Home Assistant Add-on
 This container can also be used as an add-on in Home Assistant.
-The add-on requires an existing MQTT broker such as Mosquitto, also available to install from the Add-on store.
+The add-on requires an existing MQTT broker such as Mosquito, also available to install from the Add-on store.
 To install GivTCP as an add-on, add this repository (https://github.com/britkat1980/giv_tcp) to the Add-on Store repository list.
 The following configuration items are mandatory before the add-on can be started:
 * Inverter IP address
-* MQTT username (can also be a Home Assistant user - used to authenticate againt your MQTT broker)
+* MQTT username (can also be a Home Assistant user - used to authenticate against your MQTT broker)
 * MQTT password
 All other configuration items can be left as-is unless you need to change them. See the ENV below for full details
 
@@ -55,8 +56,9 @@ This will populate HA with all devices and entities for control and monitoring. 
 | LOG_LEVEL | Error | Optional - you can choose Error, Info or Debug. Output will be sent to the debug file location if specified, otherwise it is sent to stdout|
 | DEBUG_FILE_LOCATION | /usr/pi/data | Optional  |
 | PRINT_RAW | False | Optional - If set to True the raw register values will be returned alongside the normal data |
-| SELF_RUN | True | Optional - If set to True the system will loop round connecting to inverter and publishing its data |
-| SELF_RUN_LOOP_TIMER | 5 | Optional - The wait time bewtween inverter calls when using SELF_RUN |
+| SELF_RUN | True | Optional - If set to True the system will loop round connecting to invertor and publishing its data |
+| SELF_RUN_LOOP_TIMER | 5 | Optional - The wait time bewtween invertor calls when using SELF_RUN |
+| QUEUE_RETRIES | 2 | Optional - The number of times GivTCP will attempt to push a value to the inverter |
 | INFLUX_OUTPUT | False | Optional - Used to enable publishing of energy and power data to influx |
 | INFLUX_TOKEN |abcdefg123456789| Optional - If using influx this is the token generated from within influxdb itself |
 | INFLUX_BUCKET |giv_bucket| Optional - If using influx this is data bucket to use|
@@ -150,9 +152,9 @@ Root topic for control is:
 
 
 ### RESTful Service
-GivTCP provides a wrapper function REST.py which uses Flask to expose the read and control functions as RESTful http calls. To utilise this service you will need to either use a WSGI serivce such as gunicorn or use the pre-built Docker container.
+GivTCP provides a wrapper function REST.py which uses Flask to expose the read and control functions as RESTful http calls. To utilise this service you will need to either use a WSGI service such as gunicorn or use the pre-built Docker container.
 
 If Docker is running in Host mode then the REST service is available on port 6345
 
-This can be used within a Node-Red flow to integrate into your automation or using Home Assistany REST sensors unsing the Home Assistant yaml package provided.
+This can be used within a Node-Red flow to integrate into your automation or using Home Assistant REST sensors using the Home Assistant yaml package provided.
 NB.This does require the Docker container running on your network.
