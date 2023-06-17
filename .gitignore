@@ -9,3 +9,15 @@
 
 # Stop the build file being published
 buildx.sh
+.venv
+.vscode
+GivTCP/__pycache__
+GivTCP/givenergy_modbus_2
+GivTCP/asyncclient.py
+GivTCP/testdata.json
+.dockerignore
+.gitattributes
+GivTCP/settings.py
+MQTT_TEST.py
+REST_TEST.py
+test.py
