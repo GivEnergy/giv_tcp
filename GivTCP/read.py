@@ -168,7 +168,7 @@ def getData(fullrefresh):  # Read from Inverter put in cache
         power_output['PV_Current_String_1'] = GEInv.i_pv1*10
         power_output['PV_Current_String_2'] = GEInv.i_pv2*10
         power_output['Grid_Voltage'] = GEInv.v_ac1
-        power_output['Grid_Current'] = GEInv.i_ac1 
+        power_output['Grid_Current'] = GEInv.i_ac1*10 
 
         # Grid Power
         logger.debug("Getting Grid Power")
@@ -272,12 +272,23 @@ def getData(fullrefresh):  # Read from Inverter put in cache
             if Battery_power >= 0:
                 discharge_power = abs(Battery_power)
                 charge_power = 0
+                if discharge_power!=0:
+                    power_output['Discharge_Time_Remaining'] = float(power_output['SOC_kWh'] / (discharge_power/1000)) * 60
+                else:
+                    power_output['Discharge_Time_Remaining'] = 0
+                power_output['Charge_Time_Remaining'] = 0
             elif Battery_power <= 0:
                 discharge_power = 0
                 charge_power = abs(Battery_power)
+                power_output['Discharge_Time_Remaining'] = 0
+                if charge_power!=0:
+                    power_output['Charge_Time_Remaining'] = ((((GEInv.battery_nominal_capacity*51.2)/1000) - power_output['SOC_kWh']) / (charge_power/1000)) * 60
+                else:
+                    power_output['Charge_Time_Remaining'] = 0
             power_output['Battery_Power'] = Battery_power
             power_output['Charge_Power'] = charge_power
             power_output['Discharge_Power'] = discharge_power
+
 
             # Power flows
             logger.debug("Getting Solar to H/B/G Power Flows")

@@ -197,7 +197,7 @@ configuration:
     description: >-
       How much of the battery (on a scale of 0.0-1.0) is available to use?
   PALM_WEIGHT:
-    name: Solar Forecast Automation - Solcate weighting factor
+    name: Solar Forecast Automation - Solcast weighting factor
     description: >-
       What weighting should be applied to the Solcast forecast. Range 10-90. Default is 35
   GEAPI:
