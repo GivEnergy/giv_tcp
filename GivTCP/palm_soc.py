@@ -53,8 +53,9 @@ logger = GivLUT.logger
 # v0.9.0       01/Jun/23 30-minute SoC time-slices, auto-correct GMT/BST in Solcast data
 # v0.9.1       03/Jun/23 Added logging functionality
 # v0.9.2SoC    09/Jun/23 Merge with palm.py, including fallback inverter writes via API
+# v0.9.3       18/Jun/23 Fixed significant bug in SoC calculation introduced in v0.9.2
 
-PALM_VERSION = "v0.9.2SoC"
+PALM_VERSION = "v0.9.3SoC"
 # -*- coding: utf-8 -*-
 
 class GivEnergyObj:
@@ -418,13 +419,14 @@ class GivEnergyObj:
             while i < 48:
                 if i <= end_charge_period:  # Battery is in AC Charge mode
                     total_load = 0
+                    batt_charge[i] = batt_max_charge
                 else:
                     total_load = ge.base_load[i]
-                est_gen = (gen_fcast.pv_est10_30[i] * wgt_10 +
-                    gen_fcast.pv_est50_30[i] * wgt_50+
-                    gen_fcast.pv_est90_30[i] * wgt_90) / (wgt_10 + wgt_50 + wgt_90)
-                batt_charge[i] = (batt_charge[i - 1] +
-                    max(-1 * stgs.GE.charge_rate,
+                    est_gen = (gen_fcast.pv_est10_30[i] * wgt_10 +
+                        gen_fcast.pv_est50_30[i] * wgt_50+
+                        gen_fcast.pv_est90_30[i] * wgt_90) / (wgt_10 + wgt_50 + wgt_90)
+                    batt_charge[i] = (batt_charge[i - 1] +
+                        max(-1 * stgs.GE.charge_rate,
                         min(stgs.GE.charge_rate, (est_gen - total_load))))
 
                 # Capture min charge on lowest down-slope before charge exceeds 100% append
