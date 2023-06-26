@@ -5,7 +5,7 @@ from time import sleep
 import rq_dashboard
 import zoneinfo
 import requests
-import GivTCP.findInvertor
+from GivTCP.findInvertor import findInvertor
 
 selfRun={}
 mqttClient={}
@@ -32,18 +32,13 @@ else:
 
 def palm_job():
     subprocess.Popen(["/usr/local/bin/python3","/app/GivTCP_1/palm_soc.py"])
-    #subprocess.run('/app/GivTCP/palm_soc.py')
-
-subnet="192.168.2.0"
-invList=GivTCP.findInvertor.findInvertor(subnet)
-
-logger.critical ("We have found the following invertors: "+str(invList))
-
-# test getting mqtt details direct from supervisor
+    
 try:
     logger.debug("SUPERVISOR_TOKEN is: "+ os.getenv("SUPERVISOR_TOKEN"))
     isAddon=True
     access_token = os.getenv("SUPERVISOR_TOKEN")
+
+#Get MQTT Details    
     url="http://supervisor/services/mqtt"
     result = requests.get(url,
           headers={'Content-Type':'application/json',
@@ -59,6 +54,22 @@ try:
     else:
         hasMQTT=False
         logger.critical("No HA MQTT service has been found")
+
+
+#Get Host Details    
+    url="http://supervisor/network/info"
+    result = requests.get(url,
+          headers={'Content-Type':'application/json',
+                   'Authorization': 'Bearer {}'.format(access_token)})
+    hostDetails=result.json()
+    
+    if hostDetails['result']=="ok":
+    # For each interface scan for inverters    
+        for interface in hostDetails['data']['interfaces']:
+            subnet=interface['ipv4']['gateway']
+            invList=findInvertor(subnet)
+            logger.critical ("We have found the following invertors: "+str(invList))
+
 except:
     logger.critical("SUPERVISOR TOKEN does not exist")
     isAddon=False
@@ -75,11 +86,6 @@ logger.critical("Running Redis")
 
 rqdash=subprocess.Popen(["/usr/local/bin/rq-dashboard"])
 logger.critical("Running RQ Dashboard on port 9181")
-
-#if not hasMQTT:
-#    # Run internal MQTT Broker if not found in supervisor services
-#    mqtt=subprocess.Popen(["/usr/sbin/mosquitto","/app/GivTCP/mqtt.conf"])
-#    logger.critical("Running Mosquitto")
 
 for inv in range(1,int(os.getenv('NUMINVERTORS'))+1):
     logger.critical ("Setting up invertor: "+str(inv)+" of "+str(os.getenv('NUMINVERTORS')))
