@@ -1,10 +1,23 @@
+# Stop Mac Filesystem Filesystem
+.DS_Store
+
+# Stop the Nova Project files from getting published
+.nova
+
+# Stop the gitignore file from being published
+.gitignore
+
+# Stop the build file being published
+buildx.sh
 .venv
 .vscode
-__pycache__
-givenergy_modbus_2
-asyncclient.py
-settings.py
-testdata.json
+GivTCP/__pycache__
+GivTCP/givenergy_modbus_2
+GivTCP/asyncclient.py
+GivTCP/testdata.json
+.dockerignore
+.gitattributes
+GivTCP/settings.py
 MQTT_TEST.py
 REST_TEST.py
 test.py

@@ -550,7 +550,7 @@ def setChargeRate(payload):
 def setDischargeRate(payload):
     temp={}
     if type(payload) is not dict: payload=json.loads(payload)
-    # Get invertor max bat power
+    # Get inverter max bat power
     if exists(GivLUT.regcache):      # if there is a cache then grab it
         with open(GivLUT.regcache, 'rb') as inp:
             regCacheStack = pickle.load(inp)
@@ -574,7 +574,7 @@ def setDischargeRate(payload):
             temp['result']="Setting Discharge Rate failed: " + str(e)
             logger.error (temp['result'])
     else:
-        temp['result']="Setting Disharge Rate failed: No discharge rate limit available"
+        temp['result']="Setting Discharge Rate failed: No discharge rate limit available"
         logger.error (temp['result'])        
     return json.dumps(temp)
 
@@ -854,6 +854,7 @@ def forceExport(exportTime):
         #result=GivQueue.q.enqueue(setBatteryMode,payload,retry=Retry(max=GiV_Settings.queue_retries, interval=2))
         result=setBatteryMode(payload)
         payload={}
+        logger.debug("Max discharge rate for inverter is: " + str(maxDischargeRate))
         payload['dischargeRate']=maxDischargeRate
         #from write import setDischargeRate
         #result=GivQueue.q.enqueue(setDischargeRate,payload,retry=Retry(max=GiV_Settings.queue_retries, interval=2))
@@ -1072,6 +1073,13 @@ def setBatteryMode(payload):
     temp={}
     if type(payload) is not dict: payload=json.loads(payload)
     logger.info("Setting Battery Mode to: "+str(payload['mode']))
+    #Update read data via pickle
+    if exists(GivLUT.regcache):      # if there is a cache then grab it
+        with open(GivLUT.regcache, 'rb') as inp:
+            regCacheStack= pickle.load(inp)
+    
+    logger.debug("Current battery mode from pickle is: " + str(regCacheStack[4]["Control"]["Mode"] ))     
+    
     try:
         if payload['mode']=="Eco":
             from write import smd
@@ -1154,7 +1162,7 @@ def setDateTime(payload):
 
 def switchRate(payload):
     temp={}
-    if GiV_Settings.dynamic_tariff == False:     # Only allow this control if Dyanmic control is enabled
+    if GiV_Settings.dynamic_tariff == False:     # Only allow this control if Dynamic control is enabled
         temp['result']="External rate setting not allowed. Enale Dynamic Tariff in settings"
         logger.error(temp['result'])
         return json.dumps(temp)

@@ -24,6 +24,7 @@ logging.getLogger("rq.worker").setLevel(logging.CRITICAL)
 
 sys.path.append(GiV_Settings.default_path)
 
+
 givLUT = GivLUT.entity_type
 logger = GivLUT.logger
 
@@ -39,7 +40,7 @@ def invertorData(fullrefresh):
         return ("ERROR:-"+str(sys.exc_info()))
     return Inv,Bat
 
-def getData(fullrefresh):  # Read from Invertor put in cache
+def getData(fullrefresh):  # Read from Inverter put in cache
     energy_total_output = {}
     energy_today_output = {}
     power_output = {}
@@ -49,6 +50,7 @@ def getData(fullrefresh):  # Read from Invertor put in cache
     multi_output = {}
     result = {}
     temp = {}
+    
     logger.debug("----------------------------Starting----------------------------")
     logger.debug("Getting All Registers")
 
@@ -168,7 +170,7 @@ def getData(fullrefresh):  # Read from Invertor put in cache
         power_output['PV_Current_String_1'] = GEInv.i_pv1*10
         power_output['PV_Current_String_2'] = GEInv.i_pv2*10
         power_output['Grid_Voltage'] = GEInv.v_ac1
-        power_output['Grid_Current'] = GEInv.i_ac1 
+        power_output['Grid_Current'] = GEInv.i_ac1*10 
 
         # Grid Power
         logger.debug("Getting Grid Power")
@@ -190,7 +192,7 @@ def getData(fullrefresh):  # Read from Invertor put in cache
         logger.debug("Getting EPS Power")
         power_output['EPS_Power'] = GEInv.p_eps_backup
 
-        # Invertor Power
+        # Inverter Power
         logger.debug("Getting PInv Power")
         Invertor_power = GEInv.p_inverter_out
         if -6000 <= Invertor_power <= 6000:
@@ -474,7 +476,7 @@ def getData(fullrefresh):  # Read from Invertor put in cache
         timeslots['Charge_start_time_slot_2'] = GEInv.charge_slot_2[0].isoformat()
         timeslots['Charge_end_time_slot_2'] = GEInv.charge_slot_2[1].isoformat()
 
-        ######## Get Invertor Details ########
+        ######## Get Inverter Details ########
         invertor = {}
         logger.debug("Getting Invertor Details")
         if GEInv.battery_type == 1:
@@ -648,7 +650,7 @@ def consecFails(e):
 
 
 
-def runAll(full_refresh):  # Read from Invertor put in cache and publish
+def runAll(full_refresh):  # Read from Inverter put in cache and publish
     # full_refresh=True
     from read import getData
     result=getData(full_refresh)
@@ -664,7 +666,7 @@ def pubFromJSON():
     publishOutput(data, SN)
 
 
-def pubFromPickle():  # Publish last cached Invertor Data
+def pubFromPickle():  # Publish last cached Inverter Data
     multi_output = {}
     result = "Success"
     if not exists(GivLUT.regcache):  # if there is no cache, create it
@@ -704,8 +706,8 @@ def self_run2():
         time.sleep(GiV_Settings.self_run_timer)
 
 
-# Addiitonal Publish options can be added here.
-# A seperate file in the folder can be added with a new publish "plugin"
+# Additional Publish options can be added here.
+# A separate file in the folder can be added with a new publish "plugin"
 # then referenced here with any settings required added into settings.py
 def publishOutput(array, SN):
     tempoutput = {}
@@ -830,7 +832,7 @@ def ratecalcs(multi_output, multi_output_old):
                 logger.debug(".dayRate exists so deleting it")
                 os.remove(GivLUT.dayRate)  
     else:
-        # Otherwise check to see if dynamic trigger has been recieved to change rate type
+        # Otherwise check to see if dynamic trigger has been received to change rate type
         if exists(GivLUT.nightRateRequest):
             os.remove(GivLUT.nightRateRequest)
             if not exists(GivLUT.nightRate):

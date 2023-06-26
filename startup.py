@@ -124,7 +124,7 @@ for inv in range(1,int(os.getenv('NUMINVERTORS'))+1):
         outp.write("    influxOrg=\""+str(os.getenv("INFLUX_ORG","")+"\"\n"))
         outp.write("    first_run= True\n")
         outp.write("    self_run_timer="+str(os.getenv("SELF_RUN_LOOP_TIMER","5"))+"\n")
-        outp.write("    queue_retries="+str(os.getenv("QUEUE_RETRIES","2"))+"\n")
+        outp.write("    queue_retries="+str(os.getenv("QUEUE_RETRIES","2"))+"\n")    
         outp.write("    givtcp_instance="+str(inv)+"\n")
         outp.write("    default_path=\""+str(os.getenv("PATH","")+"\"\n"))
         outp.write("    dynamic_tariff="+str(os.getenv("DYNAMICTARIFF","")+"\n"))
