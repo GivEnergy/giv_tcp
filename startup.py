@@ -70,10 +70,10 @@ logger.critical("Running Redis")
 rqdash=subprocess.Popen(["/usr/local/bin/rq-dashboard"])
 logger.critical("Running RQ Dashboard on port 9181")
 
-if not hasMQTT:
-    # Run internal MQTT Broker if not found in supervisor services
-    mqtt=subprocess.Popen(["/usr/sbin/mosquitto","/app/GivTCP/mqtt.conf"])
-    logger.critical("Running Mosquitto")
+#if not hasMQTT:
+#    # Run internal MQTT Broker if not found in supervisor services
+#    mqtt=subprocess.Popen(["/usr/sbin/mosquitto","/app/GivTCP/mqtt.conf"])
+#    logger.critical("Running Mosquitto")
 
 for inv in range(1,int(os.getenv('NUMINVERTORS'))+1):
     logger.critical ("Setting up invertor: "+str(inv)+" of "+str(os.getenv('NUMINVERTORS')))
@@ -180,6 +180,10 @@ for inv in range(1,int(os.getenv('NUMINVERTORS'))+1):
     rqWorker[inv]=subprocess.Popen(["/usr/local/bin/python3",PATH+"/worker.py"])
     logger.critical("Running RQ worker to queue and process givernergy-modbus calls")
 
+    if not hasMQTT and os.getenv('MQTT_ADDRESS')=="127.0.0.1" and os.getenv('MQTT_OUTPUT')=="True":
+        logger.critical ("Starting Mosquitto on port "+str(os.getenv('MQTT_PORT')))
+        mqttBroker=subprocess.Popen(["/usr/sbin/mosquitto", "-c",PATH+"/mqtt.conf"])
+
     if os.getenv('SELF_RUN')=="True" or isAddon:
         logger.critical ("Running Invertor read loop every "+str(os.getenv('SELF_RUN_LOOP_TIMER'))+"s")
         selfRun[inv]=subprocess.Popen(["/usr/local/bin/python3",PATH+"/read.py", "self_run2"])
@@ -206,10 +210,6 @@ for inv in range(1,int(os.getenv('NUMINVERTORS'))+1):
         logger.critical ("Serving Web Dashboard from port "+str(WDPORT))
         command=shlex.split("/usr/bin/node /usr/local/bin/serve -p "+ str(WDPORT))
         webDash[inv]=subprocess.Popen(command)
-
-if os.getenv('MQTT_ADDRESS')=="127.0.0.1" and os.getenv('MQTT_OUTPUT')=="True":
-    logger.critical ("Starting Mosquitto on port "+str(os.getenv('MQTT_PORT')))
-    mqttBroker=subprocess.Popen(["/usr/sbin/mosquitto", "-c",PATH+"/mqtt.conf"])
 
 if str(os.getenv('SMARTTARGET'))=="True":
     starttime= datetime.strftime(datetime.strptime(os.getenv('NIGHTRATESTART'),'%H:%M') - timedelta(hours=0, minutes=10),'%H:%M')

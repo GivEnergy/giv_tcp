@@ -345,7 +345,7 @@ def enableChargeSchedule(payload):
             result=GivQueue.q.enqueue(dc,retry=Retry(max=GiV_Settings.queue_retries, interval=2))
             #client.disable_charge()
         temp['result']="Setting Charge Enable was a success"
-
+        logger.info(temp['result'])
     except:
         e = sys.exc_info()
         temp['result']="Setting Charge Enable failed: " + str(e)
@@ -366,7 +366,7 @@ def enableChargeTarget(payload):
             result=GivQueue.q.enqueue(dct,retry=Retry(max=GiV_Settings.queue_retries, interval=2))
             #client.disable_charge_target()
         temp['result']="Setting Charge Target was a success"
-
+        logger.info(temp['result'])
     except:
         e = sys.exc_info()
         temp['result']="Setting Charge Target failed: " + str(e)
@@ -387,7 +387,7 @@ def enableDischarge(payload):
             from write import ssc
             result=GivQueue.q.enqueue(ssc,100,retry=Retry(max=GiV_Settings.queue_retries, interval=2))
         temp['result']="Setting Discharge Enable was a success"
-
+        logger.info(temp['result'])
     except:
         e = sys.exc_info()
         temp['result']="Setting Discharge Enable failed: " + str(e)
@@ -408,6 +408,7 @@ def enableDischargeSchedule(payload):
             result=GivQueue.q.enqueue(dd,retry=Retry(max=GiV_Settings.queue_retries, interval=2))
             #client.disable_discharge()
         temp['result']="Setting Charge Enable was a success"
+        logger.info(temp['result'])
     except:
         e = sys.exc_info()
         temp['result']="Setting Charge Enable failed: " + str(e)
@@ -422,6 +423,7 @@ def setShallowCharge(payload):
         result=GivQueue.q.enqueue(ssc,int(payload['val']),retry=Retry(max=GiV_Settings.queue_retries, interval=2))
         #client.set_shallow_charge(int(payload['val']))
         temp['result']="Setting Shallow Charge was a success"
+        logger.info(temp['result'])
     except:
         e = sys.exc_info()
         temp['result']="Setting Charge Enable failed: " + str(e)
@@ -438,6 +440,7 @@ def setChargeTarget(payload):
         result=GivQueue.q.enqueue(sct,target,retry=Retry(max=GiV_Settings.queue_retries, interval=2))
         #client.enable_charge_target(target)
         temp['result']="Setting Charge Target was a success"
+        logger.info(temp['result'])
     except:
         e = sys.exc_info()
         temp['result']="Setting Charge Target failed: " + str(e)
@@ -455,9 +458,9 @@ def setBatteryReserve(payload):
     try:
         from write import ssc
         result=GivQueue.q.enqueue(ssc,target,retry=Retry(max=GiV_Settings.queue_retries, interval=2))
-        #client.set_shallow_charge(target)
-        logger.debug("Setting Battery Reserve to: "+str(target)+" was a success")        
+        #client.set_shallow_charge(target)  
         temp['result']="Setting Battery Reserve was a success"
+        logger.info(temp['result'])
     except:
         e = sys.exc_info()
         temp['result']="Setting Battery Reserve failed: " + str(e)
@@ -477,6 +480,7 @@ def setBatteryCutoff(payload):
         result=GivQueue.q.enqueue(sbpr,target,retry=Retry(max=GiV_Settings.queue_retries, interval=2))
         #client.set_battery_power_reserve(target)
         temp['result']="Setting Battery Cutoff was a success"
+        logger.info(temp['result'])
     except:
         e = sys.exc_info()
         temp['result']="Setting Battery Cutoff failed: " + str(e)
@@ -491,6 +495,7 @@ def rebootinvertor():
         result=GivQueue.q.enqueue(ri,retry=Retry(max=GiV_Settings.queue_retries, interval=2))
         #client.reboot_invertor()
         temp['result']="Rebooting invertor was a success"
+        logger.info(temp['result'])
     except:
         e = sys.exc_info()
         temp['result']="Reboot Invertor failed: " + str(e)
@@ -508,6 +513,7 @@ def setActivePowerRate(payload):
         result=GivQueue.q.enqueue(sapr,target,retry=Retry(max=GiV_Settings.queue_retries, interval=2))
         #client.set_active_power_rate(target)
         temp['result']="Setting Active Power Rate was a success"
+        logger.info(temp['result'])
     except:
         e = sys.exc_info()
         temp['result']="Setting Active Power Rate failed: " + str(e)
@@ -536,7 +542,7 @@ def setChargeRate(payload):
             result=GivQueue.q.enqueue(sbcl,target,retry=Retry(max=GiV_Settings.queue_retries, interval=2))
             #client.set_battery_charge_limit(target)
             temp['result']="Setting Charge Rate was a success"
-
+            logger.info(temp['result'])
         except:
             e = sys.exc_info()
             temp['result']="Setting Charge Rate failed: " + str(e)
@@ -977,6 +983,7 @@ def forceCharge(chargeTime):
         f.close()
         logger.info("Force Charge revert jobid is: "+fcjob.id)
         temp['result']="Charge successfully forced for "+str(chargeTime)+" minutes"
+        logger.info(temp['result'])
     except:
         e = sys.exc_info()
         temp['result']="Force charge failed: " + str(e)
@@ -1018,6 +1025,7 @@ def tempPauseDischarge(pauseTime):
             f.close()
             logger.info("Temp Pause Discharge revert jobid is: "+tpdjob.id)
             temp['result']="Discharge paused for "+str(delay)+" seconds"
+            logger.info(temp['result'])
         else:
             temp['result']="Pausing Discharge failed"
     except:
@@ -1060,6 +1068,7 @@ def tempPauseCharge(pauseTime):
             f.close()
             logger.info("Temp Pause Charge revert jobid is: "+tpcjob.id)
             temp['result']="Charge paused for "+str(delay)+" seconds"
+            logger.info(temp['result'])
         else:
             temp['result']="Pausing Charge failed: "
         logger.debug("Result is: "+temp['result'])
@@ -1133,6 +1142,7 @@ def setBatteryMode(payload):
             temp['result']="Invalid Mode requested"
             return json.dumps(temp)
         temp['result']="Setting Battery Mode was a success"
+        logger.info(temp['result'])
 
     except:
         e = sys.exc_info()
@@ -1153,6 +1163,7 @@ def setDateTime(payload):
         result=GivQueue.q.enqueue(sdt,iDateTime,retry=Retry(max=GiV_Settings.queue_retries, interval=2))
         #client.set_datetime(iDateTime)
         temp['result']="Invertor time setting was a success"
+        logger.info(temp['result'])
 
     except:
         e = sys.exc_info()
@@ -1163,7 +1174,7 @@ def setDateTime(payload):
 def switchRate(payload):
     temp={}
     if GiV_Settings.dynamic_tariff == False:     # Only allow this control if Dynamic control is enabled
-        temp['result']="External rate setting not allowed. Enale Dynamic Tariff in settings"
+        temp['result']="External rate setting not allowed. Enable Dynamic Tariff in settings"
         logger.error(temp['result'])
         return json.dumps(temp)
     try:

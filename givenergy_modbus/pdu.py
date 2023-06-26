@@ -206,7 +206,6 @@ class ReadRegistersRequest(ModbusRequest, ABC):
         crc_builder.add_16bit_uint(self.register_count)
         self.check = CrcModbus().process(crc_builder.to_string()).final()
         self.builder.add_16bit_uint(self.check)
-        print(str(self.check))
 
     def _calculate_function_data_size(self):
         size = 16 + (self.register_count * 2)

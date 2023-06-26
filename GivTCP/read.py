@@ -57,11 +57,10 @@ def getData(fullrefresh):  # Read from Inverter put in cache
     # Connect to Invertor and load data
     try:
         logger.debug("Connecting to: " + GiV_Settings.invertorIP)
-#        plant=GivQueue.q.enqueue(invertorData,fullrefresh,retry=Retry(max=GiV_Settings.queue_retries, interval=2))   
-        plant=invertorData(True)
+        plant=GivQueue.q.enqueue(invertorData,fullrefresh,retry=Retry(max=GiV_Settings.queue_retries, interval=2))   
         while plant.result is None and plant.exc_info is None:
             time.sleep(0.5)
-        #plant=invertorData(True)
+#        plant=invertorData(True)
         # Check the ojects are not empty...
         if "ERROR" in plant.result:
             raise Exception ("Garbage or failed Invertor Response: "+ str(plant.result))

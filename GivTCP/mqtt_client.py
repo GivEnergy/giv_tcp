@@ -27,6 +27,7 @@ if GiV_Settings.MQTT_Topic=='':
 else:
     MQTT_Topic=GiV_Settings.MQTT_Topic
 
+logger.critical("Connecting to MQTT broker for control- "+str(GiV_Settings.MQTT_Address))
 #loop till serial number has been found
 while not hasattr(GiV_Settings,'serial_number'):
     time.sleep(5)
@@ -49,7 +50,7 @@ def isfloat(num):
 
 def on_message(client, userdata, message):
     payload={}
-    logger.debug("MQTT Message Recieved: "+str(message.topic)+"= "+str(message.payload.decode("utf-8")))
+    logger.critical("MQTT Message Recieved: "+str(message.topic)+"= "+str(message.payload.decode("utf-8")))
     writecommand={}
     command=str(message.topic).split("/")[-1]
     if command=="setDischargeRate":
