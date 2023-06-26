@@ -53,8 +53,10 @@ logger = GivLUT.logger
 # v0.9.0       01/Jun/23 30-minute SoC time-slices, auto-correct GMT/BST in Solcast data
 # v0.9.1       03/Jun/23 Added logging functionality
 # v0.9.2SoC    09/Jun/23 Merge with palm.py, including fallback inverter writes via API
+# v0.9.3       18/Jun/23 Fixed significant bug in SoC calculation introduced in v0.9.2
+# v0.10.0      21/Jun/23 Added multi-day averaging for usage calcs
 
-PALM_VERSION = "v0.9.2SoC"
+PALM_VERSION = "v0.10.0SoC"
 # -*- coding: utf-8 -*-
 
 class GivEnergyObj:
@@ -182,47 +184,80 @@ class GivEnergyObj:
     def get_load_hist(self):
         """Download historical consumption data from GivEnergy and pack array for next SoC calc"""
 
-        day_delta = 0 if (T_NOW_MINS_VAR > 1430) else 1  # Use latest full day
-        day = datetime.strftime(datetime.now() - timedelta(day_delta), '%Y-%m-%d')
-        url = stgs.GE.url + "data-points/" + day
-        key = stgs.GE.key
-        headers = {
-            'Authorization': 'Bearer  ' + key,
-            'Content-Type': 'application/json',
-            'Accept': 'application/json'
-        }
-        params = {
-            'page': '1',
-            'pageSize': '2000'
-        }
+        def get_load_hist_day(offset: int):
+            """Get load history for a single day"""
 
-        try:
-            resp = requests.request('GET', url, headers=headers, params=params)
-        except requests.exceptions.RequestException as error:
-            logger.error(error)
-            return
-        if resp.status_code != 200:
-            logger.error("Invalid response: "+ resp.status_code)
-            return
+            load_array = [0] * 48
+            day_delta = 0 if (T_NOW_MINS_VAR > 1260) else 1  # Use latest day if after 2100 hrs
+            day_delta += offset
+            day = datetime.strftime(datetime.now() - timedelta(day_delta), '%Y-%m-%d')
+            url = stgs.GE.url + "data-points/"+ day
+            key = stgs.GE.key
+            headers = {
+                'Authorization': 'Bearer  ' + key,
+                'Content-Type': 'application/json',
+                'Accept': 'application/json'
+            }
+            params = {
+                'page': '1',
+                'pageSize': '2000'
+            }
 
-        if len(resp.content) > 100:
-            history = json.loads(resp.content.decode('utf-8'))
-            index = 0
-            counter = 0
-            current_energy = prev_energy = 0
-            while index < 284:
-                try:
-                    current_energy = float(history['data'][index]['today']['consumption'])
-                except Exception:
-                    break
-                if counter == 0:
-                    self.base_load[counter] = round(current_energy, 1)
-                else:
-                    self.base_load[counter] = round(current_energy - prev_energy, 1)
-                counter += 1
-                prev_energy = current_energy
-                index += 12
-            logger.info("Load Calc Summary: "+ str(current_energy / 2)+ str(self.base_load))
+            try:
+                resp = requests.request('GET', url, headers=headers, params=params)
+            except requests.exceptions.RequestException as error:
+                logger.error(error)
+                return load_array
+            if resp.status_code != 200:
+                logger.error("Invalid response: "+ str(resp.status_code))
+                return load_array
+
+            if len(resp.content) > 100:
+                history = json.loads(resp.content.decode('utf-8'))
+                i = 6
+                counter = 0
+                current_energy = prev_energy = 0
+                while i < 290:
+                    try:
+                        current_energy = float(history['data'][i]['today']['consumption'])
+                    except Exception:
+                        break
+                    if counter == 0:
+                        load_array[counter] = round(current_energy, 1)
+                    else:
+                        load_array[counter] = round(current_energy - prev_energy, 1)
+                    counter += 1
+                    prev_energy = current_energy
+                    i += 6
+            return load_array
+
+        load_hist_array = [0] * 48
+        acc_load = [0] * 48
+        total_weight: int = 0
+
+        i: int = 0
+        while i < len(stgs.GE.load_hist_weight):
+            if stgs.GE.load_hist_weight[i] > 0:
+                logger.info("Processing load history for day -"+ str(i + 1))
+                load_hist_array = get_load_hist_day(i)
+                j = 0
+                while j < 48:
+                    acc_load[j] += load_hist_array[j] * stgs.GE.load_hist_weight[i]
+                    acc_load[j] = round(acc_load[j], 2)
+                    j += 1
+                total_weight += stgs.GE.load_hist_weight[i]
+                logger.debug(str(acc_load)+ " total weight: "+ str(total_weight))
+            else:
+                logger.info("Skipping load history for day -"+ str(i + 1)+ " (weight = 0)")
+            i += 1
+
+        # Calculate averages and write results
+        i = 0
+        while i < 48:
+            self.base_load[i] = round(acc_load[i]/total_weight, 1)
+            i += 1
+
+        logger.info("Load Calc Summary: "+ str(self.base_load))
 
     def set_mode(self, cmd: str, *arg: str):
         """Configures inverter operating mode"""
@@ -388,7 +423,7 @@ class GivEnergyObj:
         tgt_soc = 100
         if gen_fcast.pv_est50_day[0] > 0:
             if MNTH_VAR in stgs.GE.winter and commit:  # No need for sums...
-                logger.debug("info; winter month, SoC set to 100%")
+                print("info; winter month, SoC set to 100%")
                 self.set_mode("set_soc_winter")
                 return
 
@@ -418,13 +453,14 @@ class GivEnergyObj:
             while i < 48:
                 if i <= end_charge_period:  # Battery is in AC Charge mode
                     total_load = 0
+                    batt_charge[i] = batt_max_charge
                 else:
                     total_load = ge.base_load[i]
-                est_gen = (gen_fcast.pv_est10_30[i] * wgt_10 +
-                    gen_fcast.pv_est50_30[i] * wgt_50+
-                    gen_fcast.pv_est90_30[i] * wgt_90) / (wgt_10 + wgt_50 + wgt_90)
-                batt_charge[i] = (batt_charge[i - 1] +
-                    max(-1 * stgs.GE.charge_rate,
+                    est_gen = (gen_fcast.pv_est10_30[i] * wgt_10 +
+                        gen_fcast.pv_est50_30[i] * wgt_50+
+                        gen_fcast.pv_est90_30[i] * wgt_90) / (wgt_10 + wgt_50 + wgt_90)
+                    batt_charge[i] = (batt_charge[i - 1] +
+                        max(-1 * stgs.GE.charge_rate,
                         min(stgs.GE.charge_rate, (est_gen - total_load))))
 
                 # Capture min charge on lowest down-slope before charge exceeds 100% append
@@ -435,7 +471,7 @@ class GivEnergyObj:
                 elif i > end_charge_period:  # Charging after overnight boost
                     max_charge = max(max_charge, batt_charge[i])
 
-                logger.debug("{:<20} {:>10} {:>10} {:>10}  {:>10} {:>10}".format("SoC Calc;",
+                logger.info("{:<20} {:>10} {:>10} {:>10}  {:>10} {:>10}".format("SoC Calc;",
                     t_to_hrs(i * 30), round(batt_charge[i], 2), round(total_load, 2),
                     round(est_gen, 2), int(100 * batt_charge[i] / batt_max_charge)))
 
@@ -459,12 +495,12 @@ class GivEnergyObj:
             tgt_soc = max(200 - max_charge_pcnt, 100 - min_charge_pcnt, low_soc)
             tgt_soc = int(min(tgt_soc, 100))  # Limit range to 100%
 
-            logger.debug("{:<25} {:>10} {:>10} {:>10} {:>10} {:>10}".format("SoC Calc Summary;",
+            logger.info("{:<25} {:>10} {:>10} {:>10} {:>10} {:>10}".format("SoC Calc Summary;",
                 "Max Charge", "Min Charge", "Max %", "Min %", "Target SoC"))
-            logger.debug("{:<25} {:>10} {:>10} {:>10} {:>10} {:>10}".format("SoC Calc Summary;",
+            logger.info("{:<25} {:>10} {:>10} {:>10} {:>10} {:>10}".format("SoC Calc Summary;",
                 round(max_charge, 2), round(min_charge, 2),
                 max_charge_pcnt, min_charge_pcnt, tgt_soc))
-            logger.debug("{:<25} {:>10} {:>10} {:>10} {:>10} {:>10}".format("SoC (Adjusted);",
+            logger.info("{:<25} {:>10} {:>10} {:>10} {:>10} {:>10}".format("SoC (Adjusted);",
                 round(max_charge, 2), round(min_charge, 2),
                 max_charge_pcnt - 100 + tgt_soc, min_charge_pcnt - 100 + tgt_soc, "\n"))
 
@@ -526,7 +562,7 @@ class SolcastObj:
             return
 
         if stgs.Solcast.url_sw != "":  # Two arrays are specified
-            logger.debug("url_sw = '"+str(stgs.Solcast.url_sw)+"'")
+            logger.info("url_sw = '"+str(stgs.Solcast.url_sw)+"'")
             result, solcast_data_2 = get_solcast(stgs.Solcast.url_sw)
             if not result:
                 logger.warning("Error; Problem reading Solcast data, using previous values (if any)")
@@ -645,11 +681,11 @@ if __name__ == '__main__':
 
     try:
         ge.get_load_hist()
-        logger.debug("10% forecast...")
+        logger.info("10% forecast...")
         ge.compute_tgt_soc(solcast, 10, False)
-        logger.debug("50% forecast...")
+        logger.info("50% forecast...")
         ge.compute_tgt_soc(solcast, 50, False)
-        logger.debug("90% forecast...")
+        logger.info("90% forecast...")
         ge.compute_tgt_soc(solcast, 90, False)
     except Exception:
         logger.critical("Unable to set SoC")
