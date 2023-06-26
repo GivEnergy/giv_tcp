@@ -1,19 +1,18 @@
 # GivTCP
-## TCP Modbus connection to MQTT/JSON for Givenergy Battery/PV Invertors
+## TCP Modbus connection to MQTT/JSON for GivEnergy Battery/PV Invertors
 
 This project allows connection to the GivEnergy invertors via TCP Modbus. Access is through the native Wifi/Ethernet dongle and can be connected to through either the local LAN network or directly through the inbuilt SSID AP.
 
-In basis of this project is a connection to a Modbus TCP server which runs on the wifi dongle, so all you need is somewhere to run the script on the same network. You will need the following to make it work:
+In basis of this project is a connection to a Modbus TCP server which runs on the Wifi dongle, so all you need is somewhere to run the script on the same network. You will need the following to make it work:
 * GivEnergy Invertor properly commissioned and working
 * IP address of the invertor
 
-
 ## Docker
-Reccomended usage is through the Docker container found here: https://hub.docker.com/repository/docker/britkat/giv_tcp-ma
-This will set up a self-running service which will publish data as required and provide a REST interface for control. An internal MQTT broker can be activiated to make data avalable on the network.
+Recommended usage is through the Docker container found here: https://hub.docker.com/repository/docker/britkat/giv_tcp-ma
+This will set up a self-running service which will publish data as required and provide a REST interface for control. An internal MQTT broker can be activated to make data available on the network.
   
 * Docker image is multi-architecture so docker should grab the correct version for your system (tested on x86 and rpi3)
-* Create a container with the relevant ENV variables below (mimicing the settings.py file)
+* Create a container with the relevant ENV variables below (mimicking the settings.py file)
 * Set the container to auto-restart to ensure reliability
 * Out of the box the default setup enables local MQTT broker and REST service (see below for details)
 * Configuration via ENV as outlined below
@@ -26,7 +25,7 @@ The add-on requires an existing MQTT broker such as Mosquitto, also available to
 To install GivTCP as an add-on, add this repository (https://github.com/britkat1980/giv_tcp) to the Add-on Store repository list.
 The following configuration items are mandatory before the add-on can be started:
 * Inverter IP address
-* MQTT username (can also be a Home Assistant user - used to authenticate againt your MQTT broker)
+* MQTT username (can also be a Home Assistant user - used to authenticate against your MQTT broker)
 * MQTT password
 All other configuration items can be left as-is unless you need to change them. See the ENV below for full details
 
@@ -38,12 +37,11 @@ This will populate HA with all devices and entities for control and monitoring. 
 - Two
 - Three
 
-
 ## Settings - Environment Variables
 
 | ENV Name                | Example       |  Description                      |
 | ----------------------- | ------------- |  -------------------------------- |
-| NUMINVERTORS | 1 | Number of invertors on the network. Max invertors supprted is three |
+| NUMINVERTORS | 1 | Number of invertors on the network. Max invertors supported is three |
 | INVERTOR_IP_1 |192.168.10.1 | IP Address of your first invertor  |
 | NUMBATTERIES_1 | 1 | Number of battery units connected to the first invertor |
 | INVERTOR_IP_2 |192.168.10.1 | Optional - IP Address of your second invertor |
@@ -61,15 +59,15 @@ This will populate HA with all devices and entities for control and monitoring. 
 | DEBUG_FILE_LOCATION | /usr/pi/data | Optional  |
 | PRINT_RAW | False | Optional - If set to True the raw register values will be returned alongside the normal data |
 | SELF_RUN | True | Optional - If set to True the system will loop round connecting to invertor and publishing its data |
-| SELF_RUN_LOOP_TIMER | 5 | Optional - The wait time bewtween invertor calls when using SELF_RUN |
+| SELF_RUN_LOOP_TIMER | 5 | Optional - The wait time between invertor calls when using SELF_RUN |
 | INFLUX_OUTPUT | False | Optional - Used to enable publishing of energy and power data to influx |
 | INFLUX_TOKEN |abcdefg123456789| Optional - If using influx this is the token generated from within influxdb itself |
 | INFLUX_BUCKET |giv_bucket| Optional - If using influx this is data bucket to use|
 | INFLUX_ORG |giv_tcp| Optional - If using influx this is the org that the token is assigned to | 
-| HA_AUTO_D | True | Optional - If set to true and MQTT is enabled, it will publish Home Assistant Auto Discovery messages, which will allow Home Assistant to automagically create all entitites and devices to allow read and control of your Invertor |
-| HADEVICEPREFIX | GivTCP | Optional - Prefix to be placed in front of every Home Assistent entity created by the above for invertor 1 |
-| HADEVICEPREFIX_2 | GivTCP | Optional - Prefix to be placed in front of every Home Assistent entity created by the above for invertor 2 |
-| HADEVICEPREFIX_3 | GivTCP | Optional - Prefix to be placed in front of every Home Assistent entity created by the above for invertor 3 |
+| HA_AUTO_D | True | Optional - If set to true and MQTT is enabled, it will publish Home Assistant Auto Discovery messages, which will allow Home Assistant to automagically create all entities and devices to allow read and control of your Invertor |
+| HADEVICEPREFIX | GivTCP | Optional - Prefix to be placed in front of every Home Assistant entity created by the above for invertor 1 |
+| HADEVICEPREFIX_2 | GivTCP | Optional - Prefix to be placed in front of every Home Assistant entity created by the above for invertor 2 |
+| HADEVICEPREFIX_3 | GivTCP | Optional - Prefix to be placed in front of every Home Assistant entity created by the above for invertor 3 |
 | DAYRATE | 0.155 | Optional - Cost of your daytime energy if using Economy 7 or Octopus Go |
 | NIGHTRATE | 0.155 | Optional - Cost of your night time energy if using Economy 7 or Octopus Go |
 | DYNAMICTARIFF | False | Optional - Allows an external automation to trigger switch to 'Day' or 'Night' tariff rates. If set to true it ignores the times set below|
@@ -78,7 +76,7 @@ This will populate HA with all devices and entities for control and monitoring. 
 | HOSTIP | 192.168.1.20 | Optional - The host IP address of your container. Required to access the web dashboard from any browser |
 | DATASMOOTHER | Medium | The amount of smoothing to apply to the data, to reduce the effect of sudden invalid jumps in values. Set to 'None' to disable. Values are not case-sensitive. Other values are 'High', 'Medium', 'Low, 'None' |
 | SMARTTARGET | False | Optional - If set to True will use Palm SOC to predict solar forecast and use historic usage to determine overnight charge target |
-| GEAPI | abcdefg12345 | Optional - (SMARTTARGET) API Key from the GivEnergy Cloud to allow historic usgae stats for SMARTTARGET |
+| GEAPI | abcdefg12345 | Optional - (SMARTTARGET) API Key from the GivEnergy Cloud to allow historic usage stats for SMARTTARGET |
 | SOLCASTAPI |  | Optional - (SMARTTARGET) API Key for Solcast to allow solar prediction for SMARTTARGET |
 | SOLCASTSITEID |  | Optional - (SMARTTARGET) Solcast ID for array 1, needed for SMARTTARGET |
 | SOLCASTSITEID2 |  | Optional - (SMARTTARGET) Solcast ID for array 2 (if it exists), needed for SMARTTARGET |
@@ -86,11 +84,10 @@ This will populate HA with all devices and entities for control and monitoring. 
 | PALM_SHOULDER | 04,05,09 | Optional - (SMARTTARGET) Comma delimited list of months in which consumption can vary so SOC calculation should be more cautious |
 | PALM_MIN_SOC_TARGET | 25 | Optional - (SMARTTARGET) Lower limit for state of charge (summertime) |
 | PALM_MAX_SOC_TARGET | 45 | Optional - (SMARTTARGET) Lower limit for SoC limit in shoulder months |
-| PALM_BATT_RESERVE | 4 | Optional - (SMARTTARGET) Battery reserve for power cuts (minmum of 4%) |
+| PALM_BATT_RESERVE | 4 | Optional - (SMARTTARGET) Battery reserve for power cuts (minimum of 4%) |
 | PALM_BATT_UTILISATION | 0.85 | Optional - (SMARTTARGET) Usable proportion of battery (100% less reserve and any charge limit) on a scale of 0-1 |
 | PALM_CHARGE_RATE | 2.5 | Optional - (SMARTTARGET) Inverter charge/discharge rate in kW |
 | PALM_BATT_CAPACITY | 10.4 | Optional - (SMARTTARGET) Nominal battery capacity in kWh |
-
 
 
 ## GivTCP Read data
@@ -139,7 +136,7 @@ If you have enabled the "SELF_RUN" setting (recommended) then the container/addo
 | setDateTime             | Sets   invertor time, format must be as define in payload                                                                                                                                                 | /setDateTime             | {"dateTime":"dd/mm/yyyy   hh:mm:ss"}                       | setDateTime             | "dd/mm/yyyy hh:mm:ss"                                      |
 
 ## Usage methods:
-GivTCP data and control is generally available through two core methods. If you are using the HA ADDON then these are generally transparent to th user, but are working and available in the background.
+GivTCP data and control is generally available through two core methods. If you are using the HA ADDON then these are generally transparent to the user, but are working and available in the background.
 
 ### MQTT
 By setting MQTT_OUTPUT = True The script will publish directly to the nominated MQTT broker (MQTT_ADDRESS) all the requested read data.
@@ -153,11 +150,9 @@ Root topic for control is:
 "GivEnergy/<serial_number>/control/"    - Default
 "<MQTT_TOPIC>/<serial_number>/control/" - If MQTT_TOPIC is set
 
-
 ### RESTful Service
-GivTCP provides a wrapper function REST.py which uses Flask to expose the read and control functions as RESTful http calls. To utilise this service you will need to either use a WSGI serivce such as gunicorn or use the pre-built Docker container.
+GivTCP provides a wrapper function REST.py which uses Flask to expose the read and control functions as RESTful http calls. To utilise this service you will need to either use a WSGI service such as gunicorn or use the pre-built Docker container.
 
 If Docker is running in Host mode then the REST service is available on port 6345
 
-This can be used within a Node-Red flow to integrate into your automation or using Home Assistany REST sensors unsing the Home Assistant yaml package provided.
 NB.This does require the Docker container running on your network.

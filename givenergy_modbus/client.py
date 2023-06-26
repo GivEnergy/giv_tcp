@@ -194,7 +194,7 @@ class GivEnergyClient:
         self-consumption of renewable generation and minimise the amount of energy drawn from the grid.
         """
         self.set_battery_discharge_mode_demand()  # r27=1
-        self.set_shallow_charge(4)  # r110=4
+#        self.set_shallow_charge(4)  # r110=4
         self.disable_discharge()  # r59=0
 
     def set_mode_storage(
