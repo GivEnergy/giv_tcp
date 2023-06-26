@@ -5,6 +5,7 @@ from time import sleep
 import rq_dashboard
 import zoneinfo
 import requests
+import GivTCP.findInvertor
 
 selfRun={}
 mqttClient={}
@@ -32,6 +33,11 @@ else:
 def palm_job():
     subprocess.Popen(["/usr/local/bin/python3","/app/GivTCP_1/palm_soc.py"])
     #subprocess.run('/app/GivTCP/palm_soc.py')
+
+subnet="192.168.2.0"
+invList=GivTCP.findInvertor.findInvertor(subnet)
+
+logger.critical ("We have found the following invertors: "+str(invList))
 
 # test getting mqtt details direct from supervisor
 try:
