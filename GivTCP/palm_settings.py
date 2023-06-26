@@ -1,8 +1,6 @@
-# version 2023.05.30
-# palm_settings.py file for use with palm.py and palm_soc.py
-#
-# IMPORTANT
-# For palm_soc.py only enter parameters in the first part of the file and ignore the entries below the horizontal line
+# version 2023.06.21
+# Settings file for use with palm.py: 30-minute calculations (v0.9.0) and weightings for daily historical consumption (v0.10.0)
+
 from settings import GiV_Settings
 import os
 
@@ -46,12 +44,26 @@ class GE:
     #batt_max_charge = batt_capacity * batt_utilisation
 
     # Inverter charge/discharge rate in kW
-    #charge_rate = 2.5
+    charge_rate = 2.5
     #charge_rate = float(os.getenv('PALM_CHARGE_RATE'))
 
     # Default data for base load. Overwritten by actual data if available
-    base_load = [0.3, 2, 0.3, 0.3, 0.3, 0.5, 1.7, 1.8, 2.6, 1.5, 0.5, 2.5,\
-        1.3, 1, 1.5, 0.5, 0.3, 1, 1.5, 1, 0.6, 0.5, 0.5, 0.3]
+    base_load = [0.3, 2, 0.3, 0.3, 0.3, 0.5, 1.7, 1.8, 2.6, 1.5, 0.5, 2.5, 1.3, 1, 1.5, 0.5, 0.3, \
+                 1, 1.5, 1, 0.6, 0.5, 0.5, 0.3, 0.3, 2, 0.3, 0.3, 0.3, 0.5, 1.7, 1.8, 2.6, 1.5, \
+                 0.5, 2.5, 1.3, 1, 1.5, 0.5, 0.3, 1, 1.5, 1, 0.6, 0.5, 0.5, 0.3]
+
+    # Load history is a weighted average of actual load from previous days.
+    # Uncomment required settings or make your own using positive integers only. Examples:
+    # Most recent day only
+    load_hist_weight = [1]
+    # 3-day average
+    # load_hist_weight = [1, 1, 1]
+    # 7-day average
+    # load_hist_weight = [1, 1, 1, 1, 1, 1, 1]
+    # Same day last week - useful if, say, Monday is always wash-day
+    # load_hist_weight = [0, 0, 0, 0, 0, 0, 1]
+    # Weighted average (a more extreme example)
+    # load_hist_weight = [4, 2, 2, 1, 1, 1, 1]
 
     # Start time for Overnight Charge
     start_time = os.getenv('NIGHTRATESTART')
@@ -64,6 +76,7 @@ class GE:
 class Solcast:
     def isBlank (myString):
         return not (myString and myString.strip())
+    
     enable = True
     key = str(os.getenv('SOLCASTAPI'))
     url_se = "https://api.solcast.com.au/rooftop_sites/"+str(os.getenv('SOLCASTSITEID'))
