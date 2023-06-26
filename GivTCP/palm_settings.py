@@ -44,7 +44,7 @@ class GE:
     #batt_max_charge = batt_capacity * batt_utilisation
 
     # Inverter charge/discharge rate in kW
-    #charge_rate = 2.5
+    charge_rate = 2.5
     #charge_rate = float(os.getenv('PALM_CHARGE_RATE'))
 
     # Default data for base load. Overwritten by actual data if available
