@@ -24,7 +24,7 @@ class ModbusPDU(ABC):
     function_code: int
     data_adapter_serial_number: str = 'AB1234G567'
     padding: int = 0x00000008
-    slave_address: int = 0x32  # 0x11 is the inverter but the cloud systems interfere, 0x32+ are the batteries
+    slave_address: int = 0x31  # 0x11 is the inverter but the cloud systems interfere, 0x32+ are the batteries
     check: int = 0x0000
     error: bool = False
 

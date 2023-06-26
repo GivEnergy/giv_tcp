@@ -10,10 +10,14 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 - Type error in MQTT publishing handled gracefully
 - Grid Current scaling factor corrected (x10)
 ### Added
-- Updated SmartTarget to PALM 0.9.2 (Thanks Steve Lewis)
-- Charge and Discharge time remaining entities (mins till full charge/discharge at current power rate)
+- Updated SmartTarget to PALM 0.10.0 (Thanks Steve Lewis)
+- Charge and Discharge time remaining entities (mins till full charge/discharge at current power rate) and absolute time to hit Target SOC/Battery Reserve
 - Gen 3 invertors now recognised
-- MQTT Auto recognition. If using the Mosquitto addon in HA it will now auto connect, removing need for MQTT configuration
+- MQTT Auto recognition. If using the Mosquitto addon in HA it will now auto connect, removing need for MQTT configuration before running
+- Refactored Write.py to always use the Redis Queue, to remove contention on modbus comms and create more reliable control signals
+- Configurable retries on write commands to allow for installations with less reliable comms (Thanks @Ed-M72)
+- Modified givenergy-modbus library to allow single timeslot control, to allow better integration with select controls in HA
+- Individual timeslot start/end control, to remove race condition for setting start and end together
   
 ## [2.1.15] - 2023-06-08
 ### Fixed
@@ -24,6 +28,14 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 - REST /getCache endpoint fixed (incorrect json format)
 - Minor updates to README.md documentation
 - Refactored Force Export to use queuing for more reliable revert
+### Added
+- Updated SmartTarget to PALM 0.8.5 (Thanks Stephen Lewis)
+
+## [2.1.13] - 2023-05-13
+### Fixed
+- REST /getCache endpoint fixed (incorrect json format)
+- Minor updates to README.md documentation
+- Refactored Force Export to use queing for more reliable revert
 ### Added
 - Updated SmartTarget to PALM 0.8.5 (Thanks Stephen Lewis)
 

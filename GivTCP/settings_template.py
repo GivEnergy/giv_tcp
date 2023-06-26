@@ -7,8 +7,8 @@ class GiV_Settings:
     self_run_timer = 5              #Optional - Used to loop the "Self_run" function for regular reading
     queue_retries=2                 #Required - The number of calls to the inverter when trying to set a register. A higher number improves the chance of inverter writes succeeding    
     default_path = "GivTCP"         #Required - Used to ensure python execution. Should be the base folder you run GivTCP from
-    givtcp_instance=1               #Required - Which instance of GivTCP is this? Usually 1 if you only have one inverter
-
+    givtcp_instance=1               #Required - WHich instance of GivTCP is this? Usually 1 if you only have one invertor
+    queue_retries=2                 #Required - The number of calls to the inverter when trying to set a register. A higher number improves the chance of inverter writes succeeding  
     
 # Debug Settings
     Log_Level="Error"               #Optional - Enables logging level. Default is "Error", but can be "Info", "Critical" or "Debug"

@@ -5,6 +5,7 @@ from time import sleep
 import rq_dashboard
 import zoneinfo
 import requests
+from GivTCP.findInvertor import findInvertor
 
 selfRun={}
 mqttClient={}
@@ -31,19 +32,48 @@ else:
 
 def palm_job():
     subprocess.Popen(["/usr/local/bin/python3","/app/GivTCP_1/palm_soc.py"])
-    #subprocess.run('/app/GivTCP/palm_soc.py')
-
-# test getting mqtt details direct from supervisor
+    
 try:
-    logger.critical("SUPERVISOR_TOKEN is: "+ os.getenv("SUPERVISOR_TOKEN"))
+    logger.debug("SUPERVISOR_TOKEN is: "+ os.getenv("SUPERVISOR_TOKEN"))
+    isAddon=True
     access_token = os.getenv("SUPERVISOR_TOKEN")
+
+#Get MQTT Details    
     url="http://supervisor/services/mqtt"
     result = requests.get(url,
           headers={'Content-Type':'application/json',
                    'Authorization': 'Bearer {}'.format(access_token)})
-    logger.critical ("MQTT Details are: "+str(result.text))
+    mqttDetails=result.json()
+    if mqttDetails['result']=="ok":
+        logger.critical ("HA MQTT Service has been found at "+str(mqttDetails['data']['host']))
+        mqtt_host=mqttDetails['data']['host']
+        mqtt_username=mqttDetails['data']['username']
+        mqtt_password=mqttDetails['data']['password']
+        mqtt_port=mqttDetails['data']['port']
+        hasMQTT=True
+    else:
+        hasMQTT=False
+        logger.critical("No HA MQTT service has been found")
+
+
+#Get Host Details    
+    url="http://supervisor/network/info"
+    result = requests.get(url,
+          headers={'Content-Type':'application/json',
+                   'Authorization': 'Bearer {}'.format(access_token)})
+    hostDetails=result.json()
+    
+    if hostDetails['result']=="ok":
+    # For each interface scan for inverters    
+        for interface in hostDetails['data']['interfaces']:
+            subnet=interface['ipv4']['gateway']
+            invList=findInvertor(subnet)
+            logger.critical ("We have found the following invertors: "+str(invList))
+
 except:
     logger.critical("SUPERVISOR TOKEN does not exist")
+    isAddon=False
+    hasMQTT=False
 
 if not os.path.exists(str(os.getenv("CACHELOCATION"))):
     os.makedirs(str(os.getenv("CACHELOCATION")))
@@ -56,11 +86,6 @@ logger.critical("Running Redis")
 
 rqdash=subprocess.Popen(["/usr/local/bin/rq-dashboard"])
 logger.critical("Running RQ Dashboard on port 9181")
-
-if str(os.getenv("MQTT_OUTPUT"))=="True" and str(os.getenv("MQTT_ADDRESS"))=="127.0.0.1":
-    # Run internal MQTT Broker
-    mqtt=subprocess.Popen(["/usr/sbin/mosquitto","/app/GivTCP/mqtt.conf"])
-    logger.critical("Running Mosquitto")
 
 for inv in range(1,int(os.getenv('NUMINVERTORS'))+1):
     logger.critical ("Setting up invertor: "+str(inv)+" of "+str(os.getenv('NUMINVERTORS')))
@@ -83,14 +108,25 @@ for inv in range(1,int(os.getenv('NUMINVERTORS'))+1):
         outp.write("    numBatteries=\""+str(os.getenv("NUMBATTERIES_"+str(inv),"")+"\"\n"))
         outp.write("    Print_Raw_Registers="+str(os.getenv("PRINT_RAW",""))+"\n")
         outp.write("    MQTT_Output="+str(os.getenv("MQTT_OUTPUT","")+"\n"))
-        outp.write("    MQTT_Address=\""+str(os.getenv("MQTT_ADDRESS","")+"\"\n"))
-        outp.write("    MQTT_Username=\""+str(os.getenv("MQTT_USERNAME","")+"\"\n"))
-        outp.write("    MQTT_Password=\""+str(os.getenv("MQTT_PASSWORD","")+"\"\n"))
+        if hasMQTT:
+            outp.write("    MQTT_Address=\""+str(mqtt_host)+"\"\n")
+            outp.write("    MQTT_Username=\""+str(mqtt_username)+"\"\n")
+            outp.write("    MQTT_Password=\""+str(mqtt_password)+"\"\n")
+            outp.write("    MQTT_Port="+str(mqtt_port)+"\n")
+        else:
+            outp.write("    MQTT_Address=\""+str(os.getenv("MQTT_ADDRESS","")+"\"\n"))
+            outp.write("    MQTT_Username=\""+str(os.getenv("MQTT_USERNAME","")+"\"\n"))
+            outp.write("    MQTT_Password=\""+str(os.getenv("MQTT_PASSWORD","")+"\"\n"))
+            outp.write("    MQTT_Port="+str(os.getenv("MQTT_PORT","")+"\n"))
+        if isAddon:
+            outp.write("    HA_Auto_D=True\n")
+        else:
+            outp.write("    HA_Auto_D="+str(os.getenv("HA_AUTO_D",""))+"\n")
         if inv==1:
             outp.write("    MQTT_Topic=\""+str(os.getenv("MQTT_TOPIC","")+"\"\n"))
         else:
             outp.write("    MQTT_Topic=\""+str(os.getenv("MQTT_TOPIC_"+str(inv),"")+"\"\n"))
-        outp.write("    MQTT_Port="+str(os.getenv("MQTT_PORT","")+"\n"))
+
         outp.write("    Log_Level=\""+str(os.getenv("LOG_LEVEL","")+"\"\n"))
         #setup debug filename for each inv
         outp.write("    Influx_Output="+str(os.getenv("INFLUX_OUTPUT",""))+"\n")
@@ -98,7 +134,6 @@ for inv in range(1,int(os.getenv('NUMINVERTORS'))+1):
         outp.write("    influxToken=\""+str(os.getenv("INFLUX_TOKEN","")+"\"\n"))
         outp.write("    influxBucket=\""+str(os.getenv("INFLUX_BUCKET","")+"\"\n"))
         outp.write("    influxOrg=\""+str(os.getenv("INFLUX_ORG","")+"\"\n"))
-        outp.write("    HA_Auto_D="+str(os.getenv("HA_AUTO_D",""))+"\n")
         outp.write("    first_run= True\n")
         outp.write("    self_run_timer="+str(os.getenv("SELF_RUN_LOOP_TIMER","5"))+"\n")
         outp.write("    queue_retries="+str(os.getenv("QUEUE_RETRIES","2"))+"\n")    
@@ -157,11 +192,15 @@ for inv in range(1,int(os.getenv('NUMINVERTORS'))+1):
     rqWorker[inv]=subprocess.Popen(["/usr/local/bin/python3",PATH+"/worker.py"])
     logger.critical("Running RQ worker to queue and process givernergy-modbus calls")
 
-    if os.getenv('SELF_RUN')=="True":
+    if not hasMQTT and os.getenv('MQTT_ADDRESS')=="127.0.0.1" and os.getenv('MQTT_OUTPUT')=="True":
+        logger.critical ("Starting Mosquitto on port "+str(os.getenv('MQTT_PORT')))
+        mqttBroker=subprocess.Popen(["/usr/sbin/mosquitto", "-c",PATH+"/mqtt.conf"])
+
+    if os.getenv('SELF_RUN')=="True" or isAddon:
         logger.critical ("Running Invertor read loop every "+str(os.getenv('SELF_RUN_LOOP_TIMER'))+"s")
         selfRun[inv]=subprocess.Popen(["/usr/local/bin/python3",PATH+"/read.py", "self_run2"])
-    if os.getenv('MQTT_OUTPUT')=="True":
-        logger.critical ("Subscribing Mosquitto on port "+str(os.getenv('MQTT_PORT')))
+    if os.getenv('MQTT_OUTPUT')=="True" or isAddon:
+        logger.critical ("Subscribing MQTT Broker for control")
         mqttClient[inv]=subprocess.Popen(["/usr/local/bin/python3",PATH+"/mqtt_client.py"])
     
     GUPORT=6344+inv
@@ -183,10 +222,6 @@ for inv in range(1,int(os.getenv('NUMINVERTORS'))+1):
         logger.critical ("Serving Web Dashboard from port "+str(WDPORT))
         command=shlex.split("/usr/bin/node /usr/local/bin/serve -p "+ str(WDPORT))
         webDash[inv]=subprocess.Popen(command)
-
-if os.getenv('MQTT_ADDRESS')=="127.0.0.1" and os.getenv('MQTT_OUTPUT')=="True":
-    logger.critical ("Starting Mosquitto on port "+str(os.getenv('MQTT_PORT')))
-    mqttBroker=subprocess.Popen(["/usr/sbin/mosquitto", "-c",PATH+"/mqtt.conf"])
 
 if str(os.getenv('SMARTTARGET'))=="True":
     starttime= datetime.strftime(datetime.strptime(os.getenv('NIGHTRATESTART'),'%H:%M') - timedelta(hours=0, minutes=10),'%H:%M')

@@ -4,9 +4,8 @@ from os.path import exists
 from settings import GiV_Settings
 import write as wr
 import pickle, settings
-from GivLUT import GivQueue, GivLUT
+from GivLUT import GivLUT
 from pickletools import read_uint1
-from rq import Retry
 
 sys.path.append(GiV_Settings.default_path)
 
@@ -28,6 +27,7 @@ if GiV_Settings.MQTT_Topic=='':
 else:
     MQTT_Topic=GiV_Settings.MQTT_Topic
 
+logger.critical("Connecting to MQTT broker for control- "+str(GiV_Settings.MQTT_Address))
 #loop till serial number has been found
 while not hasattr(GiV_Settings,'serial_number'):
     time.sleep(5)
@@ -50,108 +50,110 @@ def isfloat(num):
 
 def on_message(client, userdata, message):
     payload={}
-    logger.debug("MQTT Message Recieved: "+str(message.topic)+"= "+str(message.payload.decode("utf-8")))
+    logger.critical("MQTT Message Recieved: "+str(message.topic)+"= "+str(message.payload.decode("utf-8")))
     writecommand={}
     command=str(message.topic).split("/")[-1]
     if command=="setDischargeRate":
         writecommand['dischargeRate']=str(message.payload.decode("utf-8"))
-        result=GivQueue.q.enqueue(wr.setDischargeRate,writecommand)
+        wr.setDischargeRate(writecommand)
     elif command=="setChargeRate":
         writecommand['chargeRate']=str(message.payload.decode("utf-8"))
-        result=GivQueue.q.enqueue(wr.setChargeRate,writecommand)
-    elif command=="reboot":
-        result=GivQueue.q.enqueue(wr.rebootinvertor)
+        wr.setChargeRate(writecommand)
+    elif command=="rebootInvertor":
+        wr.rebootinvertor()
+    elif command=="rebootAddon":
+        wr.rebootAddon()
     elif command=="setActivePowerRate":
         writecommand['activePowerRate']=str(message.payload.decode("utf-8"))
-        result=GivQueue.q.enqueue(wr.setActivePowerRate,writecommand)
+        wr.setActivePowerRate(writecommand)
     elif command=="enableChargeTarget":
         writecommand['state']=str(message.payload.decode("utf-8"))
-        result=GivQueue.q.enqueue(wr.enableChargeTarget,writecommand)
+        wr.enableChargeTarget(writecommand)
     elif command=="enableChargeSchedule":
         writecommand['state']=str(message.payload.decode("utf-8"))
-        result=GivQueue.q.enqueue(wr.enableChargeSchedule,writecommand)
+        wr.enableChargeSchedule(writecommand)
     elif command=="enableDishargeSchedule":
         writecommand['state']=str(message.payload.decode("utf-8"))
-        result=GivQueue.q.enqueue(wr.enableDischargeSchedule,writecommand)
+        wr.enableDischargeSchedule(writecommand)
     elif command=="enableDischarge":
         writecommand['state']=str(message.payload.decode("utf-8"))
-        result=GivQueue.q.enqueue(wr.enableDischarge,writecommand)
+        wr.enableDischarge(writecommand)
     elif command=="setChargeTarget":
         writecommand['chargeToPercent']=str(message.payload.decode("utf-8"))
-        result=GivQueue.q.enqueue(wr.setChargeTarget,writecommand)
+        wr.setChargeTarget(writecommand)
     elif command=="setBatteryReserve":
         writecommand['reservePercent']=str(message.payload.decode("utf-8"))
-        result=GivQueue.q.enqueue(wr.setBatteryReserve,writecommand)
+        wr.setBatteryReserve(writecommand)
     elif command=="setBatteryCutoff":
         writecommand['dischargeToPercent']=str(message.payload.decode("utf-8"))
-        result=GivQueue.q.enqueue(wr.setBatteryCutoff,writecommand)
+        wr.setBatteryCutoff(writecommand)
     elif command=="setBatteryMode":
         writecommand['mode']=str(message.payload.decode("utf-8"))
-        result=GivQueue.q.enqueue(wr.setBatteryMode,writecommand)
+        wr.setBatteryMode(writecommand)
     elif command=="setDateTime":
         writecommand['dateTime']=str(message.payload.decode("utf-8"))
-        result=GivQueue.q.enqueue(wr.setDateTime,writecommand)
+        wr.setDateTime(writecommand)
     elif command=="setShallowCharge":
         writecommand['val']=str(message.payload.decode("utf-8"))
-        result=GivQueue.q.enqueue(wr.setShallowCharge,writecommand)
+        wr.setShallowCharge(writecommand)
     elif command=="setChargeStart1":
-        if exists(GivLUT.regcache):
-            with open(GivLUT.regcache, 'rb') as inp:
-                regCacheStack= pickle.load(inp)
-            multi_output=regCacheStack[4]
-            finish=multi_output['Timeslots']['Charge_end_time_slot_1']
-            payload['start']=message.payload.decode("utf-8")[:5]
-            payload['finish']=finish[:5]
-            result=GivQueue.q.enqueue(wr.setChargeSlot1,payload)
+        #if exists(GivLUT.regcache):
+            #with open(GivLUT.regcache, 'rb') as inp:
+            #    regCacheStack= pickle.load(inp)
+            #multi_output=regCacheStack[4]
+            #finish=multi_output['Timeslots']['Charge_end_time_slot_1']
+        payload['start']=message.payload.decode("utf-8")[:5]
+            #payload['finish']=finish[:5]
+        wr.setChargeSlotStart1(payload)
     elif command=="setChargeEnd1":
-        if exists(GivLUT.regcache):
-            with open(GivLUT.regcache, 'rb') as inp:
-                regCacheStack= pickle.load(inp)
-            multi_output=regCacheStack[4]
-            start=multi_output['Timeslots']['Charge_start_time_slot_1']
-            payload['finish']=message.payload.decode("utf-8")[:5]
-            payload['start']=start[:5]
-            result=GivQueue.q.enqueue(wr.setChargeSlot1,payload)
+        #if exists(GivLUT.regcache):
+        #    with open(GivLUT.regcache, 'rb') as inp:
+        #        regCacheStack= pickle.load(inp)
+        #    multi_output=regCacheStack[4]
+        #    start=multi_output['Timeslots']['Charge_start_time_slot_1']
+        payload['finish']=message.payload.decode("utf-8")[:5]
+        #    payload['start']=start[:5]
+        wr.setChargeSlotEnd1(payload)
     elif command=="setDischargeStart1":
-        if exists(GivLUT.regcache):
-            with open(GivLUT.regcache, 'rb') as inp:
-                regCacheStack= pickle.load(inp)
-            multi_output=regCacheStack[4]
-            finish=multi_output['Timeslots']['Discharge_end_time_slot_1']
-            payload['start']=message.payload.decode("utf-8")[:5]
-            payload['finish']=finish[:5]
-            result=GivQueue.q.enqueue(wr.setDischargeSlot1,payload)
+        #if exists(GivLUT.regcache):
+        #    with open(GivLUT.regcache, 'rb') as inp:
+        #        regCacheStack= pickle.load(inp)
+        #    multi_output=regCacheStack[4]
+        #    finish=multi_output['Timeslots']['Discharge_end_time_slot_1']
+        payload['start']=message.payload.decode("utf-8")[:5]
+        #    payload['finish']=finish[:5]
+        wr.setDischargeSlotStart1(payload)
     elif command=="setDischargeEnd1":
-        if exists(GivLUT.regcache):
-            with open(GivLUT.regcache, 'rb') as inp:
-                regCacheStack= pickle.load(inp)
-            multi_output=regCacheStack[4]
-            start=multi_output['Timeslots']['Discharge_start_time_slot_1']
-            payload['finish']=message.payload.decode("utf-8")[:5]
-            payload['start']=start[:5]
-            result=GivQueue.q.enqueue(wr.setDischargeSlot1,payload)
+        #if exists(GivLUT.regcache):
+        #    with open(GivLUT.regcache, 'rb') as inp:
+        #        regCacheStack= pickle.load(inp)
+        #    multi_output=regCacheStack[4]
+        #    start=multi_output['Timeslots']['Discharge_start_time_slot_1']
+        payload['finish']=message.payload.decode("utf-8")[:5]
+        #    payload['start']=start[:5]
+        wr.setDischargeSlotEnd1(payload)
     elif command=="setDischargeStart2":
-        if exists(GivLUT.regcache):
-            with open(GivLUT.regcache, 'rb') as inp:
-                regCacheStack= pickle.load(inp)
-            multi_output=regCacheStack[4]
-            finish=multi_output['Timeslots']['Discharge_end_time_slot_2']
-            payload['start']=message.payload.decode("utf-8")[:5]
-            payload['finish']=finish[:5]
-            result=GivQueue.q.enqueue(wr.setDischargeSlot2,payload)
+        #if exists(GivLUT.regcache):
+        #    with open(GivLUT.regcache, 'rb') as inp:
+        #        regCacheStack= pickle.load(inp)
+        #    multi_output=regCacheStack[4]
+        #    finish=multi_output['Timeslots']['Discharge_end_time_slot_2']
+        payload['start']=message.payload.decode("utf-8")[:5]
+        #    payload['finish']=finish[:5]
+        wr.setDischargeSlotStart2(payload)
     elif command=="setDischargeEnd2":
-        if exists(GivLUT.regcache):
-            with open(GivLUT.regcache, 'rb') as inp:
-                regCacheStack= pickle.load(inp)
-            multi_output=regCacheStack[4]
-            start=multi_output['Timeslots']['Discharge_start_time_slot_2']
-            payload['finish']=message.payload.decode("utf-8")[:5]
-            payload['start']=start[:5]
-            result=GivQueue.q.enqueue(wr.setDischargeSlot2,payload)
+        #if exists(GivLUT.regcache):
+        #    with open(GivLUT.regcache, 'rb') as inp:
+        #        regCacheStack= pickle.load(inp)
+        #    multi_output=regCacheStack[4]
+        #    start=multi_output['Timeslots']['Discharge_start_time_slot_2']
+        payload['finish']=message.payload.decode("utf-8")[:5]
+        #    payload['start']=start[:5]
+        wr.setDischargeSlotEnd2(payload)
     elif command=="tempPauseDischarge":
         if isfloat(message.payload.decode("utf-8")):
             writecommand=float(message.payload.decode("utf-8"))
-            result=GivQueue.q.enqueue(wr.tempPauseDischarge,writecommand)
+            wr.tempPauseDischarge(writecommand)
         elif message.payload.decode("utf-8") == "Cancel":
             # Get the Job ID from the touchfile
             if exists(".tpdRunning"):
@@ -163,7 +165,7 @@ def on_message(client, userdata, message):
     elif command=="tempPauseCharge":
         if isfloat(message.payload.decode("utf-8")):
             writecommand=float(message.payload.decode("utf-8"))
-            result=GivQueue.q.enqueue(wr.tempPauseCharge,writecommand)
+            wr.tempPauseCharge(writecommand)
         elif message.payload.decode("utf-8") == "Cancel":
             # Get the Job ID from the touchfile
             if exists(".tpcRunning"):
@@ -175,7 +177,7 @@ def on_message(client, userdata, message):
     elif command=="forceCharge":
         if isfloat(message.payload.decode("utf-8")):
             writecommand=float(message.payload.decode("utf-8"))
-            result=GivQueue.q.enqueue(wr.forceCharge,writecommand)
+            wr.forceCharge(writecommand)
         elif message.payload.decode("utf-8") == "Cancel":
             # Get the Job ID from the touchfile
             if exists(".FCRunning"):
@@ -187,7 +189,7 @@ def on_message(client, userdata, message):
     elif command=="forceExport":
         if isfloat(message.payload.decode("utf-8")):
             writecommand=float(message.payload.decode("utf-8"))
-            result=GivQueue.q.enqueue(wr.forceExport,writecommand)
+            wr.forceExport(writecommand)
         elif message.payload.decode("utf-8") == "Cancel":
             # Get the Job ID from the touchfile
             if exists(".FERunning"):
@@ -198,7 +200,7 @@ def on_message(client, userdata, message):
                 logger.error("Force Export is not currently running")
     elif command=="switchRate":
         writecommand=message.payload.decode("utf-8")
-        result=GivQueue.q.enqueue(wr.switchRate,writecommand)
+        wr.switchRate(writecommand)
     
     #Do something with the result??
 
