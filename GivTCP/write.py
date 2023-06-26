@@ -337,12 +337,12 @@ def enableChargeSchedule(payload):
         if payload['state']=="enable":
             logger.info("Enabling Charge Schedule")
             from write import ec
-            result=GivQueue.q.enqueue(ec,retry=Retry(max=2, interval=2))
+            result=GivQueue.q.enqueue(ec,retry=Retry(max=GiV_Settings.queue_retries, interval=2))
             #client.enable_charge()
         elif payload['state']=="disable":
             logger.info("Disabling Charge Schedule")
             from write import dc
-            result=GivQueue.q.enqueue(dc,retry=Retry(max=2, interval=2))
+            result=GivQueue.q.enqueue(dc,retry=Retry(max=GiV_Settings.queue_retries, interval=2))
             #client.disable_charge()
         temp['result']="Setting Charge Enable was a success"
 
@@ -358,12 +358,12 @@ def enableChargeTarget(payload):
         if payload['state']=="enable":
             logger.info("Enabling Charge Target")
             from write import ect
-            result=GivQueue.q.enqueue(ect,retry=Retry(max=2, interval=2))
+            result=GivQueue.q.enqueue(ect,retry=Retry(max=GiV_Settings.queue_retries, interval=2))
             #client.enable_charge_target()
         elif payload['state']=="disable":
             logger.info("Disabling Charge Target")
             from write import dct
-            result=GivQueue.q.enqueue(dct,retry=Retry(max=2, interval=2))
+            result=GivQueue.q.enqueue(dct,retry=Retry(max=GiV_Settings.queue_retries, interval=2))
             #client.disable_charge_target()
         temp['result']="Setting Charge Target was a success"
 
@@ -380,12 +380,12 @@ def enableDischarge(payload):
         if payload['state']=="enable":
             logger.info("Enabling Discharge")
             from write import ssc
-            result=GivQueue.q.enqueue(ssc,saved_battery_reserve,retry=Retry(max=2, interval=2))
+            result=GivQueue.q.enqueue(ssc,saved_battery_reserve,retry=Retry(max=GiV_Settings.queue_retries, interval=2))
             #client.set_shallow_charge(saved_battery_reserve)
         elif payload['state']=="disable":
             logger.info("Disabling Discharge")
             from write import ssc
-            result=GivQueue.q.enqueue(ssc,100,retry=Retry(max=2, interval=2))
+            result=GivQueue.q.enqueue(ssc,100,retry=Retry(max=GiV_Settings.queue_retries, interval=2))
         temp['result']="Setting Discharge Enable was a success"
 
     except:
@@ -400,12 +400,12 @@ def enableDischargeSchedule(payload):
         if payload['state']=="enable":
             logger.info("Enabling Disharge Schedule")
             from write import ed
-            result=GivQueue.q.enqueue(ed,retry=Retry(max=2, interval=2))
+            result=GivQueue.q.enqueue(ed,retry=Retry(max=GiV_Settings.queue_retries, interval=2))
             #client.enable_discharge()
         elif payload['state']=="disable":
             logger.info("Disabling Discharge Schedule")
             from write import dd
-            result=GivQueue.q.enqueue(dd,retry=Retry(max=2, interval=2))
+            result=GivQueue.q.enqueue(dd,retry=Retry(max=GiV_Settings.queue_retries, interval=2))
             #client.disable_discharge()
         temp['result']="Setting Charge Enable was a success"
     except:
@@ -419,7 +419,7 @@ def setShallowCharge(payload):
     try:
         logger.info("Setting Shallow Charge to: "+ str(payload['val']))
         from write import ssc
-        result=GivQueue.q.enqueue(ssc,int(payload['val']),retry=Retry(max=2, interval=2))
+        result=GivQueue.q.enqueue(ssc,int(payload['val']),retry=Retry(max=GiV_Settings.queue_retries, interval=2))
         #client.set_shallow_charge(int(payload['val']))
         temp['result']="Setting Shallow Charge was a success"
     except:
@@ -435,7 +435,7 @@ def setChargeTarget(payload):
     try:
         logger.info("Setting Charge Target to: "+str(target))
         from write import sct
-        result=GivQueue.q.enqueue(sct,target,retry=Retry(max=2, interval=2))
+        result=GivQueue.q.enqueue(sct,target,retry=Retry(max=GiV_Settings.queue_retries, interval=2))
         #client.enable_charge_target(target)
         temp['result']="Setting Charge Target was a success"
     except:
@@ -454,7 +454,7 @@ def setBatteryReserve(payload):
     logger.info ("Setting battery reserve target to: " + str(target))
     try:
         from write import ssc
-        result=GivQueue.q.enqueue(ssc,target,retry=Retry(max=2, interval=2))
+        result=GivQueue.q.enqueue(ssc,target,retry=Retry(max=GiV_Settings.queue_retries, interval=2))
         #client.set_shallow_charge(target)
         logger.debug("Setting Battery Reserve to: "+str(target)+" was a success")        
         temp['result']="Setting Battery Reserve was a success"
@@ -474,7 +474,7 @@ def setBatteryCutoff(payload):
     try:
         logger.info("Setting Battery Cutoff to: "+str(target))
         from write import sbpr
-        result=GivQueue.q.enqueue(sbpr,target,retry=Retry(max=2, interval=2))
+        result=GivQueue.q.enqueue(sbpr,target,retry=Retry(max=GiV_Settings.queue_retries, interval=2))
         #client.set_battery_power_reserve(target)
         temp['result']="Setting Battery Cutoff was a success"
     except:
@@ -488,7 +488,7 @@ def rebootinvertor():
     try:
         logger.info("Rebooting Invertor...")
         from write import ri
-        result=GivQueue.q.enqueue(ri,retry=Retry(max=2, interval=2))
+        result=GivQueue.q.enqueue(ri,retry=Retry(max=GiV_Settings.queue_retries, interval=2))
         #client.reboot_invertor()
         temp['result']="Rebooting invertor was a success"
     except:
@@ -505,7 +505,7 @@ def setActivePowerRate(payload):
     try:
         logger.info("Setting Active Power Rate to "+str(target))
         from write import sapr
-        result=GivQueue.q.enqueue(sapr,target,retry=Retry(max=2, interval=2))
+        result=GivQueue.q.enqueue(sapr,target,retry=Retry(max=GiV_Settings.queue_retries, interval=2))
         #client.set_active_power_rate(target)
         temp['result']="Setting Active Power Rate was a success"
     except:
@@ -533,7 +533,7 @@ def setChargeRate(payload):
         logger.info ("Setting battery charge rate to: " + str(payload['chargeRate'])+" ("+str(target)+")")
         try:
             from write import sbcl
-            result=GivQueue.q.enqueue(sbcl,target,retry=Retry(max=2, interval=2))
+            result=GivQueue.q.enqueue(sbcl,target,retry=Retry(max=GiV_Settings.queue_retries, interval=2))
             #client.set_battery_charge_limit(target)
             temp['result']="Setting Charge Rate was a success"
 
@@ -565,9 +565,10 @@ def setDischargeRate(payload):
         logger.info ("Setting battery discharge rate to: " + str(payload['dischargeRate'])+" ("+str(target)+")")
         try:
             from write import sbdl
-            result=GivQueue.q.enqueue(sbdl,target,retry=Retry(max=2, interval=2))
+            result=GivQueue.q.enqueue(sbdl,target,retry=Retry(max=GiV_Settings.queue_retries, interval=2))
             #client.set_battery_discharge_limit(target)
             temp['result']="Setting Discharge Rate was a success"
+            logger.info(temp['result'])
         except:
             e = sys.exc_info()
             temp['result']="Setting Discharge Rate failed: " + str(e)
@@ -583,17 +584,18 @@ def setChargeSlot1(payload):
     if 'chargeToPercent' in payload.keys():
         target=int(payload['chargeToPercent'])
         from write import sct
-        result=GivQueue.q.enqueue(sct,target,retry=Retry(max=2, interval=2))
+        result=GivQueue.q.enqueue(sct,target,retry=Retry(max=GiV_Settings.queue_retries, interval=2))
     try:
         logger.info("Setting Charge Slot 1 to: "+str(payload['start'])+" - "+str(payload['finish']))
         from write import scs1
-        result=GivQueue.q.enqueue(scs1,payload,retry=Retry(max=2, interval=2))
+        result=GivQueue.q.enqueue(scs1,payload,retry=Retry(max=GiV_Settings.queue_retries, interval=2))
         temp['result']="Setting Charge Slot 1 was a success"
-
+        logger.info(temp['result'])
     except:
         e = sys.exc_info()
         temp['result']="Setting Charge Slot 1 failed: " + str(e)
         logger.error (temp['result'])
+    
     return json.dumps(temp)
 
 def setChargeSlotStart1(payload):
@@ -602,8 +604,9 @@ def setChargeSlotStart1(payload):
     try:
         logger.info("Setting Charge Slot 1 Start to: "+str(payload['start']))
         from write import scss1
-        result=GivQueue.q.enqueue(scss1,payload,retry=Retry(max=2, interval=2))
+        result=GivQueue.q.enqueue(scss1,payload,retry=Retry(max=GiV_Settings.queue_retries, interval=2))
         temp['result']="Setting Charge Slot Start 1 was a success"
+        logger.info(temp['result'])
     except:
         e = sys.exc_info()
         temp['result']="Setting Charge Slot 1 failed: " + str(e)
@@ -616,8 +619,9 @@ def setChargeSlotEnd1(payload):
     try:
         logger.info("Setting Charge Slot End 1 to: "+str(payload['finish']))
         from write import scse1
-        result=GivQueue.q.enqueue(scse1,payload,retry=Retry(max=2, interval=2))
+        result=GivQueue.q.enqueue(scse1,payload,retry=Retry(max=GiV_Settings.queue_retries, interval=2))
         temp['result']="Setting Charge Slot End 1 was a success"
+        logger.info(temp['result'])
     except:
         e = sys.exc_info()
         temp['result']="Setting Charge Slot 1 failed: " + str(e)
@@ -630,12 +634,13 @@ def setChargeSlot2(payload):
     if 'chargeToPercent' in payload.keys():
         target=int(payload['chargeToPercent'])
         from write import sct
-        result=GivQueue.q.enqueue(sct,payload,retry=Retry(max=2, interval=2))
+        result=GivQueue.q.enqueue(sct,payload,retry=Retry(max=GiV_Settings.queue_retries, interval=2))
     try:
         logger.info("Setting Charge Slot 2 to: "+str(payload['start'])+" - "+str(payload['finish']))
         from write import scs2
-        result=GivQueue.q.enqueue(scs2,payload,retry=Retry(max=2, interval=2))
+        result=GivQueue.q.enqueue(scs2,payload,retry=Retry(max=GiV_Settings.queue_retries, interval=2))
         temp['result']="Setting Charge Slot 2 was a success"
+        logger.info(temp['result'])
     except:
         e = sys.exc_info()
         temp['result']="Setting Charge Slot 2 failed: " + str(e)
@@ -648,8 +653,9 @@ def setChargeSlotStart2(payload):
     try:
         logger.info("Setting Charge Slot 2 Start to: "+str(payload['start']))
         from write import scss2
-        result=GivQueue.q.enqueue(scss2,payload,retry=Retry(max=2, interval=2))
+        result=GivQueue.q.enqueue(scss2,payload,retry=Retry(max=GiV_Settings.queue_retries, interval=2))
         temp['result']="Setting Charge Slot Start 2 was a success"
+        logger.info(temp['result'])
     except:
         e = sys.exc_info()
         temp['result']="Setting Charge Slot 2 failed: " + str(e)
@@ -662,8 +668,9 @@ def setChargeSlotEnd2(payload):
     try:
         logger.info("Setting Charge Slot End 2 to: "+str(payload['finish']))
         from write import scse2
-        result=GivQueue.q.enqueue(scse2,payload,retry=Retry(max=2, interval=2))
+        result=GivQueue.q.enqueue(scse2,payload,retry=Retry(max=GiV_Settings.queue_retries, interval=2))
         temp['result']="Setting Charge Slot End 2 was a success"
+        logger.info(temp['result'])
     except:
         e = sys.exc_info()
         temp['result']="Setting Charge Slot 2 failed: " + str(e)
@@ -675,16 +682,16 @@ def setDischargeSlot1(payload):
     if type(payload) is not dict: payload=json.loads(payload)
     if 'dischargeToPercent' in payload.keys():
         #from write import writeHelpers
-        #result=GivQueue.q.enqueue(setBatteryReserve,payload,retry=Retry(max=2, interval=2))
+        #result=GivQueue.q.enqueue(setBatteryReserve,payload,retry=Retry(max=GiV_Settings.queue_retries, interval=2))
         result=setBatteryReserve(payload)
     try:
         strt=datetime.strptime(payload['start'],"%H:%M")
         fnsh=datetime.strptime(payload['finish'],"%H:%M")
         logger.info("Setting Discharge Slot 1 to: "+str(payload['start'])+" - "+str(payload['finish']))
         from write import sds1
-        result=GivQueue.q.enqueue(sds1,payload,retry=Retry(max=2, interval=2))
+        result=GivQueue.q.enqueue(sds1,payload,retry=Retry(max=GiV_Settings.queue_retries, interval=2))
         temp['result']="Setting Discharge Slot 1 was a success"
-
+        logger.info(temp['result'])
     except:
         e = sys.exc_info()
         temp['result']="Setting Discharge Slot 1 failed: " + str(e)
@@ -697,8 +704,9 @@ def setDischargeSlotStart1(payload):
     try:
         logger.info("Setting Discharge Slot 1 Start to: "+str(payload['start']))
         from write import sdss1
-        result=GivQueue.q.enqueue(sdss1,payload,retry=Retry(max=2, interval=2))
+        result=GivQueue.q.enqueue(sdss1,payload,retry=Retry(max=GiV_Settings.queue_retries, interval=2))
         temp['result']="Setting Discharge Slot Start 1 was a success"
+        logger.info(temp['result'])
     except:
         e = sys.exc_info()
         temp['result']="Setting Discharge Slot 1 failed: " + str(e)
@@ -711,8 +719,9 @@ def setDischargeSlotEnd1(payload):
     try:
         logger.info("Setting Discharge Slot End 1 to: "+str(payload['finish']))
         from write import sdse1
-        result=GivQueue.q.enqueue(sdse1,payload,retry=Retry(max=2, interval=2))
+        result=GivQueue.q.enqueue(sdse1,payload,retry=Retry(max=GiV_Settings.queue_retries, interval=2))
         temp['result']="Setting Discharge Slot End 1 was a success"
+        logger.info(temp['result'])
     except:
         e = sys.exc_info()
         temp['result']="Setting Discharge Slot 1 failed: " + str(e)
@@ -726,14 +735,14 @@ def setDischargeSlot2(payload):
     if type(payload) is not dict: payload=json.loads(payload)
     if 'dischargeToPercent' in payload.keys():
         #from write import writeHelpers
-        #result=GivQueue.q.enqueue(setBatteryReserve,payload,retry=Retry(max=2, interval=2))
+        #result=GivQueue.q.enqueue(setBatteryReserve,payload,retry=Retry(max=GiV_Settings.queue_retries, interval=2))
         result=setBatteryReserve(payload)
     try:
         logger.info("Setting Discharge Slot 2 to: "+str(payload['start'])+" - "+str(payload['finish']))
         from write import sds2
-        result=GivQueue.q.enqueue(sds2,payload,retry=Retry(max=2, interval=2))
+        result=GivQueue.q.enqueue(sds2,payload,retry=Retry(max=GiV_Settings.queue_retries, interval=2))
         temp['result']="Setting Discharge Slot 2 was a success"
-
+        logger.info(temp['result'])
     except:
         e = sys.exc_info()
         temp['result']="Setting Discharge Slot 2 failed: " + str(e)
@@ -746,8 +755,9 @@ def setDischargeSlotStart2(payload):
     try:
         logger.info("Setting Discharge Slot 2 Start to: "+str(payload['start']))
         from write import sdss2
-        result=GivQueue.q.enqueue(sdss2,payload,retry=Retry(max=2, interval=2))
+        result=GivQueue.q.enqueue(sdss2,payload,retry=Retry(max=GiV_Settings.queue_retries, interval=2))
         temp['result']="Setting Discharge Slot Start 2 was a success"
+        logger.info(temp['result'])
     except:
         e = sys.exc_info()
         temp['result']="Setting Discharge Slot 2 failed: " + str(e)
@@ -760,7 +770,7 @@ def setDischargeSlotEnd2(payload):
     try:
         logger.info("Setting Discharge Slot End 2 to: "+str(payload['finish']))
         from write import sdse2
-        result=GivQueue.q.enqueue(sdse2,payload,retry=Retry(max=2, interval=2))
+        result=GivQueue.q.enqueue(sdse2,payload,retry=Retry(max=GiV_Settings.queue_retries, interval=2))
         temp['result']="Setting Discharge Slot End 2 was a success"
     except:
         e = sys.exc_info()
@@ -773,28 +783,28 @@ def FEResume(revert):
     logger.info("Reverting Force Export settings:")   
     payload['dischargeRate']=revert["dischargeRate"]
     #from write import setDischargeRate
-    #GivQueue.q.enqueue(setDischargeRate,payload,retry=Retry(max=2, interval=2))
+    #GivQueue.q.enqueue(setDischargeRate,payload,retry=Retry(max=GiV_Settings.queue_retries, interval=2))
     result=setDischargeRate(payload)
     payload={}
     payload['start']=revert["start_time"]
     payload['finish']=revert["end_time"]
     #from write import setDischargeSlot2
-    #GivQueue.q.enqueue(setDischargeSlot2,payload,retry=Retry(max=2, interval=2))
+    #GivQueue.q.enqueue(setDischargeSlot2,payload,retry=Retry(max=GiV_Settings.queue_retries, interval=2))
     result=setDischargeSlot2(payload)
     payoad={}
     payload['state']=revert['discharge_schedule']
     #from write import enableDischargeSchedule
-    #GivQueue.q.enqueue(enableDischargeSchedule,payload,retry=Retry(max=2, interval=2))
+    #GivQueue.q.enqueue(enableDischargeSchedule,payload,retry=Retry(max=GiV_Settings.queue_retries, interval=2))
     result=enableDischargeSchedule(payload)
     payload={}
     payload['reservePercent']=revert["reservePercent"]
     #from write import setBatteryReserve
-    #GivQueue.q.enqueue(setBatteryReserve,payload,retry=Retry(max=2, interval=2))
+    #GivQueue.q.enqueue(setBatteryReserve,payload,retry=Retry(max=GiV_Settings.queue_retries, interval=2))
     result=setBatteryReserve(payload)
     payload={}
     payload["mode"]=revert["mode"]
     #from write import setBatteryMode
-    #GivQueue.q.enqueue(setBatteryMode,payload,retry=Retry(max=2, interval=2))
+    #GivQueue.q.enqueue(setBatteryMode,payload,retry=Retry(max=GiV_Settings.queue_retries, interval=2))
     result=setBatteryMode(payload)
     os.remove(".FERunning")
 
@@ -821,7 +831,7 @@ def forceExport(exportTime):
             payload={}
             payload['reservePercent']=4
             #from write import setBatteryReserve
-            #result=GivQueue.q.enqueue(setBatteryReserve,payload,retry=Retry(max=2, interval=2))    
+            #result=GivQueue.q.enqueue(setBatteryReserve,payload,retry=Retry(max=GiV_Settings.queue_retries, interval=2))    
             result=setBatteryReserve(payload) 
         except:
             logger.debug("Error Setting Reserve to 4%")
@@ -836,22 +846,22 @@ def forceExport(exportTime):
         payload['start']=slot2[0].strftime("%H:%M")
         payload['finish']=slot2[1].strftime("%H:%M")
         #from write import setDischargeSlot2
-        #result=GivQueue.q.enqueue(setDischargeSlot2,payload,retry=Retry(max=2, interval=2))
+        #result=GivQueue.q.enqueue(setDischargeSlot2,payload,retry=Retry(max=GiV_Settings.queue_retries, interval=2))
         result=setDischargeSlot2(payload)
         payload={}
         payload['mode']="Timed Export"
         #from write import setBatteryMode
-        #result=GivQueue.q.enqueue(setBatteryMode,payload,retry=Retry(max=2, interval=2))
+        #result=GivQueue.q.enqueue(setBatteryMode,payload,retry=Retry(max=GiV_Settings.queue_retries, interval=2))
         result=setBatteryMode(payload)
         payload={}
         payload['dischargeRate']=maxDischargeRate
         #from write import setDischargeRate
-        #result=GivQueue.q.enqueue(setDischargeRate,payload,retry=Retry(max=2, interval=2))
+        #result=GivQueue.q.enqueue(setDischargeRate,payload,retry=Retry(max=GiV_Settings.queue_retries, interval=2))
         result=setDischargeRate(payload)
         payload={}
         payload['state']="enable"
         #from write import enableDischargeSchedule
-        #result=GivQueue.q.enqueue(enableDischargeSchedule,payload,retry=Retry(max=2, interval=2))
+        #result=GivQueue.q.enqueue(enableDischargeSchedule,payload,retry=Retry(max=GiV_Settings.queue_retries, interval=2))
         result=enableDischargeSchedule(payload)
         if exists(".FERunning"):    # If a forcecharge is already running, change time of revert job to new end time
             logger.info("Force Export already running, changing end time")
@@ -873,19 +883,19 @@ def FCResume(revert):
     logger.info("Reverting Force Charge Settings:")
     payload['chargeRate']=revert["chargeRate"]
     #from write import setChargeRate
-    #GivQueue.q.enqueue(setChargeRate,payload,retry=Retry(max=2, interval=2))
+    #GivQueue.q.enqueue(setChargeRate,payload,retry=Retry(max=GiV_Settings.queue_retries, interval=2))
     setChargeRate(payload)
     payload={}
     payload['state']=revert["chargeScheduleEnable"]
     #from write import enableChargeSchedule
-    #GivQueue.q.enqueue(enableChargeSchedule,payload,retry=Retry(max=2, interval=2))
+    #GivQueue.q.enqueue(enableChargeSchedule,payload,retry=Retry(max=GiV_Settings.queue_retries, interval=2))
     enableChargeSchedule(payload)
     payload={}
     payload['start']=revert["start_time"]
     payload['finish']=revert["end_time"]
     payload['chargeToPercent']=revert["targetSOC"]
     #from write import setChargeSlot1
-    #GivQueue.q.enqueue(setChargeSlot1,payload,retry=Retry(max=2, interval=2))
+    #GivQueue.q.enqueue(setChargeSlot1,payload,retry=Retry(max=GiV_Settings.queue_retries, interval=2))
     setChargeSlot1(payload)
     os.remove(".FCRunning")
 
@@ -942,19 +952,19 @@ def forceCharge(chargeTime):
 
         payload['chargeRate']=maxChargeRate
         #from write import setChargeRate
-        #result=GivQueue.q.enqueue(setChargeRate,payload,retry=Retry(max=2, interval=2))
+        #result=GivQueue.q.enqueue(setChargeRate,payload,retry=Retry(max=GiV_Settings.queue_retries, interval=2))
         result=setChargeRate(payload)
         payload={}
         payload['state']="enable"
         #from write import enableChargeSchedule
-        #result=GivQueue.q.enqueue(enableChargeSchedule,payload,retry=Retry(max=2, interval=2))
+        #result=GivQueue.q.enqueue(enableChargeSchedule,payload,retry=Retry(max=GiV_Settings.queue_retries, interval=2))
         result=enableChargeSchedule(payload)
         payload={}
         payload['start']=GivLUT.getTime(datetime.now())
         payload['finish']=GivLUT.getTime(datetime.now()+timedelta(minutes=chargeTime))
         payload['chargeToPercent']=100
         #from write import setChargeSlot1
-        #result=GivQueue.q.enqueue(setChargeSlot1,payload,retry=Retry(max=2, interval=2))
+        #result=GivQueue.q.enqueue(setChargeSlot1,payload,retry=Retry(max=GiV_Settings.queue_retries, interval=2))
         result=setChargeSlot1(payload)
         if exists(".FCRunning"):    # If a forcecharge is already running, change time of revert job to new end time
             logger.info("Force Charge already running, changing end time")
@@ -974,7 +984,7 @@ def forceCharge(chargeTime):
 
 def tmpPDResume(payload):
     #from write import setDischargeRate
-    #result=GivQueue.q.enqueue(setDischargeRate,payload,retry=Retry(max=2, interval=2))
+    #result=GivQueue.q.enqueue(setDischargeRate,payload,retry=Retry(max=GiV_Settings.queue_retries, interval=2))
     result=setDischargeRate(payload)
     #result=setDischargeRate(payload)
     logger.info("Discharge Rate restored to: "+str(payload["dischargeRate"]))
@@ -988,7 +998,7 @@ def tempPauseDischarge(pauseTime):
         result={}
         payload['dischargeRate']=0
         #from write import setDischargeRate
-        #result=GivQueue.q.enqueue(setDischargeRate,payload,retry=Retry(max=2, interval=2))
+        #result=GivQueue.q.enqueue(setDischargeRate,payload,retry=Retry(max=GiV_Settings.queue_retries, interval=2))
         result=setDischargeRate(payload)
         logger.info("Pausing Discharge for "+str(pauseTime)+" minutes")
         #Update read data via pickle
@@ -1017,7 +1027,7 @@ def tempPauseDischarge(pauseTime):
 
 def tmpPCResume(payload):
     #from write import setChargeRate
-    #result=GivQueue.q.enqueue(setChargeRate,payload,retry=Retry(max=2, interval=2))
+    #result=GivQueue.q.enqueue(setChargeRate,payload,retry=Retry(max=GiV_Settings.queue_retries, interval=2))
     result=setChargeRate(payload)
     logger.info("Charge Rate restored to: "+str(payload["chargeRate"]))
     if exists(".tpcRunning"): os.remove(".tpcRunning")
@@ -1030,7 +1040,7 @@ def tempPauseCharge(pauseTime):
         result={}
         payload['chargeRate']=0
         #from write import setChargeRate
-        #result=GivQueue.q.enqueue(setChargeRate,payload,retry=Retry(max=2, interval=2))
+        #result=GivQueue.q.enqueue(setChargeRate,payload,retry=Retry(max=GiV_Settings.queue_retries, interval=2))
         result=setChargeRate(payload)
         logger.debug(result)
         #Update read data via pickle
@@ -1065,25 +1075,25 @@ def setBatteryMode(payload):
     try:
         if payload['mode']=="Eco":
             from write import smd
-            result=GivQueue.q.enqueue(smd,retry=Retry(max=2, interval=2))
+            result=GivQueue.q.enqueue(smd,retry=Retry(max=GiV_Settings.queue_retries, interval=2))
             #client.set_mode_dynamic()
             #time.sleep(1)
             from write import ssc
             saved_battery_reserve = getSavedBatteryReservePercentage()
-            result=GivQueue.q.enqueue(ssc,saved_battery_reserve,retry=Retry(max=2, interval=2))
+            result=GivQueue.q.enqueue(ssc,saved_battery_reserve,retry=Retry(max=GiV_Settings.queue_retries, interval=2))
             #client.set_shallow_charge(getSavedBatteryReservePercentage())
         elif payload['mode']=="Eco (Paused)":
             from write import smd
-            result=GivQueue.q.enqueue(smd,retry=Retry(max=2, interval=2))
+            result=GivQueue.q.enqueue(smd,retry=Retry(max=GiV_Settings.queue_retries, interval=2))
             #client.set_mode_dynamic()
             #time.sleep(1)
             from write import ssc
-            result=GivQueue.q.enqueue(ssc,100,retry=Retry(max=2, interval=2))
+            result=GivQueue.q.enqueue(ssc,100,retry=Retry(max=GiV_Settings.queue_retries, interval=2))
             #client.set_shallow_charge(100)
         elif payload['mode']=="Timed Demand":
             from write import sbdmd, ed
-            result=GivQueue.q.enqueue(sbdmd,retry=Retry(max=2, interval=2))
-            result=GivQueue.q.enqueue(ed,retry=Retry(max=2, interval=2))
+            result=GivQueue.q.enqueue(sbdmd,retry=Retry(max=GiV_Settings.queue_retries, interval=2))
+            result=GivQueue.q.enqueue(ed,retry=Retry(max=GiV_Settings.queue_retries, interval=2))
             
             #client.set_battery_discharge_mode_demand()
             #client.enable_discharge()
@@ -1099,8 +1109,8 @@ def setBatteryMode(payload):
 #                client.set_mode_storage()
         elif payload['mode']=="Timed Export":
             from write import sbdmmp,ed
-            result=GivQueue.q.enqueue(sbdmmp,retry=Retry(max=2, interval=2))
-            result=GivQueue.q.enqueue(ed,retry=Retry(max=2, interval=2))
+            result=GivQueue.q.enqueue(sbdmmp,retry=Retry(max=GiV_Settings.queue_retries, interval=2))
+            result=GivQueue.q.enqueue(ed,retry=Retry(max=GiV_Settings.queue_retries, interval=2))
 #            client.set_battery_discharge_mode_max_power()
 #            client.enable_discharge()
 #            if exists(GivLUT.regcache):      # if there is a cache then grab it
@@ -1132,7 +1142,7 @@ def setDateTime(payload):
         logger.info("Setting Invertor time to: "+iDateTime)
         #Set Date and Time on Invertor
         from write import sdt
-        result=GivQueue.q.enqueue(sdt,iDateTime,retry=Retry(max=2, interval=2))
+        result=GivQueue.q.enqueue(sdt,iDateTime,retry=Retry(max=GiV_Settings.queue_retries, interval=2))
         #client.set_datetime(iDateTime)
         temp['result']="Invertor time setting was a success"
 

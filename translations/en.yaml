@@ -88,6 +88,10 @@ configuration:
     name: Self Run Loop Timer
     description: >-
       How often should GivTCP connect to the inverter to check for data when self run is enabled? Default is 5, measured in seconds.
+  QUEUE_RETRIES:
+    name: Queue Retries
+    description: >-
+      How many times should GivTCP write to the inverter to ensure the posted value is sucessfully set.  
   HA_AUTO_D:
     name: Home Assistant Auto Discovery
     description: >-

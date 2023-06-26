@@ -55,7 +55,8 @@ def getData(fullrefresh):  # Read from Invertor put in cache
     # Connect to Invertor and load data
     try:
         logger.debug("Connecting to: " + GiV_Settings.invertorIP)
-        plant=GivQueue.q.enqueue(invertorData,fullrefresh,retry=Retry(max=2, interval=2))      
+#        plant=GivQueue.q.enqueue(invertorData,fullrefresh,retry=Retry(max=GiV_Settings.queue_retries, interval=2))   
+        plant=invertorData(True)
         while plant.result is None and plant.exc_info is None:
             time.sleep(0.5)
         #plant=invertorData(True)
@@ -988,7 +989,7 @@ def dataSmoother2(dataNew, dataOld, lastUpdate):
                 logger.debug("Midnight and "+str(name)+" so accepting value as is")
                 return (dataNew)
             if newData < float(lookup.min) or newData > float(lookup.max):  # If outside min and max ranges
-                logger.debug(str(name)+" is outside of allowable bounds so using old value: "+str(newData))
+                logger.debug(str(name)+" is outside of allowable bounds so using old value. Out of bounds value is: "+str(newData) + ". Min limit: " + str(lookup.min) + ". Max limit: " + str(lookup.max))
                 return(oldData)
             if newData == 0 and not lookup.allowZero:  # if zero and not allowed to be
                 logger.debug(str(name)+" is Zero so using old value")
