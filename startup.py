@@ -60,7 +60,6 @@ if isAddon:
         hasMQTT=False
         logger.critical("No HA MQTT service has been found")
 
-
     #Get Host Details    
     url="http://supervisor/network/info"
     result = requests.get(url,
@@ -69,12 +68,16 @@ if isAddon:
     hostDetails=result.json()
     
     if hostDetails['result']=="ok":
-    # For each interface scan for inverters    
-        for interface in hostDetails['data']['interfaces']:
-            subnet=interface['ipv4']['gateway']
-            invList=findInvertor(subnet)
-            logger.critical ("We have found the following invertors: "+str(invList))
-
+    # For each interface scan for inverters
+        try:
+            for interface in hostDetails['data']['interfaces']:
+                subnet=interface['ipv4']['gateway']
+                invList=findInvertor(subnet)
+                logger.critical ("We have found the following invertors: "+str(invList))
+        except:
+            logger.error("Error scanning for Inverters")
+    
+logger.critical("GivTCP isAddon: "+str(isAddon))
 
 if not os.path.exists(str(os.getenv("CACHELOCATION"))):
     os.makedirs(str(os.getenv("CACHELOCATION")))

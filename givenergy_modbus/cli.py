@@ -4,11 +4,11 @@ import logging
 
 import click
 
-from givenergy_modbus.client import GivEnergyClient
-from givenergy_modbus.model.battery import Battery
-from givenergy_modbus.model.inverter import Inverter  # type: ignore
-from givenergy_modbus.model.plant import Plant
-from givenergy_modbus.util import InterceptHandler
+from client import GivEnergyClient
+from model.battery import Battery
+from model.inverter import Inverter  # type: ignore
+from model.plant import Plant
+from util import InterceptHandler
 
 _logger = logging.getLogger(__package__)
 

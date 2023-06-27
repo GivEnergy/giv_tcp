@@ -22,9 +22,10 @@ class ModbusPDU(ABC):
 
     builder: BinaryPayloadBuilder
     function_code: int
-    data_adapter_serial_number: str = 'AB1234G567'
+    data_adapter_serial_number: str = ''
+    #data_adapter_serial_number: int = 0x0000000000
     padding: int = 0x00000008
-    slave_address: int = 0x31  # 0x11 is the inverter but the cloud systems interfere, 0x32+ are the batteries
+    slave_address: int = 0x32  # 0x11 is the inverter but the cloud systems interfere, 0x32+ are the batteries
     check: int = 0x0000
     error: bool = False
 
@@ -201,10 +202,12 @@ class ReadRegistersRequest(ModbusRequest, ABC):
 
     def _update_check_code(self):
         crc_builder = BinaryPayloadBuilder(byteorder=Endian.Big)
+        crc_builder.add_8bit_uint(self.slave_address)
         crc_builder.add_8bit_uint(self.function_code)
         crc_builder.add_16bit_uint(self.base_register)
         crc_builder.add_16bit_uint(self.register_count)
         self.check = CrcModbus().process(crc_builder.to_string()).final()
+        self.check=int.from_bytes(self.check.to_bytes(2,'little'),'big')
         self.builder.add_16bit_uint(self.check)
 
     def _calculate_function_data_size(self):
@@ -381,10 +384,12 @@ class WriteHoldingRegisterRequest(WriteHoldingRegisterMeta, ModbusRequest, ABC):
 
     def _update_check_code(self):
         crc_builder = BinaryPayloadBuilder(byteorder=Endian.Big)
+        crc_builder.add_8bit_uint(self.slave_address)
         crc_builder.add_8bit_uint(self.function_code)
-        crc_builder.add_16bit_uint(self.register)
-        crc_builder.add_16bit_uint(self.value)
+        crc_builder.add_16bit_uint(self.base_register)
+        crc_builder.add_16bit_uint(self.register_count)
         self.check = CrcModbus().process(crc_builder.to_string()).final()
+        self.check=int.from_bytes(self.check.to_bytes(2,'little'),'big')
         self.builder.add_16bit_uint(self.check)
 
     def _calculate_function_data_size(self):

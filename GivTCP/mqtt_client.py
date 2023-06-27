@@ -50,7 +50,7 @@ def isfloat(num):
 
 def on_message(client, userdata, message):
     payload={}
-    logger.critical("MQTT Message Recieved: "+str(message.topic)+"= "+str(message.payload.decode("utf-8")))
+    logger.debug("MQTT Message Recieved: "+str(message.topic)+"= "+str(message.payload.decode("utf-8")))
     writecommand={}
     command=str(message.topic).split("/")[-1]
     if command=="setDischargeRate":
