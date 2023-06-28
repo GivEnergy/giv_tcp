@@ -23,7 +23,7 @@ logger = GivLUT.logger
 def sct(target):
     temp={}
     try:
-        client.enable_charge_target(target)
+        client.set_battery_target_soc(target)
         temp['result']="Setting Charge Enable was a success"
     except:
         e = sys.exc_info()
