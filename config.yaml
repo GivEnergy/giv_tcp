@@ -130,3 +130,4 @@ schema:
   SOLCASTAPI: "str?"
   SOLCASTSITEID: "str?"
   SOLCASTSITEID2: "str?"
+  LOAD_HIST_WEIGHT: "str?"
