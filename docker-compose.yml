@@ -61,6 +61,6 @@ services:
       - PALM_BATT_RESERVE=4           # Battery reserve for power cuts (minimum of 4%)
       - PALM_BATT_UTILISATION=0.85    # Usable proportion of battery (100% less reserve and any charge limit) on a scale of 0-1
       - PALM_WEIGHT=35                # Weighting used for final target soc
-
+      - LOAD_HIST_WEIGHT=1            # Load History Weighting
     restart: always
     privileged: true
