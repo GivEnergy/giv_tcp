@@ -216,3 +216,7 @@ configuration:
     name: Solar Forecast Automation - Solcast Site ID 2
     description: >-
       (Optional) The Solcast Site ID of your second solar installation
+  LOAD_HIST_WEIGHT:
+    name: Load History Weighting (Advanced!)
+    description: >-
+      (Optional) Load history is a weighted average of actual load from previous days and used to estimate your load for the forthcoming day. The default is using the most recent day (1). Examples are: 3-day average (1,1,1); 7-day average (1,1,1,1,1,1,1); Same day last week (0,0,0,0,0,0,1); Weighted average (4, 2, 2, 1, 1, 1, 1).
