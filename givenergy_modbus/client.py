@@ -34,7 +34,7 @@ class GivEnergyClient:
         self,
         pages: Mapping[type[HoldingRegister | InputRegister], Sequence[int]],
         register_cache: RegisterCache,
-        slave_address: int = 0x32,
+        slave_address: int = 0x31,
         sleep_between_queries: float = DEFAULT_SLEEP,
     ) -> None:
         """Reload all inverter data from the device."""
@@ -54,7 +54,7 @@ class GivEnergyClient:
             inverter_registers[HoldingRegister] = [0, 60, 120]
 
         self.fetch_register_pages(
-            inverter_registers, plant.inverter_rc, slave_address=0x32, sleep_between_queries=sleep_between_queries
+            inverter_registers, plant.inverter_rc, slave_address=0x31, sleep_between_queries=sleep_between_queries
         )
         for i, battery_rc in enumerate(plant.batteries_rcs):
             self.fetch_register_pages(
@@ -194,8 +194,7 @@ class GivEnergyClient:
         self-consumption of renewable generation and minimise the amount of energy drawn from the grid.
         """
         self.set_battery_discharge_mode_demand()  # r27=1
-        #self.set_shallow_charge(4)  # r110=4  Commented as this has nothing to do with dynamic mode.  This should be handled 
-        # in either setBatteryMode() or by calling setBatteryReserve()
+        self.set_shallow_charge(4)  # r110=4
         self.disable_discharge()  # r59=0
 
     def set_mode_storage(

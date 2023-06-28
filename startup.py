@@ -37,12 +37,17 @@ try:
     logger.debug("SUPERVISOR_TOKEN is: "+ os.getenv("SUPERVISOR_TOKEN"))
     isAddon=True
     access_token = os.getenv("SUPERVISOR_TOKEN")
+except:
+    logger.critical("SUPERVISOR TOKEN does not exist")
+    isAddon=False
+    hasMQTT=False
 
-#Get MQTT Details    
+if isAddon:
+    #Get MQTT Details    
     url="http://supervisor/services/mqtt"
     result = requests.get(url,
-          headers={'Content-Type':'application/json',
-                   'Authorization': 'Bearer {}'.format(access_token)})
+        headers={'Content-Type':'application/json',
+                'Authorization': 'Bearer {}'.format(access_token)})
     mqttDetails=result.json()
     if mqttDetails['result']=="ok":
         logger.critical ("HA MQTT Service has been found at "+str(mqttDetails['data']['host']))
@@ -55,25 +60,24 @@ try:
         hasMQTT=False
         logger.critical("No HA MQTT service has been found")
 
-
-#Get Host Details    
+    #Get Host Details    
     url="http://supervisor/network/info"
     result = requests.get(url,
-          headers={'Content-Type':'application/json',
-                   'Authorization': 'Bearer {}'.format(access_token)})
+        headers={'Content-Type':'application/json',
+                'Authorization': 'Bearer {}'.format(access_token)})
     hostDetails=result.json()
     
     if hostDetails['result']=="ok":
-    # For each interface scan for inverters    
-        for interface in hostDetails['data']['interfaces']:
-            subnet=interface['ipv4']['gateway']
-            invList=findInvertor(subnet)
-            logger.critical ("We have found the following invertors: "+str(invList))
-
-except:
-    logger.critical("SUPERVISOR TOKEN does not exist")
-    isAddon=False
-    hasMQTT=False
+    # For each interface scan for inverters
+        try:
+            for interface in hostDetails['data']['interfaces']:
+                subnet=interface['ipv4']['gateway']
+                invList=findInvertor(subnet)
+                logger.critical ("We have found the following invertors: "+str(invList))
+        except:
+            logger.error("Error scanning for Inverters")
+    
+logger.critical("GivTCP isAddon: "+str(isAddon))
 
 if not os.path.exists(str(os.getenv("CACHELOCATION"))):
     os.makedirs(str(os.getenv("CACHELOCATION")))
