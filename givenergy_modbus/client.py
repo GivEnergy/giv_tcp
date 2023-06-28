@@ -54,13 +54,13 @@ class GivEnergyClient:
             inverter_registers[HoldingRegister] = [0, 60, 120]
 
         self.fetch_register_pages(
-            inverter_registers, plant.inverter_rc, slave_address=0x11, sleep_between_queries=sleep_between_queries
+            inverter_registers, plant.inverter_rc, slave_address=0x31, sleep_between_queries=sleep_between_queries
         )
         for i, battery_rc in enumerate(plant.batteries_rcs):
             self.fetch_register_pages(
                 {InputRegister: [60]},
                 battery_rc,
-                slave_address=0x11 + i,
+                slave_address=0x32 + i,
                 sleep_between_queries=sleep_between_queries,
             )
 
