@@ -74,10 +74,10 @@ class GivEnergyClient:
             self.modbus_client.write_holding_register(HoldingRegister.ENABLE_CHARGE_TARGET, True)
             self.modbus_client.write_holding_register(HoldingRegister.CHARGE_TARGET_SOC, target_soc)
 
-    def reboot_invertor(self):
-        """Reboot Invertor"""
-        ### WARNING - MODIFYING THIS FUNCTION TO USE ANY OTHER VALUE THAN 100 WILL BRICK YOUR INVERTOR... DON'T DO IT!
-        self.modbus_client.write_holding_register(HoldingRegister.REBOOT_INVERTOR, 100)
+    def reboot_inverter(self):
+        """Reboot inverter"""
+        ### WARNING - MODIFYING THIS FUNCTION TO USE ANY OTHER VALUE THAN 100 WILL BRICK YOUR inverter... DON'T DO IT!
+        self.modbus_client.write_holding_register(HoldingRegister.REBOOT_INVERTER, 100)
 
     def disable_charge_target(self):
         """Removes SOC limit and target 100% charging."""
@@ -244,7 +244,7 @@ class GivEnergyClient:
         self.modbus_client.write_holding_register(HoldingRegister.BATTERY_SOC_RESERVE, val)
 
     def set_active_power_rate(self, val: int):
-        """Set the mmaximum invertor power rate."""
+        """Set the mmaximum inverter power rate."""
         # TODO what are valid values? 0-100?
         self.modbus_client.write_holding_register(HoldingRegister.ACTIVE_POWER_RATE, val)
 

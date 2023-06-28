@@ -30,7 +30,7 @@ logger = GivLUT.logger
 
 cacheLock = Lock()
 
-def invertorData(fullrefresh):
+def inverterData(fullrefresh):
     temp={}
     try:
         plant = GivClient.getData(fullrefresh)
@@ -46,7 +46,7 @@ def getData(fullrefresh):  # Read from Inverter put in cache
     power_output = {}
     controlmode = {}
     power_flow_output = {}
-    invertor = {}
+    inverter = {}
     multi_output = {}
     result = {}
     temp = {}
@@ -54,16 +54,16 @@ def getData(fullrefresh):  # Read from Inverter put in cache
     logger.debug("----------------------------Starting----------------------------")
     logger.debug("Getting All Registers")
 
-    # Connect to Invertor and load data
+    # Connect to inverter and load data
     try:
         logger.debug("Connecting to: " + GiV_Settings.invertorIP)
-        plant=GivQueue.q.enqueue(invertorData,fullrefresh,retry=Retry(max=GiV_Settings.queue_retries, interval=2))   
+        plant=GivQueue.q.enqueue(inverterData,fullrefresh,retry=Retry(max=GiV_Settings.queue_retries, interval=2))   
         while plant.result is None and plant.exc_info is None:
             time.sleep(0.5)
-#        plant=invertorData(True)
+#        plant=inverterData(True)
         # Check the ojects are not empty...
         if "ERROR" in plant.result:
-            raise Exception ("Garbage or failed Invertor Response: "+ str(plant.result))
+            raise Exception ("Garbage or failed inverter Response: "+ str(plant.result))
 
         GEInv=plant.result[0]
         GEBat=plant.result[1]
@@ -78,33 +78,33 @@ def getData(fullrefresh):  # Read from Inverter put in cache
         temp['result'] = "Error collecting registers: " + str(e)
         return json.dumps(temp)
 
-    logger.debug("Invertor connection successful, registers retrieved")
+    logger.debug("inverter connection successful, registers retrieved")
 
     try:
         logger.debug("Beginning parsing of Inverter data")
-        invertorModel= InvType
-        # Determine Invertor Model and max charge rate first...
+        inverterModel= InvType
+        # Determine inverter Model and max charge rate first...
 
         genint=math.floor(int(GEInv.arm_firmware_version)/100)
 
-        invertorModel.model=GEInv.inverter_model
-        invertorModel.generation=GEInv.inverter_generation
-        invertorModel.phase=GEInv.inverter_phases
-        invertorModel.power=GEInv.inverter_maxpower
+        inverterModel.model=GEInv.inverter_model
+        inverterModel.generation=GEInv.inverter_generation
+        inverterModel.phase=GEInv.inverter_phases
+        inverterModel.power=GEInv.inverter_maxpower
 
-        if invertorModel.generation == 'Gen 1':
-            if invertorModel.model == "AC":
+        if inverterModel.generation == 'Gen 1':
+            if inverterModel.model == "AC":
                 maxInvChargeRate=3000
             else:
                 maxInvChargeRate=2600
         else:
-            if invertorModel.model == "AC":
+            if inverterModel.model == "AC":
                 maxInvChargeRate=5000
             else:
                 maxInvChargeRate=3600
 
         # Calc max charge rate
-        invertorModel.batmaxrate=min(maxInvChargeRate, (GEInv.battery_nominal_capacity*51.2)/2)
+        inverterModel.batmaxrate=min(maxInvChargeRate, (GEInv.battery_nominal_capacity*51.2)/2)
 
 ############  Energy Stats    ############
 
@@ -116,7 +116,7 @@ def getData(fullrefresh):  # Read from Inverter put in cache
         energy_total_output['PV_Energy_Total_kWh'] = GEInv.e_pv_total
         energy_total_output['AC_Charge_Energy_Total_kWh'] = GEInv.e_inverter_in_total
 
-        if invertorModel.model == "Hybrid":
+        if inverterModel.model == "Hybrid":
             energy_total_output['Load_Energy_Total_kWh'] = round((energy_total_output['Invertor_Energy_Total_kWh']-energy_total_output['AC_Charge_Energy_Total_kWh']) -
                                                                  (energy_total_output['Export_Energy_Total_kWh']-energy_total_output['Import_Energy_Total_kWh']), 2)
         else:
@@ -135,7 +135,7 @@ def getData(fullrefresh):  # Read from Inverter put in cache
         energy_today_output['Invertor_Energy_Today_kWh'] = GEInv.e_inverter_out_day
         energy_today_output['Self_Consumption_Energy_Today_kWh'] = round(energy_today_output['PV_Energy_Today_kWh'], 2)-round(energy_today_output['Export_Energy_Today_kWh'], 2)
 
-        if invertorModel.model == "Hybrid":
+        if inverterModel.model == "Hybrid":
             energy_today_output['Load_Energy_Today_kWh'] = round((energy_today_output['Invertor_Energy_Today_kWh']-energy_today_output['AC_Charge_Energy_Today_kWh']) -
                                                                  (energy_today_output['Export_Energy_Today_kWh']-energy_today_output['Import_Energy_Today_kWh']), 2)
         else:
@@ -193,11 +193,11 @@ def getData(fullrefresh):  # Read from Inverter put in cache
 
         # Inverter Power
         logger.debug("Getting PInv Power")
-        Invertor_power = GEInv.p_inverter_out
-        if -6000 <= Invertor_power <= 6000:
-            power_output['Invertor_Power'] = Invertor_power
-        if Invertor_power < 0:
-            power_output['AC_Charge_Power'] = abs(Invertor_power)
+        inverter_power = GEInv.p_inverter_out
+        if -6000 <= inverter_power <= 6000:
+            power_output['Invertor_Power'] = inverter_power
+        if inverter_power < 0:
+            power_output['AC_Charge_Power'] = abs(inverter_power)
         else:
             power_output['AC_Charge_Power'] = 0
 
@@ -317,8 +317,8 @@ def getData(fullrefresh):  # Read from Inverter put in cache
             discharge_enable = "disable"
 
         # Get Charge/Discharge Active status
-        discharge_rate = int(min((GEInv.battery_discharge_limit/100)*(GEInv.battery_nominal_capacity*51.2), invertorModel.batmaxrate))
-        charge_rate = int(min((GEInv.battery_charge_limit/100)*(GEInv.battery_nominal_capacity*51.2), invertorModel.batmaxrate))
+        discharge_rate = int(min((GEInv.battery_discharge_limit/100)*(GEInv.battery_nominal_capacity*51.2), inverterModel.batmaxrate))
+        charge_rate = int(min((GEInv.battery_charge_limit/100)*(GEInv.battery_nominal_capacity*51.2), inverterModel.batmaxrate))
 
         # Calculate Mode
         logger.debug("Calculating Mode...")
@@ -460,7 +460,7 @@ def getData(fullrefresh):  # Read from Inverter put in cache
         for item in energy_total_output:
             checksum = checksum+energy_total_output[item]
         if checksum == 0:
-            raise ValueError("All zeros returned by Invertor, skipping update")
+            raise ValueError("All zeros returned by inverter, skipping update")
 
 
         ######## Grab Timeslots ########
@@ -476,26 +476,26 @@ def getData(fullrefresh):  # Read from Inverter put in cache
         timeslots['Charge_end_time_slot_2'] = GEInv.charge_slot_2[1].isoformat()
 
         ######## Get Inverter Details ########
-        invertor = {}
-        logger.debug("Getting Invertor Details")
+        inverter = {}
+        logger.debug("Getting inverter Details")
         if GEInv.battery_type == 1:
             batterytype = "Lithium"
         if GEInv.battery_type == 0:
             batterytype = "Lead Acid"
-        invertor['Battery_Type'] = batterytype
-        invertor['Battery_Capacity_kWh'] = ((GEInv.battery_nominal_capacity*51.2)/1000)
-        invertor['Invertor_Serial_Number'] = GEInv.inverter_serial_number
-        invertor['Modbus_Version'] = GEInv.modbus_version
-        invertor['Invertor_Firmware'] = GEInv.arm_firmware_version
-        invertor['Invertor_Time'] = GEInv.system_time
+        inverter['Battery_Type'] = batterytype
+        inverter['Battery_Capacity_kWh'] = ((GEInv.battery_nominal_capacity*51.2)/1000)
+        inverter['Invertor_Serial_Number'] = GEInv.inverter_serial_number
+        inverter['Modbus_Version'] = GEInv.modbus_version
+        inverter['Invertor_Firmware'] = GEInv.arm_firmware_version
+        inverter['Invertor_Time'] = GEInv.system_time
         if GEInv.meter_type == 1:
             metertype = "EM115"
         if GEInv.meter_type == 0:
             metertype = "EM418"
-        invertor['Meter_Type'] = metertype
-        invertor['Invertor_Type'] = invertorModel.generation + " " + invertorModel.model
-        invertor['Invertor_Max_Rate'] = invertorModel.batmaxrate
-        invertor['Invertor_Temperature'] = GEInv.temp_inverter_heatsink
+        inverter['Meter_Type'] = metertype
+        inverter['Invertor_Type'] = inverterModel.generation + " " + inverterModel.model
+        inverter['Invertor_Max_Rate'] = inverterModel.batmaxrate
+        inverter['Invertor_Temperature'] = GEInv.temp_inverter_heatsink
 
         ######## Get Battery Details ########
         battery = {}
@@ -554,11 +554,10 @@ def getData(fullrefresh):  # Read from Inverter put in cache
         power["Power"] = power_output
         power["Flows"] = power_flow_output
         multi_output["Power"] = power
-        multi_output["Invertor_Details"] = invertor
+        multi_output["Invertor_Details"] = inverter
         multi_output["Energy"] = energy
         multi_output["Timeslots"] = timeslots
         multi_output["Control"] = controlmode
-        multi_output["Invertor_Details"] = invertor
         multi_output["Battery_Details"] = batteries2
         if GiV_Settings.Print_Raw_Registers:
             raw = {}
@@ -618,7 +617,7 @@ def getData(fullrefresh):  # Read from Inverter put in cache
     except:
         e = sys.exc_info()
         consecFails(e)
-        logger.error("Invertor Update failed so using last known good data from cache")
+        logger.error("inverter Update failed so using last known good data from cache")
         result['result'] = "Error processing registers: " + str(e)
         return json.dumps(result)
     return json.dumps(result, indent=4, sort_keys=True, default=str)
@@ -636,7 +635,7 @@ def consecFails(e):
             oldDataCount = 1
         if oldDataCount>10:
             #10 error in a row so delete regCache data
-            logger.error("10 failed invertor reads in a row so removing regCache to force update...")
+            logger.error("10 failed inverter reads in a row so removing regCache to force update...")
             if exists(GivLUT.regcache):
                 os.remove(GivLUT.regcache)
             if exists(GivLUT.batterypkl):

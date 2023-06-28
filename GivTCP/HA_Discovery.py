@@ -126,7 +126,7 @@ class HAMQTT():
                 tempObj['unit_of_meas']="kWh"
                 tempObj['device_class']="Energy"
                 if topic.split("/")[-2]=="Total":
-                    tempObj['state_class']="total"
+                    tempObj['state_class']="total_increasing"
                 else:
                     tempObj['state_class']="total_increasing"
             if GivLUT.entity_type[str(topic).split("/")[-1]].sensorClass=="money":

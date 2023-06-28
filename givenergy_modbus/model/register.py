@@ -331,7 +331,7 @@ class HoldingRegister(Register):
     HOLDING_REG160 = (160, {})
     HOLDING_REG161 = (161, {})
     HOLDING_REG162 = (162, {})
-    REBOOT_INVERTOR = (163, {'write_safe': True})
+    REBOOT_INVERTER = (163, {'write_safe': True})
     HOLDING_REG164 = (164, {})
     HOLDING_REG165 = (165, {})
     HOLDING_REG166 = (166, {})

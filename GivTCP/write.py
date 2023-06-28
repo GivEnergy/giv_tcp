@@ -122,7 +122,7 @@ def sbpr(target):
 def ri():
     temp={}
     try:
-        client.reboot_invertor()
+        client.reboot_inverter()
         temp['result']="Rebooting Inverter was a success"
         logger.info(temp['result'])
     except:
@@ -516,18 +516,18 @@ def setBatteryCutoff(payload):
         logger.error (temp['result'])
     return json.dumps(temp)
 
-def rebootinvertor():
+def rebootinverter():
     temp={}
     try:
-        logger.info("Rebooting Invertor...")
+        logger.info("Rebooting inverter...")
         from write import ri
         result=GivQueue.q.enqueue(ri,retry=Retry(max=GiV_Settings.queue_retries, interval=2))
-        #client.reboot_invertor()
-        temp['result']="Rebooting invertor was a success"
+        #client.reboot_inverter()
+        temp['result']="Rebooting inverter was a success"
         
     except:
         e = sys.exc_info()
-        temp['result']="Reboot Invertor failed: " + str(e)
+        temp['result']="Reboot inverter failed: " + str(e)
         logger.error (temp['result'])
         #raise Exception
     return json.dumps(temp)
@@ -553,7 +553,7 @@ def setChargeRate(payload):
     temp={}
     if type(payload) is not dict: payload=json.loads(payload)
 
-    # Get invertor max bat power
+    # Get inverter max bat power
     if exists(GivLUT.regcache):      # if there is a cache then grab it
         with open(GivLUT.regcache, 'rb') as inp:
             regCacheStack = pickle.load(inp)
@@ -1186,17 +1186,17 @@ def setDateTime(payload):
     #convert payload to dateTime components
     try:
         iDateTime=datetime.strptime(payload['dateTime'],"%d/%m/%Y %H:%M:%S")   #format '12/11/2021 09:15:32'
-        logger.info("Setting Invertor time to: "+iDateTime)
-        #Set Date and Time on Invertor
+        logger.info("Setting inverter time to: "+iDateTime)
+        #Set Date and Time on inverter
         from write import sdt
         result=GivQueue.q.enqueue(sdt,iDateTime,retry=Retry(max=GiV_Settings.queue_retries, interval=2))
         #client.set_datetime(iDateTime)
-        temp['result']="Invertor time setting was a success"
+        temp['result']="inverter time setting was a success"
         
 
     except:
         e = sys.exc_info()
-        temp['result']="Setting Invertor DateTime failed: " + str(e) 
+        temp['result']="Setting inverter DateTime failed: " + str(e) 
         logger.error (temp['result'])
     return json.dumps(temp)
 

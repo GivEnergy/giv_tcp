@@ -29,7 +29,7 @@ def getAll():
 
 @giv_api.route('/reboot', methods=['GET'])
 def reboot():
-    return wr.rebootinvertor()
+    return wr.rebootinverter()
 
 #Publish last cached Invertor Data
 @giv_api.route('/readData', methods=['GET'])
