@@ -1,6 +1,6 @@
 from datetime import datetime
 from typing import Any
-
+import zoneinfo
 from pydantic.utils import GetterDict
 
 
@@ -54,7 +54,7 @@ class RegisterGetter(GetterDict):
                 self.get('system_time_day'),
                 self.get('system_time_hour'),
                 self.get('system_time_minute'),
-                self.get('system_time_second'),
+                self.get('system_time_second')
             )
 
         if key in ('charge_slot_1', 'charge_slot_2', 'discharge_slot_1', 'discharge_slot_2'):

@@ -386,11 +386,11 @@ class WriteHoldingRegisterRequest(WriteHoldingRegisterMeta, ModbusRequest, ABC):
         crc_builder = BinaryPayloadBuilder(byteorder=Endian.Big)
         crc_builder.add_8bit_uint(self.slave_address)
         crc_builder.add_8bit_uint(self.function_code)
+        crc_builder.add_16bit_uint(self.register)
         crc_builder.add_16bit_uint(self.value)
         self.check = CrcModbus().process(crc_builder.to_string()).final()
         self.check=int.from_bytes(self.check.to_bytes(2,'little'),'big')
         self.builder.add_16bit_uint(self.check)
-
     def _calculate_function_data_size(self):
         size = 16
         _logger.debug(f"Calculated {size} bytes partial response size for {self}")

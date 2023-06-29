@@ -44,7 +44,7 @@ class GivEnergyClient:
                 register_cache.set_registers(register, data)
                 t.sleep(sleep_between_queries)
 
-    def refresh_plant(self, plant: Plant, full_refresh: bool, sleep_between_queries=DEFAULT_SLEEP):
+    def refresh_plant(self, plant: Plant, isAIO: bool, full_refresh: bool, sleep_between_queries=DEFAULT_SLEEP):
         """Refresh the internal caches for a plant. Optionally refresh only data that changes frequently."""
         inverter_registers = {
             InputRegister: [0, 180],
@@ -53,9 +53,17 @@ class GivEnergyClient:
         if full_refresh:
             inverter_registers[HoldingRegister] = [0, 60, 120]
 
-        self.fetch_register_pages(
-            inverter_registers, plant.inverter_rc, slave_address=0x31, sleep_between_queries=sleep_between_queries
-        )
+        #How do I know which inverter I'm connecting to from inside the library...
+        if isAIO:
+            self.fetch_register_pages(
+                inverter_registers, plant.inverter_rc, slave_address=0x11, sleep_between_queries=sleep_between_queries
+            )
+            _logger.debug("Inverter is AIO so using the 0x11 slave_address")
+        else:
+            self.fetch_register_pages(
+                inverter_registers, plant.inverter_rc, slave_address=0x31, sleep_between_queries=sleep_between_queries
+            )
+            _logger.debug("Inverter is normal so using the 0x31 slave_address")
         for i, battery_rc in enumerate(plant.batteries_rcs):
             self.fetch_register_pages(
                 {InputRegister: [60]},

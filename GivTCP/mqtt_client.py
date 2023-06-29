@@ -75,6 +75,9 @@ def on_message(client, userdata, message):
     elif command=="enableDishargeSchedule":
         writecommand['state']=str(message.payload.decode("utf-8"))
         wr.enableDischargeSchedule(writecommand)
+    elif command=="setBatteryPowerMode":
+        writecommand['state']=str(message.payload.decode("utf-8"))
+        wr.setBatteryPowerMode(writecommand)
     elif command=="enableDischarge":
         writecommand['state']=str(message.payload.decode("utf-8"))
         wr.enableDischarge(writecommand)

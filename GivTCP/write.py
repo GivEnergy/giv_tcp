@@ -163,10 +163,10 @@ def sbdl(target):
         temp['result']="Setting battery charge limit failed: " + str(e)
         logger.error (temp['result'])
     return json.dumps(temp)
-def smd(target):
+def smd():
     temp={}
     try:
-        client.set_mode_dynamic(target)
+        client.set_mode_dynamic()
         temp['result']="Setting dynamic mode was a success"
         logger.info(temp['result'])
     except:
@@ -1106,6 +1106,16 @@ def tempPauseCharge(pauseTime):
         temp['result']="Pausing Charge failed: " + str(e)
         logger.error(temp['result'])
     return json.dumps(temp)
+
+def setBatteryPowerMode(payload):
+    temp={}
+    if type(payload) is not dict: payload=json.loads(payload)
+    if payload['state']=="enable":
+        from write import sbdmd
+        result=GivQueue.q.enqueue(sbdmd,retry=Retry(max=GiV_Settings.queue_retries, interval=2))
+    else:
+        from write import sbdmmp
+        result=GivQueue.q.enqueue(sbdmmp,retry=Retry(max=GiV_Settings.queue_retries, interval=2))
 
 def setBatteryMode(payload):
     temp={}
