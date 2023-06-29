@@ -55,7 +55,7 @@ class GE:
     # Load history is a weighted average of actual load from previous days.
     # Uncomment required settings or make your own using positive integers only. Examples:
     # Most recent day only
-    load_hist_weight = [1]
+    load_hist_weight = [1] # Need to declare this even if using environment variables, just to instantiate the property
     # 3-day average
     # load_hist_weight = [1, 1, 1]
     # 7-day average
@@ -64,6 +64,10 @@ class GE:
     # load_hist_weight = [0, 0, 0, 0, 0, 0, 1]
     # Weighted average (a more extreme example)
     # load_hist_weight = [4, 2, 2, 1, 1, 1, 1]
+
+    # Pull in load history weighting from environment variables.
+    tmp_load_hist_weight = str(os.getenv('LOAD_HIST_WEIGHT'))
+    load_hist_weight = [int(elem) for elem in tmp_load_hist_weight.split(',') if elem.strip().isnumeric()]
 
     # Start time for Overnight Charge
     start_time = os.getenv('NIGHTRATESTART')
