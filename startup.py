@@ -109,7 +109,8 @@ for inv in range(1,int(os.getenv('NUMINVERTORS'))+1):
     with open(PATH+"/settings.py", 'w') as outp:
         outp.write("class GiV_Settings:\n")
         outp.write("    invertorIP=\""+str(os.getenv("INVERTOR_IP_"+str(inv),""))+"\"\n")
-        outp.write("    numBatteries=\""+str(os.getenv("NUMBATTERIES_"+str(inv),"")+"\"\n"))
+        outp.write("    numBatteries="+str(os.getenv("NUMBATTERIES_"+str(inv),"")+"\n"))
+        outp.write("    isAIO="+str(os.getenv("INVERTOR_AIO_"+str(inv),"")+"\n"))
         outp.write("    Print_Raw_Registers="+str(os.getenv("PRINT_RAW",""))+"\n")
         outp.write("    MQTT_Output="+str(os.getenv("MQTT_OUTPUT","")+"\n"))
         if hasMQTT:
@@ -160,6 +161,8 @@ for inv in range(1,int(os.getenv('NUMINVERTORS'))+1):
         else:
             outp.write("    cache_location=\""+str(os.getenv("CACHELOCATION")+"\"\n"))
             outp.write("    Debug_File_Location=\""+os.getenv("CACHELOCATION")+"/log_inv_"+str(inv)+".log\"\n")
+        outp.write("    inverter_num=\""+str(inv)+"\"\n")
+        
 
     # replicate the startup script here:
 

@@ -110,7 +110,7 @@ class GivEnergyModbusTcpClient(ModbusTcpClient):
         if value != value & 0xFFFF:
             raise ValueError(f'Value {value} must fit in 2 bytes')
         _logger.info(f'Attempting to write {value}/{hex(value)} to Holding Register {register.value}/{register.name}')
-        request = WriteHoldingRegisterRequest(register=register.value, value=value)
+        request = WriteHoldingRegisterRequest(register=register.value, value=value, slave_address=0x11)
         result = self.execute(request)
         if isinstance(result, WriteHoldingRegisterResponse):
             if result.value != value:

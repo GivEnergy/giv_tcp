@@ -60,13 +60,15 @@ def getData(fullrefresh):  # Read from Inverter put in cache
         plant=GivQueue.q.enqueue(inverterData,fullrefresh,retry=Retry(max=GiV_Settings.queue_retries, interval=2))   
         while plant.result is None and plant.exc_info is None:
             time.sleep(0.5)
-#        plant=inverterData(True)
-        # Check the ojects are not empty...
         if "ERROR" in plant.result:
             raise Exception ("Garbage or failed inverter Response: "+ str(plant.result))
-
         GEInv=plant.result[0]
         GEBat=plant.result[1]
+
+#        plant=inverterData(True)
+#        GEInv=plant[0]
+#        GEBat=plant[1]
+        
 
         multi_output['Last_Updated_Time'] = datetime.datetime.utcnow().replace(tzinfo=datetime.timezone.utc).isoformat()
         multi_output['status'] = "online"
@@ -245,28 +247,29 @@ def getData(fullrefresh):  # Read from Inverter put in cache
 
         ######## Battery Stats only if there are batteries...  ########
         logger.debug("Getting SOC")
-        if int(GiV_Settings.numBatteries) > 0:  # only do this if there are batteries
-            if GEInv.battery_percent != 0:
-                power_output['SOC'] = GEInv.battery_percent
-            elif GEInv.battery_percent == 0 and 'multi_output_old' in locals():
-                power_output['SOC'] = multi_output_old['Power']['Power']['SOC']
-                logger.error("\"Battery SOC\" reported as: "+str(GEInv.battery_percent)+"% so using previous value")
-            elif GEInv.battery_percent == 0 and not 'multi_output_old' in locals():
-                power_output['SOC'] = 1
-                logger.error("\"Battery SOC\" reported as: "+str(GEInv.battery_percent)+"% and no previou value so setting to 1%")
-            power_output['SOC_kWh'] = (int(power_output['SOC'])*((GEInv.battery_nominal_capacity*51.2)/1000))/100
-
-            # Energy Stats
-            energy_today_output['Battery_Charge_Energy_Today_kWh'] = GEInv.e_battery_charge_day
-            energy_today_output['Battery_Discharge_Energy_Today_kWh'] = GEInv.e_battery_discharge_day
-            energy_today_output['Battery_Throughput_Today_kWh'] = GEInv.e_battery_charge_day+GEInv.e_battery_discharge_day
-            energy_total_output['Battery_Throughput_Total_kWh'] = GEInv.e_battery_throughput_total
-            if GEInv.e_battery_charge_total == 0 and GEInv.e_battery_discharge_total == 0:  # If no values in "nomal" registers then grab from back up registers - for some f/w versions
-                energy_total_output['Battery_Charge_Energy_Total_kWh'] = GEBat[0].e_battery_charge_total_2
-                energy_total_output['Battery_Discharge_Energy_Total_kWh'] = GEBat[0].e_battery_discharge_total_2
-            else:
-                energy_total_output['Battery_Charge_Energy_Total_kWh'] = GEInv.e_battery_charge_total
-                energy_total_output['Battery_Discharge_Energy_Total_kWh'] = GEInv.e_battery_discharge_total
+#        if int(GiV_Settings.numBatteries) > 0:  # only do this if there are batteries
+        if GEInv.battery_percent != 0:
+            power_output['SOC'] = GEInv.battery_percent
+        elif GEInv.battery_percent == 0 and 'multi_output_old' in locals():
+            power_output['SOC'] = multi_output_old['Power']['Power']['SOC']
+            logger.error("\"Battery SOC\" reported as: "+str(GEInv.battery_percent)+"% so using previous value")
+        elif GEInv.battery_percent == 0 and not 'multi_output_old' in locals():
+            power_output['SOC'] = 1
+            logger.error("\"Battery SOC\" reported as: "+str(GEInv.battery_percent)+"% and no previous value so setting to 1%")
+        power_output['SOC_kWh'] = (int(power_output['SOC'])*((GEInv.battery_nominal_capacity*51.2)/1000))/100
+ 
+        # Energy Stats
+        logger.debug("Getting Battery Energy Data")
+        energy_today_output['Battery_Charge_Energy_Today_kWh'] = GEInv.e_battery_charge_day
+        energy_today_output['Battery_Discharge_Energy_Today_kWh'] = GEInv.e_battery_discharge_day
+        energy_today_output['Battery_Throughput_Today_kWh'] = GEInv.e_battery_charge_day+GEInv.e_battery_discharge_day
+        energy_total_output['Battery_Throughput_Total_kWh'] = GEInv.e_battery_throughput_total
+        if GEInv.e_battery_charge_total == 0 and GEInv.e_battery_discharge_total == 0 and not GiV_Settings.numBatteries==0:  # If no values in "nomal" registers then grab from back up registers - for some f/w versions
+            energy_total_output['Battery_Charge_Energy_Total_kWh'] = GEBat[0].e_battery_charge_total_2
+            energy_total_output['Battery_Discharge_Energy_Total_kWh'] = GEBat[0].e_battery_discharge_total_2
+        else:
+            energy_total_output['Battery_Charge_Energy_Total_kWh'] = GEInv.e_battery_charge_total
+            energy_total_output['Battery_Discharge_Energy_Total_kWh'] = GEInv.e_battery_discharge_total
 
 
 ######## Get Control Data ########
@@ -281,6 +284,10 @@ def getData(fullrefresh):  # Read from Inverter put in cache
             discharge_schedule = "enable"
         else:
             discharge_schedule = "disable"
+        if GEInv.battery_power_mode == 1:
+            batPowerMode="enable"
+        else:
+            batPowerMode="disable"
         #Get Battery Stat registers
         #battery_reserve = GEInv.battery_discharge_min_power_reserve
 
@@ -344,6 +351,7 @@ def getData(fullrefresh):  # Read from Inverter put in cache
         controlmode['Mode'] = mode
         controlmode['Battery_Power_Reserve'] = battery_reserve
         controlmode['Battery_Power_Cutoff'] = battery_cutoff
+        controlmode['Battery_Power_Mode'] = batPowerMode
         controlmode['Target_SOC'] = target_soc
         controlmode['Enable_Charge_Schedule'] = charge_schedule
         controlmode['Enable_Discharge_Schedule'] = discharge_schedule
@@ -487,7 +495,7 @@ def getData(fullrefresh):  # Read from Inverter put in cache
         inverter['Invertor_Serial_Number'] = GEInv.inverter_serial_number
         inverter['Modbus_Version'] = GEInv.modbus_version
         inverter['Invertor_Firmware'] = GEInv.arm_firmware_version
-        inverter['Invertor_Time'] = GEInv.system_time
+        inverter['Invertor_Time'] = GEInv.system_time.replace(tzinfo=GivLUT.timezone).isoformat()
         if GEInv.meter_type == 1:
             metertype = "EM115"
         if GEInv.meter_type == 0:
