@@ -10,7 +10,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 - Invertor Mode calculation
 - Fixed Inverer Time entity
 ### Added
-- Now compatable with the new GE AIO device (no battery data yet)
+- Work in progress compatability with the new GE AIO device (no battery data yet) - Beta testers needed
 - New battery power mode switch (replicates the GE Portal "Eco" switch)
 
 
