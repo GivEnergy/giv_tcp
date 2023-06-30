@@ -43,7 +43,7 @@ class GivLUT:
     import logging, os, zoneinfo
     from settings import GiV_Settings
     from logging.handlers import TimedRotatingFileHandler
-    logging.basicConfig(format='%(asctime)s - %(module)s_inv'+ str(GiV_Settings.givtcp_instance)+' -  [%(levelname)-8s] - %(message)s')
+    logging.basicConfig(format='%(asctime)s - Inv'+ str(GiV_Settings.givtcp_instance)+' - %(module)-11s -  [%(levelname)-8s] - %(message)s')
     formatter = logging.Formatter(
         '%(asctime)s - %(module)s - [%(levelname)s] - %(message)s')
     fh = TimedRotatingFileHandler(GiV_Settings.Debug_File_Location, when='D', interval=1, backupCount=7)
@@ -261,7 +261,7 @@ class GivLUT:
     ]
     
     delay_times=["Normal","Running","Cancel","2","15","30","45","60","90","120","150","180"]
-    modes=["Eco","Timed Demand","Timed Export","Unknown", "Eco (Paused)"]
+    modes=["Eco","Eco (Paused)","Timed Demand","Timed Export","Unknown"]
     rates=["Day","Night"]
 
     def getTime(timestamp):
