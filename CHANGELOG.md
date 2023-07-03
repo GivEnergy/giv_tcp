@@ -5,6 +5,10 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/)
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
+## [2.2.3] - 2023-07-03
+### Fixed
+- Fixed Charge_time_remaining device_class error
+
 ## [2.2.2] - 2023-07-03
 ### Fixed
 - Fixed charge target bug (Thanks S0ckhamster)

@@ -397,6 +397,11 @@ def getData(fullrefresh):  # Read from Inverter put in cache
 
             # Battery Power
             Battery_power = GEInv.p_battery
+            if GiV_Settings.first_run:          # Make sure that we publish the HA message for both Charge and Discharge times
+                power_output['Charge_Time_Remaining'] = 0
+                power_output['Charge_Completion_Time'] = datetime.datetime.now().replace(tzinfo=GivLUT.timezone).isoformat()
+                power_output['Discharge_Time_Remaining'] = 0
+                power_output['Discharge_Completion_Time'] = datetime.datetime.now().replace(tzinfo=GivLUT.timezone).isoformat()
             if Battery_power >= 0:
                 discharge_power = abs(Battery_power)
                 charge_power = 0
