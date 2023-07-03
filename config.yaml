@@ -78,6 +78,7 @@ options:
   SOLCASTAPI: ""
   SOLCASTSITEID: ""
   SOLCASTSITEID2: ""
+  LOAD_HIST_WEIGHT: "1"
 schema: 
   NUMINVERTORS: int
   INVERTOR_IP_1:  str
