@@ -419,7 +419,7 @@ def getData(fullrefresh):  # Read from Inverter put in cache
                     # Time to get from current SOC to target SOC at the current rate (Target SOC-Current SOC)xBattery Capacity
                     power_output['Charge_Time_Remaining'] = max(int((((GEInv.battery_nominal_capacity*51.2)/1000)*((controlmode['Target_SOC'] - power_output['SOC'])/100) / (charge_power/1000)) * 60),0)
                     finaltime=datetime.datetime.now() + timedelta(minutes=power_output['Charge_Time_Remaining'])
-                    power_output['Charge_Time_Remaining'] = finaltime.replace(tzinfo=GivLUT.timezone).isoformat()
+                    power_output['Charge_Completion_Time'] = finaltime.replace(tzinfo=GivLUT.timezone).isoformat()
                 else:
                     power_output['Charge_Time_Remaining'] = 0
                     #power_output['Charge_Time_Remaining'] = datetime.datetime.now().replace(tzinfo=GivLUT.timezone).isoformat()
