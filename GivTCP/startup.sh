@@ -67,7 +67,6 @@ printf "    HA_Auto_D=$HA_AUTO_D\n" >> $FILE
 printf "    first_run= True\n" >> $FILE
 
 #TODO Update givTCP if a newer release is available
-
 if [ "$SELF_RUN" = "True" ]                         #Only run Schedule if requested
 then
     echo Running Invertor read loop every "$SELF_RUN_LOOP_TIMER"s...

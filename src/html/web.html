@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GivTCP environment Setup</title>
+    <link rel="stylesheet" href="../css/index.css">
+</head>
+
+<body>
+    <h2>Please find your settings.py file to modify your settings to your setup!</h2>
+    <input type="file" id="file-input" />
+    <h3>Contents of the file:</h3>
+    <pre id="file-content"></pre>
+
+    <form>
+        <div class="container card">
+            <h2>
+                Inverter Settings
+            </h2>
+            <label class="tooltip" for="numberOfInverters">
+                Number of Inverters
+                <span class="tooltiptext">
+                    Set this to the number of Inverters in your setup, then replicate the next two lines for each inverter (changing the last number of the ENV)</span>
+            </label>
+            <select name='numberOfInverters'>
+                <option value="1">1</option>
+                <option value="2">2</option>
+                <option value="3">3</option>
+            </select>
+            <br/>
+            <label for="inverterIp">Inverter IP</label>
+            <input name="inverterIp">
+            <br/>
+            <label for="numberOfInverters">Number of Batteries</label>
+            <input name='numberOfInverters' type=number>
+        </div>
+
+        <div class="container card">
+            <h2>MQTT Broker</h2>
+        </div>
+
+        <br/>
+        <br/>
+
+        <input type="submit" value='Export'>
+    </form>
+</body>
+
+</html>
+
+<script src="../js/index.js"></script>
+

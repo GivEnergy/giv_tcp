@@ -4,6 +4,9 @@
 from flask import Flask, json, request
 import GivTCP.read as rd       #grab passthrough functions from main read file
 import write as wr      #grab passthrough functions from main write file
+import os
+import json
+import GivTCP.settings_template
 
 #set-up Flask details
 giv_api = Flask(__name__)
@@ -95,6 +98,25 @@ def setBattMode():
 def setDate():
     payload = request.get_json(silent=True, force=True)
     return wr.setDateTime(payload)
+
+#Publish last cached Invertor Data
+@giv_api.route('/settings', methods=['GET'])
+def getFileData():
+    file = open(os.path.dirname(__file__) + '/settings.json', 'r')
+    data = json.load(file)
+    file.close()
+    return data
+
+@giv_api.route('/settings', methods=['POST'])
+def editFileData():
+    file = open(os.path.dirname(__file__) + '/settings.json', 'r')
+    data = json.load(file)
+    file.close()
+    data.update(request.get_json(silent=True, force=True))
+    file = open(os.path.dirname(__file__) + '/settings.json', 'w')
+    json.dump(data, file)
+    file.close()
+    return data
 
 if __name__ == "__main__":
     giv_api.run()
