@@ -439,8 +439,8 @@ class GivEnergyObj:
             max_charge = 0
             min_charge = batt_max_charge
 
-            logger.info("")
-            logger.info("{:<20} {:>10} {:>10} {:>10}  {:>10} {:>10}".format("SoC Calc;",
+            logger.debug("")
+            logger.debug("{:<20} {:>10} {:>10} {:>10}  {:>10} {:>10}".format("SoC Calc;",
                 "Hour", "Charge", "Cons", "Gen", "SoC"))
 
             if stgs.GE.end_time != "":
@@ -471,7 +471,7 @@ class GivEnergyObj:
                 elif i > end_charge_period:  # Charging after overnight boost
                     max_charge = max(max_charge, batt_charge[i])
 
-                logger.info("{:<20} {:>10} {:>10} {:>10}  {:>10} {:>10}".format("SoC Calc;",
+                logger.debug("{:<20} {:>10} {:>10} {:>10}  {:>10} {:>10}".format("SoC Calc;",
                     t_to_hrs(i * 30), round(batt_charge[i], 2), round(total_load, 2),
                     round(est_gen, 2), int(100 * batt_charge[i] / batt_max_charge)))
 
@@ -633,11 +633,11 @@ class SolcastObj:
             i += 1
 
         timestamp = time.strftime("%d-%m-%Y %H:%M:%S", time.localtime())
-        logger.info("PV Estimate 10% (hrly, 7 days) / kWh; "+ timestamp+ "; "+
+        logger.debug("PV Estimate 10% (hrly, 7 days) / kWh; "+ timestamp+ "; "+
             str(self.pv_est10_30[0:47])+ str(self.pv_est10_day[0:6]))
-        logger.info("PV Estimate 50% (hrly, 7 days) / kWh; "+ timestamp+ "; "+
+        logger.debug("PV Estimate 50% (hrly, 7 days) / kWh; "+ timestamp+ "; "+
             str(self.pv_est50_30[0:47])+ str(self.pv_est50_day[0:6]))
-        logger.info("PV Estimate 90% (hrly, 7 days) / kWh; "+ timestamp+ "; "+
+        logger.debug("PV Estimate 90% (hrly, 7 days) / kWh; "+ timestamp+ "; "+
             str(self.pv_est90_30[0:47])+ str(self.pv_est90_day[0:6]))
 
 # End of SolcastObj() class definition
@@ -681,11 +681,11 @@ if __name__ == '__main__':
 
     try:
         ge.get_load_hist()
-        logger.info("10% forecast...")
+        logger.debug("10% forecast...")
         ge.compute_tgt_soc(solcast, 10, False)
-        logger.info("50% forecast...")
+        logger.debug("50% forecast...")
         ge.compute_tgt_soc(solcast, 50, False)
-        logger.info("90% forecast...")
+        logger.debug("90% forecast...")
         ge.compute_tgt_soc(solcast, 90, False)
     except Exception:
         logger.critical("Unable to set SoC")
