@@ -804,15 +804,21 @@ def ratecalcs(multi_output, multi_output_old):
     logger.debug("Night Start= "+datetime.datetime.strftime(night_start, '%c'))
     day_start = datetime.datetime.combine(datetime.datetime.now(GivLUT.timezone).date(),dayRateStart.time()).replace(tzinfo=GivLUT.timezone)
     logger.debug("Day Start= "+datetime.datetime.strftime(day_start, '%c'))
+    import_energy = multi_output['Energy']['Total']['Import_Energy_Total_kWh']
+    import_energy_old = multi_output_old['Energy']['Total']['Import_Energy_Total_kWh']
+
     # check if pickle data exists:
     if exists(GivLUT.ratedata):
         with open(GivLUT.ratedata, 'rb') as inp:
             rate_data = pickle.load(inp)
     else:
         logger.debug("No rate_data exists, so creating new baseline")
-
-    import_energy = multi_output['Energy']['Total']['Import_Energy_Total_kWh']
-    import_energy_old = multi_output_old['Energy']['Total']['Import_Energy_Total_kWh']
+        rate_data['Night_Cost'] = 0.00
+        rate_data['Day_Cost'] = 0.00
+        rate_data['Night_Energy_kWh'] = 0.00
+        rate_data['Day_Energy_kWh'] = 0.00
+        rate_data['Day_Start_Energy_kWh'] = import_energy
+        rate_data['Night_Start_Energy_kWh'] = import_energy
 
     # if midnight then reset costs
     if datetime.datetime.now(GivLUT.timezone).hour == 0 and datetime.datetime.now(GivLUT.timezone).minute == 0:
@@ -828,7 +834,7 @@ def ratecalcs(multi_output, multi_output_old):
         if dayRateStart.hour == datetime.datetime.now(GivLUT.timezone).hour and dayRateStart.minute == datetime.datetime.now(GivLUT.timezone).minute:
             #Save current Total stats as baseline
             logger.info("Saving current energy stats at start of day rate tariff")
-            rate_data['Day_Start_Energy_kWh'] = import_energy
+            #rate_data['Day_Start_Energy_kWh'] = import_energy
             open(GivLUT.dayRate, 'w').close()
             if exists(GivLUT.nightRate):
                 logger.debug(".nightRate exists so deleting it")
@@ -837,7 +843,7 @@ def ratecalcs(multi_output, multi_output_old):
         elif nightRateStart.hour == datetime.datetime.now(GivLUT.timezone).hour and nightRateStart.minute == datetime.datetime.now(GivLUT.timezone).minute:
             #Save current Total stats as baseline
             logger.info("Saving current energy stats at start of night rate tariff")
-            rate_data['Night_Start_Energy_kWh'] = import_energy
+            #rate_data['Night_Start_Energy_kWh'] = import_energy
             open(GivLUT.nightRate, 'w').close()
             if exists(GivLUT.dayRate):
                 logger.debug(".dayRate exists so deleting it")
@@ -848,7 +854,7 @@ def ratecalcs(multi_output, multi_output_old):
             os.remove(GivLUT.nightRateRequest)
             if not exists(GivLUT.nightRate):
                 logger.info("Saving current energy stats at start of night rate tariff (Dynamic)")
-                rate_data['Night_Start_Energy_kWh'] = import_energy
+                #rate_data['Night_Start_Energy_kWh'] = import_energy
                 open(GivLUT.nightRate, 'w').close()
                 if exists(GivLUT.dayRate):
                     logger.debug(".dayRate exists so deleting it")
@@ -858,7 +864,7 @@ def ratecalcs(multi_output, multi_output_old):
             os.remove(GivLUT.dayRateRequest)
             if not exists(GivLUT.dayRate):
                 logger.info("Saving current energy stats at start of day rate tariff (Dynamic)")
-                rate_data['Day_Start_Energy_kWh'] = import_energy
+                #rate_data['Day_Start_Energy_kWh'] = import_energy
                 open(GivLUT.dayRate, 'w').close()
                 if exists(GivLUT.nightRate):
                     logger.debug(".nightRate exists so deleting it")

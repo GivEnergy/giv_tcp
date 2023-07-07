@@ -165,7 +165,6 @@ class HAMQTT():
     #    elif GivLUT.entity_type[str(topic).split("/")[-1].devType=="binary_sensor":
     #        client.publish("homeassistant/binary_sensor/GivEnergy/"+str(topic).split("/")[-1]+"/config",HAMQTT.create_binary_sensor_payload(topic,SN),retain=True)
         elif GivLUT.entity_type[str(topic).split("/")[-1]].devType=="select":
-            del(tempObj['unit_of_meas'])
             if "Mode" in topic:
                 options=GivLUT.modes
             elif "slot" in topic:
