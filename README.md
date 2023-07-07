@@ -1,16 +1,17 @@
 # GivTCP
 ## TCP Modbus connection to MQTT/JSON for GivEnergy Battery/PV Invertors
 
-This project allows connection to the GivEnergy inverters via TCP Modbus. Access is through the native Wifi/Ethernet dongle and can be connected to through either the local LAN network or directly through the inbuilt SSID AP.
+This project opens a connection to the GivEnergy invertors via TCP Modbus. Access is given through the native Wifi/Ethernet dongle and can be connected via either LAN or directly through the inbuilt SSID AP.
 
-In basis of this project is a connection to a Modbus TCP server which runs on the wifi dongle, so all you need is somewhere to run the script on the same network. You will need the following to make it work:
-* GivEnergy Inverter properly commissioned and working
-* IP address of the inverter
+The basis of this project is a connection to the Modbus TCP server which runs on the wifi dongle. All you need is run the script on the same network. The following is needed to make it work:
+* GivEnergy Invertor that is commissioned and online.
+* IP address of the invertor
+
 
 ## Docker
-Recommended usage is through the Docker container found here: https://hub.docker.com/repository/docker/britkat/giv_tcp-ma
-This will set up a self-running service which will publish data as required and provide a REST interface for control. An internal MQTT broker can be activated to make data available on the network.
-  
+You can find the Docker container repo here: https://hub.docker.com/repository/docker/britkat/giv_tcp-ma
+This will set up a self-running service which will publish data as required and provide a REST interface for control. An internal MQTT broker can be activiated to make data avalable on the network.
+ 
 * Docker image is multi-architecture so docker should grab the correct version for your system (tested on x86 and rpi3)
 * Create a container with the relevant ENV variables below (mimicing the settings.py file)
 * Set the container to auto-restart to ensure reliability
@@ -150,6 +151,3 @@ Root topic for control is:
 GivTCP provides a wrapper function REST.py which uses Flask to expose the read and control functions as RESTful http calls. To utilise this service you will need to either use a WSGI service such as gunicorn or use the pre-built Docker container.
 
 If Docker is running in Host mode then the REST service is available on port 6345
-
-This can be used within a Node-Red flow to integrate into your automation or using Home Assistant REST sensors using the Home Assistant yaml package provided.
-NB.This does require the Docker container running on your network.
