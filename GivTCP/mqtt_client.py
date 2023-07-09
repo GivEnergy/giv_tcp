@@ -29,12 +29,13 @@ else:
 
 logger.critical("Connecting to MQTT broker for control- "+str(GiV_Settings.MQTT_Address))
 #loop till serial number has been found
+count=0          # 09-July-2023  set start point
 while not hasattr(GiV_Settings,'serial_number'):
     time.sleep(5)
     #del sys.modules['settings.GiV_Settings']
     importlib.reload(settings)
     from settings import GiV_Settings
-    count=+1
+    count=count + 1      # 09-July-2023  previous +1 only simply reset value to 1 so loop was infinite
     if count==20:
         logger.error("No serial_number found in MQTT queue. MQTT Control not available.")
         break
