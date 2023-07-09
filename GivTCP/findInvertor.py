@@ -1,55 +1,99 @@
-# version 1.0
-from scapy.all import ARP, Ether, srp
-import scapy.config
-import scapy.layers.l2
-import scapy.route
+#########################################
+#         modbus find inverters         #
+#   ver 3.0.1 enable/disable modbus     #
+#   call                                #
+#########################################
+
+
+from threading import Thread, Lock
+from time import perf_counter
+from time import sleep
 import sys
-import os
-import math
+import socket
 
-def find_Invertor(target_ip):
-    arp = ARP(pdst=target_ip)
-    # ff:ff:ff:ff:ff:ff MAC address indicates broadcasting
-    ether = Ether(dst="ff:ff:ff:ff:ff:ff")
-    # stack them
-    packet = ether/arp
-    result = srp(packet, timeout=3, verbose=0)[0]
-    # a list of clients, we will fill this in the upcoming loop
-    for sent, received in result:
-        #print("IP=",received.psrc,"and MAC= ",received.hwsrc)
-        if received.hwsrc[0:8]=="34:ea:e7" or received.hwsrc[0:8]=="98:d8:63" or received.hwsrc[0:8]=="0e:93:9f":
-            return received.psrc
+class Threader:
+    """
+    This is a class that calls a list of functions in a limited number of
+    threads. It uses locks to make sure the data is thread safe.
+    This class also provides a lock called: `<Threader>.print_lock`
+    """
+    def __init__(self, threads=30):
+        self.thread_lock = Lock()
+        self.functions_lock = Lock()
+        self.functions = []
+        self.threads = []
+        self.nthreads = threads
+        self.running = True
+        self.print_lock = Lock()
 
-def long2net(arg):
-    if (arg <= 0 or arg >= 0xFFFFFFFF):
-        raise ValueError("illegal netmask value", hex(arg))
-    return 32 - int(round(math.log(0xFFFFFFFF - arg, 2)))
+    def stop(self) -> None:
+        # Signal all worker threads to stop
+        self.running = False
 
-def to_CIDR_notation(bytes_network, bytes_netmask):
-    network = scapy.utils.ltoa(bytes_network)
-    netmask = long2net(bytes_netmask)
-    net = "%s/%s" % (network, netmask)
-    if netmask < 16:
-        return None
-    return net
+    def append(self, function, *args) -> None:
+        # Add the function to a list of functions to be run
+        self.functions.append((function, args))
 
-interface_to_scan=None
-if os.geteuid() != 0:
-    sys.exit(1)
-for network, netmask, _, interface, address, _ in scapy.config.conf.route.routes:
-    if interface_to_scan and interface_to_scan != interface:
-        continue
-    # skip loopback network and default gw
-    if network == 0 or interface == 'lo' or address == '127.0.0.1' or address == '0.0.0.0':
-        continue
-    if netmask <= 0 or netmask == 0xFFFFFFFF:
-        continue
-    # skip docker interface
-    if interface != interface_to_scan and interface.startswith('docker') or interface.startswith('br-'):
-        continue
-    net = to_CIDR_notation(network, netmask)
-    if net[0:7]!="169.254":
-        invIP=find_Invertor(net)
-        if invIP!= None and invIP!=" ":
-            print (invIP)
-            sys.exit()
+    def start(self) -> None:
+        # Create a limited number of threads
+        for i in range(self.nthreads):
+            thread = Thread(target=self.worker, daemon=True)
+            # We need to pass in `thread` as a parameter so we
+            # have to use `<threading.Thread>._args` like this:
+            thread._args = (thread, )
+            self.threads.append(thread)
+            thread.start()
+
+    def join(self) -> None:
+        # Joins the threads one by one until all of them are done.
+        for thread in self.threads:
+            thread.join()
+
+    def worker(self, thread:Thread) -> None:
+        # While we are running and there are functions to call:
+        while self.running and (len(self.functions) > 0):
+            # Get a function
+            with self.functions_lock:
+                function, args = self.functions.pop(0)
+            # Call that function
+            function(*args)
+
+        # Remove the thread from the list of threads.
+        # This may cause issues if the user calls `<Threader>.join()`
+        # But I haven't seen this problem while testing/using it.
+        with self.thread_lock:
+            self.threads.remove(thread)
+
+def findInvertor(subnet):
+    segs=subnet.split('.')
+    BASE_IP = segs[0]+'.'+segs[1]+'.'+segs[2]+'.'"%i"
+    PORT = 8899
+    start = perf_counter()
+    # I didn't need a timeout of 1 so I used 0.1
+    socket.setdefaulttimeout(0.1)
+
+    error_dict = {}
+    invlist = {}
+    def connect(hostname, port):
+        
+        with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as sock:
+            result = sock.connect_ex((hostname, port))
+        with threader.print_lock:
+            if result == 0:
+                invlist[len(invlist)+1]=hostname       
+
+    # add more or less threads to complete your scan
+    threader = Threader(20)
+    for i in range(255):
+        threader.append(connect, BASE_IP%i, PORT)
+        #threader.append(connect, BASE_IP, PORT)
+    threader.start()
+    threader.join()
+    print(invlist)
+    return(invlist)
+
+if __name__ == '__main__':
+    if len(sys.argv) == 2:
+        globals()[sys.argv[1]]()
+    elif len(sys.argv) == 3:
+        globals()[sys.argv[1]](sys.argv[2])

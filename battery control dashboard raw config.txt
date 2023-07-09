@@ -1,0 +1,312 @@
+title: Home
+views:
+  - title: Energy Now
+    path: energy-now
+    badges: []
+    cards:
+      - type: custom:apexcharts-card
+        header:
+          title: Load Usage
+          show_states: true
+          colorize_states: true
+        apex_config:
+          plotOptions:
+            pie:
+              donut:
+                labels:
+                  total:
+                    show: true
+        chart_type: donut
+        series:
+          - entity: sensor.other_power
+          - entity: sensor.tumble_dryer_electric_consumption_w
+          - entity: sensor.av_rack_electric_consumption_w
+          - entity: sensor.boiling_tap_electric_consumption_w
+          - entity: sensor.car_charge_power
+          - entity: sensor.server_rack_electric_consumption_w_2
+          - entity: sensor.lights_power
+          - entity: sensor.eden_fan_energy_power_2
+          - entity: sensor.hot_tub_power
+          - entity: sensor.tsmart_power_w
+      - type: custom:tesla-style-solar-power-card
+        name: My Flows
+        grid_consumption_entity: sensor.givtcp_XX1234X567_import_power
+        house_consumption_entity: sensor.givtcp_XX1234X567_load_power
+        generation_yield_entity: sensor.givtcp_XX1234X567_pv_power
+        battery_consumption_entity: sensor.givtcp_XX1234X567_discharge_power
+        grid_to_house_entity: sensor.givtcp_XX1234X567_grid_to_house
+        grid_to_battery_entity: sensor.givtcp_XX1234X567_grid_to_battery
+        generation_to_grid_entity: sensor.givtcp_XX1234X567_solar_to_grid
+        generation_to_battery_entity: sensor.givtcp_XX1234X567_solar_to_battery
+        generation_to_house_entity: sensor.givtcp_XX1234X567_solar_to_house
+        battery_to_house_entity: sensor.givtcp_XX1234X567_battery_to_house
+        battery_to_grid_entity: sensor.givtcp_XX1234X567_battery_to_grid
+        battery_extra_entity: sensor.givtcp_XX1234X567_soc
+        appliance1_consumption_entity: sensor.car_charge_power
+        appliance1_extra_entity: sensor.etron_state_of_charge
+        grid_entity: sensor.givtcp_XX1234X567_grid_power
+        house_entity: sensor.givtcp_XX1234X567_load_power
+        generation_entity: sensor.givtcp_XX1234X567_pv_power
+        battery_entity: sensor.givtcp_XX1234X567_battery_power
+        show_w_not_kw: 1
+        hide_inactive_lines: 1
+        change_house_bubble_color_with_flow: 1
+      - type: gauge
+        entity: sensor.electric_cost_today
+        min: 0
+        max: 20
+        needle: false
+      - type: gauge
+        entity: sensor.gas_cost_today
+        min: 0
+        max: 20
+      - type: entities
+        entities:
+          - entity: sensor.givtcp_XX1234X567_night_cost
+          - entity: sensor.givtcp_XX1234X567_night_energy_kwh
+          - entity: sensor.givtcp_XX1234X567_day_cost
+          - entity: sensor.givtcp_XX1234X567_day_energy_kwh
+          - entity: sensor.givtcp_XX1234X567_import_ppkwh_today
+      - type: custom:apexcharts-card
+        header:
+          title: Load Usage
+          show_states: true
+          colorize_states: true
+        apex_config:
+          plotOptions:
+            pie:
+              donut:
+                labels:
+                  total:
+                    show: true
+        chart_type: donut
+        series:
+          - entity: sensor.givtcp_XX1234X567_day_energy_kwh
+          - entity: sensor.givtcp_XX1234X567_night_energy_kwh
+          - entity: sensor.givtcp_XX1234X567_pv_energy_today_kwh
+      - type: history-graph
+        entities:
+          - entity: sensor.givtcp_XX1234X567_battery_value
+          - entity: sensor.givtcp_XX1234X567_battery_ppkwh
+        hours_to_show: 24
+  - panel: false
+    path: energy
+    title: Energy
+    badges: []
+    cards:
+      - type: history-graph
+        entities:
+          - entity: sensor.givtcp_XX1234X567_battery_power
+          - entity: sensor.givtcp_XX1234X567_load_power
+          - entity: sensor.givtcp_XX1234X567_grid_power
+          - entity: sensor.givtcp_XX1234X567_pv_power
+        hours_to_show: 24
+        refresh_interval: 0
+        title: Energy Usage
+      - type: history-graph
+        entities:
+          - entity: sensor.givtcp_XX1234X567_soc
+          - entity: number.givtcp_XX1234X567_target_soc
+        hours_to_show: 24
+        refresh_interval: 0
+        title: Battery State
+      - type: custom:apexcharts-card
+        header:
+          show: true
+          title: Import/Export
+          show_states: true
+          colorize_states: true
+        graph_span: 24h
+        span:
+          end: hour
+        experimental:
+          color_threshold: true
+        series:
+          - entity: sensor.givtcp_XX1234X567_grid_power
+            type: column
+            group_by:
+              func: avg
+              duration: 30min
+            color_threshold:
+              - value: -2
+                color: red
+                opacity: 1
+              - value: 2
+                color: green
+      - type: custom:apexcharts-card
+        header:
+          title: Load Usage
+          show_states: true
+          colorize_states: true
+        graph_span: 24h
+        span:
+          end: hour
+        apex_config:
+          chart:
+            stacked: 'true'
+        series:
+          - entity: sensor.givtcp_XX1234X567_grid_to_battery
+            type: column
+            color: blue
+            group_by:
+              func: avg
+              duration: 30min
+          - entity: sensor.lights_power
+            type: column
+            color: yellow
+            group_by:
+              func: avg
+              duration: 30min
+          - entity: sensor.server_rack_electric_consumption_w_2
+            type: column
+            group_by:
+              func: avg
+              duration: 30min
+          - entity: sensor.tumble_dryer_electric_consumption_w
+            type: column
+            group_by:
+              func: avg
+              duration: 30min
+          - entity: sensor.av_rack_electric_consumption_w
+            type: column
+            group_by:
+              func: avg
+              duration: 30min
+          - entity: sensor.boiling_tap_power_stable
+            type: column
+            group_by:
+              func: avg
+              duration: 30min
+          - entity: sensor.car_charge_power
+            type: column
+            group_by:
+              func: avg
+              duration: 30min
+          - entity: sensor.hot_tub_power
+            type: column
+            color: brown
+            group_by:
+              func: avg
+              duration: 30min
+          - entity: sensor.other_power
+            type: column
+            color: grey
+            group_by:
+              func: avg
+              duration: 30min
+          - entity: sensor.tsmart_power_w
+            type: column
+            color: orange
+            group_by:
+              func: avg
+              duration: 30min
+      - type: history-graph
+        entities:
+          - entity: sensor.energy_production_tomorrow
+          - entity: sensor.givtcp_XX1234X567_pv_energy_today_kwh
+        refresh_interval: 0
+        title: Forecast vs Actual PV
+        hours_to_show: 72
+      - type: history-graph
+        entities:
+          - entity: sensor.givtcp_XX1234X567_pv_power
+          - entity: sensor.givtcp_XX1234X567_pv_power_string_1
+          - entity: sensor.givtcp_XX1234X567_pv_power_string_2
+        hours_to_show: 12
+      - type: custom:apexcharts-card
+        header:
+          show: true
+          title: Daily cost
+          show_states: true
+          colorize_states: true
+        graph_span: 28d
+        span:
+          end: day
+        apex_config:
+          chart:
+            stacked: 'true'
+        series:
+          - entity: sensor.givtcp_XX1234X567_day_cost
+            type: column
+            color: red
+            group_by:
+              func: max
+              duration: 24h
+          - entity: sensor.givtcp_XX1234X567_night_cost
+            type: column
+            color: orange
+            group_by:
+              func: max
+              duration: 24h
+      - type: custom:apexcharts-card
+        header:
+          show: true
+          title: Daily Load
+          show_states: true
+          colorize_states: true
+        graph_span: 28d
+        span:
+          end: hour
+        apex_config:
+          chart:
+            stacked: 'true'
+        series:
+          - entity: sensor.givtcp_XX1234X567_day_energy_kwh
+            type: column
+            color: red
+            group_by:
+              func: last
+              duration: 24h
+          - entity: sensor.givtcp_XX1234X567_night_energy_kwh
+            type: column
+            color: orange
+            group_by:
+              func: last
+              duration: 24h
+          - entity: sensor.givtcp_XX1234X567_pv_energy_today_kwh
+            type: column
+            color: green
+            group_by:
+              func: last
+              duration: 24h
+      - type: history-graph
+        entities:
+          - entity: sensor.givtcp_XX1234X567_load_energy_today_kwh
+  - theme: Backend-selected
+    title: GivEnergy Control
+    path: givenergy-control
+    badges: []
+    cards:
+      - type: entities
+        entities:
+          - entity: select.givtcp_XX1234X567_mode
+          - entity: sensor.givtcp_XX1234X567_soc
+          - entity: number.givtcp_XX1234X567_target_soc
+          - entity: number.givtcp_XX1234X567_battery_charge_rate
+          - entity: switch.givtcp_XX1234X567_enable_charge_schedule
+          - entity: select.givtcp_XX1234X567_charge_start_time_slot_1
+          - entity: select.givtcp_XX1234X567_charge_end_time_slot_1
+          - entity: switch.givtcp_XX1234X567_enable_discharge
+          - entity: number.givtcp_XX1234X567_battery_discharge_rate
+          - entity: number.givtcp_XX1234X567_battery_power_reserve
+          - entity: switch.givtcp_XX1234X567_enable_discharge_schedule
+          - entity: select.givtcp_XX1234X567_discharge_start_time_slot_1
+          - entity: select.givtcp_XX1234X567_discharge_end_time_slot_1
+          - entity: select.givtcp_XX1234X567_discharge_start_time_slot_2
+          - entity: select.givtcp_XX1234X567_discharge_end_time_slot_2
+        title: Battery Control
+        show_header_toggle: false
+        state_color: true
+        header:
+          type: graph
+          entity: sensor.givtcp_XX1234X567_soc
+          hours_to_show: 24
+      - type: entities
+        entities:
+          - entity: select.givtcp_XX1234X567_temp_pause_charge
+          - entity: select.givtcp_XX1234X567_temp_pause_discharge
+          - entity: select.givtcp_XX1234X567_force_charge
+          - entity: select.givtcp_XX1234X567_force_export
+        title: Battery Boost Control
+        show_header_toggle: false
+        state_color: true
