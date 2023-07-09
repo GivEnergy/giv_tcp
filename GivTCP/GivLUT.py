@@ -4,10 +4,10 @@ class GivClient:
         from settings import GiV_Settings
         from givenergy_modbus.model.plant import Plant  
         client= GivEnergyClient(host=GiV_Settings.invertorIP)
-        if GiV_Settings.isAIO:
-            numbat=0
-        else:
-            numbat=GiV_Settings.numBatteries
+#        if GiV_Settings.isAIO:
+#            numbat=0
+#        else:
+        numbat=GiV_Settings.numBatteries
         plant=Plant(number_batteries=numbat)
         client.refresh_plant(plant,GiV_Settings.isAIO,full_refresh=fullrefresh)
         return (plant)
@@ -84,9 +84,9 @@ class GivLUT:
         timezone=zoneinfo.ZoneInfo(key="Europe/London")
 
     # Standard values for devices
-    maxInvPower=6000
+    maxInvPower=8000
     maxPower=20000
-    maxBatPower=4000
+    maxBatPower=7500
     maxTemp=100
     maxCellVoltage=4
     maxTotalEnergy=100000000
@@ -163,10 +163,46 @@ class GivLUT:
         "Discharge_end_time_slot_1":GEType("select","","setDischargeEnd1","","",False,False,False),
         "Discharge_start_time_slot_2":GEType("select","","setDischargeStart2","","",False,False,False),
         "Discharge_end_time_slot_2":GEType("select","","setDischargeEnd2","","",False,False,False),
+        "Discharge_start_time_slot_3":GEType("select","","setDischargeStart3","","",False,False,False),
+        "Discharge_end_time_slot_3":GEType("select","","setDischargeEnd3","","",False,False,False),
+        "Discharge_start_time_slot_4":GEType("select","","setDischargeStart4","","",False,False,False),
+        "Discharge_end_time_slot_4":GEType("select","","setDischargeEnd4","","",False,False,False),
+        "Discharge_start_time_slot_5":GEType("select","","setDischargeStart5","","",False,False,False),
+        "Discharge_end_time_slot_5":GEType("select","","setDischargeEnd5","","",False,False,False),
+        "Discharge_start_time_slot_6":GEType("select","","setDischargeStart6","","",False,False,False),
+        "Discharge_end_time_slot_6":GEType("select","","setDischargeEnd6","","",False,False,False),
+        "Discharge_start_time_slot_7":GEType("select","","setDischargeStart7","","",False,False,False),
+        "Discharge_end_time_slot_7":GEType("select","","setDischargeEnd7","","",False,False,False),
+        "Discharge_start_time_slot_8":GEType("select","","setDischargeStart8","","",False,False,False),
+        "Discharge_end_time_slot_8":GEType("select","","setDischargeEnd8","","",False,False,False),
+        "Discharge_start_time_slot_9":GEType("select","","setDischargeStart9","","",False,False,False),
+        "Discharge_end_time_slot_9":GEType("select","","setDischargeEnd9","","",False,False,False),
+        "Discharge_start_time_slot_10":GEType("select","","setDischargeStart10","","",False,False,False),
+        "Discharge_end_time_slot_10":GEType("select","","setDischargeEnd10","","",False,False,False),
+        "Battery_pause_start_time_slot":GEType("select","","setPauseStart","","",False,False,False),
+        "Battery_pause_end_time_slot":GEType("select","","setPauseEnd","","",False,False,False),
+        
         "Charge_start_time_slot_1":GEType("select","","setChargeStart1","","",False,False,False),
         "Charge_end_time_slot_1":GEType("select","","setChargeEnd1","","",False,False,False),
         "Charge_start_time_slot_2":GEType("select","","setChargeStart2","","",False,False,False),
         "Charge_end_time_slot_2":GEType("select","","setChargeEnd2","","",False,False,False),
+        "Charge_start_time_slot_3":GEType("select","","setChargeStart3","","",False,False,False),
+        "Charge_end_time_slot_3":GEType("select","","setChargeEnd3","","",False,False,False),
+        "Charge_start_time_slot_4":GEType("select","","setChargeStart4","","",False,False,False),
+        "Charge_end_time_slot_4":GEType("select","","setChargeEnd4","","",False,False,False),
+        "Charge_start_time_slot_5":GEType("select","","setChargeStart5","","",False,False,False),
+        "Charge_end_time_slot_5":GEType("select","","setChargeEnd5","","",False,False,False),
+        "Charge_start_time_slot_6":GEType("select","","setChargeStart6","","",False,False,False),
+        "Charge_end_time_slot_6":GEType("select","","setChargeEnd6","","",False,False,False),
+        "Charge_start_time_slot_7":GEType("select","","setChargeStart7","","",False,False,False),
+        "Charge_end_time_slot_7":GEType("select","","setChargeEnd7","","",False,False,False),
+        "Charge_start_time_slot_8":GEType("select","","setChargeStart8","","",False,False,False),
+        "Charge_end_time_slot_8":GEType("select","","setChargeEnd8","","",False,False,False),
+        "Charge_start_time_slot_9":GEType("select","","setChargeStart9","","",False,False,False),
+        "Charge_end_time_slot_9":GEType("select","","setChargeEnd9","","",False,False,False),
+        "Charge_start_time_slot_10":GEType("select","","setChargeStart10","","",False,False,False),
+        "Charge_end_time_slot_10":GEType("select","","setChargeEnd10","","",False,False,False),
+        
         "Battery_Serial_Number":GEType("sensor","string","","","",False,True,False),
         "Battery_SOC":GEType("sensor","battery","",0,100,False,False,False),
         "Battery_Capacity":GEType("sensor","","",0,250,False,True,False),
@@ -202,6 +238,15 @@ class GivLUT:
         "Battery_Power_Reserve":GEType("number","","setBatteryReserve",4,100,False,False,False),
         "Battery_Power_Cutoff":GEType("number","","setBatteryCutoff",4,100,False,False,False),
         "Target_SOC":GEType("number","","setChargeTarget",4,100,False,False,False),
+        "Target_SOC_2":GEType("number","","setChargeTarget2",4,100,False,False,False),
+        "Target_SOC_3":GEType("number","","setChargeTarget3",4,100,False,False,False),
+        "Target_SOC_4":GEType("number","","setChargeTarget4",4,100,False,False,False),
+        "Target_SOC_5":GEType("number","","setChargeTarget5",4,100,False,False,False),
+        "Target_SOC_6":GEType("number","","setChargeTarget6",4,100,False,False,False),
+        "Target_SOC_7":GEType("number","","setChargeTarget7",4,100,False,False,False),
+        "Target_SOC_8":GEType("number","","setChargeTarget8",4,100,False,False,False),
+        "Target_SOC_9":GEType("number","","setChargeTarget9",4,100,False,False,False),
+        "Target_SOC_10":GEType("number","","setChargeTarget10",4,100,False,False,False),
         "Enable_Charge_Schedule":GEType("switch","","enableChargeSchedule","","",False,False,False),
         "Enable_Discharge_Schedule":GEType("switch","","enableDishargeSchedule","","",False,False,False),
         "Enable_Discharge":GEType("switch","","enableDischarge","","",False,False,False),
@@ -225,13 +270,16 @@ class GivLUT:
         "Temp_Pause_Charge":GEType("select","","tempPauseCharge","","",True,False,False),
         "Force_Charge":GEType("select","","forceCharge","","",True,False,False),
         "Force_Export":GEType("select","","forceExport","","",True,False,False),
-        "Reboot_Invertor":GEType("switch","","rebootInvertor","","",False,False,False),
+        "Reboot_Invertor":GEType("switch","","rebootInverter","","",False,False,False),
         "Reboot_Addon":GEType("switch","","rebootAddon","","",False,False,False),
         "Discharge_Time_Remaining":GEType("sensor","","",0,1000,True,False,False),
         "Charge_Time_Remaining":GEType("sensor","","",0,1000,True,False,False),
         "Charge_Completion_Time":GEType("sensor","timestamp","","","",False,False,False),
         "Discharge_Completion_Time":GEType("sensor","timestamp","","","",False,False,False),
         "Battery_Power_Mode":GEType("switch","","setBatteryPowerMode","","",False,False,False),
+        "Local_control_mode":GEType("select","","setLocalControlMode","","",True,False,False),
+        "Battery_pause_mode":GEType("select","","setBatteryPauseMode","","",True,False,False),
+        "PV_input_mode":GEType("select","","setPVInputMode","","",True,False,False),
         }
     time_slots=[
 "00:00:00","00:01:00","00:02:00","00:03:00","00:04:00","00:05:00","00:06:00","00:07:00","00:08:00","00:09:00","00:10:00","00:11:00","00:12:00","00:13:00","00:14:00","00:15:00","00:16:00","00:17:00","00:18:00","00:19:00","00:20:00","00:21:00","00:22:00","00:23:00","00:24:00","00:25:00","00:26:00","00:27:00","00:28:00","00:29:00","00:30:00","00:31:00","00:32:00","00:33:00","00:34:00","00:35:00","00:36:00","00:37:00","00:38:00","00:39:00","00:40:00","00:41:00","00:42:00","00:43:00","00:44:00","00:45:00","00:46:00","00:47:00","00:48:00","00:49:00","00:50:00","00:51:00","00:52:00","00:53:00","00:54:00","00:55:00","00:56:00","00:57:00","00:58:00","00:59:00",
@@ -263,6 +311,9 @@ class GivLUT:
     delay_times=["Normal","Running","Cancel","2","15","30","45","60","90","120","150","180"]
     modes=["Eco","Eco (Paused)","Timed Demand","Timed Export","Unknown"]
     rates=["Day","Night"]
+    battery_pause_mode=["Disabled","PauseCharge","PauseDischarge","PauseBoth",]
+    local_control_mode=["Load","Battery","Grid"]
+    pv_input_mode=["Independent","1x2"]
 
     def getTime(timestamp):
         timeslot=timestamp.strftime("%H:%M")

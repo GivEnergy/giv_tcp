@@ -12,7 +12,8 @@ buildx.sh
 .venv
 .vscode
 GivTCP/__pycache__
-./givenergy_modbus/__pycache__
+givenergy_modbus/__pycache__
+givenergy_modbus/model/__pycache__
 GivTCP/givenergy_modbus_2
 GivTCP/asyncclient.py
 GivTCP/testdata.json

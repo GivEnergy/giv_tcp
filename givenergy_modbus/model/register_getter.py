@@ -1,6 +1,6 @@
 from datetime import datetime
 from typing import Any
-import zoneinfo
+
 from pydantic.utils import GetterDict
 
 
@@ -54,10 +54,10 @@ class RegisterGetter(GetterDict):
                 self.get('system_time_day'),
                 self.get('system_time_hour'),
                 self.get('system_time_minute'),
-                self.get('system_time_second')
+                self.get('system_time_second'),
             )
 
-        if key in ('charge_slot_1', 'charge_slot_2', 'discharge_slot_1', 'discharge_slot_2'):
+        if key in ('charge_slot_1', 'charge_slot_2', 'charge_slot_3', 'charge_slot_4', 'charge_slot_5', 'charge_slot_6', 'charge_slot_7', 'charge_slot_8', 'charge_slot_9', 'charge_slot_10', 'discharge_slot_1', 'discharge_slot_2', 'discharge_slot_3', 'discharge_slot_4', 'discharge_slot_5', 'discharge_slot_6', 'discharge_slot_7', 'discharge_slot_8', 'discharge_slot_9', 'discharge_slot_10','battery_pause_slot'):
             return self.get(f'{key}_start'), self.get(f'{key}_end')
 
         if key == "inverter_firmware_version":

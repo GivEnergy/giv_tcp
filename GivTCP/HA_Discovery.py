@@ -165,15 +165,22 @@ class HAMQTT():
     #    elif GivLUT.entity_type[str(topic).split("/")[-1].devType=="binary_sensor":
     #        client.publish("homeassistant/binary_sensor/GivEnergy/"+str(topic).split("/")[-1]+"/config",HAMQTT.create_binary_sensor_payload(topic,SN),retain=True)
         elif GivLUT.entity_type[str(topic).split("/")[-1]].devType=="select":
-            if "Mode" in topic:
+            item=str(topic).split("/")[-1]
+            if item == "Battery_pause_mode":
+                options=GivLUT.battery_pause_mode
+            elif item == "Local_control_mode":
+                options=GivLUT.local_control_mode
+            elif item == "PV_input_mode":
+                options=GivLUT.pv_input_mode
+            elif "Mode" in item:
                 options=GivLUT.modes
-            elif "slot" in topic:
+            elif "slot" in item:
                 options=GivLUT.time_slots
-            elif "Temp" in topic:
+            elif "Temp" in item:
                 options=GivLUT.delay_times
-            elif "Force" in topic:
+            elif "Force" in item:
                 options=GivLUT.delay_times
-            elif "Rate" in topic:
+            elif "Rate" in item:
                 options=GivLUT.rates
             tempObj['options']=options
         elif GivLUT.entity_type[str(topic).split("/")[-1]].devType=="number":

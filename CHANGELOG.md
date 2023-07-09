@@ -5,6 +5,20 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/)
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
+## [2.3] - 2023-06-29
+### Fixed
+- Upped maxBatPower to 8000 to account for AIO
+- fix for Eco mode setting (when moving from Eco (Paused)) Thanks Ed-M72
+- MQTT fix for retained topics (Thanks xxxx)
+- Improved monitoring of failed write commands and associated logging
+### Added
+- New Controls available for beta firmware:
+  - Local Control Mode: Sets priority for Battery, Grid or Load
+  - PV Input Mode: Sets MPPT tracking to 1x2 or Independent
+  - Battery Pause Mode: Forces pause of Charge, Discharge or Both
+  - Gen2 inverters now have access to 10 charge and discharge slots
+  - 
+
 ## [2.2.1] - 2023-06-29
 ### Fixed
 - Invertor Mode calculation

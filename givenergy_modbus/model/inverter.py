@@ -208,8 +208,24 @@ class Inverter(GivEnergyBaseModel):
 
     charge_slot_1: Tuple[datetime.time, datetime.time]
     charge_slot_2: Tuple[datetime.time, datetime.time]
+    charge_slot_3: Tuple[datetime.time, datetime.time]
+    charge_slot_4: Tuple[datetime.time, datetime.time]
+    charge_slot_5: Tuple[datetime.time, datetime.time]
+    charge_slot_6: Tuple[datetime.time, datetime.time]
+    charge_slot_7: Tuple[datetime.time, datetime.time]
+    charge_slot_8: Tuple[datetime.time, datetime.time]
+    charge_slot_9: Tuple[datetime.time, datetime.time]
+    charge_slot_10: Tuple[datetime.time, datetime.time]
     discharge_slot_1: Tuple[datetime.time, datetime.time]
     discharge_slot_2: Tuple[datetime.time, datetime.time]
+    discharge_slot_3: Tuple[datetime.time, datetime.time]
+    discharge_slot_4: Tuple[datetime.time, datetime.time]
+    discharge_slot_5: Tuple[datetime.time, datetime.time]
+    discharge_slot_6: Tuple[datetime.time, datetime.time]
+    discharge_slot_7: Tuple[datetime.time, datetime.time]
+    discharge_slot_8: Tuple[datetime.time, datetime.time]
+    discharge_slot_9: Tuple[datetime.time, datetime.time]
+    discharge_slot_10: Tuple[datetime.time, datetime.time]
     charge_and_discharge_soc: Tuple[int, int]
 
     battery_low_force_charge_time: int
@@ -219,10 +235,36 @@ class Inverter(GivEnergyBaseModel):
     island_check_continue: int
     battery_discharge_min_power_reserve: int
     charge_target_soc: int
-    charge_soc_stop_2: int
-    discharge_soc_stop_2: int
-    charge_soc_stop_1: int
-    discharge_soc_stop_1: int
+    charge_target_soc_1: int
+    charge_target_soc_2: int
+    charge_target_soc_3: int
+    charge_target_soc_4: int
+    charge_target_soc_5: int
+    charge_target_soc_6: int
+    charge_target_soc_7: int
+    charge_target_soc_8: int
+    charge_target_soc_9: int
+    charge_target_soc_10: int
+    discharge_target_soc_1: int
+    discharge_target_soc_2: int
+    discharge_target_soc_3: int
+    discharge_target_soc_4: int
+    discharge_target_soc_5: int
+    discharge_target_soc_6: int
+    discharge_target_soc_7: int
+    discharge_target_soc_8: int
+    discharge_target_soc_9: int
+    discharge_target_soc_10: int
+
+#    charge_soc_stop_2: int
+#    discharge_soc_stop_2: int
+#    charge_soc_stop_1: int
+#    discharge_soc_stop_1: int
+
+    local_control_mode: int
+    pv_input_mode: int
+    battery_pause_mode: int
+    battery_pause_slot: Tuple[datetime.time, datetime.time]
 
     # InputRegisters
     inverter_status: int

@@ -1,0 +1,1 @@
+cp givenergy_modbus/ .venv/lib/python3.10/site-packages/givenergy_modbus
