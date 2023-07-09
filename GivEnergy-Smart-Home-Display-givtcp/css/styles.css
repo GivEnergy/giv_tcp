@@ -1,0 +1,82 @@
+body {
+    background-color: black;
+    font-family: Tahoma, Arial;
+    font-size: 14pt;
+    color: #ffffff;
+}
+
+.circle_scale {
+    font-size: 65%;
+}
+
+g.idle path.graphic {
+    stroke: #313131;
+}
+
+g.idle path.connector {
+    stroke: #313131;
+    stroke-width: 2;
+}
+
+g.active path.connector, g.active line.connector {
+    stroke: #808080;
+    stroke-width: 2;
+}
+
+marker path.connector {
+    fill: #808080;
+}
+
+.idle circle, .idle line.connector {
+    stroke: #313131;
+    stroke-width: 2;
+}
+
+#summary_panel text {
+    fill: #ffffff;
+}
+
+#summary_panel text.clock {
+    fill: #c9c9c9;
+}
+
+#summary_panel tspan.label {
+    font-weight: bold;
+    font-size: 100%;
+}
+
+#summary_panel path {
+    stroke-width: 2;
+}
+
+.idle text {
+    fill: #313131;
+}
+
+.active text {
+    fill: #ffffff;
+}
+
+.active circle {
+    stroke-width: 2;
+}
+
+.graphic {
+    stroke-width: 1;
+}
+
+.active circle#power_grid_circle, #power_grid.active path.graphic, #summary_panel path.graphic-grid {
+    stroke: #e53935;
+}
+
+.active circle#power_battery_circle, #power_battery.active path.graphic, #summary_panel path.graphic-battery {
+    stroke: #3949ab;
+}
+
+.active circle#power_solar_circle, #power_solar.active path.graphic, #summary_panel path.graphic-solar {
+    stroke: #fdd835;
+}
+
+.active circle#power_home_circle, #power_home.active path.graphic, #summary_panel path.graphic-home {
+    stroke: #00897b;
+}

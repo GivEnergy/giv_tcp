@@ -1,32 +1,50 @@
 # -*- coding: utf-8 -*-
 # version 2021.12.22
-
 from flask import Flask, json, request
-import GivTCP.read as rd       #grab passthrough functions from main read file
+from flask_cors import CORS
+import read as rd       #grab passthrough functions from main read file
 import write as wr      #grab passthrough functions from main write file
-import os
-import json
-import GivTCP.settings_template
+import config_dash as cfdash
+from GivLUT import GivQueue, GivLUT
+from os.path import exists
+
+logger = GivLUT.logger
 
 #set-up Flask details
 giv_api = Flask(__name__)
+CORS(giv_api)
 
 #Proxy Read Functions
+@giv_api.route('/config', methods=['GET', 'POST'])
+def get_config_page():
+    if request.method=="GET":
+        return cfdash.get_config()
+    elif request.method=="POST":
+        return cfdash.set_config(request.form)
 
 #Read from Invertor put in cache and publish
 @giv_api.route('/runAll', methods=['GET'])
 def getAll():
     return rd.runAll(True)
 
+@giv_api.route('/reboot', methods=['GET'])
+def reboot():
+    return wr.rebootinverter()
+
 #Publish last cached Invertor Data
 @giv_api.route('/readData', methods=['GET'])
 def rdData():
     return rd.pubFromPickle()
 
+#Publish last cached Invertor Data
+@giv_api.route('/getCache', methods=['GET'])
+def gtCache():
+    return rd.getCache()
+
 #Read from Invertor put in cache 
 @giv_api.route('/getData', methods=['GET'])
 def gtData():
-    return rd.getData()
+    return GivQueue.q.enqueue(rd.getData,True)
 
 #Proxy Write Functions
 @giv_api.route('/enableChargeTarget', methods=['POST'])
@@ -89,6 +107,59 @@ def setDischrgSlot2():
     payload = request.get_json(silent=True, force=True)
     return wr.setDischargeSlot2(payload)
 
+@giv_api.route('/tempPauseDischarge', methods=['POST'])
+def tmpPauseDischrg():
+    payload = request.get_json(silent=True, force=True)
+    if payload == "Cancel":
+        if exists(".tpdRunning"):
+            jobid= str(open(".tpdRunning","r").readline())
+            logger.critical("Retrieved jobID to cancel Temp Pause Discharge: "+ str(jobid))
+            return wr.cancelJob(jobid)
+        else:
+            logger.error("Force Charge is not currently running")
+    else:
+        return wr.tempPauseCharge(payload)
+
+@giv_api.route('/tempPauseCharge', methods=['POST'])
+def tmpPauseChrg():
+    payload = request.get_json(silent=True, force=True)
+    if payload == "Cancel":
+        if exists(".tpcRunning"):
+            jobid= str(open(".tpcRunning","r").readline())
+            logger.debug("Retrieved jobID to cancel Temp Pause Charge: "+ str(jobid))
+            return wr.cancelJob(jobid)
+        else:
+            logger.error("Force Charge is not currently running")
+    else:
+        return wr.tempPauseCharge(payload)
+
+@giv_api.route('/forceCharge', methods=['POST'])
+def frceChrg():
+    payload = request.get_json(silent=True, force=True)
+    #Check if Cancel then return the right function
+    if payload == "Cancel":
+        if exists(".FCRunning"):
+            jobid= str(open(".FCRunning","r").readline())
+            logger.debug("Retrieved jobID to cancel Force Charge: "+ str(jobid))
+            return wr.cancelJob(jobid)
+        else:
+            logger.error("Force Charge is not currently running")
+    else:
+        return wr.forceCharge(payload)
+
+@giv_api.route('/forceExport', methods=['POST'])
+def frceExprt():
+    payload = request.get_json(silent=True, force=True)
+    if payload == "Cancel":
+        if exists(".FERunning"):
+            jobid= str(open(".FERunning","r").readline())
+            logger.debug("Retrieved jobID to cancel Force Export: "+ str(jobid))
+            return wr.cancelJob(jobid)
+        else:
+            logger.error("Force Charge is not currently running")
+    else:
+        return wr.forceExport(payload)
+
 @giv_api.route('/setBatteryMode', methods=['POST'])
 def setBattMode():
     payload = request.get_json(silent=True, force=True)
@@ -99,24 +170,10 @@ def setDate():
     payload = request.get_json(silent=True, force=True)
     return wr.setDateTime(payload)
 
-#Publish last cached Invertor Data
-@giv_api.route('/settings', methods=['GET'])
-def getFileData():
-    file = open(os.path.dirname(__file__) + '/settings.json', 'r')
-    data = json.load(file)
-    file.close()
-    return data
-
-@giv_api.route('/settings', methods=['POST'])
-def editFileData():
-    file = open(os.path.dirname(__file__) + '/settings.json', 'r')
-    data = json.load(file)
-    file.close()
-    data.update(request.get_json(silent=True, force=True))
-    file = open(os.path.dirname(__file__) + '/settings.json', 'w')
-    json.dump(data, file)
-    file.close()
-    return data
+@giv_api.route('/switchRate', methods=['POST'])
+def swRates():
+    payload = request.get_json(silent=True, force=True)
+    return wr.switchRate(payload)
 
 if __name__ == "__main__":
     giv_api.run()

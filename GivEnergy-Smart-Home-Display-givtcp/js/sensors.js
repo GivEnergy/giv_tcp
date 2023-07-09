@@ -1,0 +1,147 @@
+import { Prefix, SensorType, Suffix } from './enums.js';
+import { Converters } from './converters.js';
+import { Formatters } from './formatters.js';
+
+const Sensors = [{
+    id: 'Load_Power',
+    mapping: 'Power.Power.Load_Power',
+    type: SensorType.Power,
+    textElementId: 'power_home_text',
+    converter: Converters.wattsToKw
+}, {
+    id: 'Import_Power',
+    mapping: 'Power.Power.Import_Power',
+    type: SensorType.Power,
+    textElementId: 'power_grid_text',
+    inverse: 'givtcp_export_power',
+    converter: Converters.wattsToKw
+}, {
+    id: 'Export_Power',
+    mapping: 'Power.Power.Export_Power',
+    type: SensorType.Power,
+    textElementId: 'power_grid_text',
+    inverse: 'givtcp_import_power',
+    converter: Converters.wattsToKw
+}, {
+    id: 'PV_Power',
+    mapping: 'Power.Power.PV_Power',
+    type: SensorType.Power,
+    textElementId: 'power_solar_text',
+    converter: Converters.wattsToKw
+}, {
+    id: 'Charge_Power',
+    mapping: 'Power.Power.Charge_Power',
+    type: SensorType.Power,
+    textElementId: 'power_battery_text',
+    inverse: 'givtcp_discharge_power',
+    converter: Converters.wattsToKw
+}, {
+    id: 'Discharge_Power',
+    mapping: 'Power.Power.Discharge_Power',
+    type: SensorType.Power,
+    textElementId: 'power_battery_text',
+    inverse: 'givtcp_charge_power',
+    converter: Converters.wattsToKw
+}, {
+    id: 'Grid_to_Battery',
+    mapping: 'Power.Flows.Grid_to_Battery',
+    type: SensorType.Flow,
+    flowElementId: 'battery_with_grid'
+}, {
+    id: 'Grid_to_House',
+    mapping: 'Power.Flows.Grid_to_House',
+    type: SensorType.Flow,
+    flowElementId: 'grid_to_home',
+    nonZeroValueCheck: 'givtcp_import_power'
+}, {
+    id: 'Solar_to_Battery',
+    mapping: 'Power.Flows.Solar_to_Battery',
+    type: SensorType.Flow,
+    flowElementId: 'solar_to_battery'
+}, {
+    id: 'Solar_to_Grid',
+    mapping: 'Power.Flows.Solar_to_Grid',
+    type: SensorType.Flow,
+    flowElementId: 'solar_to_grid'
+}, {
+    id: 'Solar_to_House',
+    mapping: 'Power.Flows.Solar_to_House',
+    type: SensorType.Flow,
+    flowElementId: 'solar_to_home'
+}, {
+    id: 'Battery_to_Grid',
+    mapping: 'Power.Flows.Battery_to_Grid',
+    type: SensorType.Flow,
+    flowElementId: 'battery_with_grid'
+}, {
+    id: 'Battery_to_House',
+    mapping: 'Power.Flows.Battery_to_House',
+    type: SensorType.Flow,
+    flowElementId: 'battery_to_home'
+}, {
+    id: 'Load_Energy_Today_kWh',
+    mapping: 'Energy.Today.Load_Energy_Today_kWh',
+    textElementId: 'energy_home_text',
+    type: SensorType.Summary,
+    suffix: Suffix.Energy,
+    formatter: Formatters.roundToOneDecimalPlace
+}, {
+    id: 'PV_Energy_Today_kWh',
+    mapping: 'Energy.Today.PV_Energy_Today_kWh',
+    textElementId: 'energy_solar_text',
+    type: SensorType.Summary,
+    suffix: Suffix.Energy,
+    formatter: Formatters.roundToOneDecimalPlace
+}, /*{
+    id: 'daily_energy_peak',
+    textElementId: 'energy_imported_peak_text',
+    type: SensorType.Summary
+}, {
+    id: 'daily_energy_offpeak',
+    textElementId: 'energy_imported_offpeak_text',
+    type: SensorType.Summary
+},*/ {
+    id: 'Export_Energy_Today_kWh',
+    mapping: 'Energy.Today.Export_Energy_Today_kWh',
+    textElementId: 'energy_exported_text',
+    type: SensorType.Summary,
+    formatter: Formatters.roundToOneDecimalPlace
+}, {
+    id: 'Battery_State',
+    textElementId: 'battery_state_text',
+    type: SensorType.Summary
+}, {
+    id: 'Battery_State_of_Charge',
+    mapping: 'Power.Power.SOC',
+    textElementId: 'battery_percentage_text',
+    type: SensorType.Summary,
+    suffix: Suffix.Percent
+}, /*{
+    id: 'daily_energy_cost_peak',
+    textElementId: 'energy_imported_peak_cost_text',
+    type: SensorType.Summary,
+    prefix: Prefix.Currency,
+    converter: Converters.numberToCurrency
+}, {
+    id: 'daily_energy_cost_offpeak',
+    textElementId: 'energy_imported_offpeak_cost_text',
+    type: SensorType.Summary,
+    prefix: Prefix.Currency,
+    converter: Converters.numberToCurrency
+},*/ {
+    id: 'Export_Income',
+    mapping: 'Energy.Today.Export_Energy_Today_kWh',
+    textElementId: 'energy_exported_income',
+    type: SensorType.Summary,
+    prefix: Prefix.Currency,
+    converter: Converters.numberToCurrency
+}, {
+    id: 'Solar_Income',
+    mapping: 'Energy.Today.PV_Energy_Today_kWh',
+    textElementId: 'solar_generated_income_text',
+    type: SensorType.Summary,
+    prefix: Prefix.Currency,
+    converter: Converters.numberToCurrency
+}];
+
+export { Sensors };
