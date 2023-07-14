@@ -18,6 +18,7 @@ class GivQueue:
     from settings import GiV_Settings
     redis_connection = Redis(host='127.0.0.1', port=6379, db=0)
     q = Queue("GivTCP_"+str(GiV_Settings.givtcp_instance),connection=redis_connection)
+    #q = Queue("default",connection=redis_connection)
     
 class GEType:
     def __init__(self,dT,sC,cF,mn,mx,aZ,sM,oI):
@@ -76,6 +77,7 @@ class GivLUT:
     dayRate=GiV_Settings.cache_location+"/.dayRate"
     nightRateRequest=GiV_Settings.cache_location+"/.nightRateRequest"
     dayRateRequest=GiV_Settings.cache_location+"/.dayRateRequest"
+    invippkl=GiV_Settings.cache_location+"/invIPList.pkl"
 
 
     if "TZ" in os.environ:
@@ -238,15 +240,25 @@ class GivLUT:
         "Battery_Power_Reserve":GEType("number","","setBatteryReserve",4,100,False,False,False),
         "Battery_Power_Cutoff":GEType("number","","setBatteryCutoff",4,100,False,False,False),
         "Target_SOC":GEType("number","","setChargeTarget",4,100,False,False,False),
-        "Target_SOC_2":GEType("number","","setChargeTarget2",4,100,False,False,False),
-        "Target_SOC_3":GEType("number","","setChargeTarget3",4,100,False,False,False),
-        "Target_SOC_4":GEType("number","","setChargeTarget4",4,100,False,False,False),
-        "Target_SOC_5":GEType("number","","setChargeTarget5",4,100,False,False,False),
-        "Target_SOC_6":GEType("number","","setChargeTarget6",4,100,False,False,False),
-        "Target_SOC_7":GEType("number","","setChargeTarget7",4,100,False,False,False),
-        "Target_SOC_8":GEType("number","","setChargeTarget8",4,100,False,False,False),
-        "Target_SOC_9":GEType("number","","setChargeTarget9",4,100,False,False,False),
-        "Target_SOC_10":GEType("number","","setChargeTarget10",4,100,False,False,False),
+        "Charge_Target_SOC_2":GEType("number","","setChargeTarget2",4,100,False,False,False),
+        "Charge_Target_SOC_3":GEType("number","","setChargeTarget3",4,100,False,False,False),
+        "Charge_Target_SOC_4":GEType("number","","setChargeTarget4",4,100,False,False,False),
+        "Charge_Target_SOC_5":GEType("number","","setChargeTarget5",4,100,False,False,False),
+        "Charge_Target_SOC_6":GEType("number","","setChargeTarget6",4,100,False,False,False),
+        "Charge_Target_SOC_7":GEType("number","","setChargeTarget7",4,100,False,False,False),
+        "Charge_Target_SOC_8":GEType("number","","setChargeTarget8",4,100,False,False,False),
+        "Charge_Target_SOC_9":GEType("number","","setChargeTarget9",4,100,False,False,False),
+        "Charge_Target_SOC_10":GEType("number","","setChargeTarget10",4,100,False,False,False),
+        "Discharge_Target_SOC_1":GEType("number","","setChargeTarget",4,100,False,False,False),
+        "Discharge_Target_SOC_2":GEType("number","","setChargeTarget2",4,100,False,False,False),
+        "Discharge_Target_SOC_3":GEType("number","","setChargeTarget3",4,100,False,False,False),
+        "Discharge_Target_SOC_4":GEType("number","","setChargeTarget4",4,100,False,False,False),
+        "Discharge_Target_SOC_5":GEType("number","","setChargeTarget5",4,100,False,False,False),
+        "Discharge_Target_SOC_6":GEType("number","","setChargeTarget6",4,100,False,False,False),
+        "Discharge_Target_SOC_7":GEType("number","","setChargeTarget7",4,100,False,False,False),
+        "Discharge_Target_SOC_8":GEType("number","","setChargeTarget8",4,100,False,False,False),
+        "Discharge_Target_SOC_9":GEType("number","","setChargeTarget9",4,100,False,False,False),
+        "Discharge_Target_SOC_10":GEType("number","","setChargeTarget10",4,100,False,False,False),
         "Enable_Charge_Schedule":GEType("switch","","enableChargeSchedule","","",False,False,False),
         "Enable_Discharge_Schedule":GEType("switch","","enableDishargeSchedule","","",False,False,False),
         "Enable_Discharge":GEType("switch","","enableDischarge","","",False,False,False),

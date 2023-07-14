@@ -74,6 +74,9 @@ if isAddon:
                 subnet=interface['ipv4']['gateway']
                 invList=findInvertor(subnet)
                 logger.critical ("We have found the following invertors: "+str(invList))
+                    # write data to pickle
+                with open('invippkl.pkl', 'wb') as outp:
+                    pickle.dump(invList, outp, pickle.HIGHEST_PROTOCOL)
         except:
             logger.error("Error scanning for Inverters")
     

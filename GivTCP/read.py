@@ -524,18 +524,27 @@ def getData(fullrefresh):  # Read from Inverter put in cache
             timeslots['Discharge_end_time_slot_9'] = GEInv.discharge_slot_9[1].isoformat()
             timeslots['Discharge_start_time_slot_10'] = GEInv.discharge_slot_10[0].isoformat()
             timeslots['Discharge_end_time_slot_10'] = GEInv.discharge_slot_10[1].isoformat()
-            controlmode['Target_SOC_2'] = GEInv.charge_target_soc_2
-            controlmode['Target_SOC_3'] = GEInv.charge_target_soc_3
-            controlmode['Target_SOC_4'] = GEInv.charge_target_soc_4
-            controlmode['Target_SOC_5'] = GEInv.charge_target_soc_5
-            controlmode['Target_SOC_6'] = GEInv.charge_target_soc_6
-            controlmode['Target_SOC_7'] = GEInv.charge_target_soc_7
-            controlmode['Target_SOC_8'] = GEInv.charge_target_soc_8
-            controlmode['Target_SOC_9'] = GEInv.charge_target_soc_9
-            controlmode['Target_SOC_10'] = GEInv.charge_target_soc_10
-
-        timeslots['Battery_pause_start_time_slot'] = GEInv.battery_pause_slot[0].isoformat()
-        timeslots['Battery_pause_end_time_slot'] = GEInv.battery_pause_slot[1].isoformat()
+            controlmode['Charge_Target_SOC_2'] = GEInv.charge_target_soc_2
+            controlmode['Charge_Target_SOC_3'] = GEInv.charge_target_soc_3
+            controlmode['Charge_Target_SOC_4'] = GEInv.charge_target_soc_4
+            controlmode['Charge_Target_SOC_5'] = GEInv.charge_target_soc_5
+            controlmode['Charge_Target_SOC_6'] = GEInv.charge_target_soc_6
+            controlmode['Charge_Target_SOC_7'] = GEInv.charge_target_soc_7
+            controlmode['Charge_Target_SOC_8'] = GEInv.charge_target_soc_8
+            controlmode['Charge_Target_SOC_9'] = GEInv.charge_target_soc_9
+            controlmode['Charge_Target_SOC_10'] = GEInv.charge_target_soc_10
+            controlmode['Discharge_Target_SOC_1'] = GEInv.discharge_target_soc_1
+            controlmode['Discharge_Target_SOC_2'] = GEInv.discharge_target_soc_2
+            controlmode['Discharge_Target_SOC_3'] = GEInv.discharge_target_soc_3
+            controlmode['Discharge_Target_SOC_4'] = GEInv.discharge_target_soc_4
+            controlmode['Discharge_Target_SOC_5'] = GEInv.discharge_target_soc_5
+            controlmode['Discharge_Target_SOC_6'] = GEInv.discharge_target_soc_6
+            controlmode['Discharge_Target_SOC_7'] = GEInv.discharge_target_soc_7
+            controlmode['Discharge_Target_SOC_8'] = GEInv.discharge_target_soc_8
+            controlmode['Discharge_Target_SOC_9'] = GEInv.discharge_target_soc_9
+            controlmode['Discharge_Target_SOC_10'] = GEInv.discharge_target_soc_10
+            timeslots['Battery_pause_start_time_slot'] = GEInv.battery_pause_slot[0].isoformat()
+            timeslots['Battery_pause_end_time_slot'] = GEInv.battery_pause_slot[1].isoformat()
 
 
         ######## Get Inverter Details ########

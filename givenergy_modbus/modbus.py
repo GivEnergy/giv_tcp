@@ -54,12 +54,12 @@ class GivEnergyModbusTcpClient(ModbusTcpClient):
         except ModbusIOException as e:
             _logger.exception(e)
             self.close()
-            return None
+            return e
         except Exception as e:
             # This seems to help with inverters becoming unresponsive from the portal."""
             _logger.exception(e)
             self.close()
-            return None
+            return e
 
     def read_registers(
         self, kind: type[HoldingRegister | InputRegister], base_address: int, register_count: int, **kwargs

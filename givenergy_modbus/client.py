@@ -212,17 +212,31 @@ class GivEnergyClient:
 #        self.modbus_client.write_holding_register(HoldingRegister.DISCHARGE_SLOT_2_END, 0)
 
     def set_discharge_slot_start(self, slot: int, timeslot: time):
-        """Set discharge slot start time, for any slot 3-10."""
+        """Set discharge slot start time, for any slot 1-10."""
         #  slot n = 276+((n-3)*3)
         if 1 <=slot <=10:
             if slot==1:
                 self.modbus_client.write_holding_register(HoldingRegister.DISCHARGE_SLOT_1_START, int(timeslot.strftime('%H%M')))
             elif slot==2:
                 self.modbus_client.write_holding_register(HoldingRegister.DISCHARGE_SLOT_2_START, int(timeslot.strftime('%H%M')))
-            else:
-                self.modbus_client.write_holding_register(HoldingRegister(276+((slot-3)*3)), int(timeslot.strftime('%H%M')))
+            elif slot==3:
+                self.modbus_client.write_holding_register(HoldingRegister.DISCHARGE_SLOT_3_START, int(timeslot.strftime('%H%M')))
+            elif slot==4:
+                self.modbus_client.write_holding_register(HoldingRegister.DISCHARGE_SLOT_4_START, int(timeslot.strftime('%H%M')))
+            elif slot==5:
+                self.modbus_client.write_holding_register(HoldingRegister.DISCHARGE_SLOT_5_START, int(timeslot.strftime('%H%M')))
+            elif slot==6:
+                self.modbus_client.write_holding_register(HoldingRegister.DISCHARGE_SLOT_6_START, int(timeslot.strftime('%H%M')))
+            elif slot==7:
+                self.modbus_client.write_holding_register(HoldingRegister.DISCHARGE_SLOT_7_START, int(timeslot.strftime('%H%M')))
+            elif slot==8:
+                self.modbus_client.write_holding_register(HoldingRegister.DISCHARGE_SLOT_8_START, int(timeslot.strftime('%H%M')))
+            elif slot==9:
+                self.modbus_client.write_holding_register(HoldingRegister.DISCHARGE_SLOT_9_START, int(timeslot.strftime('%H%M')))
+            elif slot==10:
+                self.modbus_client.write_holding_register(HoldingRegister.DISCHARGE_SLOT_10_START, int(timeslot.strftime('%H%M')))
         else:
-            raise ValueError(f'Specified slot ({slot}) is not in [1-10]%')
+            raise ValueError(f'Specified slot ({slot}) is not in [1-10]')
 
     def set_discharge_slot_end(self, slot: int, timeslot: time):
         """Set discharge slot start time, for any slot 3-10."""
@@ -232,8 +246,22 @@ class GivEnergyClient:
                 self.modbus_client.write_holding_register(HoldingRegister.DISCHARGE_SLOT_1_END, int(timeslot.strftime('%H%M')))
             elif slot==2:
                 self.modbus_client.write_holding_register(HoldingRegister.DISCHARGE_SLOT_2_END, int(timeslot.strftime('%H%M')))
-            else:
-                self.modbus_client.write_holding_register(HoldingRegister(277+((slot-3)*3)), int(timeslot.strftime('%H%M')))  
+            elif slot==3:
+                self.modbus_client.write_holding_register(HoldingRegister.DISCHARGE_SLOT_3_END, int(timeslot.strftime('%H%M')))
+            elif slot==4:
+                self.modbus_client.write_holding_register(HoldingRegister.DISCHARGE_SLOT_4_END, int(timeslot.strftime('%H%M')))
+            elif slot==5:
+                self.modbus_client.write_holding_register(HoldingRegister.DISCHARGE_SLOT_5_END, int(timeslot.strftime('%H%M')))
+            elif slot==6:
+                self.modbus_client.write_holding_register(HoldingRegister.DISCHARGE_SLOT_6_END, int(timeslot.strftime('%H%M')))
+            elif slot==7:
+                self.modbus_client.write_holding_register(HoldingRegister.DISCHARGE_SLOT_7_END, int(timeslot.strftime('%H%M')))
+            elif slot==8:
+                self.modbus_client.write_holding_register(HoldingRegister.DISCHARGE_SLOT_8_END, int(timeslot.strftime('%H%M')))
+            elif slot==9:
+                self.modbus_client.write_holding_register(HoldingRegister.DISCHARGE_SLOT_9_END, int(timeslot.strftime('%H%M')))
+            elif slot==10:
+                self.modbus_client.write_holding_register(HoldingRegister.DISCHARGE_SLOT_10_END, int(timeslot.strftime('%H%M')))
         else:
             raise ValueError(f'Specified slot ({slot}) is not in [1-10]%')
         

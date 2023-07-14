@@ -14,7 +14,7 @@ from givenergy_modbus.client import GivEnergyClient
 from rq import Retry, job
 import requests
 
-logging.getLogger("givenergy_modbus").setLevel(logging.CRITICAL)
+logging.getLogger("givenergy_modbus").setLevel(logging.INFO)
 client=GivEnergyClient(host=GiV_Settings.invertorIP)
 
 logger = GivLUT.logger
@@ -121,7 +121,8 @@ def sbpm(val):
         e = sys.exc_info()
         temp['result']="Setting Battery Pause Mode to " +str(GivLUT.battery_pause_mode[val])+" failed: " + str(e)
     logger.info(temp['result'])
-    return json.dumps(temp)
+    #return json.dumps(temp)
+    return temp
 
 def ssc(target):
     temp={}
@@ -248,7 +249,7 @@ def sdt(idateTime):
 def sds(payload):
     temp={}
     try:
-        client.set_discharge_slot(int(payload['slot']),datetime.strptime(payload['start'],"%H:%M"),datetime.strptime(payload['finish'],"%H:%M"))
+        client.set_discharge_slot(int(payload['slot']),[datetime.strptime(payload['start'],"%H:%M"),datetime.strptime(payload['finish'],"%H:%M")])
         temp['result']="Setting Discharge Slot "+str(payload['slot'])+" was a success"
     except:
         e = sys.exc_info()
@@ -302,7 +303,7 @@ def spe(payload):
 def scs(payload):
     temp={}
     try:
-        client.set_charge_slot(int(payload['slot']),datetime.strptime(payload['start'],"%H:%M"),datetime.strptime(payload['finish'],"%H:%M"))
+        client.set_charge_slot(int(payload['slot']),[datetime.strptime(payload['start'],"%H:%M"),datetime.strptime(payload['finish'],"%H:%M")])
         temp['result']="Setting Charge Slot "+str(payload['slot'])+" was a success"
     except:
         e = sys.exc_info()
@@ -860,38 +861,43 @@ def forceCharge(chargeTime):
     return json.dumps(temp)
 
 def tmpPDResume(payload):
-    result=setDischargeRate(payload)
-    logger.info("Discharge Rate restored to: "+str(payload["dischargeRate"]))
-    if exists(".tpdRunning"): os.remove(".tpdRunning")
+    temp={}
+    try:
+        result=setDischargeRate(payload)
+        if exists(".tpcRunning"): os.remove(".tpdRunning")
+        temp['result']="Temp Pause Disharge Resumed"
+        logger.info(temp['result'])
+    except:
+        e = sys.exc_info()
+        temp['result']="Temp Pause Discharge Resume failed: " + str(e)
+        logger.error (temp['result'])
+    return json.dump(temp)
 
 def tempPauseDischarge(pauseTime):
     temp={}
     try:
         pauseTime=int(pauseTime)
+        logger.info("Pausing Discharge for "+str(pauseTime)+" minutes")
         payload={}
         result={}
         payload['dischargeRate']=0
         result=setDischargeRate(payload)
-        logger.info("Pausing Discharge for "+str(pauseTime)+" minutes")
         #Update read data via pickle
         if exists(GivLUT.regcache):      # if there is a cache then grab it
             with open(GivLUT.regcache, 'rb') as inp:
                 regCacheStack= pickle.load(inp)
             revertRate=regCacheStack[4]["Control"]["Battery_Discharge_Rate"]
-
-#### CHECK CHECK output from enqueue result
-        if "success" in result:
-            payload['dischargeRate']=revertRate
-            delay=float(pauseTime*60)
-            tpdjob=GivQueue.q.enqueue_in(timedelta(delay),tmpPDResume,payload)
-            f=open(".tpdRunning", 'w')
-            f.write(str(tpdjob.id))
-            f.close()
-            logger.info("Temp Pause Discharge revert jobid is: "+tpdjob.id)
-            temp['result']="Discharge paused for "+str(delay)+" seconds"
-            logger.info(temp['result'])
         else:
-            temp['result']="Pausing Discharge failed"
+            revertRate=2600
+        payload['dischargeRate']=revertRate
+        delay=float(pauseTime*60)
+        tpdjob=GivQueue.q.enqueue_in(timedelta(seconds=delay),tmpPDResume,payload)
+        f=open(".tpdRunning", 'w')
+        f.write(str(tpdjob.id))
+        f.close()
+        logger.info("Temp Pause Discharge revert jobid is: "+tpdjob.id)
+        temp['result']="Discharge paused for "+str(delay)+" seconds"
+        logger.info(temp['result'])
     except:
         e = sys.exc_info()
         temp['result']="Pausing Discharge failed: " + str(e)
@@ -899,9 +905,17 @@ def tempPauseDischarge(pauseTime):
     return json.dumps(temp)
 
 def tmpPCResume(payload):
-    result=setChargeRate(payload)
-    logger.info("Charge Rate restored to: "+str(payload["chargeRate"]))
-    if exists(".tpcRunning"): os.remove(".tpcRunning")
+    temp={}
+    try:
+        result=setChargeRate(payload)
+        if exists(".tpcRunning"): os.remove(".tpcRunning")
+        temp['result']="Temp Pause Charge Resumed"
+        logger.info(temp['result'])
+    except:
+        e = sys.exc_info()
+        temp['result']="Temp Pause Charge Resume failed: " + str(e)
+        logger.error (temp['result'])
+    return json.dump(temp)
 
 def tempPauseCharge(pauseTime):
     temp={}
@@ -911,26 +925,23 @@ def tempPauseCharge(pauseTime):
         result={}
         payload['chargeRate']=0
         result=setChargeRate(payload)
-        logger.debug(result)
+        logger.info(result)
         #Update read data via pickle
         if exists(GivLUT.regcache):      # if there is a cache then grab it
             with open(GivLUT.regcache, 'rb') as inp:
                 regCacheStack= pickle.load(inp)
-        revertRate=regCacheStack[4]["Control"]["Battery_Charge_Rate"]
-
-#### CHECK CHECK output from enqueue result
-        if "success" in result:
-            payload['chargeRate']=revertRate
-            delay=float(pauseTime*60)
-            tpcjob=GivQueue.q.enqueue_in(timedelta(delay),tmpPCResume,payload)
-            f=open(".tpcRunning", 'w')
-            f.write(str(tpcjob.id))
-            f.close()
-            logger.info("Temp Pause Charge revert jobid is: "+tpcjob.id)
-            temp['result']="Charge paused for "+str(delay)+" seconds"
-            logger.info(temp['result'])
+            revertRate=regCacheStack[4]["Control"]["Battery_Charge_Rate"]
         else:
-            temp['result']="Pausing Charge failed: "
+            revertRate=2600
+        payload['chargeRate']=revertRate
+        delay=float(pauseTime*60)
+        tpcjob=GivQueue.q.enqueue_in(timedelta(seconds=delay),tmpPCResume,payload)
+        f=open(".tpcRunning", 'w')
+        f.write(str(tpcjob.id))
+        f.close()
+        logger.info("Temp Pause Charge revert jobid is: "+tpcjob.id)
+        temp['result']="Charge paused for "+str(delay)+" seconds"
+        logger.info(temp['result'])
         logger.debug("Result is: "+temp['result'])
     except:
         e = sys.exc_info()
@@ -959,7 +970,10 @@ def setBatteryPauseMode(payload):
     if payload['state'] in GivLUT.battery_pause_mode:
         val=GivLUT.battery_pause_mode.index(payload['state'])
         from write import sbpm
-        result=GivQueue.q.enqueue(sbpm,val,retry=Retry(max=GiV_Settings.queue_retries, interval=2))
+        job=GivQueue.q.enqueue(sbpm,val,retry=Retry(max=GiV_Settings.queue_retries, interval=2))
+        while job.result is None and job.exc_info is None:
+            time.sleep(0.5)
+        print (job)
     else:
         logger.error ("Invalid Mode requested: "+ payload['state'])
         temp['result']="Invalid Mode requested"

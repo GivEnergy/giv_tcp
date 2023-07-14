@@ -23,3 +23,4 @@ GivTCP/settings.py
 MQTT_TEST.py
 REST_TEST.py
 test.py
+settings.py
