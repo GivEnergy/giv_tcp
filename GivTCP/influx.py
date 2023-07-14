@@ -34,25 +34,31 @@ class GivInflux():
         new_str=new_str.lower()
         return new_str
 
+    def stringSafe(data):
+        output=str(data)
+        if isinstance(data,str):
+            output="\""+str(data)+"\""
+        return output
+
     def publish(SN,data):
         output_str=""
         power_output = data['Power']['Power']
         for key in power_output:
             logging.debug("Creating Power string for InfluxDB")
-            output_str=output_str+str(GivInflux.make_influx_string(key))+'='+str(power_output[key])+','
+            output_str=output_str+str(GivInflux.make_influx_string(key))+'='+GivInflux.stringSafe(power_output[key])+','
         flow_output = data['Power']['Flows']
         for key in flow_output:
             logging.debug("Creating Power Flow string for InfluxDB")
-            output_str=output_str+str(GivInflux.make_influx_string(key))+'='+str(flow_output[key])+','
+            output_str=output_str+str(GivInflux.make_influx_string(key))+'='+GivInflux.stringSafe(flow_output[key])+','
         energy_today = data['Energy']['Today']
         for key in energy_today:
             logging.debug("Creating Energy/Today string for InfluxDB")
-            output_str=output_str+str(GivInflux.make_influx_string(key))+'='+str(energy_today[key])+','
+            output_str=output_str+str(GivInflux.make_influx_string(key))+'='+GivInflux.stringSafe(energy_today[key])+','
 
         energy_total = data['Energy']['Total']
         for key in energy_total:
             logging.debug("Creating Energy/Total string for InfluxDB")
-            output_str=output_str+str(GivInflux.make_influx_string(key))+'='+str(energy_total[key])+','
+            output_str=output_str+str(GivInflux.make_influx_string(key))+'='+GivInflux.stringSafe(energy_total[key])+','
 
         logging.debug("Data sending to Influx is: "+ output_str[:-1])
         data1=GivInflux.line_protocol(SN,output_str[:-1])
