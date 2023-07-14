@@ -5,6 +5,11 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/)
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
+## [2.2.4] - 2023-07-14
+### Fixed
+- Fixed Temp Pause Charge and Temp Pause Discharge selct controls, which weren't reverting
+- Fixed Influxdb string error
+
 ## [2.2.3] - 2023-07-03
 ### Fixed
 - Fixed Charge_time_remaining device_class error

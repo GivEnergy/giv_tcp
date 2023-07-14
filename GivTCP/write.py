@@ -1043,20 +1043,17 @@ def tempPauseDischarge(pauseTime):
             with open(GivLUT.regcache, 'rb') as inp:
                 regCacheStack= pickle.load(inp)
             revertRate=regCacheStack[4]["Control"]["Battery_Discharge_Rate"]
-
-#### CHECK CHECK output from enqueue result
-        if "success" in result:
-            payload['dischargeRate']=revertRate
-            delay=float(pauseTime*60)
-            tpdjob=GivQueue.q.enqueue_in(timedelta(delay),tmpPDResume,payload)
-            f=open(".tpdRunning", 'w')
-            f.write(str(tpdjob.id))
-            f.close()
-            logger.info("Temp Pause Discharge revert jobid is: "+tpdjob.id)
-            temp['result']="Discharge paused for "+str(delay)+" seconds"
-            logger.info(temp['result'])
         else:
-            temp['result']="Pausing Discharge failed"
+            revertRate=2600    
+        payload['dischargeRate']=revertRate
+        delay=float(pauseTime*60)
+        tpdjob=GivQueue.q.enqueue_in(timedelta(seconds=delay),tmpPDResume,payload)
+        f=open(".tpdRunning", 'w')
+        f.write(str(tpdjob.id))
+        f.close()
+        logger.info("Temp Pause Discharge revert jobid is: "+tpdjob.id)
+        temp['result']="Discharge paused for "+str(delay)+" seconds"
+        logger.info(temp['result'])
     except:
         e = sys.exc_info()
         temp['result']="Pausing Discharge failed: " + str(e)
@@ -1085,21 +1082,18 @@ def tempPauseCharge(pauseTime):
         if exists(GivLUT.regcache):      # if there is a cache then grab it
             with open(GivLUT.regcache, 'rb') as inp:
                 regCacheStack= pickle.load(inp)
-        revertRate=regCacheStack[4]["Control"]["Battery_Charge_Rate"]
-
-#### CHECK CHECK output from enqueue result
-        if "success" in result:
-            payload['chargeRate']=revertRate
-            delay=float(pauseTime*60)
-            tpcjob=GivQueue.q.enqueue_in(timedelta(delay),tmpPCResume,payload)
-            f=open(".tpcRunning", 'w')
-            f.write(str(tpcjob.id))
-            f.close()
-            logger.info("Temp Pause Charge revert jobid is: "+tpcjob.id)
-            temp['result']="Charge paused for "+str(delay)+" seconds"
-            logger.info(temp['result'])
+            revertRate=regCacheStack[4]["Control"]["Battery_Charge_Rate"]
         else:
-            temp['result']="Pausing Charge failed: "
+            revertRate=2600    
+        payload['chargeRate']=revertRate
+        delay=float(pauseTime*60)
+        tpcjob=GivQueue.q.enqueue_in(timedelta(seconds=delay),tmpPCResume,payload)
+        f=open(".tpcRunning", 'w')
+        f.write(str(tpcjob.id))
+        f.close()
+        logger.info("Temp Pause Charge revert jobid is: "+tpcjob.id)
+        temp['result']="Charge paused for "+str(delay)+" seconds"
+        logger.info(temp['result'])
         logger.debug("Result is: "+temp['result'])
     except:
         e = sys.exc_info()
