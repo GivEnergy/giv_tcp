@@ -10,11 +10,11 @@ import * as components from 'vuetify/components'
 import * as directives from 'vuetify/directives'
 
 const vuetify = createVuetify({
-    components,
-    directives,
+  components,
+  directives
 })
 
-const pinia = createPinia();
+const pinia = createPinia()
 
 const app = createApp(App)
 
