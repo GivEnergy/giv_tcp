@@ -4,8 +4,11 @@ import os, pickle, subprocess, logging,shutil, shlex, schedule
 from time import sleep
 import rq_dashboard
 import zoneinfo
+import sys
 import requests
 from GivTCP.findInvertor import findInvertor
+import givenergy_modbus.model.inverter
+from givenergy_modbus.client import GivEnergyClient
 
 selfRun={}
 mqttClient={}
@@ -16,22 +19,21 @@ redis={}
 
 logger = logging.getLogger("startup")
 logging.basicConfig(format='%(asctime)s - %(name)s - [%(levelname)s] - %(message)s')
-
-if os.getenv("LOG_LEVEL").lower=="debug":
-    logger.setLevel(logging.DEBUG)
-elif os.getenv("LOG_LEVEL").lower()=="info":
-    logger.setLevel(logging.INFO)
-elif os.getenv("LOG_LEVEL").lower()=="critical":
-    logger.setLevel(logging.CRITICAL)
-elif os.getenv("LOG_LEVEL").lower()=="warning":
-    logger.setLevel(logging.WARNING)
-else:
-    logger.setLevel(logging.ERROR)
+logger.setLevel(logging.INFO)
 
 # Check if config directory exists and creates it if not
 
 def palm_job():
     subprocess.Popen(["/usr/local/bin/python3","/app/GivTCP_1/palm_soc.py"])
+
+def getInvDeets(HOST):
+    client=GivEnergyClient(host=HOST)
+    stats=client.get_inverter_stats()
+    SN=stats[2]
+    gen=givenergy_modbus.model.inverter.Generation.from_fw_version(stats[1])._value_
+    model=givenergy_modbus.model.inverter.Model.from_device_type_code(stats[0])
+    fw=stats[1]
+    return SN,gen,model,fw
     
 try:
     logger.debug("SUPERVISOR_TOKEN is: "+ os.getenv("SUPERVISOR_TOKEN"))
@@ -69,16 +71,36 @@ if isAddon:
     
     if hostDetails['result']=="ok":
     # For each interface scan for inverters
+        Stats={}
+        inverterStats={}
+        invList={}
+        logger.critical("Scanning network for inverters...")
         try:
-            for interface in hostDetails['data']['interfaces']:
-                subnet=interface['ipv4']['gateway']
-                invList=findInvertor(subnet)
-                logger.critical ("We have found the following invertors: "+str(invList))
-                    # write data to pickle
+
+            subnet="192.168.2.1"
+            list=findInvertor(subnet)
+            logger.info("Inverters found on "+str(subnet)+" - "+str(list))
+            invList.update(list)
+            for inv in invList:
+                logger.debug("Getting inverter stats for: "+str(invList[inv]))
+                deets=getInvDeets(invList[inv])
+                logger.critical (f'Inverter {deets[0]} which is a {str(deets[1])} - {str(deets[2])} has been found at: {str(invList[inv])}')
+                Stats['Serial_Number']=deets[0]
+                Stats['Firmware']=deets[3]
+                Stats['Model']=deets[2]
+                Stats['Generation']=deets[1]
+                inverterStats[inv]=Stats
+            if len(invList)==0:
+                logger.critical("No inverters found...")
+            else:
+            # write data to pickle
                 with open('invippkl.pkl', 'wb') as outp:
-                    pickle.dump(invList, outp, pickle.HIGHEST_PROTOCOL)
+                    pickle.dump(inverterStats, outp, pickle.HIGHEST_PROTOCOL)
         except:
-            logger.error("Error scanning for Inverters")
+            e = sys.exc_info()
+            logger.error("Error scanning for Inverters- "+str(e))
+    else:
+        logger.error("Unable to get host details from Supervisor")
     
 logger.critical("GivTCP isAddon: "+str(isAddon))
 
@@ -93,6 +115,14 @@ logger.critical("Running Redis")
 
 rqdash=subprocess.Popen(["/usr/local/bin/rq-dashboard"])
 logger.critical("Running RQ Dashboard on port 9181")
+
+#####################################################
+# Up to now everything is __init__ type prep, below is conifg setting (move to webpage and not ENV...)
+# 
+# 
+# 
+######################################################
+
 
 for inv in range(1,int(os.getenv('NUMINVERTORS'))+1):
     logger.critical ("Setting up invertor: "+str(inv)+" of "+str(os.getenv('NUMINVERTORS')))
@@ -167,7 +197,8 @@ for inv in range(1,int(os.getenv('NUMINVERTORS'))+1):
         outp.write("    inverter_num=\""+str(inv)+"\"\n")
         
 
-    # replicate the startup script here:
+    ######
+    #  Always delete lockfiles and FCRunning etc... but only delete pkl if too old?
 
     if exists(os.getenv("CACHELOCATION")+"/regCache_"+str(inv)+".pkl"):
         logger.critical("Removing old invertor data cache")
@@ -196,7 +227,16 @@ for inv in range(1,int(os.getenv('NUMINVERTORS'))+1):
         else:
             logger.critical("Rate Data exisits but is from today so keeping it")
 
+
 ########### Run the various processes needed #############
+# Check if settings.py exists then start processes
+# Still need to run the below process per inverter
+#
+#
+
+
+
+
     os.chdir(PATH)
 
     rqWorker[inv]=subprocess.Popen(["/usr/local/bin/python3",PATH+"/worker.py"])

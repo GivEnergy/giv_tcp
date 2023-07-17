@@ -687,24 +687,32 @@ def setPauseEnd(payload):
 
 
 def FEResume(revert):
-    payload={}
-    logger.info("Reverting Force Export settings:")   
-    payload['dischargeRate']=revert["dischargeRate"]
-    result=setDischargeRate(payload)
-    payload={}
-    payload['start']=revert["start_time"]
-    payload['finish']=revert["end_time"]
-    result=setDischargeSlot(payload)
-    payoad={}
-    payload['state']=revert['discharge_schedule']
-    result=enableDischargeSchedule(payload)
-    payload={}
-    payload['reservePercent']=revert["reservePercent"]
-    result=setBatteryReserve(payload)
-    payload={}
-    payload["mode"]=revert["mode"]
-    result=setBatteryMode(payload)
-    os.remove(".FERunning")
+    temp={}
+    try:
+        payload={}
+        logger.info("Reverting Force Export settings:")   
+        payload['dischargeRate']=revert["dischargeRate"]
+        result=setDischargeRate(payload)
+        payload={}
+        payload['start']=revert["start_time"]
+        payload['finish']=revert["end_time"]
+        payload['slot']=2
+        result=setDischargeSlot(payload)
+        payoad={}
+        payload['state']=revert['discharge_schedule']
+        result=enableDischargeSchedule(payload)
+        payload={}
+        payload['reservePercent']=revert["reservePercent"]
+        result=setBatteryReserve(payload)
+        payload={}
+        payload["mode"]=revert["mode"]
+        result=setBatteryMode(payload)
+        os.remove(".FERunning")
+    except:
+        e = sys.exc_info()
+        temp['result']="Force Export Revert failed: " + str(e)
+        logger.error (temp['result'])
+    return json.dumps(temp)
 
 def forceExport(exportTime):
     temp={}
@@ -732,12 +740,12 @@ def forceExport(exportTime):
         except:
             logger.debug("Error Setting Reserve to 4%")
 
-        slot2=(datetime.now(),datetime.now()+timedelta(minutes=exportTime))
-        logger.debug("Setting export slot to: "+ slot2[0].strftime("%H:%M")+" - "+slot2[1].strftime("%H:%M"))       
-#        result= client.set_mode_storage(slot1,slot2,export=True)
         payload={}
-        payload['start']=slot2[0].strftime("%H:%M")
-        payload['finish']=slot2[1].strftime("%H:%M")
+        payload['state']="enable"
+        result=enableDischargeSchedule(payload)
+        payload={}
+        payload['start']=GivLUT.getTime(datetime.now())
+        payload['finish']=GivLUT.getTime(datetime.now()+timedelta(minutes=exportTime))
         payload['slot']=2
         result=setDischargeSlot(payload)
         payload={}
@@ -747,18 +755,17 @@ def forceExport(exportTime):
         logger.debug("Max discharge rate for inverter is: " + str(maxDischargeRate))
         payload['dischargeRate']=maxDischargeRate
         result=setDischargeRate(payload)
-        payload={}
-        payload['state']="enable"
-        result=enableDischargeSchedule(payload)
         if exists(".FERunning"):    # If a forcecharge is already running, change time of revert job to new end time
             logger.info("Force Export already running, changing end time")
             revert=getFEArgs()[0]   # set new revert object and cancel old revert job
+            logger.critical("new revert= "+ str(revert))
         fejob=GivQueue.q.enqueue_in(timedelta(minutes=exportTime),FEResume,revert)
         f=open(".FERunning", 'w')
         f.write(str(fejob.id))
         f.close()
-        logger.debug("Force Export revert jobid is: "+fejob.id)
+        logger.info("Force Export revert jobid is: "+fejob.id)
         temp['result']="Export successfully forced for "+str(exportTime)+" minutes"
+        logger.info(temp['result'])
     except:
         e = sys.exc_info()
         temp['result']="Force Export failed: " + str(e)
@@ -830,7 +837,7 @@ def forceCharge(chargeTime):
             revert["chargeRate"]=regCacheStack[4]["Control"]["Battery_Charge_Rate"]
             revert["targetSOC"]=regCacheStack[4]["Control"]["Target_SOC"]
             revert["chargeScheduleEnable"]=regCacheStack[4]["Control"]["Enable_Charge_Schedule"]
-            maxChargeRate=int(regCacheStack[4]["Invertor_Details"]["Invertor_Max_Rate"])
+        maxChargeRate=int(regCacheStack[4]["Invertor_Details"]["Invertor_Max_Rate"])
 
         payload['chargeRate']=maxChargeRate
         result=setChargeRate(payload)
@@ -863,15 +870,16 @@ def forceCharge(chargeTime):
 def tmpPDResume(payload):
     temp={}
     try:
+        logger.info("Reverting Temp Pause Discharge")
         result=setDischargeRate(payload)
-        if exists(".tpcRunning"): os.remove(".tpdRunning")
-        temp['result']="Temp Pause Disharge Resumed"
+        if exists(".tpdRunning"): os.remove(".tpdRunning")
+        temp['result']="Temp Pause Discharge Reverted"
         logger.info(temp['result'])
     except:
         e = sys.exc_info()
         temp['result']="Temp Pause Discharge Resume failed: " + str(e)
         logger.error (temp['result'])
-    return json.dump(temp)
+    return json.dumps(temp)
 
 def tempPauseDischarge(pauseTime):
     temp={}
@@ -907,9 +915,10 @@ def tempPauseDischarge(pauseTime):
 def tmpPCResume(payload):
     temp={}
     try:
+        logger.info("Reverting Temp Pause Charge...")
         result=setChargeRate(payload)
         if exists(".tpcRunning"): os.remove(".tpcRunning")
-        temp['result']="Temp Pause Charge Resumed"
+        temp['result']="Temp Pause Charge Reverted"
         logger.info(temp['result'])
     except:
         e = sys.exc_info()
@@ -925,7 +934,6 @@ def tempPauseCharge(pauseTime):
         result={}
         payload['chargeRate']=0
         result=setChargeRate(payload)
-        logger.info(result)
         #Update read data via pickle
         if exists(GivLUT.regcache):      # if there is a cache then grab it
             with open(GivLUT.regcache, 'rb') as inp:

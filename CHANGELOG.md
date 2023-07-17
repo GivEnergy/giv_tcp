@@ -17,7 +17,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
   - PV Input Mode: Sets MPPT tracking to 1x2 or Independent
   - Battery Pause Mode: Forces pause of Charge, Discharge or Both
   - Gen2 inverters now have access to 10 charge and discharge slots
-  - 
+
 
 ## [2.2.1] - 2023-06-29
 ### Fixed

@@ -185,7 +185,9 @@ class HAMQTT():
             tempObj['options']=options
         elif GivLUT.entity_type[str(topic).split("/")[-1]].devType=="number":
             # If its a rate then change to Watts
-            if "charge" in str(topic).lower():
+            if "SOC" in str(topic).lower():
+                tempObj['unit_of_meas']="%"
+            elif "charge" in str(topic).lower():
                 tempObj['unit_of_meas']="W"
                 tempObj['min']=0
                 tempObj['max']=HAMQTT.getinvbatmax()
