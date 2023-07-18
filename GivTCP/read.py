@@ -92,19 +92,26 @@ def getData(fullrefresh):  # Read from Inverter put in cache
         inverterModel.phase=GEInv.inverter_phases
         inverterModel.power=GEInv.inverter_maxpower
 
+        if GEInv.device_type_code=="8001":  # if AIO
+            batteryCapacity=GEInv.battery_nominal_capacity*307
+        else:
+            batteryCapacity=GEInv.battery_nominal_capacity*51.2
+
         if inverterModel.generation == 'Gen 1':
             if inverterModel.model == "AC":
-                maxInvChargeRate=3000
+                maxBatChargeRate=3000
+            elif inverterModel.model == "All in One":
+                maxBatChargeRate=6000
             else:
-                maxInvChargeRate=2600
+                maxBatChargeRate=2600
         else:
             if inverterModel.model == "AC":
-                maxInvChargeRate=5000
+                maxBatChargeRate=5000
             else:
-                maxInvChargeRate=3600
+                maxBatChargeRate=3600
 
         # Calc max charge rate
-        inverterModel.batmaxrate=min(maxInvChargeRate, (GEInv.battery_nominal_capacity*51.2)/2)
+        inverterModel.batmaxrate=min(maxBatChargeRate, batteryCapacity/2)
 
 ############  Energy Stats    ############
 
@@ -254,7 +261,7 @@ def getData(fullrefresh):  # Read from Inverter put in cache
         elif GEInv.battery_percent == 0 and not 'multi_output_old' in locals():
             power_output['SOC'] = 1
             logger.error("\"Battery SOC\" reported as: "+str(GEInv.battery_percent)+"% and no previous value so setting to 1%")
-        power_output['SOC_kWh'] = (int(power_output['SOC'])*((GEInv.battery_nominal_capacity*51.2)/1000))/100
+        power_output['SOC_kWh'] = (int(power_output['SOC'])*((batteryCapacity)/1000))/100
  
         # Energy Stats
         logger.debug("Getting Battery Energy Data")
@@ -322,8 +329,8 @@ def getData(fullrefresh):  # Read from Inverter put in cache
             discharge_enable = "disable"
 
         # Get Charge/Discharge Active status
-        discharge_rate = int(min((GEInv.battery_discharge_limit/100)*(GEInv.battery_nominal_capacity*51.2), inverterModel.batmaxrate))
-        charge_rate = int(min((GEInv.battery_charge_limit/100)*(GEInv.battery_nominal_capacity*51.2), inverterModel.batmaxrate))
+        discharge_rate = int(min((GEInv.battery_discharge_limit/100)*(batteryCapacity), inverterModel.batmaxrate))
+        charge_rate = int(min((GEInv.battery_charge_limit/100)*(batteryCapacity), inverterModel.batmaxrate))
 
         # Calculate Mode
         logger.debug("Calculating Mode...")
@@ -412,7 +419,7 @@ def getData(fullrefresh):  # Read from Inverter put in cache
                 #power_output['Charge_Completion_Time'] = finaltime.replace(tzinfo=GivLUT.timezone).isoformat()
                 if discharge_power!=0:
                     # Time to get from current SOC to battery Reserve at the current rate
-                    power_output['Discharge_Time_Remaining'] = max(int((((GEInv.battery_nominal_capacity*51.2)/1000)*((power_output['SOC'] - controlmode['Battery_Power_Reserve'])/100) / (discharge_power/1000)) * 60),0)
+                    power_output['Discharge_Time_Remaining'] = max(int((((batteryCapacity)/1000)*((power_output['SOC'] - controlmode['Battery_Power_Reserve'])/100) / (discharge_power/1000)) * 60),0)
                     finaltime=datetime.datetime.now() + timedelta(minutes=power_output['Discharge_Time_Remaining'])
                     power_output['Discharge_Completion_Time'] = finaltime.replace(tzinfo=GivLUT.timezone).isoformat()
                 else:
@@ -425,7 +432,7 @@ def getData(fullrefresh):  # Read from Inverter put in cache
                 #power_output['Discharge_Completion_Time'] = datetime.datetime.now().replace(tzinfo=GivLUT.timezone).isoformat()
                 if charge_power!=0:
                     # Time to get from current SOC to target SOC at the current rate (Target SOC-Current SOC)xBattery Capacity
-                    power_output['Charge_Time_Remaining'] = max(int((((GEInv.battery_nominal_capacity*51.2)/1000)*((controlmode['Target_SOC'] - power_output['SOC'])/100) / (charge_power/1000)) * 60),0)
+                    power_output['Charge_Time_Remaining'] = max(int((((batteryCapacity)/1000)*((controlmode['Target_SOC'] - power_output['SOC'])/100) / (charge_power/1000)) * 60),0)
                     finaltime=datetime.datetime.now() + timedelta(minutes=power_output['Charge_Time_Remaining'])
                     power_output['Charge_Completion_Time'] = finaltime.replace(tzinfo=GivLUT.timezone).isoformat()
                 else:
@@ -555,7 +562,7 @@ def getData(fullrefresh):  # Read from Inverter put in cache
         if GEInv.battery_type == 0:
             batterytype = "Lead Acid"
         inverter['Battery_Type'] = batterytype
-        inverter['Battery_Capacity_kWh'] = ((GEInv.battery_nominal_capacity*51.2)/1000)
+        inverter['Battery_Capacity_kWh'] = ((batteryCapacity)/1000)
         inverter['Invertor_Serial_Number'] = GEInv.inverter_serial_number
         inverter['Modbus_Version'] = GEInv.modbus_version
         inverter['Invertor_Firmware'] = GEInv.arm_firmware_version
