@@ -89,7 +89,7 @@ else:
 redis=subprocess.Popen(["/usr/bin/redis-server","/app/redis.conf"])
 logger.critical("Running Redis")
 
-#rqdash=subprocess.Popen(["/usr/local/bin/rq-dashboard"])
+rqdash=subprocess.Popen(["/usr/local/bin/rq-dashboard"])
 logger.critical("Running RQ Dashboard on port 9181")
 
 for inv in range(1,int(os.getenv('NUMINVERTORS'))+1):
