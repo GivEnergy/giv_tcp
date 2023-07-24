@@ -10,6 +10,7 @@ from GivTCP.findInvertor import findInvertor
 selfRun={}
 mqttClient={}
 gunicorn={}
+prometheusExporter={}
 webDash={}
 rqWorker={}
 redis={}
@@ -88,7 +89,7 @@ else:
 redis=subprocess.Popen(["/usr/bin/redis-server","/app/redis.conf"])
 logger.critical("Running Redis")
 
-rqdash=subprocess.Popen(["/usr/local/bin/rq-dashboard"])
+#rqdash=subprocess.Popen(["/usr/local/bin/rq-dashboard"])
 logger.critical("Running RQ Dashboard on port 9181")
 
 for inv in range(1,int(os.getenv('NUMINVERTORS'))+1):
@@ -131,6 +132,9 @@ for inv in range(1,int(os.getenv('NUMINVERTORS'))+1):
             outp.write("    MQTT_Topic=\""+str(os.getenv("MQTT_TOPIC","")+"\"\n"))
         else:
             outp.write("    MQTT_Topic=\""+str(os.getenv("MQTT_TOPIC_"+str(inv),"")+"\"\n"))
+
+        outp.write("    Prometheus_Exporter="+str(os.getenv("PROMETHEUS_EXPORTER"))+"\n")
+        outp.write("    Prometheus_Port="+str(os.getenv("PROMETHEUS_PORT"))+"\n")
 
         outp.write("    Log_Level=\""+str(os.getenv("LOG_LEVEL","")+"\"\n"))
         #setup debug filename for each inv
@@ -209,6 +213,11 @@ for inv in range(1,int(os.getenv('NUMINVERTORS'))+1):
     if os.getenv('MQTT_OUTPUT')=="True" or isAddon:
         logger.critical ("Subscribing MQTT Broker for control")
         mqttClient[inv]=subprocess.Popen(["/usr/local/bin/python3",PATH+"/mqtt_client.py"])
+    if (os.getenv('PROMETHEUS_EXPORTER')=="True" and os.getenv('PROMETHEUS_PORT') is not None) or isAddon:
+        PROMETHEUS_PORT = str(int(os.getenv("PROMETHEUS_PORT"))+inv-1)
+        logger.critical("Creating prometheus metric exporter on port "+PROMETHEUS_PORT)
+        command=shlex.split("/usr/local/bin/python3 "+PATH+"/prometheus_exporter.py -p " + PROMETHEUS_PORT)
+        prometheusExporter[inv]=subprocess.Popen(command)
     
     GUPORT=6344+inv
     logger.critical ("Starting Gunicorn on port "+str(GUPORT))
@@ -263,6 +272,12 @@ while True:
             logger.critical ("Starting Gunicorn on port "+str(GUPORT))
             command=shlex.split("/usr/local/bin/gunicorn -w 3 -b :"+str(GUPORT)+" REST:giv_api")
             gunicorn[inv]=subprocess.Popen(command)
+        elif (os.getenv('PROMETHEUS_EXPORTER')=="True" and os.getenv('PROMETHEUS_PORT') is not None) and prometheusExporter[inv].poll() is not None:
+            PROMETHEUS_PORT = str(int(os.getenv("PROMETHEUS_PORT"))+inv-1)
+            os.chdir(PATH)
+            logger.critical("Prometheus died, creating prometheus metric exporter on port "+PROMETHEUS_PORT)
+            command=shlex.split("/usr/local/bin/python3 "+PATH+"/prometheus_exporter.py -p " + PROMETHEUS_PORT)
+            prometheusExporter[inv]=subprocess.Popen(command)
     if os.getenv('MQTT_ADDRESS')=="127.0.0.1" and not mqttBroker.poll()==None:
         logger.error("MQTT Broker process died. Restarting...")
         os.chdir(PATH)

@@ -31,6 +31,10 @@ class GiV_Settings:
     influxBucket="GivEnergy"        #Optional - name of Bucket to put data into
     influxOrg="GivTCP"              #Optional - Influx Organisation to use
 
+# Prometheus Exporter Settings
+    Prometheus_Exporter= False      #Optional - turns on the prometheus exporter. True or False
+    Prometheus_Port=6711            #Optional - the starting port number to listen on for the first invertor. Subsequent inverters will listen on the next port number in sequence.
+
 # Home Assistant
     HA_Auto_D=True                  #Optional - Bool - Publishes Home assistant MQTT Auto Discovery messages to push data into HA automagically (requires MQTT to be enabled below)
     ha_device_prefix=""             #Required - This is the prefix used at the start of every Home Assistant device created

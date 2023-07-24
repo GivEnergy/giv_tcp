@@ -8,6 +8,7 @@ services:
       - "3000:3000"                   # This should match the WEB_DASH_PORT ENV below
       - "6379:6379"                   # Redis port for job queueing
       - "9181:9181"                   # RQ Dashboard to view job scheduling
+      - "6711:6711"                   # Prometheus exporter port(s)
     environment:
 ## Critical to update
       - NUMINVERTORS=1                # Set this to the number of Inverters in your setup, then replicate the next two lines for each inverter (changing the last number of the ENV)
@@ -62,5 +63,7 @@ services:
       - PALM_BATT_UTILISATION=0.85    # Usable proportion of battery (100% less reserve and any charge limit) on a scale of 0-1
       - PALM_WEIGHT=35                # Weighting used for final target soc
       - LOAD_HIST_WEIGHT=1            # Load History Weighting
+      - PROMETHEUS_EXPORTER=False     # Set to True to enable the Prometheus exporter
+      - PROMETHEUS_PORT=6711          # Set the port for the first Prometheus exporter to listen on for the first inverter and so on
     restart: always
     privileged: true
