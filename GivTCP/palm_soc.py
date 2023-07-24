@@ -675,6 +675,9 @@ if __name__ == '__main__':
     # GivEnergy power object initialisation
     ge: GivEnergyObj = GivEnergyObj()
 
+    if exists(ge.batcap):
+        logger.info("Battery Capacity: "+ str(ge.batcap))
+    
     # Solcast PV prediction object initialisation
     solcast: SolcastObj = SolcastObj()
     solcast.update()
