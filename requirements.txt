@@ -10,4 +10,5 @@ pickle-mixin
 flask-cors
 rq
 redis
+prometheus-client
 git+https://github.com/jace/rq-dashboard.git

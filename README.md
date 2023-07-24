@@ -52,6 +52,8 @@ This will populate HA with all devices and entities for control and monitoring. 
 | MQTT_TOPIC | GivEnergy/Data | Optional - default is Givenergy.<serial number>|
 | MQTT_TOPIC_2 | GivEnergy/Data | Optional - Setting for second Inverter if configured. default is Givenergy.<serial number>|
 | MQTT_TOPIC_2 | GivEnergy/Data | Optional - Setting for third Inverter if configured. default is Givenergy.<serial number>|
+| PROMETHEUS_EXPORTER | True | Optional - Set to True to enable the prometheus exporter. default is False.|
+| PROMETHEUS_PORT | 6711 | The port number to listen on for the first inverter. Subsequent inverters will be 6712 and so on.|
 | LOG_LEVEL | Error | Optional - you can choose Error, Info or Debug. Output will be sent to the debug file location if specified, otherwise it is sent to stdout|
 | DEBUG_FILE_LOCATION | /usr/pi/data | Optional  |
 | PRINT_RAW | False | Optional - If set to True the raw register values will be returned alongside the normal data |
@@ -151,3 +153,20 @@ Root topic for control is:
 GivTCP provides a wrapper function REST.py which uses Flask to expose the read and control functions as RESTful http calls. To utilise this service you will need to either use a WSGI service such as gunicorn or use the pre-built Docker container.
 
 If Docker is running in Host mode then the REST service is available on port 6345
+
+### Prometheus Exporter
+To make use of the Prometheus exporter you will need to have a [Prometheus](https://prometheus.io) server configured.
+
+By setting `PROMETHEUS_EXPORTER` to `True` the `prometheus_exporter.py` script will be executed for each inverter, with the first listening on the value of `PROMETHEUS_PORT`.
+
+You can see the metrics exported by visiting http://localhost:6711/metrics
+
+You will need to update your Prometheus server's configuration to scrape the metrics from the exporter. An example is shown below:
+
+```yaml
+  - job_name: 'giv_energy'
+    static_configs:
+      - targets: [ 'localhost:6711' ]
+```
+
+You can then visualise the metrics using [Grafana](https://grafana.com/) for example.
