@@ -16,6 +16,7 @@ gunicorn={}
 webDash={}
 rqWorker={}
 redis={}
+networks={}
 
 logger = logging.getLogger("startup")
 logging.basicConfig(format='%(asctime)s - %(name)s - [%(levelname)s] - %(message)s')
@@ -68,18 +69,37 @@ if isAddon:
         headers={'Content-Type':'application/json',
                 'Authorization': 'Bearer {}'.format(access_token)})
     hostDetails=result.json()
-    
-    if hostDetails['result']=="ok":
-    # For each interface scan for inverters
-        Stats={}
-        inverterStats={}
-        invList={}
-        logger.critical("Scanning network for inverters...")
-        try:
+    i=0
+    for interface in hostDetails['data']['interfaces']:
+        networks[i]=interface['ipv4']['gateway']
+        i=i+1
+else:
+    # Get subnet from docker if not addon
+    try:
+        import socket
+        s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+        s.settimeout(0)
+        # doesn't even have to be reachable
+        s.connect(('10.254.254.254', 1))
+        IP = s.getsockname()[0]
+        s.close()
+        networks[0]=IP
+    except:
+        e=sys.exc_info()
+        logger.error("Could not get network info: "+ str(e))
 
-            subnet="192.168.2.1"
-            list=findInvertor(subnet)
-            logger.info("Inverters found on "+str(subnet)+" - "+str(list))
+if len(networks)>0:
+# For each interface scan for inverters
+    logger.info("Networks available for scanning are: "+str(networks))
+    Stats={}
+    inverterStats={}
+    invList={}
+    logger.critical("Scanning network for inverters...")
+    try:
+        for subnet in networks:
+            logger.info("Scanning network:"+str(networks[subnet]))
+            list=findInvertor(networks[subnet])
+            logger.info("Inverters found on "+str(networks[subnet])+" - "+str(list))
             invList.update(list)
             for inv in invList:
                 logger.debug("Getting inverter stats for: "+str(invList[inv]))
@@ -96,11 +116,11 @@ if isAddon:
             # write data to pickle
                 with open('invippkl.pkl', 'wb') as outp:
                     pickle.dump(inverterStats, outp, pickle.HIGHEST_PROTOCOL)
-        except:
-            e = sys.exc_info()
-            logger.error("Error scanning for Inverters- "+str(e))
-    else:
-        logger.error("Unable to get host details from Supervisor")
+    except:
+        e = sys.exc_info()
+        logger.error("Error scanning for Inverters- "+str(e))
+else:
+    logger.error("Unable to get host details from Supervisor")
     
 logger.critical("GivTCP isAddon: "+str(isAddon))
 
@@ -144,6 +164,7 @@ for inv in range(1,int(os.getenv('NUMINVERTORS'))+1):
         outp.write("    invertorIP=\""+str(os.getenv("INVERTOR_IP_"+str(inv),""))+"\"\n")
         outp.write("    numBatteries="+str(os.getenv("NUMBATTERIES_"+str(inv),"")+"\n"))
         outp.write("    isAIO="+str(os.getenv("INVERTOR_AIO_"+str(inv),"")+"\n"))
+        outp.write("    isAC="+str(os.getenv("INVERTOR_AC_"+str(inv),"")+"\n"))
         outp.write("    Print_Raw_Registers="+str(os.getenv("PRINT_RAW",""))+"\n")
         outp.write("    MQTT_Output="+str(os.getenv("MQTT_OUTPUT","")+"\n"))
         if hasMQTT:

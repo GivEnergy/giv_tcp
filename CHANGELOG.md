@@ -11,6 +11,10 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 - fix for Eco mode setting (when moving from Eco (Paused)) Thanks Ed-M72
 - MQTT fix for retained topics (Thanks xxxx)
 - Improved monitoring of failed write commands and associated logging
+- soc_kWh state_class changed to 
+- Inverter Scanning improved to determine inverter type pre-config
+- Setting Charge Target to values below 4 or above 100 now force those max/min values
+- 
 ### Added
 - New Controls available for beta firmware:
   - Local Control Mode: Sets priority for Battery, Grid or Load

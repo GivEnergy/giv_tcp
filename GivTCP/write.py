@@ -521,7 +521,7 @@ def setChargeRate(payload):
         with open(GivLUT.regcache, 'rb') as inp:
             regCacheStack = pickle.load(inp)
             multi_output_old = regCacheStack[4]
-        invmaxrate=multi_output_old['Invertor_Details']['Invertor_Max_Rate']
+        invmaxrate=multi_output_old['Invertor_Details']['Invertor_Max_Bat_Rate']
         batcap=float(multi_output_old['Invertor_Details']['Battery_Capacity_kWh'])*1000
 
         if int(payload['chargeRate']) < int(invmaxrate):
@@ -551,7 +551,7 @@ def setDischargeRate(payload):
         with open(GivLUT.regcache, 'rb') as inp:
             regCacheStack = pickle.load(inp)
             multi_output_old = regCacheStack[4]
-        invmaxrate=multi_output_old['Invertor_Details']['Invertor_Max_Rate']
+        invmaxrate=multi_output_old['Invertor_Details']['Invertor_Max_Bat_Rate']
         batcap=float(multi_output_old['Invertor_Details']['Battery_Capacity_kWh'])*1000
 
         if int(payload['dischargeRate']) < int(invmaxrate):
@@ -730,7 +730,7 @@ def forceExport(exportTime):
             revert["reservePercent"]=regCacheStack[4]["Control"]["Battery_Power_Reserve"]
             revert["mode"]=regCacheStack[4]["Control"]["Mode"]
             revert['discharge_schedule']=regCacheStack[4]["Control"]["Enable_Discharge_Schedule"]
-        maxDischargeRate=int(regCacheStack[4]["Invertor_Details"]["Invertor_Max_Rate"])
+        maxDischargeRate=int(regCacheStack[4]["Invertor_Details"]["Invertor_Max_Bat_Rate"])
         
         #In case somebody has set a high reserve value set the reserve rate to the default value to allow the battery to discharge
         try:

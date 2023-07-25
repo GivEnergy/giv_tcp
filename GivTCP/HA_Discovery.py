@@ -30,7 +30,7 @@ class HAMQTT():
             with open(GivLUT.regcache, 'rb') as inp:
                 regCacheStack = pickle.load(inp)
                 multi_output_old = regCacheStack[4]
-            return int(multi_output_old['Invertor_Details']['Invertor_Max_Rate'])
+            return int(multi_output_old['Invertor_Details']['Invertor_Max_Bat_Rate'])
         return 5000
 
     def on_connect(client, userdata, flags, rc):
@@ -125,8 +125,8 @@ class HAMQTT():
             if GivLUT.entity_type[str(topic).split("/")[-1]].sensorClass=="energy":
                 tempObj['unit_of_meas']="kWh"
                 tempObj['device_class']="Energy"
-                if topic.split("/")[-2]=="Total":
-                    tempObj['state_class']="total_increasing"
+                if "soc" in str(topic.split("/")[-2]).lower():
+                    tempObj['state_class']="measurement"
                 else:
                     tempObj['state_class']="total_increasing"
             if GivLUT.entity_type[str(topic).split("/")[-1]].sensorClass=="money":

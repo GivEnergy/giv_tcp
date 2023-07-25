@@ -1,5 +1,5 @@
 class GivClient:
-    def getData(fullrefresh):
+    def getData(fullrefresh: bool):
         from givenergy_modbus.client import GivEnergyClient
         from settings import GiV_Settings
         from givenergy_modbus.model.plant import Plant  
@@ -9,14 +9,14 @@ class GivClient:
 #        else:
         numbat=GiV_Settings.numBatteries
         plant=Plant(number_batteries=numbat)
-        client.refresh_plant(plant,GiV_Settings.isAIO,full_refresh=fullrefresh)
+        client.refresh_plant(plant,GiV_Settings.isAIO,GiV_Settings.isAC,fullrefresh)
         return (plant)
         
 class GivQueue:
     from redis import Redis
     from rq import Queue
     from settings import GiV_Settings
-    redis_connection = Redis(host='192.168.2.83', port=6379, db=0)
+    redis_connection = Redis(host='127.0.0.1', port=6379, db=0)
     q = Queue("GivTCP_"+str(GiV_Settings.givtcp_instance),connection=redis_connection)
     #q = Queue("default",connection=redis_connection)
     
@@ -86,8 +86,8 @@ class GivLUT:
         timezone=zoneinfo.ZoneInfo(key="Europe/London")
 
     # Standard values for devices
-    maxInvPower=8000
-    maxPower=20000
+    maxInvPower=11000
+    maxPower=30000
     maxBatPower=7500
     maxTemp=100
     maxCellVoltage=4
@@ -154,7 +154,8 @@ class GivLUT:
         "Battery_Capacity_kWh":GEType("sensor","","",0,maxBatPower,True,True,False),
         "Invertor_Serial_Number":GEType("sensor","string","","","",False,False,False),
         "Invertor_Time":GEType("sensor","timestamp","","","",False,False,False),
-        "Invertor_Max_Rate":GEType("sensor","","",0,maxBatPower,True,False,False),
+        "Invertor_Max_Inv_Rate":GEType("sensor","","",0,maxInvPower,True,False,False),
+        "Invertor_Max_Bat_Rate":GEType("sensor","","",0,maxBatPower,True,False,False),
         "Active_Power_Rate":GEType("number","","setActivePowerRate",0,100,True,False,False),
         "Invertor_Firmware":GEType("sensor","string","",0,10000,False,False,False),
         "Modbus_Version":GEType("sensor","","",1,10,False,True,False),

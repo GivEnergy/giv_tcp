@@ -98,7 +98,7 @@ class GivEnergyObj:
             with open(GivLUT.regcache, 'rb') as inp:
                 regCacheStack = pickle.load(inp)
                 multi_output_old = regCacheStack[4]
-            self.invmaxrate=float(multi_output_old['Invertor_Details']['Invertor_Max_Rate']) / 1000
+            self.invmaxrate=float(multi_output_old['Invertor_Details']['Invertor_Max_Bat_Rate']) / 1000
             self.batcap=float(multi_output_old['Invertor_Details']['Battery_Capacity_kWh'])
 
         # v0.9.2: Removed routine to download valid inverter commands from GE API - not used
@@ -439,8 +439,8 @@ class GivEnergyObj:
             max_charge = 0
             min_charge = batt_max_charge
 
-            logger.info("")
-            logger.info("{:<20} {:>10} {:>10} {:>10}  {:>10} {:>10}".format("SoC Calc;",
+            logger.debug("")
+            logger.debug("{:<20} {:>10} {:>10} {:>10}  {:>10} {:>10}".format("SoC Calc;",
                 "Hour", "Charge", "Cons", "Gen", "SoC"))
 
             if stgs.GE.end_time != "":
@@ -471,7 +471,7 @@ class GivEnergyObj:
                 elif i > end_charge_period:  # Charging after overnight boost
                     max_charge = max(max_charge, batt_charge[i])
 
-                logger.info("{:<20} {:>10} {:>10} {:>10}  {:>10} {:>10}".format("SoC Calc;",
+                logger.debug("{:<20} {:>10} {:>10} {:>10}  {:>10} {:>10}".format("SoC Calc;",
                     t_to_hrs(i * 30), round(batt_charge[i], 2), round(total_load, 2),
                     round(est_gen, 2), int(100 * batt_charge[i] / batt_max_charge)))
 

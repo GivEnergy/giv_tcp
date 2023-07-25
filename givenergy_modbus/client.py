@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import logging
+import sys
 import time as t
 from datetime import datetime, time
 from typing import Mapping, Sequence
@@ -9,7 +10,7 @@ from pymodbus.client.sync import ModbusTcpClient
 
 from givenergy_modbus.modbus import GivEnergyModbusTcpClient
 from givenergy_modbus.model.plant import Plant
-from givenergy_modbus.model.register import HoldingRegister, InputRegister  # type: ignore
+from givenergy_modbus.model.register import HoldingRegister,HoldingRegister_AC, InputRegister  # type: ignore
 from givenergy_modbus.model.register_cache import RegisterCache
 
 _logger = logging.getLogger(__package__)
@@ -32,7 +33,7 @@ class GivEnergyClient:
 
     def fetch_register_pages(
         self,
-        pages: Mapping[type[HoldingRegister | InputRegister], Sequence[int]],
+        pages: Mapping[type[HoldingRegister | HoldingRegister_AC | InputRegister], Sequence[int]],
         register_cache: RegisterCache,
         slave_address: int = 0x31,
         sleep_between_queries: float = DEFAULT_SLEEP,
@@ -44,14 +45,17 @@ class GivEnergyClient:
                 register_cache.set_registers(register, data)
                 t.sleep(sleep_between_queries)
 
-    def refresh_plant(self, plant: Plant, isAIO: bool, full_refresh: bool, sleep_between_queries=DEFAULT_SLEEP):
+    def refresh_plant(self, plant: Plant, isAIO: bool, isAC: bool, full_refresh: bool, sleep_between_queries=DEFAULT_SLEEP):
         """Refresh the internal caches for a plant. Optionally refresh only data that changes frequently."""
         inverter_registers = {
             InputRegister: [0, 180],
         }
 
         if full_refresh:
-            inverter_registers[HoldingRegister] = [0, 60, 120, 240, 300]
+            if isAC:
+                inverter_registers[HoldingRegister_AC] = [0, 60, 120]
+            else:
+                inverter_registers[HoldingRegister] = [0, 60, 120, 240, 300]
 
         #How do I know which inverter I'm connecting to from inside the library...
         if isAIO:
@@ -59,6 +63,10 @@ class GivEnergyClient:
                 inverter_registers, plant.inverter_rc, slave_address=0x11, sleep_between_queries=sleep_between_queries
             )
             _logger.debug("Inverter is AIO so using the 0x11 slave_address")
+        elif isAC:
+            self.fetch_register_pages(
+                inverter_registers, plant.inverter_rc_ac, slave_address=0x31, sleep_between_queries=sleep_between_queries
+            )
         else:
             self.fetch_register_pages(
                 inverter_registers, plant.inverter_rc, slave_address=0x31, sleep_between_queries=sleep_between_queries
@@ -73,22 +81,28 @@ class GivEnergyClient:
             )
 
     def get_inverter_stats(self):
-        SN={}
-        regs=self.modbus_client.read_holding_registers(0,22)
-        DTC=hex(regs[0])[-4:] #plant.inverter.device_type_code
-        SN_1=bytes.fromhex(hex(regs[13])[2:]).decode("ASCII")
-        SN_2=bytes.fromhex(hex(regs[14])[2:]).decode("ASCII")
-        SN_3=bytes.fromhex(hex(regs[15])[2:]).decode("ASCII")
-        SN_4=bytes.fromhex(hex(regs[16])[2:]).decode("ASCII")
-        SN_5=bytes.fromhex(hex(regs[17])[2:]).decode("ASCII")
-        SN=SN_1+SN_2+SN_3+SN_4+SN_5 #SN=plant.inverter.inverter_serial_number
-        FW=regs[21] #plant.inverter.arm_firmware_version
-        return DTC,FW,SN
+        try:
+            SN={}
+            regs=self.modbus_client.read_holding_registers(0,22)
+            DTC=hex(regs[0])[-4:] #plant.inverter.device_type_code
+            SN_1=bytes.fromhex(hex(regs[13])[2:]).decode("ASCII")
+            SN_2=bytes.fromhex(hex(regs[14])[2:]).decode("ASCII")
+            SN_3=bytes.fromhex(hex(regs[15])[2:]).decode("ASCII")
+            SN_4=bytes.fromhex(hex(regs[16])[2:]).decode("ASCII")
+            SN_5=bytes.fromhex(hex(regs[17])[2:]).decode("ASCII")
+            SN=SN_1+SN_2+SN_3+SN_4+SN_5 #SN=plant.inverter.inverter_serial_number
+            FW=regs[21] #plant.inverter.arm_firmware_version
+            return DTC,FW,SN
+        except:
+            return ("ERROR: "+str(sys.exc_info()))
 
     def enable_charge_target(self, target_soc: int):
         """Sets inverter to stop charging when SOC reaches the desired level. Also referred to as "winter mode"."""
-        if not 4 <= target_soc <= 100:
-            raise ValueError(f'Specified Charge Target SOC ({target_soc}) is not in [4-100]')
+        if target_soc > 100:
+            target_soc=100
+        elif target_soc<4:
+            target_soc=4
+
         if target_soc == 100:
             self.disable_charge_target()
         else:
@@ -97,8 +111,11 @@ class GivEnergyClient:
 
     def enable_charge_target_2(self, target_soc: int, slot: int):
         """Sets inverter to stop charging when SOC reaches the desired level. Also referred to as "winter mode"."""
-        if not 4 <= target_soc <= 100:
-            raise ValueError(f'Specified Charge Target SOC ({target_soc}) is not in [4-100]')
+        if target_soc > 100:
+            target_soc=100
+        elif target_soc<4:
+            target_soc=4
+
         if target_soc == 100:
             self.disable_charge_target()
         else:

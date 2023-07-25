@@ -59,7 +59,7 @@ def getData(fullrefresh):  # Read from Inverter put in cache
         logger.debug("Connecting to: " + GiV_Settings.invertorIP)
         plant=GivQueue.q.enqueue(inverterData,fullrefresh,retry=Retry(max=GiV_Settings.queue_retries, interval=2))   
         while plant.result is None and plant.exc_info is None:
-            time.sleep(0.5)
+            time.sleep(0.1)
         if "ERROR" in plant.result:
             raise Exception ("Garbage or failed inverter Response: "+ str(plant.result))
         GEInv=plant.result[0]
@@ -68,7 +68,7 @@ def getData(fullrefresh):  # Read from Inverter put in cache
 #        plant=inverterData(True)
 #        GEInv=plant[0]
 #        GEBat=plant[1]
-        
+       
         multi_output['Last_Updated_Time'] = datetime.datetime.utcnow().replace(tzinfo=datetime.timezone.utc).isoformat()
         multi_output['status'] = "online"
         multi_output['Time_Since_Last_Update'] = 0  
@@ -497,7 +497,7 @@ def getData(fullrefresh):  # Read from Inverter put in cache
         timeslots['Charge_end_time_slot_1'] = GEInv.charge_slot_1[1].isoformat()
 
         if inverterModel.generation == "Gen 2" or inverterModel.generation == "Gen 3":
-            timeslots['Charge_start_time_slot_2'] = GEInv.charge_slot_2[0].isoformat()
+            '''timeslots['Charge_start_time_slot_2'] = GEInv.charge_slot_2[0].isoformat()
             timeslots['Charge_end_time_slot_2'] = GEInv.charge_slot_2[1].isoformat()
             timeslots['Charge_start_time_slot_3'] = GEInv.charge_slot_3[0].isoformat()
             timeslots['Charge_end_time_slot_3'] = GEInv.charge_slot_3[1].isoformat()
@@ -549,7 +549,7 @@ def getData(fullrefresh):  # Read from Inverter put in cache
             controlmode['Discharge_Target_SOC_7'] = GEInv.discharge_target_soc_7
             controlmode['Discharge_Target_SOC_8'] = GEInv.discharge_target_soc_8
             controlmode['Discharge_Target_SOC_9'] = GEInv.discharge_target_soc_9
-            controlmode['Discharge_Target_SOC_10'] = GEInv.discharge_target_soc_10
+            controlmode['Discharge_Target_SOC_10'] = GEInv.discharge_target_soc_10  '''
             timeslots['Battery_pause_start_time_slot'] = GEInv.battery_pause_slot[0].isoformat()
             timeslots['Battery_pause_end_time_slot'] = GEInv.battery_pause_slot[1].isoformat()
 
@@ -573,7 +573,8 @@ def getData(fullrefresh):  # Read from Inverter put in cache
             metertype = "EM418"
         inverter['Meter_Type'] = metertype
         inverter['Invertor_Type'] = inverterModel.generation + " " + inverterModel.model
-        inverter['Invertor_Max_Rate'] = inverterModel.batmaxrate
+        inverter['Invertor_Max_Inv_Rate'] = inverterModel.power
+        inverter['Invertor_Max_Bat_Rate'] = inverterModel.batmaxrate
         inverter['Invertor_Temperature'] = GEInv.temp_inverter_heatsink
 
         ######## Get Battery Details ########
@@ -870,6 +871,8 @@ def ratecalcs(multi_output, multi_output_old):
     logger.debug("Night Start= "+datetime.datetime.strftime(night_start, '%c'))
     day_start = datetime.datetime.combine(datetime.datetime.now(GivLUT.timezone).date(),dayRateStart.time()).replace(tzinfo=GivLUT.timezone)
     logger.debug("Day Start= "+datetime.datetime.strftime(day_start, '%c'))
+    import_energy = multi_output['Energy']['Total']['Import_Energy_Total_kWh']
+    import_energy_old = multi_output_old['Energy']['Total']['Import_Energy_Total_kWh']
     # check if pickle data exists:
     if exists(GivLUT.ratedata):
         with open(GivLUT.ratedata, 'rb') as inp:
@@ -904,9 +907,6 @@ def ratecalcs(multi_output, multi_output_old):
         rate_data['Day_Energy_Total_kWh'] = 0
 
 
-    import_energy = multi_output['Energy']['Total']['Import_Energy_Total_kWh']
-    import_energy_old = multi_output_old['Energy']['Total']['Import_Energy_Total_kWh']
-
     # if midnight then reset costs
     if datetime.datetime.now(GivLUT.timezone).hour == 0 and datetime.datetime.now(GivLUT.timezone).minute == 0:
         logger.critical("Midnight, so resetting Day/Night stats...")
@@ -922,25 +922,10 @@ def ratecalcs(multi_output, multi_output_old):
     if GiV_Settings.dynamic_tariff == False:     ## If we use externally triggered rates then don't do the time check but assume the rate files are set elsewhere (default to Day if not set)
         if dayRateStart.hour == datetime.datetime.now(GivLUT.timezone).hour and dayRateStart.minute == datetime.datetime.now(GivLUT.timezone).minute:
             open(GivLUT.dayRateRequest, 'w').close()
-            #Save current Total stats as baseline
-            #logger.info("Saving current energy stats at start of day rate tariff")
-            #rate_data['Day_Start_Energy_kWh'] = import_energy
-            #open(GivLUT.dayRate, 'w').close()
-            #if exists(GivLUT.nightRate):
-            #    logger.debug(".nightRate exists so deleting it")
-            #    os.remove(GivLUT.nightRate)
-
         elif nightRateStart.hour == datetime.datetime.now(GivLUT.timezone).hour and nightRateStart.minute == datetime.datetime.now(GivLUT.timezone).minute:
             open(GivLUT.nightRateRequest, 'w').close()
-            #Save current Total stats as baseline
-            #logger.info("Saving current energy stats at start of night rate tariff")
-            #rate_data['Night_Start_Energy_kWh'] = import_energy
-            #open(GivLUT.nightRate, 'w').close()
-            #if exists(GivLUT.dayRate):
-            #    logger.debug(".dayRate exists so deleting it")
-            #    os.remove(GivLUT.dayRate)
-
         # Otherwise check to see if dynamic trigger has been received to change rate type
+
     if exists(GivLUT.nightRateRequest):
         os.remove(GivLUT.nightRateRequest)
         if not exists(GivLUT.nightRate):
