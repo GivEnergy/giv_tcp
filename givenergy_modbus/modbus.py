@@ -7,7 +7,7 @@ from pymodbus.exceptions import ModbusIOException
 
 from givenergy_modbus.decoder import GivEnergyResponseDecoder
 from givenergy_modbus.framer import GivEnergyModbusFramer
-from givenergy_modbus.model.register import HoldingRegister, InputRegister  # type: ignore
+from givenergy_modbus.model.register import HoldingRegister, HoldingRegister_AC, InputRegister  # type: ignore
 from givenergy_modbus.pdu import (
     ModbusPDU,
     ReadHoldingRegistersRequest,
@@ -54,20 +54,21 @@ class GivEnergyModbusTcpClient(ModbusTcpClient):
         except ModbusIOException as e:
             _logger.exception(e)
             self.close()
-            return None
+            return e
         except Exception as e:
             # This seems to help with inverters becoming unresponsive from the portal."""
             _logger.exception(e)
             self.close()
-            return None
+            return e
 
     def read_registers(
-        self, kind: type[HoldingRegister | InputRegister], base_address: int, register_count: int, **kwargs
+        self, kind: type[HoldingRegister | HoldingRegister_AC | InputRegister], base_address: int, register_count: int, **kwargs
     ) -> dict[int, int]:
         """Read out registers from the correct location depending on type specified."""
         # match types of register to their request/response types
         t_req, t_res = {
             HoldingRegister: (ReadHoldingRegistersRequest, ReadHoldingRegistersResponse),
+            HoldingRegister_AC: (ReadHoldingRegistersRequest, ReadHoldingRegistersResponse),
             InputRegister: (ReadInputRegistersRequest, ReadInputRegistersResponse),
         }[kind]
 

@@ -4,6 +4,8 @@
 #   call                                #
 #########################################
 
+## Create a modbus call which connects, gets SN, DTC and FW to determine what type it is
+
 
 from threading import Thread, Lock
 from time import perf_counter

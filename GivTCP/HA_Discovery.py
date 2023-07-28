@@ -30,7 +30,7 @@ class HAMQTT():
             with open(GivLUT.regcache, 'rb') as inp:
                 regCacheStack = pickle.load(inp)
                 multi_output_old = regCacheStack[4]
-            return int(multi_output_old['Invertor_Details']['Invertor_Max_Rate'])
+            return int(multi_output_old['Invertor_Details']['Invertor_Max_Bat_Rate'])
         return 5000
 
     def on_connect(client, userdata, flags, rc):
@@ -125,8 +125,8 @@ class HAMQTT():
             if GivLUT.entity_type[str(topic).split("/")[-1]].sensorClass=="energy":
                 tempObj['unit_of_meas']="kWh"
                 tempObj['device_class']="Energy"
-                if topic.split("/")[-2]=="Total":
-                    tempObj['state_class']="total_increasing"
+                if "soc" in str(topic.split("/")[-2]).lower():
+                    tempObj['state_class']="measurement"
                 else:
                     tempObj['state_class']="total_increasing"
             if GivLUT.entity_type[str(topic).split("/")[-1]].sensorClass=="money":
@@ -165,20 +165,29 @@ class HAMQTT():
     #    elif GivLUT.entity_type[str(topic).split("/")[-1].devType=="binary_sensor":
     #        client.publish("homeassistant/binary_sensor/GivEnergy/"+str(topic).split("/")[-1]+"/config",HAMQTT.create_binary_sensor_payload(topic,SN),retain=True)
         elif GivLUT.entity_type[str(topic).split("/")[-1]].devType=="select":
-            if "Mode" in topic:
+            item=str(topic).split("/")[-1]
+            if item == "Battery_pause_mode":
+                options=GivLUT.battery_pause_mode
+            elif item == "Local_control_mode":
+                options=GivLUT.local_control_mode
+            elif item == "PV_input_mode":
+                options=GivLUT.pv_input_mode
+            elif "Mode" in item:
                 options=GivLUT.modes
-            elif "slot" in topic:
+            elif "slot" in item:
                 options=GivLUT.time_slots
-            elif "Temp" in topic:
+            elif "Temp" in item:
                 options=GivLUT.delay_times
-            elif "Force" in topic:
+            elif "Force" in item:
                 options=GivLUT.delay_times
-            elif "Rate" in topic:
+            elif "Rate" in item:
                 options=GivLUT.rates
             tempObj['options']=options
         elif GivLUT.entity_type[str(topic).split("/")[-1]].devType=="number":
             # If its a rate then change to Watts
-            if "charge" in str(topic).lower():
+            if "SOC" in str(topic).lower():
+                tempObj['unit_of_meas']="%"
+            elif "charge" in str(topic).lower():
                 tempObj['unit_of_meas']="W"
                 tempObj['min']=0
                 tempObj['max']=HAMQTT.getinvbatmax()

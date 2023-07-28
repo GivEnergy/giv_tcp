@@ -42,7 +42,7 @@ def hexlify(val) -> str:
         if sys.version_info < (3, 8):
             # TODO remove once 3.7 is unsupported
             return binascii.hexlify(val).decode('ascii')
-        return binascii.hexlify(val, sep=' ', bytes_per_sep=2).decode('ascii')
+        return binascii.hexlify(val, sep=' ', bytes_per_sep=4).decode('ascii')
     return str(val)
 
 
