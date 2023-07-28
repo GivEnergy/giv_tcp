@@ -12,7 +12,17 @@ services:
 ## Critical to update
       - NUMINVERTORS=1                # Set this to the number of Inverters in your setup, then replicate the next two lines for each inverter (changing the last number of the ENV)
       - INVERTOR_IP_1=                # Set this to the IP address of your Inverter on your local network
+      - INVERTOR_AIO_1=False          # Set this to true if you have an AIO
+      - INVERTOR_AC_1=False           # Set this to true if you have an AC on old firmware and don't have the new registers
       - NUMBATTERIES_1=1              # Number of battery modules installed and connected to the above inverter
+      - INVERTOR_IP_2=                # Set this to the IP address of your Inverter on your local network
+      - INVERTOR_AIO_2=False          # Set this to true if you have an AIO
+      - INVERTOR_AC_2=False           # Set this to true if you have an AC on old firmware and don't have the new registers
+      - NUMBATTERIES_2=1              # Number of battery modules installed and connected to the above inverter
+      - INVERTOR_IP_3=                # Set this to the IP address of your Inverter on your local network
+      - INVERTOR_AIO_3=False          # Set this to true if you have an AIO
+      - INVERTOR_AC_3=False           # Set this to true if you have an AC on old firmware and don't have the new registers
+      - NUMBATTERIES_3=1              # Number of battery modules installed and connected to the above inverter
       - MQTT_OUTPUT=True              # "True" if you want to publish your data to MQTT, "False" otherwise
       - MQTT_ADDRESS=                 # IP address of an existing MQTT broker, or leave as "127.0.0.1" to use the internal broker
       - MQTT_USERNAME=                # Username of your existing broker, if needed. Not required for internal broker

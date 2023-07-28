@@ -906,16 +906,15 @@ def ratecalcs(multi_output, multi_output_old):
         rate_data['Night_Cost'] = 0.00
     if not('Day_Cost' in rate_data):
         rate_data['Day_Cost'] = 0.00
-    if not('Day_Rate' in rate_data):
-        rate_data['Day_Rate'] = GiV_Settings.day_rate
-    if not('Night_Rate' in rate_data):
-        rate_data['Night_Rate'] = GiV_Settings.night_rate
-    if not('Export_Rate' in rate_data):
-        rate_data['Export_Rate'] = GiV_Settings.export_rate
     if not('Night_Energy_Total_kWh' in rate_data):
         rate_data['Night_Energy_Total_kWh'] = 0
     if not('Day_Energy_Total_kWh' in rate_data):
         rate_data['Day_Energy_Total_kWh'] = 0
+
+# Always update rates from new setting
+    rate_data['Export_Rate'] = GiV_Settings.export_rate
+    rate_data['Day_Rate'] = GiV_Settings.day_rate
+    rate_data['Night_Rate'] = GiV_Settings.night_rate
 
     # if midnight then reset costs
     if datetime.datetime.now(GivLUT.timezone).hour == 0 and datetime.datetime.now(GivLUT.timezone).minute == 0:

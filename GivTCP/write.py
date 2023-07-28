@@ -17,7 +17,7 @@ from mqtt import GivMQTT
 import requests
 import importlib
 
-logging.getLogger("givenergy_modbus").setLevel(logging.INFO)
+logging.getLogger("givenergy_modbus").setLevel(logging.CRITICAL)
 client=GivEnergyClient(host=GiV_Settings.invertorIP)
 
 logger = GivLUT.logger
