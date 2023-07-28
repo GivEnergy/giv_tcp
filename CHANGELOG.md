@@ -12,7 +12,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 ### Fixed
 - Upped maxBatPower to 8000 to account for AIO
 - fix for Eco mode setting (when moving from Eco (Paused)) Thanks Ed-M72
-- MQTT fix for retained topics (Thanks xxxx)
+- MQTT fix for retained topics (Thanks BrianUK6)
 - Improved monitoring of failed write commands and associated logging
 - soc_kWh state_class changed to 
 - Inverter Scanning improved to determine inverter type pre-config (doesn't affect config yet...)
@@ -26,6 +26,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
   - Battery Pause Mode: Forces pause of Charge, Discharge or Both
   - Gen2 inverters now have access to 10 charge and discharge slots
 - Inverter_Max_Inv_Rate added as new "Inverter Details" entity
+- New ENV/Config item Inverter_AC_X - Only turn this on if you have an AC inverter on "old" firmware and you get errors on startup 
 
 ## [2.2.4] - 2023-07-14
 ### Fixed
