@@ -25,7 +25,7 @@ class ModbusPDU(ABC):
     data_adapter_serial_number: str = ''
     #data_adapter_serial_number: int = 0x0000000000
     padding: int = 0x00000008
-    slave_address: int = 0x32  # 0x11 is the inverter but the cloud systems interfere, 0x32+ are the batteries
+    slave_address: int = 0x11  # 0x11 is the inverter but the cloud systems interfere, 0x32+ are the batteries
     check: int = 0x0000
     error: bool = False
 
@@ -104,6 +104,11 @@ class ModbusPDU(ABC):
         function_code = decoder.decode_8bit_uint()
         if function_code >= 0x80:
             self.error = True
+            #e = ValueError(
+            #    f"Expected function code 0x{self.function_code:02x}, found 0x{function_code:02x} instead.", self
+            #)
+            #_logger.exception(e)
+            #raise e
             function_code = function_code & 0x7F
         if self.function_code != function_code:
             e = ValueError(
@@ -366,6 +371,66 @@ class WriteHoldingRegisterRequest(WriteHoldingRegisterMeta, ModbusRequest, ABC):
         114,  # BATTERY_DISCHARGE_MIN_POWER_RESERVE
         116,  # TARGET_SOC
         163,  # REBOOT_INVERTOR
+        242,
+        243,
+        244,
+        245,
+        246,
+        247,
+        248,
+        249,
+        250,
+        251,
+        252,
+        253,
+        254,
+        255,
+        256,
+        257,
+        258,
+        259,
+        260,
+        261,
+        262,
+        263,
+        264,
+        265,
+        266,
+        267,
+        268,
+        269,
+        260,
+        272,
+        275,
+        276,
+        277,
+        278,
+        279,
+        280,
+        281,
+        282,
+        283,
+        284,
+        285,
+        286,
+        287,
+        288,
+        289,
+        290,
+        291,
+        292,
+        293,
+        294,
+        295,
+        296,
+        297,
+        298,
+        299,
+        305, # PV_INPUT_MODE
+        311, # LOCAL_CONTROL_MODE
+        318, # BATTERY_PAUSE_MODE
+        319, # BATTERY_PAUSE_SLOT_START
+        320  # BATTERY_PAUSE_SLOT_END
     }
 
     def __init__(self, **kwargs):
@@ -391,6 +456,7 @@ class WriteHoldingRegisterRequest(WriteHoldingRegisterMeta, ModbusRequest, ABC):
         self.check = CrcModbus().process(crc_builder.to_string()).final()
         self.check=int.from_bytes(self.check.to_bytes(2,'little'),'big')
         self.builder.add_16bit_uint(self.check)
+
     def _calculate_function_data_size(self):
         size = 16
         _logger.debug(f"Calculated {size} bytes partial response size for {self}")

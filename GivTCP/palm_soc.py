@@ -98,7 +98,7 @@ class GivEnergyObj:
             with open(GivLUT.regcache, 'rb') as inp:
                 regCacheStack = pickle.load(inp)
                 multi_output_old = regCacheStack[4]
-            self.invmaxrate=float(multi_output_old['Invertor_Details']['Invertor_Max_Rate']) / 1000
+            self.invmaxrate=float(multi_output_old['Invertor_Details']['Invertor_Max_Bat_Rate']) / 1000
             self.batcap=float(multi_output_old['Invertor_Details']['Battery_Capacity_kWh'])
 
         # v0.9.2: Removed routine to download valid inverter commands from GE API - not used

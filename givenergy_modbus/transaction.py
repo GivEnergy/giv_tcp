@@ -83,7 +83,7 @@ class GivEnergyTransactionManager(FifoTransactionManager):
             self.client.connect()
             tx_data = self.client.framer.buildPacket(request)
             _logger.debug(f"SEND raw frame: {hexlify(tx_data)}")
-#            print(f"SEND raw frame: {hexlify(tx_data)}")
+            #print(f"SEND raw frame: {hexlify(tx_data)}")
             _logger.info(f'Sending request {request}')
             tx_size = self._send(tx_data)
 

@@ -4,8 +4,11 @@ import os, pickle, subprocess, logging,shutil, shlex, schedule
 from time import sleep
 import rq_dashboard
 import zoneinfo
+import sys
 import requests
 from GivTCP.findInvertor import findInvertor
+import givenergy_modbus.model.inverter
+from givenergy_modbus.client import GivEnergyClient
 
 selfRun={}
 mqttClient={}
@@ -17,23 +20,31 @@ redis={}
 logger = logging.getLogger("startup")
 logging.basicConfig(format='%(asctime)s - %(name)s - [%(levelname)s] - %(message)s')
 
-if os.getenv("LOG_LEVEL").lower=="debug":
-    logger.setLevel(logging.DEBUG)
-elif os.getenv("LOG_LEVEL").lower()=="info":
-    logger.setLevel(logging.INFO)
-elif os.getenv("LOG_LEVEL").lower()=="critical":
-    logger.setLevel(logging.CRITICAL)
-elif os.getenv("LOG_LEVEL").lower()=="warning":
-    logger.setLevel(logging.WARNING)
-else:
-    logger.setLevel(logging.ERROR)
+#if os.getenv("LOG_LEVEL").lower=="debug":
+#    logger.setLevel(logging.DEBUG)
+#elif os.getenv("LOG_LEVEL").lower()=="info":
+#    logger.setLevel(logging.INFO)
+#elif os.getenv("LOG_LEVEL").lower()=="critical":
+#    logger.setLevel(logging.CRITICAL)
+#elif os.getenv("LOG_LEVEL").lower()=="warning":
+#    logger.setLevel(logging.WARNING)
+#else:
+#    logger.setLevel(logging.ERROR)
 
 # Check if config directory exists and creates it if not
 
 def palm_job():
     subprocess.Popen(["/usr/local/bin/python3","/app/GivTCP_1/palm_soc.py"])
 
-numInv=0
+def getInvDeets(HOST):
+    client=GivEnergyClient(host=HOST)
+    stats=client.get_inverter_stats()
+    SN=stats[2]
+    gen=givenergy_modbus.model.inverter.Generation.from_fw_version(stats[1])._value_
+    model=givenergy_modbus.model.inverter.Model.from_device_type_code(stats[0])
+    fw=stats[1]
+    return SN,gen,model,fw
+    
 try:
     logger.debug("SUPERVISOR_TOKEN is: "+ os.getenv("SUPERVISOR_TOKEN"))
     isAddon=True
@@ -70,17 +81,38 @@ if isAddon:
     
     if hostDetails['result']=="ok":
     # For each interface scan for inverters
+        Stats={}
+        inverterStats={}
+        invList={}
+        logger.critical("Scanning network for inverters...")
         try:
-            for interface in hostDetails['data']['interfaces']:
-                subnet=interface['ipv4']['gateway']
-                invList=findInvertor(subnet)
-                logger.critical ("We have found the following invertors: "+str(invList))
-            numInv=len(invList)
-        except:
-            logger.error("Error scanning for Inverters")
-    
-logger.critical("GivTCP isAddon: "+str(isAddon)+" and we have found "+str(numInv)+" inverters on the network")
 
+            subnet="192.168.2.1"
+            list=findInvertor(subnet)
+            logger.info("Inverters found on "+str(subnet)+" - "+str(list))
+            invList.update(list)
+            for inv in invList:
+                logger.debug("Getting inverter stats for: "+str(invList[inv]))
+                deets=getInvDeets(invList[inv])
+                logger.critical (f'Inverter {deets[0]} which is a {str(deets[1])} - {str(deets[2])} has been found at: {str(invList[inv])}')
+                Stats['Serial_Number']=deets[0]
+                Stats['Firmware']=deets[3]
+                Stats['Model']=deets[2]
+                Stats['Generation']=deets[1]
+                inverterStats[inv]=Stats
+            if len(invList)==0:
+                logger.critical("No inverters found...")
+            else:
+            # write data to pickle
+                with open('invippkl.pkl', 'wb') as outp:
+                    pickle.dump(inverterStats, outp, pickle.HIGHEST_PROTOCOL)
+        except:
+            e = sys.exc_info()
+            logger.error("Error scanning for Inverters- "+str(e))
+    else:
+        logger.error("Unable to get host details from Supervisor")
+    
+logger.critical("GivTCP isAddon: "+str(isAddon))
 
 if not os.path.exists(str(os.getenv("CACHELOCATION"))):
     os.makedirs(str(os.getenv("CACHELOCATION")))
@@ -94,7 +126,15 @@ logger.critical("Running Redis")
 rqdash=subprocess.Popen(["/usr/local/bin/rq-dashboard"])
 logger.critical("Running RQ Dashboard on port 9181")
 
-for inv in range(1,numInv+1):
+#####################################################
+# Up to now everything is __init__ type prep, below is conifg setting (move to webpage and not ENV...)
+# 
+# 
+# 
+######################################################
+
+
+for inv in range(1,int(os.getenv('NUMINVERTORS'))+1):
     logger.critical ("Setting up invertor: "+str(inv)+" of "+str(os.getenv('NUMINVERTORS')))
     PATH= "/app/GivTCP_"+str(inv)
     PATH2= "/app/GivEnergy-Smart-Home-Display-givtcp_"+str(inv)
@@ -111,8 +151,9 @@ for inv in range(1,numInv+1):
     logger.critical ("Recreating settings.py for invertor "+str(inv))
     with open(PATH+"/settings.py", 'w') as outp:
         outp.write("class GiV_Settings:\n")
-        outp.write("    invertorIP=\""+str(invList[inv+1])+"\"\n")
-        outp.write("    numBatteries=\""+str(os.getenv("NUMBATTERIES_"+str(inv),"")+"\"\n"))
+        outp.write("    invertorIP=\""+str(os.getenv("INVERTOR_IP_"+str(inv),""))+"\"\n")
+        outp.write("    numBatteries="+str(os.getenv("NUMBATTERIES_"+str(inv),"")+"\n"))
+        outp.write("    isAIO="+str(os.getenv("INVERTOR_AIO_"+str(inv),"")+"\n"))
         outp.write("    Print_Raw_Registers="+str(os.getenv("PRINT_RAW",""))+"\n")
         outp.write("    MQTT_Output="+str(os.getenv("MQTT_OUTPUT","")+"\n"))
         if hasMQTT:
@@ -163,8 +204,11 @@ for inv in range(1,numInv+1):
         else:
             outp.write("    cache_location=\""+str(os.getenv("CACHELOCATION")+"\"\n"))
             outp.write("    Debug_File_Location=\""+os.getenv("CACHELOCATION")+"/log_inv_"+str(inv)+".log\"\n")
+        outp.write("    inverter_num=\""+str(inv)+"\"\n")
+        
 
-    # replicate the startup script here:
+    ######
+    #  Always delete lockfiles and FCRunning etc... but only delete pkl if too old?
 
     if exists(os.getenv("CACHELOCATION")+"/regCache_"+str(inv)+".pkl"):
         logger.critical("Removing old invertor data cache")
@@ -193,7 +237,16 @@ for inv in range(1,numInv+1):
         else:
             logger.critical("Rate Data exisits but is from today so keeping it")
 
+
 ########### Run the various processes needed #############
+# Check if settings.py exists then start processes
+# Still need to run the below process per inverter
+#
+#
+
+
+
+
     os.chdir(PATH)
 
     rqWorker[inv]=subprocess.Popen(["/usr/local/bin/python3",PATH+"/worker.py"])
