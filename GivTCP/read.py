@@ -800,12 +800,14 @@ def publishOutput(array, SN):
     tempoutput = iterate_dict(array)
 
     if GiV_Settings.MQTT_Output:
-        if GiV_Settings.first_run and GiV_Settings.HA_Auto_D:        # Home Assistant MQTT Discovery
-            logger.critical("Publishing Home Assistant Discovery messages")
-            from HA_Discovery import HAMQTT
-            HAMQTT.publish_discovery(tempoutput, SN)
-        GiV_Settings.first_run = False
-        updateFirstRun(SN)
+        if GiV_Settings.first_run:        # 09-July-23 - HA is seperated to seperate if check.
+          updateFirstRun(SN)              # 09=July=23 - Always do this first irrespective of HA setting.
+          if GiV_Settings.HA_Auto_D:        # Home Assistant MQTT Discovery
+              logger.critical("Publishing Home Assistant Discovery messages")
+              from HA_Discovery import HAMQTT
+              HAMQTT.publish_discovery(tempoutput, SN)
+          GiV_Settings.first_run = False  # 09-July-23 - Always set firstrun irrespective of HA setting.
+
         from mqtt import GivMQTT
         logger.debug("Publish all to MQTT")
         if GiV_Settings.MQTT_Topic == "":

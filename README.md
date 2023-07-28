@@ -144,8 +144,8 @@ Data is published to "GivEnergy/<serial_number>/" by default or you can nominate
 
 Control is available using MQTT. By publishing data to the same MQTT broker as above you can trigger the control methods as per the above table.
 Root topic for control is:
-"GivEnergy/<serial_number>/control/"    - Default
-"<MQTT_TOPIC>/<serial_number>/control/" - If MQTT_TOPIC is set
+"GivEnergy/control/<serial_number>/"    - Default
+"<MQTT_TOPIC>/control/<serial_number>/" - If MQTT_TOPIC is set
 
 ### RESTful Service
 GivTCP provides a wrapper function REST.py which uses Flask to expose the read and control functions as RESTful http calls. To utilise this service you will need to either use a WSGI service such as gunicorn or use the pre-built Docker container.
