@@ -30,9 +30,31 @@ class GivMQTT():
             #client.subscribe(topic)
         else:
             logger.error("Bad connection Returned code= "+str(rc))
-    
-    def multi_MQTT_publish(rootTopic,array):   #Recieve multiple payloads with Topics and publish in a single MQTT connection
+
+    def single_MQTT_publish(Topic,value):   #Recieve multiple payloads with Topics and publish in a single MQTT connection
         mqtt.Client.connected_flag=False        			#create flag in class
+        client=mqtt.Client("GivEnergy_GivTCP_"+str(GiV_Settings.givtcp_instance))
+
+        if GivMQTT.MQTTCredentials:
+            client.username_pw_set(GivMQTT.MQTT_Username,GivMQTT.MQTT_Password)
+        try:
+            client.on_connect=GivMQTT.on_connect     			#bind call back function
+            client.loop_start()
+            logger.debug ("Connecting to broker: "+ GivMQTT.MQTT_Address)
+            client.connect(GivMQTT.MQTT_Address,port=GivMQTT.MQTT_Port)
+            while not client.connected_flag:        			#wait in loop
+                logger.debug ("In wait loop")
+                time.sleep(0.2)
+            client.publish(Topic,value)
+        except:
+            e = sys.exc_info()
+            logger.error("Error connecting to MQTT Broker: " + str(e))
+        client.loop_stop()                      			    #Stop loop
+        client.disconnect()
+        return client
+
+    def multi_MQTT_publish(rootTopic,array):                    #Recieve multiple payloads with Topics and publish in a single MQTT connection
+        mqtt.Client.connected_flag=False        			    #create flag in class
         client=mqtt.Client("GivEnergy_GivTCP_"+str(GiV_Settings.givtcp_instance))
         
         ##Check if first run then publish auto discovery message
@@ -59,7 +81,7 @@ class GivMQTT():
         except:
             e = sys.exc_info()
             logger.error("Error connecting to MQTT Broker: " + str(e))
-        client.loop_stop()                      			#Stop loop
+        client.loop_stop()                      			    #Stop loop
         client.disconnect()
         return client
 

@@ -4,9 +4,6 @@ class GivClient:
         from settings import GiV_Settings
         from givenergy_modbus.model.plant import Plant  
         client= GivEnergyClient(host=GiV_Settings.invertorIP)
-#        if GiV_Settings.isAIO:
-#            numbat=0
-#        else:
         numbat=GiV_Settings.numBatteries
         plant=Plant(number_batteries=numbat)
         client.refresh_plant(plant,GiV_Settings.isAIO,GiV_Settings.isAC,fullrefresh)
@@ -18,7 +15,6 @@ class GivQueue:
     from settings import GiV_Settings
     redis_connection = Redis(host='127.0.0.1', port=6379, db=0)
     q = Queue("GivTCP_"+str(GiV_Settings.givtcp_instance),connection=redis_connection)
-    #q = Queue("default",connection=redis_connection)
     
 class GEType:
     def __init__(self,dT,sC,cF,mn,mx,aZ,sM,oI):

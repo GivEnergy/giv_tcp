@@ -21,6 +21,7 @@ networks={}
 logger = logging.getLogger("startup")
 logging.basicConfig(format='%(asctime)s - %(name)s - [%(levelname)s] - %(message)s')
 logger.setLevel(logging.INFO)
+logging.getLogger("givenergy_modbus").setLevel(logging.CRITICAL)
 
 # Check if config directory exists and creates it if not
 
@@ -28,13 +29,17 @@ def palm_job():
     subprocess.Popen(["/usr/local/bin/python3","/app/GivTCP_1/palm_soc.py"])
 
 def getInvDeets(HOST):
-    client=GivEnergyClient(host=HOST)
-    stats=client.get_inverter_stats()
-    SN=stats[2]
-    gen=givenergy_modbus.model.inverter.Generation.from_fw_version(stats[1])._value_
-    model=givenergy_modbus.model.inverter.Model.from_device_type_code(stats[0])
-    fw=stats[1]
-    return SN,gen,model,fw
+    try:
+        client=GivEnergyClient(host=HOST)
+        stats=client.get_inverter_stats()
+        SN=stats[2]
+        gen=givenergy_modbus.model.inverter.Generation.from_fw_version(stats[1])._value_
+        model=givenergy_modbus.model.inverter.Model.from_device_type_code(stats[0])
+        fw=stats[1]
+        return SN,gen,model,fw
+    except:
+        logger.error("Gathering inverter details for " + str(HOST) + " failed.")
+        return None
     
 try:
     logger.debug("SUPERVISOR_TOKEN is: "+ os.getenv("SUPERVISOR_TOKEN"))
@@ -88,28 +93,47 @@ else:
         e=sys.exc_info()
         logger.error("Could not get network info: "+ str(e))
 
+sleep(2)        # Sleep to allow port scanning se-ocket to close
+
 if len(networks)>0:
 # For each interface scan for inverters
     logger.info("Networks available for scanning are: "+str(networks))
     Stats={}
     inverterStats={}
     invList={}
+    list={}
     logger.critical("Scanning network for inverters...")
     try:
         for subnet in networks:
-            logger.info("Scanning network:"+str(networks[subnet]))
-            list=findInvertor(networks[subnet])
-            logger.info("Inverters found on "+str(networks[subnet])+" - "+str(list))
-            invList.update(list)
-            for inv in invList:
-                logger.debug("Getting inverter stats for: "+str(invList[inv]))
-                deets=getInvDeets(invList[inv])
-                logger.critical (f'Inverter {deets[0]} which is a {str(deets[1])} - {str(deets[2])} has been found at: {str(invList[inv])}')
-                Stats['Serial_Number']=deets[0]
-                Stats['Firmware']=deets[3]
-                Stats['Model']=deets[2]
-                Stats['Generation']=deets[1]
-                inverterStats[inv]=Stats
+            count=0
+            while len(list)<=0:
+                if count<2:
+                    logger.info("Scanning network ("+str(count+1)+"):"+str(networks[subnet]))
+                    list=findInvertor(networks[subnet])
+                    if len(list)>0: break
+                    count=count+1
+                else:
+                    break
+            if list:
+                logger.info("Inverters found on "+str(networks[subnet])+" - "+str(list))
+                invList.update(list)
+                for inv in invList:
+                    deets={}
+                    logger.debug("Getting inverter stats for: "+str(invList[inv]))
+                    count=0
+                    while not deets:
+                        if count<2:
+                            deets=getInvDeets(invList[inv])
+                            if deets:
+                                logger.critical (f'Inverter {deets[0]} which is a {str(deets[1])} - {str(deets[2])} has been found at: {str(invList[inv])}')
+                                Stats['Serial_Number']=deets[0]
+                                Stats['Firmware']=deets[3]
+                                Stats['Model']=deets[2]
+                                Stats['Generation']=deets[1]
+                                inverterStats[inv]=Stats
+                            count=count+1
+                        else:
+                            break
             if len(invList)==0:
                 logger.critical("No inverters found...")
             else:
@@ -120,8 +144,8 @@ if len(networks)>0:
         e = sys.exc_info()
         logger.error("Error scanning for Inverters- "+str(e))
 else:
-    logger.error("Unable to get host details from Supervisor")
-    
+    logger.error("Unable to get host details from Supervisor\Container")
+
 logger.critical("GivTCP isAddon: "+str(isAddon))
 
 if not os.path.exists(str(os.getenv("CACHELOCATION"))):
@@ -133,15 +157,19 @@ else:
 redis=subprocess.Popen(["/usr/bin/redis-server","/app/redis.conf"])
 logger.critical("Running Redis")
 
-rqdash=subprocess.Popen(["/usr/local/bin/rq-dashboard"])
-logger.critical("Running RQ Dashboard on port 9181")
+#rqdash=subprocess.Popen(["/usr/local/bin/rq-dashboard","-u redis://127.0.0.1:6379"])
+#logger.critical("Running RQ Dashboard on port 9181")
 
-#####################################################
-# Up to now everything is __init__ type prep, below is conifg setting (move to webpage and not ENV...)
+#vueConfig=subprocess.Popen(["npm", "run", "dev","-- --host"],cwd="/app/config_frontend")
+#logger.critical("Running Config Frontend")
+
+##########################################################################################################
+#
+#
+#   Up to now everything is __init__ type prep, below is conifg setting (move to webpage and not ENV...) #
 # 
 # 
-# 
-######################################################
+##########################################################################################################
 
 
 for inv in range(1,int(os.getenv('NUMINVERTORS'))+1):

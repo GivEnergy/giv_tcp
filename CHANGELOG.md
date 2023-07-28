@@ -6,14 +6,18 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/)
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
 ## [2.3] - 2023-06-29
+### Breaking Change
+- Inverter_Max_Rate now called Inverter_Max_Bat_Rate
+
 ### Fixed
 - Upped maxBatPower to 8000 to account for AIO
 - fix for Eco mode setting (when moving from Eco (Paused)) Thanks Ed-M72
 - MQTT fix for retained topics (Thanks xxxx)
 - Improved monitoring of failed write commands and associated logging
 - soc_kWh state_class changed to 
-- Inverter Scanning improved to determine inverter type pre-config
+- Inverter Scanning improved to determine inverter type pre-config (doesn't affect config yet...)
 - Setting Charge Target to values below 4 or above 100 now force those max/min values
+- Day/Night costs fixed
 - 
 ### Added
 - New Controls available for beta firmware:
@@ -21,7 +25,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
   - PV Input Mode: Sets MPPT tracking to 1x2 or Independent
   - Battery Pause Mode: Forces pause of Charge, Discharge or Both
   - Gen2 inverters now have access to 10 charge and discharge slots
-
+- Inverter_Max_Inv_Rate added as new "Inverter Details" entity
 
 ## [2.2.1] - 2023-06-29
 ### Fixed

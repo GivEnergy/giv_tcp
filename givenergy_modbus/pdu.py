@@ -104,11 +104,11 @@ class ModbusPDU(ABC):
         function_code = decoder.decode_8bit_uint()
         if function_code >= 0x80:
             self.error = True
-            e = ValueError(
-                f"Expected function code 0x{self.function_code:02x}, found 0x{function_code:02x} instead.", self
-            )
-            _logger.exception(e)
-            raise e
+            #e = ValueError(
+            #    f"Expected function code 0x{self.function_code:02x}, found 0x{function_code:02x} instead.", self
+            #)
+            #_logger.exception(e)
+            #raise e
             function_code = function_code & 0x7F
         if self.function_code != function_code:
             e = ValueError(

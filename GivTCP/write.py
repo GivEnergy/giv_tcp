@@ -6,23 +6,38 @@ import logging
 import datetime
 from datetime import datetime, timedelta
 from settings import GiV_Settings
+import settings
 import time
 from os.path import exists
 import pickle,os
 from GivLUT import GivLUT, GivQueue
 from givenergy_modbus.client import GivEnergyClient
-from rq import Retry, job
+from rq import Retry
+from mqtt import GivMQTT
 import requests
+import importlib
 
 logging.getLogger("givenergy_modbus").setLevel(logging.INFO)
 client=GivEnergyClient(host=GiV_Settings.invertorIP)
 
 logger = GivLUT.logger
 
+def updateControlMQTT(entity,value):
+    # immediately update broker on success of control áction
+    importlib.reload(settings)
+    from settings import GiV_Settings
+    if GiV_Settings.MQTT_Topic == "":
+        GiV_Settings.MQTT_Topic = "GivEnergy"
+    Topic=str(GiV_Settings.MQTT_Topic+"/"+GiV_Settings.serial_number+"/Control/")+str(entity)
+    GivMQTT.single_MQTT_publish(Topic,str(value))
+    return
+
+
 def sct(target):
     temp={}
     try:
         client.enable_charge_target(target)
+        updateControlMQTT("Target_SOC",target)
         temp['result']="Setting Charge Target "+str(target)+" was a success"
     except:
         e = sys.exc_info()
@@ -33,6 +48,7 @@ def sct2(target,slot):
     temp={}
     try:
         client.enable_charge_target_2(target,slot)
+        updateControlMQTT("Charge_Target_SOC_"+str(slot),target)
         temp['result']="Setting Charge Target "+str(slot) + " was a success"
     except:
         e = sys.exc_info()
@@ -53,16 +69,18 @@ def dct():
     temp={}
     try:
         client.disable_charge_target()
-        temp['result']="Setting Discharge Enable was a success"
+        updateControlMQTT("Target_SOC","100")
+        temp['result']="Setting Discharge Disable was a success"
     except:
         e = sys.exc_info()
-        temp['result']="Setting Discharge Enable failed: " + str(e)
+        temp['result']="Setting Discharge Disable failed: " + str(e)
     logger.info(temp['result'])    
     return json.dumps(temp)
 def ed():
     temp={}
     try:
         client.enable_discharge()
+        updateControlMQTT("Enable_Discharge_Schedule","enable")
         temp['result']="Enabling Discharge was a success"
     except:
         e = sys.exc_info()
@@ -73,6 +91,7 @@ def dd():
     temp={}
     try:
         client.disable_discharge()
+        updateControlMQTT("Enable_Discharge_Schedule","disable")
         temp['result']="Disabling discharge was a success"
     except:
         e = sys.exc_info()
@@ -83,6 +102,7 @@ def ec():
     temp={}
     try:
         client.enable_charge()
+        updateControlMQTT("Enable_Charge_Schedule","enable")
         temp['result']="Setting Charge Enable was a success"
         
     except:
@@ -94,6 +114,7 @@ def dc():
     temp={}
     try:
         client.disable_charge()
+        updateControlMQTT("Enable_Charge_Schedule","disable")
         temp['result']="Disabling Charge was a success"
     except:
         e = sys.exc_info()
@@ -105,6 +126,7 @@ def slcm(val):
     temp={}
     try:
         client.set_local_control_mode(val)
+        updateControlMQTT("Local_control_mode",str(GivLUT.local_control_mode[int(val)]))
         temp['result']="Setting Local Control Mode to " +str(GivLUT.local_control_mode[val])+" was a success"
     except:
         e = sys.exc_info()
@@ -116,18 +138,20 @@ def sbpm(val):
     temp={}
     try:
         client.set_battery_pause_mode(val)
+        updateControlMQTT("Battery_pause_mode",str(GivLUT.battery_pause_mode[int(val)]))
         temp['result']="Setting Battery Pause Mode to " +str(GivLUT.battery_pause_mode[val])+" was a success"
     except:
         e = sys.exc_info()
         temp['result']="Setting Battery Pause Mode to " +str(GivLUT.battery_pause_mode[val])+" failed: " + str(e)
     logger.info(temp['result'])
-    #return json.dumps(temp)
-    return temp
+    return json.dumps(temp)
+    #return temp
 
 def ssc(target):
     temp={}
     try:
         client.set_shallow_charge(target)
+        updateControlMQTT("Battery_Power_Reserve",str(target))
         temp['result']="Setting shallow charge "+str(target)+" was a success"
     except:
         e = sys.exc_info()
@@ -138,6 +162,7 @@ def sbpr(target):
     temp={}
     try:
         client.set_battery_power_reserve(target)
+        updateControlMQTT("Battery_Power_Cutoff",str(target))
         temp['result']="Setting battery power reserve to "+str(target)+" was a success"
     except:
         e = sys.exc_info()
@@ -158,6 +183,7 @@ def sapr(target):
     temp={}
     try:
         client.set_active_power_rate(target)
+        updateControlMQTT("Active_Power_Rate",str(target))
         temp['result']="Setting active power rate "+str(target)+" was a success"
     except:
         e = sys.exc_info()
@@ -168,26 +194,44 @@ def sbcl(target):
     temp={}
     try:
         client.set_battery_charge_limit(target)
-        temp['result']="Setting battery charge limit "+str(target)+" was a success"
+        # Get cache and work out rate
+        if exists(GivLUT.regcache):      # if there is a cache then grab it
+            with open(GivLUT.regcache, 'rb') as inp:
+                regCacheStack = pickle.load(inp)
+                multi_output_old = regCacheStack[4]
+                batteryCapacity=int(multi_output_old["Invertor_Details"]['Battery_Capacity_kWh'])*1000
+                batmaxrate=int(multi_output_old["Invertor_Details"]['Invertor_Max_Bat_Rate'])
+            val=int(min((target/100)*(batteryCapacity), batmaxrate))
+            updateControlMQTT("Battery_Charge_Rate",str(val))
+        temp['result']="Setting battery charge rate "+str(target)+" was a success"
     except:
         e = sys.exc_info()
-        temp['result']="Setting battery charge limit "+str(target)+" failed: " + str(e)
+        temp['result']="Setting battery charge rate "+str(target)+" failed: " + str(e)
     logger.info(temp['result'])    
     return json.dumps(temp)
 def sbdl(target):
     temp={}
     try:
         client.set_battery_discharge_limit(target)
+        # Get cache and work out rate
+        if exists(GivLUT.regcache):      # if there is a cache then grab it
+            with open(GivLUT.regcache, 'rb') as inp:
+                regCacheStack = pickle.load(inp)
+                multi_output_old = regCacheStack[4]
+                batteryCapacity=int(multi_output_old["Invertor_Details"]['Battery_Capacity_kWh'])*1000
+                batmaxrate=int(multi_output_old["Invertor_Details"]['Invertor_Max_Bat_Rate'])
+            val=int(min((target/100)*(batteryCapacity), batmaxrate))
         temp['result']="Setting battery discharge limit "+str(target)+" was a success"
     except:
         e = sys.exc_info()
-        temp['result']="Setting battery charge limit "+str(target)+" failed: " + str(e)
+        temp['result']="Setting battery discharge limit "+str(target)+" failed: " + str(e)
     logger.info(temp['result'])   
     return json.dumps(temp)
 def smd():
     temp={}
     try:
         client.set_mode_dynamic()
+        updateControlMQTT("Mode","Eco")
         temp['result']="Setting dynamic mode was a success"
     except:
         e = sys.exc_info()
@@ -208,6 +252,7 @@ def sbdmd():
     temp={}
     try:
         client.set_battery_discharge_mode_demand()
+        updateControlMQTT("Mode","Timed Demand")
         temp['result']="Setting demand mode was a success"
     except:
         e = sys.exc_info()
@@ -218,6 +263,7 @@ def sbdmmp():
     temp={}
     try:
         client.set_battery_discharge_mode_max_power()
+        updateControlMQTT("Mode","Timed Export")
         temp['result']="Setting export mode was a success"
     except:
         e = sys.exc_info()
@@ -229,6 +275,7 @@ def spvim(val):
     temp={}
     try:
         client.set_pv_input_mode(val)
+        updateControlMQTT("PV_input_mode",str(GivLUT.pv_input_mode[int(val)]))
         temp['result']="Setting PV Input mode to "+str(GivLUT.pv_input_mode[val])+" was a success"
     except:
         e = sys.exc_info()
@@ -250,6 +297,8 @@ def sds(payload):
     temp={}
     try:
         client.set_discharge_slot(int(payload['slot']),[datetime.strptime(payload['start'],"%H:%M"),datetime.strptime(payload['finish'],"%H:%M")])
+        updateControlMQTT("Discharge_start_time_slot_"+str(payload['slot']),str(datetime.strptime(payload['start'],"%H:%M")))
+        updateControlMQTT("Discharge_end_time_slot_"+str(payload['slot']),str(datetime.strptime(payload['finish'],"%H:%M")))
         temp['result']="Setting Discharge Slot "+str(payload['slot'])+" was a success"
     except:
         e = sys.exc_info()
@@ -260,6 +309,7 @@ def sdss(payload):
     temp={}
     try:
         client.set_discharge_slot_start(int(payload['slot']),datetime.strptime(payload['start'],"%H:%M"))
+        updateControlMQTT("Discharge_start_time_slot_"+str(payload['slot']),str(datetime.strptime(payload['start'],"%H:%M")))
         temp['result']="Setting Discharge Slot Start "+str(payload['slot'])+" was a success"
     except:
         e = sys.exc_info()
@@ -271,6 +321,7 @@ def sdse(payload):
     temp={}
     try:
         client.set_discharge_slot_end(int(payload['slot']),datetime.strptime(payload['finish'],"%H:%M"))
+        updateControlMQTT("Discharge_end_time_slot_"+str(payload['slot']),str(datetime.strptime(payload['finish'],"%H:%M")))
         temp['result']="Setting Discharge Slot End "+str(payload['slot'])+" was a success"
     except:
         e = sys.exc_info()
@@ -282,6 +333,7 @@ def sps(payload):
     temp={}
     try:
         client.set_pause_slot_start(datetime.strptime(payload['start'],"%H:%M"))
+        updateControlMQTT("Battery_pause_end_time_slot"+str(payload['slot']),str(datetime.strptime(payload['start'],"%H:%M")))
         temp['result']="Setting Pause Slot Start was a success"
     except:
         e = sys.exc_info()
@@ -293,6 +345,7 @@ def spe(payload):
     temp={}
     try:
         client.set_pause_slot_end(datetime.strptime(payload['finish'],"%H:%M"))
+        updateControlMQTT("Battery_pause_end_time_slot"+str(payload['slot']),str(datetime.strptime(payload['finish'],"%H:%M")))
         temp['result']="Setting Pause Slot End was a success"
     except:
         e = sys.exc_info()
@@ -304,6 +357,8 @@ def scs(payload):
     temp={}
     try:
         client.set_charge_slot(int(payload['slot']),[datetime.strptime(payload['start'],"%H:%M"),datetime.strptime(payload['finish'],"%H:%M")])
+        updateControlMQTT("Charge_start_time_slot_"+str(payload['slot']),str(datetime.strptime(payload['start'],"%H:%M")))
+        updateControlMQTT("Charge_end_time_slot_"+str(payload['slot']),str(datetime.strptime(payload['finish'],"%H:%M")))
         temp['result']="Setting Charge Slot "+str(payload['slot'])+" was a success"
     except:
         e = sys.exc_info()
@@ -314,6 +369,7 @@ def scss(payload):
     temp={}
     try:
         client.set_charge_slot_start(int(payload['slot']),datetime.strptime(payload['start'],"%H:%M"))
+        updateControlMQTT("Charge_start_time_slot_"+str(payload['slot']),str(datetime.strptime(payload['start'],"%H:%M")))
         temp['result']="Setting Charge Slot Start "+str(payload['slot'])+" was a success"
     except:
         e = sys.exc_info()
@@ -325,8 +381,8 @@ def scse(payload):
     temp={}
     try:
         client.set_charge_slot_end(int(payload['slot']),datetime.strptime(payload['finish'],"%H:%M"))
+        updateControlMQTT("Charge_end_time_slot_"+str(payload['slot']),str(datetime.strptime(payload['finish'],"%H:%M")))
         temp['result']="Setting Charge Slot End "+str(payload['slot'])+" was a success"
-        
     except:
         e = sys.exc_info()
         temp['result']="Setting Charge Slot End "+str(payload['slot'])+" failed: " + str(e)
@@ -708,6 +764,7 @@ def FEResume(revert):
         payload["mode"]=revert["mode"]
         result=setBatteryMode(payload)
         os.remove(".FERunning")
+        updateControlMQTT("Force_Export","Normal")
     except:
         e = sys.exc_info()
         temp['result']="Force Export Revert failed: " + str(e)
@@ -765,6 +822,7 @@ def forceExport(exportTime):
         f.close()
         logger.info("Force Export revert jobid is: "+fejob.id)
         temp['result']="Export successfully forced for "+str(exportTime)+" minutes"
+        updateControlMQTT("Force_Export","Running")
         logger.info(temp['result'])
     except:
         e = sys.exc_info()
@@ -787,6 +845,7 @@ def FCResume(revert):
     payload['slot']=1
     setChargeSlot(payload)
     os.remove(".FCRunning")
+    updateControlMQTT("Force_Charge","Normal")
 
 def cancelJob(jobid):
     if jobid in GivQueue.q.scheduled_job_registry:
@@ -837,7 +896,7 @@ def forceCharge(chargeTime):
             revert["chargeRate"]=regCacheStack[4]["Control"]["Battery_Charge_Rate"]
             revert["targetSOC"]=regCacheStack[4]["Control"]["Target_SOC"]
             revert["chargeScheduleEnable"]=regCacheStack[4]["Control"]["Enable_Charge_Schedule"]
-        maxChargeRate=int(regCacheStack[4]["Invertor_Details"]["Invertor_Max_Rate"])
+        maxChargeRate=int(regCacheStack[4]["Invertor_Details"]["Invertor_Max_Bat_Rate"])
 
         payload['chargeRate']=maxChargeRate
         result=setChargeRate(payload)
@@ -860,6 +919,7 @@ def forceCharge(chargeTime):
         f.close()
         logger.info("Force Charge revert jobid is: "+fcjob.id)
         temp['result']="Charge successfully forced for "+str(chargeTime)+" minutes"
+        updateControlMQTT("Force_Charge","Running")
         logger.info(temp['result'])
     except:
         e = sys.exc_info()
@@ -874,6 +934,7 @@ def tmpPDResume(payload):
         result=setDischargeRate(payload)
         if exists(".tpdRunning"): os.remove(".tpdRunning")
         temp['result']="Temp Pause Discharge Reverted"
+        updateControlMQTT("Temp_Pause_Discharge","Normal")
         logger.info(temp['result'])
     except:
         e = sys.exc_info()
@@ -905,6 +966,7 @@ def tempPauseDischarge(pauseTime):
         f.close()
         logger.info("Temp Pause Discharge revert jobid is: "+tpdjob.id)
         temp['result']="Discharge paused for "+str(delay)+" seconds"
+        updateControlMQTT("Temp_Pause_Discharge","Running")
         logger.info(temp['result'])
     except:
         e = sys.exc_info()
@@ -919,6 +981,7 @@ def tmpPCResume(payload):
         result=setChargeRate(payload)
         if exists(".tpcRunning"): os.remove(".tpcRunning")
         temp['result']="Temp Pause Charge Reverted"
+        updateControlMQTT("Temp_Pause_Charge","Normal")
         logger.info(temp['result'])
     except:
         e = sys.exc_info()
@@ -949,6 +1012,7 @@ def tempPauseCharge(pauseTime):
         f.close()
         logger.info("Temp Pause Charge revert jobid is: "+tpcjob.id)
         temp['result']="Charge paused for "+str(delay)+" seconds"
+        updateControlMQTT("Temp_Pause_Charge","Running")
         logger.info(temp['result'])
         logger.debug("Result is: "+temp['result'])
     except:

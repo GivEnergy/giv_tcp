@@ -10,6 +10,8 @@ RUN apk add tzdata
 RUN apk add musl-utils
 RUN apk add xsel
 RUN apk add redis
+RUN apk add npm
+
 
 # set the working directory in the container
 WORKDIR /app
@@ -28,6 +30,11 @@ COPY givenergy_modbus/ /usr/local/lib/python3.10/site-packages/givenergy_modbus
 COPY startup.py startup.py
 COPY startup_2.py startup_2.py
 COPY redis.conf redis.conf
+
+#COPY givtcp-vuejs/package.json ./config_frontend/package.json
+#RUN cd /app/config_frontend && npm install
+#COPY givtcp-vuejs ./config_frontend
+#RUN cd /app/config_frontend && npm run build
 
 ENV NUMINVERTORS=1
 ENV INVERTOR_IP_1=""
@@ -93,6 +100,6 @@ ENV PALM_WEIGHT=35
 ENV LOAD_HIST_WEIGHT="1"
 
 
-EXPOSE 6345 1883 3000 6379 9181
+EXPOSE 6345 1883 3000 5173 6379 9181
 
 CMD ["python3", "/app/startup.py"]

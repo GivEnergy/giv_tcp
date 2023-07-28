@@ -358,17 +358,20 @@ def getData(fullrefresh):  # Read from Inverter put in cache
         controlmode['Battery_Power_Cutoff'] = battery_cutoff
         controlmode['Battery_Power_Mode'] = batPowerMode
         controlmode['Target_SOC'] = target_soc
-        
-        controlmode['Local_control_mode'] = GivLUT.local_control_mode[int(GEInv.local_control_mode)]
-        controlmode['PV_input_mode'] = GivLUT.pv_input_mode[int(GEInv.pv_input_mode)]
-        controlmode['Battery_pause_mode'] = GivLUT.battery_pause_mode[int(GEInv.battery_pause_mode)]
+
+        try:
+            controlmode['Local_control_mode'] = GivLUT.local_control_mode[int(GEInv.local_control_mode)]
+            controlmode['PV_input_mode'] = GivLUT.pv_input_mode[int(GEInv.pv_input_mode)]
+            controlmode['Battery_pause_mode'] = GivLUT.battery_pause_mode[int(GEInv.battery_pause_mode)]
+        except:
+            logger.debug("New control modes don't exist for this model")
 
         controlmode['Enable_Charge_Schedule'] = charge_schedule
         controlmode['Enable_Discharge_Schedule'] = discharge_schedule
         controlmode['Enable_Discharge'] = discharge_enable
         controlmode['Battery_Charge_Rate'] = charge_rate
         controlmode['Battery_Discharge_Rate'] = discharge_rate
-#        controlmode['Active_Power_Rate']= GEInv.active_power_rate
+        controlmode['Active_Power_Rate']= GEInv.active_power_rate
         controlmode['Reboot_Invertor']="disable"
         controlmode['Reboot_Addon']="disable"
         if not isinstance(regCacheStack[4], int):
@@ -495,64 +498,69 @@ def getData(fullrefresh):  # Read from Inverter put in cache
         timeslots['Discharge_end_time_slot_2'] = GEInv.discharge_slot_2[1].isoformat()
         timeslots['Charge_start_time_slot_1'] = GEInv.charge_slot_1[0].isoformat()
         timeslots['Charge_end_time_slot_1'] = GEInv.charge_slot_1[1].isoformat()
+        try:
+            if inverterModel.generation == "Gen 2" or inverterModel.generation == "Gen 3":
+                timeslots['Charge_start_time_slot_2'] = GEInv.charge_slot_2[0].isoformat()
+                timeslots['Charge_end_time_slot_2'] = GEInv.charge_slot_2[1].isoformat()
+                timeslots['Charge_start_time_slot_3'] = GEInv.charge_slot_3[0].isoformat()
+                timeslots['Charge_end_time_slot_3'] = GEInv.charge_slot_3[1].isoformat()
+                timeslots['Charge_start_time_slot_4'] = GEInv.charge_slot_4[0].isoformat()
+                timeslots['Charge_end_time_slot_4'] = GEInv.charge_slot_4[1].isoformat()
+                timeslots['Charge_start_time_slot_5'] = GEInv.charge_slot_5[0].isoformat()
+                timeslots['Charge_end_time_slot_5'] = GEInv.charge_slot_5[1].isoformat()
+                timeslots['Charge_start_time_slot_6'] = GEInv.charge_slot_6[0].isoformat()
+                timeslots['Charge_end_time_slot_6'] = GEInv.charge_slot_6[1].isoformat()
+                timeslots['Charge_start_time_slot_7'] = GEInv.charge_slot_7[0].isoformat()
+                timeslots['Charge_end_time_slot_7'] = GEInv.charge_slot_7[1].isoformat()
+                timeslots['Charge_start_time_slot_8'] = GEInv.charge_slot_8[0].isoformat()
+                timeslots['Charge_end_time_slot_8'] = GEInv.charge_slot_8[1].isoformat()
+                timeslots['Charge_start_time_slot_9'] = GEInv.charge_slot_9[0].isoformat()
+                timeslots['Charge_end_time_slot_9'] = GEInv.charge_slot_9[1].isoformat()
+                timeslots['Charge_start_time_slot_10'] = GEInv.charge_slot_10[0].isoformat()
+                timeslots['Charge_end_time_slot_10'] = GEInv.charge_slot_10[1].isoformat()
+                timeslots['Discharge_start_time_slot_3'] = GEInv.discharge_slot_3[0].isoformat()
+                timeslots['Discharge_end_time_slot_3'] = GEInv.discharge_slot_3[1].isoformat()
+                timeslots['Discharge_start_time_slot_4'] = GEInv.discharge_slot_4[0].isoformat()
+                timeslots['Discharge_end_time_slot_4'] = GEInv.discharge_slot_4[1].isoformat()
+                timeslots['Discharge_start_time_slot_5'] = GEInv.discharge_slot_5[0].isoformat()
+                timeslots['Discharge_end_time_slot_5'] = GEInv.discharge_slot_5[1].isoformat()
+                timeslots['Discharge_start_time_slot_6'] = GEInv.discharge_slot_6[0].isoformat()
+                timeslots['Discharge_end_time_slot_6'] = GEInv.discharge_slot_6[1].isoformat()
+                timeslots['Discharge_start_time_slot_7'] = GEInv.discharge_slot_7[0].isoformat()
+                timeslots['Discharge_end_time_slot_7'] = GEInv.discharge_slot_7[1].isoformat()
+                timeslots['Discharge_start_time_slot_8'] = GEInv.discharge_slot_8[0].isoformat()
+                timeslots['Discharge_end_time_slot_8'] = GEInv.discharge_slot_8[1].isoformat()
+                timeslots['Discharge_start_time_slot_9'] = GEInv.discharge_slot_9[0].isoformat()
+                timeslots['Discharge_end_time_slot_9'] = GEInv.discharge_slot_9[1].isoformat()
+                timeslots['Discharge_start_time_slot_10'] = GEInv.discharge_slot_10[0].isoformat()
+                timeslots['Discharge_end_time_slot_10'] = GEInv.discharge_slot_10[1].isoformat()
+                controlmode['Charge_Target_SOC_2'] = GEInv.charge_target_soc_2
+                controlmode['Charge_Target_SOC_3'] = GEInv.charge_target_soc_3
+                controlmode['Charge_Target_SOC_4'] = GEInv.charge_target_soc_4
+                controlmode['Charge_Target_SOC_5'] = GEInv.charge_target_soc_5
+                controlmode['Charge_Target_SOC_6'] = GEInv.charge_target_soc_6
+                controlmode['Charge_Target_SOC_7'] = GEInv.charge_target_soc_7
+                controlmode['Charge_Target_SOC_8'] = GEInv.charge_target_soc_8
+                controlmode['Charge_Target_SOC_9'] = GEInv.charge_target_soc_9
+                controlmode['Charge_Target_SOC_10'] = GEInv.charge_target_soc_10
+                controlmode['Discharge_Target_SOC_1'] = GEInv.discharge_target_soc_1
+                controlmode['Discharge_Target_SOC_2'] = GEInv.discharge_target_soc_2
+                controlmode['Discharge_Target_SOC_3'] = GEInv.discharge_target_soc_3
+                controlmode['Discharge_Target_SOC_4'] = GEInv.discharge_target_soc_4
+                controlmode['Discharge_Target_SOC_5'] = GEInv.discharge_target_soc_5
+                controlmode['Discharge_Target_SOC_6'] = GEInv.discharge_target_soc_6
+                controlmode['Discharge_Target_SOC_7'] = GEInv.discharge_target_soc_7
+                controlmode['Discharge_Target_SOC_8'] = GEInv.discharge_target_soc_8
+                controlmode['Discharge_Target_SOC_9'] = GEInv.discharge_target_soc_9
+                controlmode['Discharge_Target_SOC_10'] = GEInv.discharge_target_soc_10
+        except:
+            logger.debug("New Charge/Discharge timeslots don't exist for this model")
 
-        if inverterModel.generation == "Gen 2" or inverterModel.generation == "Gen 3":
-            '''timeslots['Charge_start_time_slot_2'] = GEInv.charge_slot_2[0].isoformat()
-            timeslots['Charge_end_time_slot_2'] = GEInv.charge_slot_2[1].isoformat()
-            timeslots['Charge_start_time_slot_3'] = GEInv.charge_slot_3[0].isoformat()
-            timeslots['Charge_end_time_slot_3'] = GEInv.charge_slot_3[1].isoformat()
-            timeslots['Charge_start_time_slot_4'] = GEInv.charge_slot_4[0].isoformat()
-            timeslots['Charge_end_time_slot_4'] = GEInv.charge_slot_4[1].isoformat()
-            timeslots['Charge_start_time_slot_5'] = GEInv.charge_slot_5[0].isoformat()
-            timeslots['Charge_end_time_slot_5'] = GEInv.charge_slot_5[1].isoformat()
-            timeslots['Charge_start_time_slot_6'] = GEInv.charge_slot_6[0].isoformat()
-            timeslots['Charge_end_time_slot_6'] = GEInv.charge_slot_6[1].isoformat()
-            timeslots['Charge_start_time_slot_7'] = GEInv.charge_slot_7[0].isoformat()
-            timeslots['Charge_end_time_slot_7'] = GEInv.charge_slot_7[1].isoformat()
-            timeslots['Charge_start_time_slot_8'] = GEInv.charge_slot_8[0].isoformat()
-            timeslots['Charge_end_time_slot_8'] = GEInv.charge_slot_8[1].isoformat()
-            timeslots['Charge_start_time_slot_9'] = GEInv.charge_slot_9[0].isoformat()
-            timeslots['Charge_end_time_slot_9'] = GEInv.charge_slot_9[1].isoformat()
-            timeslots['Charge_start_time_slot_10'] = GEInv.charge_slot_10[0].isoformat()
-            timeslots['Charge_end_time_slot_10'] = GEInv.charge_slot_10[1].isoformat()
-            timeslots['Discharge_start_time_slot_3'] = GEInv.discharge_slot_3[0].isoformat()
-            timeslots['Discharge_end_time_slot_3'] = GEInv.discharge_slot_3[1].isoformat()
-            timeslots['Discharge_start_time_slot_4'] = GEInv.discharge_slot_4[0].isoformat()
-            timeslots['Discharge_end_time_slot_4'] = GEInv.discharge_slot_4[1].isoformat()
-            timeslots['Discharge_start_time_slot_5'] = GEInv.discharge_slot_5[0].isoformat()
-            timeslots['Discharge_end_time_slot_5'] = GEInv.discharge_slot_5[1].isoformat()
-            timeslots['Discharge_start_time_slot_6'] = GEInv.discharge_slot_6[0].isoformat()
-            timeslots['Discharge_end_time_slot_6'] = GEInv.discharge_slot_6[1].isoformat()
-            timeslots['Discharge_start_time_slot_7'] = GEInv.discharge_slot_7[0].isoformat()
-            timeslots['Discharge_end_time_slot_7'] = GEInv.discharge_slot_7[1].isoformat()
-            timeslots['Discharge_start_time_slot_8'] = GEInv.discharge_slot_8[0].isoformat()
-            timeslots['Discharge_end_time_slot_8'] = GEInv.discharge_slot_8[1].isoformat()
-            timeslots['Discharge_start_time_slot_9'] = GEInv.discharge_slot_9[0].isoformat()
-            timeslots['Discharge_end_time_slot_9'] = GEInv.discharge_slot_9[1].isoformat()
-            timeslots['Discharge_start_time_slot_10'] = GEInv.discharge_slot_10[0].isoformat()
-            timeslots['Discharge_end_time_slot_10'] = GEInv.discharge_slot_10[1].isoformat()
-            controlmode['Charge_Target_SOC_2'] = GEInv.charge_target_soc_2
-            controlmode['Charge_Target_SOC_3'] = GEInv.charge_target_soc_3
-            controlmode['Charge_Target_SOC_4'] = GEInv.charge_target_soc_4
-            controlmode['Charge_Target_SOC_5'] = GEInv.charge_target_soc_5
-            controlmode['Charge_Target_SOC_6'] = GEInv.charge_target_soc_6
-            controlmode['Charge_Target_SOC_7'] = GEInv.charge_target_soc_7
-            controlmode['Charge_Target_SOC_8'] = GEInv.charge_target_soc_8
-            controlmode['Charge_Target_SOC_9'] = GEInv.charge_target_soc_9
-            controlmode['Charge_Target_SOC_10'] = GEInv.charge_target_soc_10
-            controlmode['Discharge_Target_SOC_1'] = GEInv.discharge_target_soc_1
-            controlmode['Discharge_Target_SOC_2'] = GEInv.discharge_target_soc_2
-            controlmode['Discharge_Target_SOC_3'] = GEInv.discharge_target_soc_3
-            controlmode['Discharge_Target_SOC_4'] = GEInv.discharge_target_soc_4
-            controlmode['Discharge_Target_SOC_5'] = GEInv.discharge_target_soc_5
-            controlmode['Discharge_Target_SOC_6'] = GEInv.discharge_target_soc_6
-            controlmode['Discharge_Target_SOC_7'] = GEInv.discharge_target_soc_7
-            controlmode['Discharge_Target_SOC_8'] = GEInv.discharge_target_soc_8
-            controlmode['Discharge_Target_SOC_9'] = GEInv.discharge_target_soc_9
-            controlmode['Discharge_Target_SOC_10'] = GEInv.discharge_target_soc_10  '''
+        try:
             timeslots['Battery_pause_start_time_slot'] = GEInv.battery_pause_slot[0].isoformat()
             timeslots['Battery_pause_end_time_slot'] = GEInv.battery_pause_slot[1].isoformat()
-
+        except:
+            logger.debug("Battery Pause timeslots don't exist for this model")
 
         ######## Get Inverter Details ########
         inverter = {}
