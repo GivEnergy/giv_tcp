@@ -68,6 +68,15 @@ if isAddon:
         hasMQTT=False
         logger.critical("No HA MQTT service has been found")
 
+    #Get Timezone    
+    url="http://supervisor/info"
+    result = requests.get(url,
+        headers={'Content-Type':'application/json',
+                'Authorization': 'Bearer {}'.format(access_token)})
+    info=result.json()
+    SuperTimezone=info['timezone']
+    logger.info("Supervisor Timezone: "+str(info['timezone']))
+
     #Get Host Details    
     url="http://supervisor/network/info"
     result = requests.get(url,
@@ -244,6 +253,7 @@ for inv in range(1,int(os.getenv('NUMINVERTORS'))+1):
             outp.write("    cache_location=\""+str(os.getenv("CACHELOCATION")+"\"\n"))
             outp.write("    Debug_File_Location=\""+os.getenv("CACHELOCATION")+"/log_inv_"+str(inv)+".log\"\n")
         outp.write("    inverter_num=\""+str(inv)+"\"\n")
+        if SuperTimezone: outp.write("    timezone=\""+str(SuperTimezone)+"\"\n")
         
 
     ######

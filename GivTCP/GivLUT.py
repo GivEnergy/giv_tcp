@@ -329,3 +329,13 @@ class GivLUT:
     def getTime(timestamp):
         timeslot=timestamp.strftime("%H:%M")
         return (timeslot)
+    
+
+'''
+Firmware Versions for each Model
+AC coupled 5xx old, 2xx new. 28x, 29x beta
+Gen1 4xx Old, 1xx New. 19x Beta
+Gen 2 909+ New. 99x Beta
+Gen3 303+ New 39x Beta
+AIO 6xx New 69x Beta
+'''
