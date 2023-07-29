@@ -31,7 +31,7 @@ class InvType:
     def __init__(self,ph,md,pw,mr,gn):
         self.phase=ph
         self.model=md
-        self.power=pw
+        self.invmaxrate=pw
         self.batmaxrate=mr
         self.generation=gn
 
