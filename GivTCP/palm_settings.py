@@ -43,10 +43,10 @@ class GE:
 
     #batt_max_charge = batt_capacity * batt_utilisation
 
-    # Inverter charge/discharge rate in kW
+    # Inverter charge/discharge rate in kW, INVERTER_MAX_BAT_RATE is in Watts
     #charge_rate = 2.5
     #charge_rate = float(os.getenv('PALM_CHARGE_RATE'))
-    charge_rate = float(os.getenv('INVERTER_MAX_BAT_RATE'))
+    charge_rate = float(os.getenv('INVERTER_MAX_BAT_RATE') / 1000)
   
     # Default data for base load. Overwritten by actual data if available
     base_load = [0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.2, \
