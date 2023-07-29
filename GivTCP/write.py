@@ -957,6 +957,7 @@ def tempPauseDischarge(pauseTime):
                 regCacheStack= pickle.load(inp)
             revertRate=regCacheStack[4]["Control"]["Battery_Discharge_Rate"]
         else:
+
             revertRate=2600
         payload['dischargeRate']=revertRate
         delay=float(pauseTime*60)

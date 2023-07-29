@@ -881,6 +881,7 @@ def ratecalcs(multi_output, multi_output_old):
     logger.debug("Day Start= "+datetime.datetime.strftime(day_start, '%c'))
     import_energy = multi_output['Energy']['Total']['Import_Energy_Total_kWh']
     import_energy_old = multi_output_old['Energy']['Total']['Import_Energy_Total_kWh']
+
     # check if pickle data exists:
     if exists(GivLUT.ratedata):
         with open(GivLUT.ratedata, 'rb') as inp:
@@ -913,7 +914,6 @@ def ratecalcs(multi_output, multi_output_old):
         rate_data['Night_Energy_Total_kWh'] = 0
     if not('Day_Energy_Total_kWh' in rate_data):
         rate_data['Day_Energy_Total_kWh'] = 0
-
 
     # if midnight then reset costs
     if datetime.datetime.now(GivLUT.timezone).hour == 0 and datetime.datetime.now(GivLUT.timezone).minute == 0:

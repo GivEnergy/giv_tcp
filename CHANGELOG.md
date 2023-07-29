@@ -27,12 +27,25 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
   - Gen2 inverters now have access to 10 charge and discharge slots
 - Inverter_Max_Inv_Rate added as new "Inverter Details" entity
 
+## [2.2.4] - 2023-07-14
+### Fixed
+- Fixed Temp Pause Charge and Temp Pause Discharge selct controls, which weren't reverting
+- Fixed Influxdb string error
+
+## [2.2.3] - 2023-07-03
+### Fixed
+- Fixed Charge_time_remaining device_class error
+
+## [2.2.2] - 2023-07-03
+### Fixed
+- Fixed charge target bug (Thanks S0ckhamster)
+
 ## [2.2.1] - 2023-06-29
 ### Fixed
 - Invertor Mode calculation
 - Fixed Inverer Time entity
 ### Added
-- Now compatable with the new GE AIO device (no battery data yet)
+- Work in progress compatability with the new GE AIO device (no battery data yet) - Beta testers needed
 - New battery power mode switch (replicates the GE Portal "Eco" switch)
 
 
