@@ -48,13 +48,12 @@ class GE:
 
     # Inverter charge/discharge rate in kW, INVERTER_MAX_BAT_RATE is in Watts
     #charge_rate = 2.5
-    #charge_rate = float(os.getenv('PALM_CHARGE_RATE'))
-    charge_rate = float(os.getenv('INVERTER_MAX_BAT_RATE') / 1000)
+    #charge_rate = float(os.getenv('INVERTER_MAX_BAT_RATE') / 1000)
     if exists(GivLUT.regcache):      # if there is a cache then grab it
         with open(GivLUT.regcache, 'rb') as inp:
             regCacheStack = pickle.load(inp)
             multi_output_old = regCacheStack[4]
-        charge_rate=multi_output_old['Invertor_Details']['Invertor_Max_Bat_Rate']
+        charge_rate=float(multi_output_old['Invertor_Details']['Invertor_Max_Bat_Rate'])/1000
     else:
         charge_rate=2.5
 
