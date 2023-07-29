@@ -537,9 +537,9 @@ class SolcastObj:
         self.pv_est50_day: [int] = [0] *  7
         self.pv_est90_day: [int] = [0] * 7
 
-        self.pv_est10_30: [int] = [0] * 48
-        self.pv_est50_30: [int] = [0] * 48
-        self.pv_est90_30: [int] = [0] * 48
+        self.pv_est10_30: [int] = [0] * 96
+        self.pv_est50_30: [int] = [0] * 96
+        self.pv_est90_30: [int] = [0] * 96
 
     def update(self):
         """Updates forecast generation from Solcast server."""
@@ -606,7 +606,7 @@ class SolcastObj:
 
         i = solcast_offset
         cntr = 0
-        while i < forecast_lines * interval:
+        while i < solcast_offset + forecast_lines * interval:
             if stgs.Solcast.url_sw != "":  # Two arrays are specified
                 pv_est10[i] = (int(solcast_data_1['forecasts'][cntr]['pv_estimate10'] * 1000) +
                     int(solcast_data_2['forecasts'][cntr]['pv_estimate10'] * 1000))
@@ -623,7 +623,7 @@ class SolcastObj:
                 cntr += 1
             i += 1
 
-        if solcast_offset > 720:  # Forget obout current day
+        if solcast_offset > 720:  # Forget about current day
             offset = 1440 - 90
         else:
             offset = 0
@@ -638,7 +638,7 @@ class SolcastObj:
             i += 1
 
         i = 0
-        while i < 48:  # Calculate half-hourly generation
+        while i < 96:  # Calculate half-hourly generation
             start = i * 30 + offset + 1
             end = start + 29
             self.pv_est10_30[i] = round(sum(pv_est10[start:end])/60000, 3)
