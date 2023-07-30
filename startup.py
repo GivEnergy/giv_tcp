@@ -74,8 +74,8 @@ if isAddon:
         headers={'Content-Type':'application/json',
                 'Authorization': 'Bearer {}'.format(access_token)})
     info=result.json()
-    SuperTimezone=info['timezone']
-    logger.info("Supervisor Timezone: "+str(info['timezone']))
+    SuperTimezone=info['data']['timezone']
+    logger.info("Supervisor Timezone: "+str(SuperTimezone))
 
     #Get Host Details    
     url="http://supervisor/network/info"

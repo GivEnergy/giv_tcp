@@ -76,10 +76,12 @@ class GivLUT:
     invippkl=GiV_Settings.cache_location+"/invIPList.pkl"
 
 
-    if "TZ" in os.environ:
+    if hasattr(GiV_Settings,'timezone'):                        # If in Addon, use the HA Supervisor timezone
+        timezone=zoneinfo.ZoneInfo(key=GiV_Settings.timezone)    
+    elif "TZ" in os.environ:                                    # Otherwise use the ENV (for Docker)
         timezone=zoneinfo.ZoneInfo(key=os.getenv("TZ"))
     else:
-        timezone=zoneinfo.ZoneInfo(key="Europe/London")
+        timezone=zoneinfo.ZoneInfo(key="Europe/London")         # Otherwise Assume everyone is in UK!
 
     # Standard values for devices
     maxInvPower=11000

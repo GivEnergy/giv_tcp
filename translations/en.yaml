@@ -15,7 +15,11 @@ configuration:
   INVERTOR_AIO_1:
     name: Inverter 1 - Is it an AIO?
     description: >-
-      Does this firmware need the new modubs connection to work, only applies to AIO and future firmware releases. If unsure, leave it as False/off
+      Does this Inverter need the new modbus connection to work, only applies to AIO and future firmware releases. If unsure, leave it as False/off
+  INVERTOR_AC_1:
+    name: Inverter 1 - Is it on old firmware?
+    description: >-
+      Does this Inverter need the old modbus connection to work, only applies to old firmware releases. If unsure, leave it as False/off
   HADEVICEPREFIX:
     name: Inverter 1 - Home Assistant Entity Prefix
     description: >-
@@ -31,7 +35,11 @@ configuration:
   INVERTOR_AIO_2:
     name: Inverter 2 - Is it an AIO?
     description: >-
-      Does this firmware need the new modubs connection to work, only applies to AIO and future firmware releases. If unsure, leave it as False/off
+      Does this Inverter need the new modbus connection to work, only applies to AIO and future firmware releases. If unsure, leave it as False/off
+  INVERTOR_AC_2:
+    name: Inverter 2 - Is it on old firmware?
+    description: >-
+      Does this Inverter need the old modbus connection to work, only applies to old firmware releases. If unsure, leave it as False/off
   HADEVICEPREFIX_2:
     name: Inverter 2 - Home Assistant Entity Prefix
     description: >-
@@ -47,7 +55,11 @@ configuration:
   INVERTOR_AIO_3:
     name: Inverter 3 - Is it an AIO?
     description: >-
-      Does this firmware need the new modubs connection to work, only applies to AIO and future firmware releases. If unsure, leave it as False/off
+      Does this Inverter need the new modbus connection to work, only applies to AIO and future firmware releases. If unsure, leave it as False/off
+  INVERTOR_AC_3:
+    name: Inverter 3 - Is it on old firmware?
+    description: >-
+      Does this Inverter need the old modbus connection to work, only applies to old firmware releases. If unsure, leave it as False/off
   HADEVICEPREFIX_3:
     name: Inverter 3 - Home Assistant Entity Prefix
     description: >-
