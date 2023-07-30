@@ -10,7 +10,7 @@ The basis of this project is a connection to the Modbus TCP server which runs on
 
 ## Docker
 You can find the Docker container repo here: https://hub.docker.com/repository/docker/britkat/giv_tcp-ma
-This will set up a self-running service which will publish data as required and provide a REST interface for control. An internal MQTT broker can be activiated to make data avalable on the network.
+This will set up a self-running service which will publish data as required and provide a REST interface for control. An internal MQTT broker can be activiated to make data available on the network.
  
 * Docker image is multi-architecture so docker should grab the correct version for your system (tested on x86 and rpi3)
 * Create a container with the relevant ENV variables below (mimicing the settings.py file)
@@ -144,8 +144,8 @@ Data is published to "GivEnergy/<serial_number>/" by default or you can nominate
 
 Control is available using MQTT. By publishing data to the same MQTT broker as above you can trigger the control methods as per the above table.
 Root topic for control is:
-"GivEnergy/<serial_number>/control/"    - Default
-"<MQTT_TOPIC>/<serial_number>/control/" - If MQTT_TOPIC is set
+"GivEnergy/control/<serial_number>/"    - Default
+"<MQTT_TOPIC>/control/<serial_number>/" - If MQTT_TOPIC is set
 
 ### RESTful Service
 GivTCP provides a wrapper function REST.py which uses Flask to expose the read and control functions as RESTful http calls. To utilise this service you will need to either use a WSGI service such as gunicorn or use the pre-built Docker container.

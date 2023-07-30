@@ -2,6 +2,9 @@
 # Settings file for use with palm.py: 30-minute calculations (v0.9.0) and weightings for daily historical consumption (v0.10.0)
 
 from settings import GiV_Settings
+from GivLUT import GivLUT
+import pickle
+from os.path import exists
 import os
 
 # User settings for GivEnergy inverter API
@@ -43,14 +46,22 @@ class GE:
 
     #batt_max_charge = batt_capacity * batt_utilisation
 
-    # Inverter charge/discharge rate in kW
-    charge_rate = 2.5
-    #charge_rate = float(os.getenv('PALM_CHARGE_RATE'))
+    # Inverter charge/discharge rate in kW, INVERTER_MAX_BAT_RATE is in Watts
+    #charge_rate = 2.5
+    #charge_rate = float(os.getenv('INVERTER_MAX_BAT_RATE') / 1000)
+    if exists(GivLUT.regcache):      # if there is a cache then grab it
+        with open(GivLUT.regcache, 'rb') as inp:
+            regCacheStack = pickle.load(inp)
+            multi_output_old = regCacheStack[4]
+        charge_rate=float(multi_output_old['Invertor_Details']['Invertor_Max_Bat_Rate'])/1000
+    else:
+        charge_rate=2.5
 
+  
     # Default data for base load. Overwritten by actual data if available
-    base_load = [0.3, 2, 0.3, 0.3, 0.3, 0.5, 1.7, 1.8, 2.6, 1.5, 0.5, 2.5, 1.3, 1, 1.5, 0.5, 0.3, \
-                 1, 1.5, 1, 0.6, 0.5, 0.5, 0.3, 0.3, 2, 0.3, 0.3, 0.3, 0.5, 1.7, 1.8, 2.6, 1.5, \
-                 0.5, 2.5, 1.3, 1, 1.5, 0.5, 0.3, 1, 1.5, 1, 0.6, 0.5, 0.5, 0.3]
+    base_load = [0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.2, \
+                 0.2, 0.2, 0.2, 0.3, 0.2, 0.2, 0.1, 0.3, 0.3, 0.2, 0.3, 0.8, 0.6, 0.3, 0.3, 0.2, \
+                 0.2, 0.2, 0.2, 0.6, 0.6, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1]
 
     # Load history is a weighted average of actual load from previous days.
     # Uncomment required settings or make your own using positive integers only. Examples:

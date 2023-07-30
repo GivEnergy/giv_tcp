@@ -17,7 +17,7 @@ from mqtt import GivMQTT
 import requests
 import importlib
 
-logging.getLogger("givenergy_modbus").setLevel(logging.INFO)
+logging.getLogger("givenergy_modbus").setLevel(logging.CRITICAL)
 client=GivEnergyClient(host=GiV_Settings.invertorIP)
 
 logger = GivLUT.logger
@@ -231,7 +231,7 @@ def smd():
     temp={}
     try:
         client.set_mode_dynamic()
-        updateControlMQTT("Mode","Eco")
+        #updateControlMQTT("Mode","Eco")
         temp['result']="Setting dynamic mode was a success"
     except:
         e = sys.exc_info()
@@ -252,7 +252,7 @@ def sbdmd():
     temp={}
     try:
         client.set_battery_discharge_mode_demand()
-        updateControlMQTT("Mode","Timed Demand")
+        #updateControlMQTT("Mode","Timed Demand")
         temp['result']="Setting demand mode was a success"
     except:
         e = sys.exc_info()
@@ -263,7 +263,7 @@ def sbdmmp():
     temp={}
     try:
         client.set_battery_discharge_mode_max_power()
-        updateControlMQTT("Mode","Timed Export")
+        #updateControlMQTT("Mode","Timed Export")
         temp['result']="Setting export mode was a success"
     except:
         e = sys.exc_info()

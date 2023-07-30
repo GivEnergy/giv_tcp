@@ -90,7 +90,7 @@ def getData(fullrefresh):  # Read from Inverter put in cache
         inverterModel.model=GEInv.inverter_model
         inverterModel.generation=GEInv.inverter_generation
         inverterModel.phase=GEInv.inverter_phases
-        inverterModel.power=GEInv.inverter_maxpower
+        inverterModel.invmaxrate=GEInv.inverter_maxpower
 
         if GEInv.device_type_code=="8001":  # if AIO
             batteryCapacity=GEInv.battery_nominal_capacity*307
@@ -201,7 +201,7 @@ def getData(fullrefresh):  # Read from Inverter put in cache
         # Inverter Power
         logger.debug("Getting PInv Power")
         inverter_power = GEInv.p_inverter_out
-        if -6000 <= inverter_power <= 6000:
+        if -inverterModel.invmaxrate <= inverter_power <=inverterModel.invmaxrate:
             power_output['Invertor_Power'] = inverter_power
         if inverter_power < 0:
             power_output['AC_Charge_Power'] = abs(inverter_power)
@@ -348,6 +348,9 @@ def getData(fullrefresh):  # Read from Inverter put in cache
         elif GEInv.battery_power_mode == 0 and GEInv.enable_discharge == True:
             # Storage (export) r27=0 r59=1
             mode = "Timed Export"
+        elif GEInv.battery_power_mode == 0 and GEInv.enable_discharge == False:
+            # Dynamic r27=1 r110=4 r59=0
+            mode = "Eco (Paused)"
         else:
             mode = "Unknown"
 
@@ -581,7 +584,7 @@ def getData(fullrefresh):  # Read from Inverter put in cache
             metertype = "EM418"
         inverter['Meter_Type'] = metertype
         inverter['Invertor_Type'] = inverterModel.generation + " " + inverterModel.model
-        inverter['Invertor_Max_Inv_Rate'] = inverterModel.power
+        inverter['Invertor_Max_Inv_Rate'] = inverterModel.invmaxrate
         inverter['Invertor_Max_Bat_Rate'] = inverterModel.batmaxrate
         inverter['Invertor_Temperature'] = GEInv.temp_inverter_heatsink
 
@@ -800,12 +803,14 @@ def publishOutput(array, SN):
     tempoutput = iterate_dict(array)
 
     if GiV_Settings.MQTT_Output:
-        if GiV_Settings.first_run and GiV_Settings.HA_Auto_D:        # Home Assistant MQTT Discovery
-            logger.critical("Publishing Home Assistant Discovery messages")
-            from HA_Discovery import HAMQTT
-            HAMQTT.publish_discovery(tempoutput, SN)
-        GiV_Settings.first_run = False
-        updateFirstRun(SN)
+        if GiV_Settings.first_run:        # 09-July-23 - HA is seperated to seperate if check.
+          updateFirstRun(SN)              # 09=July=23 - Always do this first irrespective of HA setting.
+          if GiV_Settings.HA_Auto_D:        # Home Assistant MQTT Discovery
+              logger.critical("Publishing Home Assistant Discovery messages")
+              from HA_Discovery import HAMQTT
+              HAMQTT.publish_discovery(tempoutput, SN)
+          GiV_Settings.first_run = False  # 09-July-23 - Always set firstrun irrespective of HA setting.
+
         from mqtt import GivMQTT
         logger.debug("Publish all to MQTT")
         if GiV_Settings.MQTT_Topic == "":
@@ -904,16 +909,15 @@ def ratecalcs(multi_output, multi_output_old):
         rate_data['Night_Cost'] = 0.00
     if not('Day_Cost' in rate_data):
         rate_data['Day_Cost'] = 0.00
-    if not('Day_Rate' in rate_data):
-        rate_data['Day_Rate'] = GiV_Settings.day_rate
-    if not('Night_Rate' in rate_data):
-        rate_data['Night_Rate'] = GiV_Settings.night_rate
-    if not('Export_Rate' in rate_data):
-        rate_data['Export_Rate'] = GiV_Settings.export_rate
     if not('Night_Energy_Total_kWh' in rate_data):
         rate_data['Night_Energy_Total_kWh'] = 0
     if not('Day_Energy_Total_kWh' in rate_data):
         rate_data['Day_Energy_Total_kWh'] = 0
+
+# Always update rates from new setting
+    rate_data['Export_Rate'] = GiV_Settings.export_rate
+    rate_data['Day_Rate'] = GiV_Settings.day_rate
+    rate_data['Night_Rate'] = GiV_Settings.night_rate
 
     # if midnight then reset costs
     if datetime.datetime.now(GivLUT.timezone).hour == 0 and datetime.datetime.now(GivLUT.timezone).minute == 0:

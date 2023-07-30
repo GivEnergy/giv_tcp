@@ -55,8 +55,9 @@ logger = GivLUT.logger
 # v0.9.2SoC    09/Jun/23 Merge with palm.py, including fallback inverter writes via API
 # v0.9.3       18/Jun/23 Fixed significant bug in SoC calculation introduced in v0.9.2
 # v0.10.0      21/Jun/23 Added multi-day averaging for usage calcs
+# v1.0.0       28/Jul/23 Align with palm v1.0.0: 48-hour forecast, minor bugfixes
 
-PALM_VERSION = "v0.10.0SoC"
+PALM_VERSION = "v1.0.0SoC"
 # -*- coding: utf-8 -*-
 
 class GivEnergyObj:
@@ -408,104 +409,117 @@ class GivEnergyObj:
             self.set_mode("set_soc_winter")
             return
 
+        # Quick check for valid generation data
+        if gen_fcast.pv_est50_day[0] == 0:
+            logger.error("Missing generation data, SoC set to 100")
+            self.set_mode("set_soc")
+            return
+
         # Solcast provides 3 estimates (P10, P50 and P90). Compute individual weighting
         # factors for each of the 3 estimates from the weight input parameter, using a
         # triangular approximation for simplicity
 
         weight = min(max(weight,10),90)  # Range check
-        wgt_10 = max(0, 50 - weight)  # Triangular approximation to Solcast normal distrbution
+        wgt_10 = max(0, 50 - weight)
         if weight > 50:
             wgt_50 = 90 - weight
         else:
             wgt_50 = weight - 10
         wgt_90 = max(0, weight - 50)
 
-        tgt_soc = 100
-        if gen_fcast.pv_est50_day[0] > 0:
-            if MNTH_VAR in stgs.GE.winter and commit:  # No need for sums...
-                print("info; winter month, SoC set to 100%")
-                self.set_mode("set_soc_winter")
-                return
+        logger.info("")
+        logger.info("{:<20} {:>10} {:>10} {:>10} {:>10}  {:>10} {:>10}".format("SoC Calc;",
+            "Day", "Hour", "Charge", "Cons", "Gen", "SoC"))
 
-            # The clever bit:
-            # Start with a battery at 100%. For each 30 -minute slot of the coming day, calculate
-            # the battery charge based on forecast generation and historical usage. Capture values
-            # for maximum charge and also the minimum charge value at any time before the maximum.
+        if stgs.GE.end_time != "":
+            end_charge_period = int(stgs.GE.end_time[0:2]) * 2
+        else:
+            end_charge_period = 8
 
-            #batt_max_charge: float = stgs.GE.batt_max_charge
-            batt_max_charge: float = self.batcap * stgs.GE.batt_utilisation
-            batt_charge: float = [0] * 49
-            batt_charge[0] = batt_max_charge
-            max_charge = 0
-            min_charge = batt_max_charge
+        batt_max_charge: float = stgs.GE.batt_max_charge
+        batt_charge: float = [0] * 98
+        reserve_energy = batt_max_charge * stgs.GE.batt_reserve / 100
+        max_charge_pcnt = [0] * 2
+        min_charge_pcnt = [0] * 2
 
-            logger.debug("")
-            logger.debug("{:<20} {:>10} {:>10} {:>10}  {:>10} {:>10}".format("SoC Calc;",
-                "Hour", "Charge", "Cons", "Gen", "SoC"))
+        # The clever bit:
+        # Start with battery at reserve %. For each 30-minute slot of the coming day, calculate
+        # the battery charge based on forecast generation and historical usage. Capture values
+        # for maximum charge and also the minimum charge value at any time before the maximum.
 
-            if stgs.GE.end_time != "":
-                end_charge_period = int(stgs.GE.end_time[0:2]) * 2
-            else:
-                end_charge_period = 8
-
-            i = 0
+        day = 0
+        while day < 2:  # Repeat for tomorrow and next day
+            batt_charge[0] = max_charge = min_charge = reserve_energy
             est_gen = 0
+            i = 0
             while i < 48:
                 if i <= end_charge_period:  # Battery is in AC Charge mode
                     total_load = 0
-                    batt_charge[i] = batt_max_charge
+                    batt_charge[i] = batt_charge[0]
                 else:
                     total_load = ge.base_load[i]
-                    est_gen = (gen_fcast.pv_est10_30[i] * wgt_10 +
-                        gen_fcast.pv_est50_30[i] * wgt_50+
-                        gen_fcast.pv_est90_30[i] * wgt_90) / (wgt_10 + wgt_50 + wgt_90)
+                    est_gen = (gen_fcast.pv_est10_30[day*48 + i] * wgt_10 +
+                        gen_fcast.pv_est50_30[day*48 + i] * wgt_50 +
+                        gen_fcast.pv_est90_30[day*48 + i] * wgt_90) / (wgt_10 + wgt_50 + wgt_90)
                     batt_charge[i] = (batt_charge[i - 1] +
                         max(-1 * stgs.GE.charge_rate,
                         min(stgs.GE.charge_rate, (est_gen - total_load))))
 
-                # Capture min charge on lowest down-slope before charge exceeds 100% append
-                # max charge if on an up slope after overnight charge
+                # Capture min charge on lowest point on down-slope before charge reaches 100%
+                # or max charge if on an up slope after overnight charge
                 if (batt_charge[i] <= batt_charge[i - 1] and
                     max_charge < batt_max_charge):
                     min_charge = min(min_charge, batt_charge[i])
                 elif i > end_charge_period:  # Charging after overnight boost
                     max_charge = max(max_charge, batt_charge[i])
 
-                logger.debug("{:<20} {:>10} {:>10} {:>10}  {:>10} {:>10}".format("SoC Calc;",
-                    t_to_hrs(i * 30), round(batt_charge[i], 2), round(total_load, 2),
+                logger.info("{:<20} {:>10} {:>10} {:>10} {:>10}  {:>10} {:>10}".format("SoC Calc;",
+                    day, t_to_hrs(i * 30), round(batt_charge[i], 2), round(total_load, 2),
                     round(est_gen, 2), int(100 * batt_charge[i] / batt_max_charge)))
-
                 i += 1
 
-            max_charge_pcnt = int(100 * max_charge / batt_max_charge)
-            min_charge_pcnt = int(100 * min_charge / batt_max_charge)
+            max_charge_pcnt[day] = int(100 * max_charge / batt_max_charge)
+            min_charge_pcnt[day] = int(100 * min_charge / batt_max_charge)
 
-            # low_soc is the minimum SoC target. Provide more buffer capacity in shoulder months
-            if MNTH_VAR in stgs.GE.shoulder:
-                low_soc = stgs.GE.max_soc_target
-            else:
-                low_soc = stgs.GE.min_soc_target
+            day += 1
 
-            # The really clever bit is just two lines:
-            # Reduce the target SoC to the greater of:
-            #     The surplus above 100% for max_charge_pcnt
-            #     The spare capacity in the battery before the maximum charge point
-            #     The preset minimum value
-            # Range check the resulting value
-            tgt_soc = max(200 - max_charge_pcnt, 100 - min_charge_pcnt, low_soc)
-            tgt_soc = int(min(tgt_soc, 100))  # Limit range to 100%
-
-            logger.info("{:<25} {:>10} {:>10} {:>10} {:>10} {:>10}".format("SoC Calc Summary;",
-                "Max Charge", "Min Charge", "Max %", "Min %", "Target SoC"))
-            logger.info("{:<25} {:>10} {:>10} {:>10} {:>10} {:>10}".format("SoC Calc Summary;",
-                round(max_charge, 2), round(min_charge, 2),
-                max_charge_pcnt, min_charge_pcnt, tgt_soc))
-            logger.info("{:<25} {:>10} {:>10} {:>10} {:>10} {:>10}".format("SoC (Adjusted);",
-                round(max_charge, 2), round(min_charge, 2),
-                max_charge_pcnt - 100 + tgt_soc, min_charge_pcnt - 100 + tgt_soc, "\n"))
-
+        # low_soc is the minimum SoC target. Provide more buffer capacity in shoulder months
+        # when load is likely to be more variable, e.g. heating
+        if MNTH_VAR in stgs.GE.shoulder:
+            low_soc = stgs.GE.max_soc_target
         else:
-            logger.warning("Incomplete Solcast data, setting target SoC to 100%")
+            low_soc = stgs.GE.min_soc_target
+
+        # So we now have the four values of max & min charge for tomorrow & overmorrow
+        # Check if overmorrow is better than tomorrow and there is opportunity to reduce target
+        # to avoid residual charge at the end of the day in anticipation of a sunny day
+        if max_charge_pcnt[1] > 100 - low_soc > max_charge_pcnt[0]:
+            logger.info("Overmorrow correction applied")
+            max_charge_pc = max_charge_pcnt[0] + (max_charge_pcnt[1] - 100) / 2
+        else:
+            logger.info("Overmorrow correction not needed/applied")
+            max_charge_pc = max_charge_pcnt[0]
+        min_charge_pc = min_charge_pcnt[0]
+
+        print("Min & max", min_charge_pc, max_charge_pc)
+        # The really clever bit: reduce the target SoC to the greater of:
+        #     The surplus above 100% for max_charge_pcnt
+        #     The value needed to achieve the stated spare capacity at minimum charge point
+        #     The preset minimum value
+        tgt_soc = max(100 - max_charge_pc, (low_soc - min_charge_pc), low_soc)
+        # Range check the resulting value
+        tgt_soc = int(min(tgt_soc, 100))  # Limit range to 100%
+
+        # Produce SoC plots (y1 = baseline, y2 = adjusted)
+
+        logger.info("{:<25} {:>10} {:>10} {:>10} {:>10} {:>10}".format("SoC Calc Summary;",
+            "Max Charge", "Min Charge", "Max %", "Min %", "Target SoC"))
+        logger.info("{:<25} {:>10} {:>10} {:>10} {:>10} {:>10}".format("SoC Calc Summary;",
+            round(max_charge, 2), round(min_charge, 2),
+            max_charge_pc, min_charge_pc, tgt_soc))
+        logger.info("{:<25} {:>10} {:>10} {:>10} {:>10} {:>10}".format("SoC (Adjusted);",
+            round(max_charge, 2), round(min_charge, 2),
+            max_charge_pc + tgt_soc, min_charge_pc + tgt_soc, "\n"))
 
         if commit:
             logger.critical("Sending calculated SoC to inverter: "+ str(tgt_soc))
@@ -523,9 +537,9 @@ class SolcastObj:
         self.pv_est50_day: [int] = [0] *  7
         self.pv_est90_day: [int] = [0] * 7
 
-        self.pv_est10_30: [int] = [0] * 48
-        self.pv_est50_30: [int] = [0] * 48
-        self.pv_est90_30: [int] = [0] * 48
+        self.pv_est10_30: [int] = [0] * 96
+        self.pv_est50_30: [int] = [0] * 96
+        self.pv_est90_30: [int] = [0] * 96
 
     def update(self):
         """Updates forecast generation from Solcast server."""
@@ -592,7 +606,7 @@ class SolcastObj:
 
         i = solcast_offset
         cntr = 0
-        while i < forecast_lines * interval:
+        while i < solcast_offset + forecast_lines * interval:
             if stgs.Solcast.url_sw != "":  # Two arrays are specified
                 pv_est10[i] = (int(solcast_data_1['forecasts'][cntr]['pv_estimate10'] * 1000) +
                     int(solcast_data_2['forecasts'][cntr]['pv_estimate10'] * 1000))
@@ -609,7 +623,7 @@ class SolcastObj:
                 cntr += 1
             i += 1
 
-        if solcast_offset > 720:  # Forget obout current day
+        if solcast_offset > 720:  # Forget about current day
             offset = 1440 - 90
         else:
             offset = 0
@@ -624,7 +638,7 @@ class SolcastObj:
             i += 1
 
         i = 0
-        while i < 48:  # Calculate half-hourly generation
+        while i < 96:  # Calculate half-hourly generation
             start = i * 30 + offset + 1
             end = start + 29
             self.pv_est10_30[i] = round(sum(pv_est10[start:end])/60000, 3)
@@ -645,18 +659,24 @@ class SolcastObj:
 def t_to_mins(time_in_hrs: str) -> int:
     """Convert times from HH:MM format to mins after midnight."""
 
-    time_in_mins = 60 * int(time_in_hrs[0:2]) + int(time_in_hrs[3:5])
-    return time_in_mins
+    try:
+        time_in_mins = 60 * int(time_in_hrs[0:2]) + int(time_in_hrs[3:5])
+        return time_in_mins
+    except Exception:
+        return 0
 
 #  End of t_to_mins()
 
 def t_to_hrs(time_in: int) -> str:
     """Convert times from mins after midnight format to HH:MM."""
 
-    hours = int(time_in // 60)
-    mins = int(time_in - hours * 60)
-    time_in_hrs = '{:02d}{}{:02d}'.format(hours, ": ", mins)
-    return time_in_hrs
+    try:
+        hours = int(time_in // 60)
+        mins = int(time_in - hours * 60)
+        time_in_hrs = '{:02d}{}{:02d}'.format(hours, ":", mins)
+        return time_in_hrs
+    except Exception:
+        return "00:00"
 
 #  End of t_to_hrs()
 
