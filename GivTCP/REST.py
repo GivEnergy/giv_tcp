@@ -90,22 +90,26 @@ def setDischrgeRate():
 @giv_api.route('/setChargeSlot1', methods=['POST'])
 def setChrgSlot1():
     payload = request.get_json(silent=True, force=True)
-    return wr.setChargeSlot1(payload)
+    payload['slot']=1
+    return wr.setChargeSlot(payload)
 
 @giv_api.route('/setChargeSlot2', methods=['POST'])
 def setChrgSlot2():
     payload = request.get_json(silent=True, force=True)
-    return wr.setChargeSlot2(payload)
+    payload['slot']=2
+    return wr.setChargeSlot(payload)
 
 @giv_api.route('/setDischargeSlot1', methods=['POST'])
 def setDischrgSlot1():
     payload = request.get_json(silent=True, force=True)
-    return wr.setDischargeSlot1(payload)
+    payload['slot']=1
+    return wr.setDischargeSlot(payload)
 
 @giv_api.route('/setDischargeSlot2', methods=['POST'])
 def setDischrgSlot2():
     payload = request.get_json(silent=True, force=True)
-    return wr.setDischargeSlot2(payload)
+    payload['slot']=2
+    return wr.setDischargeSlot(payload)
 
 @giv_api.route('/tempPauseDischarge', methods=['POST'])
 def tmpPauseDischrg():
