@@ -124,7 +124,7 @@ if len(networks)>0:
                 else:
                     break
             if list:
-                logger.info("Inverters found on "+str(networks[subnet])+" - "+str(list))
+                logger.info(str(len(list))+" Inverters found on "+str(networks[subnet])+" - "+str(list))
                 invList.update(list)
                 for inv in invList:
                     deets={}

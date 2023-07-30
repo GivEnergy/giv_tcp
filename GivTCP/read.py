@@ -411,78 +411,82 @@ def getData(fullrefresh):  # Read from Inverter put in cache
 
 ############  Battery Power Stats    ############
 
-            # Battery Power
-            Battery_power = GEInv.p_battery
-            if GiV_Settings.first_run:          # Make sure that we publish the HA message for both Charge and Discharge times
-                power_output['Charge_Time_Remaining'] = 0
-                power_output['Charge_Completion_Time'] = datetime.datetime.now().replace(tzinfo=GivLUT.timezone).isoformat()
-                power_output['Discharge_Time_Remaining'] = 0
-                power_output['Discharge_Completion_Time'] = datetime.datetime.now().replace(tzinfo=GivLUT.timezone).isoformat()
-            if Battery_power >= 0:
-                discharge_power = abs(Battery_power)
-                charge_power = 0
-                power_output['Charge_Time_Remaining'] = 0
-                #power_output['Charge_Completion_Time'] = finaltime.replace(tzinfo=GivLUT.timezone).isoformat()
-                if discharge_power!=0:
-                    # Time to get from current SOC to battery Reserve at the current rate
-                    power_output['Discharge_Time_Remaining'] = max(int((((batteryCapacity)/1000)*((power_output['SOC'] - controlmode['Battery_Power_Reserve'])/100) / (discharge_power/1000)) * 60),0)
-                    finaltime=datetime.datetime.now() + timedelta(minutes=power_output['Discharge_Time_Remaining'])
-                    power_output['Discharge_Completion_Time'] = finaltime.replace(tzinfo=GivLUT.timezone).isoformat()
-                else:
-                    power_output['Discharge_Time_Remaining'] = 0
-                    #power_output['Discharge_Completion_Time'] = datetime.datetime.now().replace(tzinfo=GivLUT.timezone).isoformat()
-            elif Battery_power <= 0:
-                discharge_power = 0
-                charge_power = abs(Battery_power)
+        # Battery Power
+        Battery_power = GEInv.p_battery
+        if GiV_Settings.first_run:          # Make sure that we publish the HA message for both Charge and Discharge times
+            power_output['Charge_Time_Remaining'] = 0
+            power_output['Charge_Completion_Time'] = datetime.datetime.now().replace(tzinfo=GivLUT.timezone).isoformat()
+            power_output['Discharge_Time_Remaining'] = 0
+            power_output['Discharge_Completion_Time'] = datetime.datetime.now().replace(tzinfo=GivLUT.timezone).isoformat()
+        if Battery_power >= 0:
+            discharge_power = abs(Battery_power)
+            charge_power = 0
+            power_output['Charge_Time_Remaining'] = 0
+            #power_output['Charge_Completion_Time'] = finaltime.replace(tzinfo=GivLUT.timezone).isoformat()
+            if discharge_power!=0:
+                # Time to get from current SOC to battery Reserve at the current rate
+                power_output['Discharge_Time_Remaining'] = max(int((((batteryCapacity)/1000)*((power_output['SOC'] - controlmode['Battery_Power_Reserve'])/100) / (discharge_power/1000)) * 60),0)
+                finaltime=datetime.datetime.now() + timedelta(minutes=power_output['Discharge_Time_Remaining'])
+                power_output['Discharge_Completion_Time'] = finaltime.replace(tzinfo=GivLUT.timezone).isoformat()
+            else:
                 power_output['Discharge_Time_Remaining'] = 0
                 #power_output['Discharge_Completion_Time'] = datetime.datetime.now().replace(tzinfo=GivLUT.timezone).isoformat()
-                if charge_power!=0:
-                    # Time to get from current SOC to target SOC at the current rate (Target SOC-Current SOC)xBattery Capacity
-                    power_output['Charge_Time_Remaining'] = max(int((((batteryCapacity)/1000)*((controlmode['Target_SOC'] - power_output['SOC'])/100) / (charge_power/1000)) * 60),0)
-                    finaltime=datetime.datetime.now() + timedelta(minutes=power_output['Charge_Time_Remaining'])
-                    power_output['Charge_Completion_Time'] = finaltime.replace(tzinfo=GivLUT.timezone).isoformat()
-                else:
-                    power_output['Charge_Time_Remaining'] = 0
-                    #power_output['Charge_Time_Remaining'] = datetime.datetime.now().replace(tzinfo=GivLUT.timezone).isoformat()
-            power_output['Battery_Power'] = Battery_power
-            power_output['Charge_Power'] = charge_power
-            power_output['Discharge_Power'] = discharge_power
-
-            # Power flows
-            logger.debug("Getting Solar to H/B/G Power Flows")
-            if PV_power > 0:
-                S2H = min(PV_power, Load_power)
-                power_flow_output['Solar_to_House'] = S2H
-                S2B = max((PV_power-S2H)-export_power, 0)
-                power_flow_output['Solar_to_Battery'] = S2B
-                power_flow_output['Solar_to_Grid'] = max(PV_power - S2H - S2B, 0)
-
+        elif Battery_power <= 0:
+            discharge_power = 0
+            charge_power = abs(Battery_power)
+            power_output['Discharge_Time_Remaining'] = 0
+            #power_output['Discharge_Completion_Time'] = datetime.datetime.now().replace(tzinfo=GivLUT.timezone).isoformat()
+            if charge_power!=0:
+                # Time to get from current SOC to target SOC at the current rate (Target SOC-Current SOC)xBattery Capacity
+                power_output['Charge_Time_Remaining'] = max(int((((batteryCapacity)/1000)*((controlmode['Target_SOC'] - power_output['SOC'])/100) / (charge_power/1000)) * 60),0)
+                finaltime=datetime.datetime.now() + timedelta(minutes=power_output['Charge_Time_Remaining'])
+                power_output['Charge_Completion_Time'] = finaltime.replace(tzinfo=GivLUT.timezone).isoformat()
             else:
-                power_flow_output['Solar_to_House'] = 0
-                power_flow_output['Solar_to_Battery'] = 0
-                power_flow_output['Solar_to_Grid'] = 0
+                power_output['Charge_Time_Remaining'] = 0
+                #power_output['Charge_Time_Remaining'] = datetime.datetime.now().replace(tzinfo=GivLUT.timezone).isoformat()
+        power_output['Battery_Power'] = Battery_power
+        power_output['Charge_Power'] = charge_power
+        power_output['Discharge_Power'] = discharge_power
+        power_output['Grid_Frequency'] = GEInv.f_ac1
+        power_output['Inverter_Output_Frequency'] = GEInv.f_eps_backup
 
-            # Battery to House
-            logger.debug("Getting Battery to House Power Flow")
-            B2H = max(discharge_power-export_power, 0)
-            power_flow_output['Battery_to_House'] = B2H
+        # Power flows
+        logger.debug("Getting Solar to H/B/G Power Flows")
+        if PV_power > 0:
+            S2H = min(PV_power, Load_power)
+            power_flow_output['Solar_to_House'] = S2H
+            S2B = max((PV_power-S2H)-export_power, 0)
+            power_flow_output['Solar_to_Battery'] = S2B
+            power_flow_output['Solar_to_Grid'] = max(PV_power - S2H - S2B, 0)
 
-            # Grid to Battery/House Power
-            logger.debug("Getting Grid to Battery/House Power Flow")
-            if import_power > 0:
-                power_flow_output['Grid_to_Battery'] = charge_power-max(PV_power-Load_power, 0)
-                power_flow_output['Grid_to_House'] = max(import_power-charge_power, 0)
+        else:
+            power_flow_output['Solar_to_House'] = 0
+            power_flow_output['Solar_to_Battery'] = 0
+            power_flow_output['Solar_to_Grid'] = 0
 
-            else:
-                power_flow_output['Grid_to_Battery'] = 0
-                power_flow_output['Grid_to_House'] = 0
+        # Battery to House
+        logger.debug("Getting Battery to House Power Flow")
+        B2H = max(discharge_power-export_power, 0)
+        power_flow_output['Battery_to_House'] = B2H
 
-            # Battery to Grid Power
-            logger.debug("Getting Battery to Grid Power Flow")
-            if export_power > 0:
-                power_flow_output['Battery_to_Grid'] = max(discharge_power-B2H, 0)
-            else:
-                power_flow_output['Battery_to_Grid'] = 0
+        # Grid to Battery/House Power
+        logger.debug("Getting Grid to Battery/House Power Flow")
+        if import_power > 0:
+            power_flow_output['Grid_to_Battery'] = charge_power-max(PV_power-Load_power, 0)
+            power_flow_output['Grid_to_House'] = max(import_power-charge_power, 0)
+
+        else:
+            power_flow_output['Grid_to_Battery'] = 0
+            power_flow_output['Grid_to_House'] = 0
+
+        # Battery to Grid Power
+        logger.debug("Getting Battery to Grid Power Flow")
+        if export_power > 0:
+            power_flow_output['Battery_to_Grid'] = max(discharge_power-B2H, 0)
+        else:
+            power_flow_output['Battery_to_Grid'] = 0
+
+        
 
         # Check for all zeros
         checksum = 0

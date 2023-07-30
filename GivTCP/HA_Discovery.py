@@ -146,6 +146,9 @@ class HAMQTT():
             if GivLUT.entity_type[str(topic).split("/")[-1]].sensorClass=="voltage":
                 tempObj['unit_of_meas']="V"
                 tempObj['device_class']="Voltage"
+            if GivLUT.entity_type[str(topic).split("/")[-1]].sensorClass=="frequency":
+                tempObj['unit_of_meas']="Hz"
+                tempObj['device_class']="frequency"
             if GivLUT.entity_type[str(topic).split("/")[-1]].sensorClass=="current":
                 tempObj['unit_of_meas']="A"
                 tempObj['device_class']="Current"

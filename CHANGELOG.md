@@ -5,6 +5,16 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/)
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
+## [2.3.1] - 2023-06-30
+### Fixed
+- REST api fixed to correct (dis)charge timeslot error
+- Corrected Config page to clarify the Inverter_AC_X setting applies to all invertoers on "old" firmware
+
+### Added
+- Inverter frequency stats added
+- PALM updated to v1.0.0, imporving Smart Target (Thanks @salewis38)
+
+
 ## [2.3] - 2023-06-29
 ### Breaking Change
 - Inverter_Max_Rate now called Inverter_Max_Bat_Rate
