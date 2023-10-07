@@ -1,25 +1,25 @@
 <template>
   <div>
     <v-card>
-      <v-card-title> {{ card.title }} </v-card-title>
-      <v-card-subtitle> {{ card.subtitle }} </v-card-subtitle>
+      <v-card-title> {{ card?.title }} </v-card-title>
+      <v-card-subtitle> {{ card?.subtitle }} </v-card-subtitle>
       <v-card-text>
-        <div v-for="(input, i) in card.fields" :key="i">
+        <div v-for="(input, i) in card?.fields" :key="i">
           <v-select
-            v-if="input.type === 'select'"
-            :label="input.options.label"
-            :items="input.options.items"
-            v-model="storeTCP[input.options.parent][input.options.key]"
+            v-if="input?.type === 'select'"
+            :label="input?.options?.label"
+            :items="input?.options?.items"
+            v-model="storeTCP[input?.options?.parent][input?.options?.key]"
           />
           <v-text-field
-            v-else-if="input.type === 'text'"
-            v-model="storeTCP[input.options.parent][input.options.key]"
-            :label="input.options.label"
+            v-else-if="input?.type === 'text'"
+            v-model="storeTCP[input?.options?.parent][input?.options?.key]"
+            :label="input?.options?.label"
           />
           <v-checkbox
-            v-else-if="input.type === 'checkbox'"
-            v-model="storeTCP[input.options.parent][input.options.key]"
-            :label="input.options.label"
+            v-else-if="input?.type === 'checkbox'"
+            v-model="storeTCP[input?.options?.parent][input?.options?.key]"
+            :label="input?.options?.label"
           />
         </div>
       </v-card-text>
