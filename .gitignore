@@ -26,3 +26,4 @@ test.py
 # Ignore frontend
 node_modules
 .idea
+settings.py

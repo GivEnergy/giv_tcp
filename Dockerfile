@@ -28,6 +28,7 @@ COPY givenergy_modbus/ /usr/local/lib/python3.10/site-packages/givenergy_modbus
 COPY startup.py startup.py
 COPY startup_2.py startup_2.py
 COPY redis.conf redis.conf
+COPY GivTCP/settings.json /app/config
 
 ENV NUMINVERTORS=1
 ENV INVERTOR_IP_1=""
