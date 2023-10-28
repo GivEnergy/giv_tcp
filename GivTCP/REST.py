@@ -7,6 +7,8 @@ import write as wr      #grab passthrough functions from main write file
 import config_dash as cfdash
 from GivLUT import GivQueue, GivLUT
 from os.path import exists
+import os
+import json
 
 logger = GivLUT.logger
 
@@ -175,5 +177,22 @@ def swRates():
     payload = request.get_json(silent=True, force=True)
     return wr.switchRate(payload)
 
+@giv_api.route('/settings', methods=['GET'])
+def getFileData():
+    file = open(os.path.dirname(__file__) + '/settings.json', 'r')
+    data = json.load(file)
+    file.close()
+    return data
+
+@giv_api.route('/settings', methods=['POST'])
+def editFileData():
+    file = open(os.path.dirname(__file__) + '/settings.json', 'r')
+    data = json.load(file)
+    file.close()
+    data.update(request.get_json(silent=True, force=True))
+    file = open(os.path.dirname(__file__) + '/settings.json', 'w')
+    json.dump(data, file)
+    file.close()
+    return data
 if __name__ == "__main__":
     giv_api.run()
