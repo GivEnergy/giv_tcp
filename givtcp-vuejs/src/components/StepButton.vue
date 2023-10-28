@@ -3,7 +3,7 @@
     <v-btn v-if="storeStep.step > -1" @click="storeStep.step = storeStep.step - 1">
       Previous
     </v-btn>
-    <v-btn v-if="storeStep.step < 10" @click="storeStep.step = storeStep.step + 1"> Next </v-btn>
+    <v-btn v-if="storeStep.step < 9" @click="storeStep.step = storeStep.step + 1"> Next </v-btn>
         <v-snackbar
       v-model="snackbar"
       :color="message === 'Success' ? '#4fbba9' : 'red'"
@@ -56,7 +56,17 @@ export default {
           ...this.storeTCP.palm
         }
 
-        const getResponse = await fetch("http://127.0.0.1:6345/settings")
+      const setResponse = await fetch("http://127.0.0.1:6345/settings",{
+        method:"POST",
+        headers:{
+          "Content-Type":"application/json"
+        },
+        body:JSON.stringify(data)
+      })
+      if(setResponse.ok){
+       this.snackbar = true
+       this.message = `Success`
+      const getResponse = await fetch("http://127.0.0.1:6345/settings")
 
         const getJSON = {...await getResponse.json()}
 
@@ -65,8 +75,7 @@ export default {
           this.message = `Server Error: ${setResponse.statusText}`
         }
 
-
-        Object.keys(data).map((key)=>{
+                Object.keys(data).map((key)=>{
           if(key in this.storeTCP.web){
             this.storeTCP.web[key] = getJSON[key]
           }else if(key in this.storeTCP.mqtt){
@@ -89,17 +98,6 @@ export default {
             return
           }
         })
-        
-      const setResponse = await fetch("http://127.0.0.1:6345/settings",{
-        method:"POST",
-        headers:{
-          "Content-Type":"application/json"
-        },
-        body:JSON.stringify(data)
-      })
-      if(setResponse.ok){
-       this.snackbar = true
-       this.message = `Success`
       }else{
         this.snackbar = true
         this.message = `Server Error: ${setResponse.statusText}`

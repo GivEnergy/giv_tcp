@@ -69,6 +69,10 @@ export const useTcpStore = defineStore('givtcp-form', {
       PALM_WEIGHT: 35,
       LOAD_HIST_WEIGHT: 1
 
+    }),
+    restart: useStorage('restart',{
+      restart:false,
+      hasRestarted:null
     })
   })
 })
@@ -510,6 +514,34 @@ export const useCard = defineStore('card', {
             key: 'LOAD_HIST_WEIGHT'
           }
         }
+      ]
+    },
+    restart:{
+      title:"Finished Setup",
+      subtitle:"Restart Container to apply changes",
+      fields:[
+        {
+          type: 'button',
+          options: {
+            label: 'Restart Container',
+            parent: 'restart',
+            key: 'restart',
+            message:useTcpStore().restart.hasRestarted != null ? useTcpStore().restart.hasRestarted ? "Container Restarted Successfully" : "Container Failed to Restart. Try Restarting Manually" : '',
+            onClick:async ()=>{
+              const store = useTcpStore()
+              try{
+              const res = await fetch("http://127.0.0.1:6345/restart")
+              if(res.ok){
+                store.restart.hasRestarted = true
+              }else{
+                store.restart.hasRestarted = false
+              }
+            } catch(e){
+              store.restart.hasRestarted = false
+            }
+            }
+          }
+        },
       ]
     }
   })
